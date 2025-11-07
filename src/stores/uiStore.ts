@@ -7,14 +7,14 @@ interface UIState {
   theme: 'light' | 'dark'
   fontSize: number
   selectedCategory: Category | null
-  bookmarks: []
+  // bookmarks: Bookmark[]
   recentlyViewed: NewsItem[]
   
   // Actions
   toggleTheme: () => void
   setFontSize: (size: number) => void
   setSelectedCategory: (category: Category | null) => void
-  toggleBookmark: (item: NewsItem) => void
+  // toggleBookmark: (item: NewsItem) => void
   addToRecentlyViewed: (item: NewsItem) => void
 }
 
@@ -24,7 +24,7 @@ export const useUIStore = create<UIState>()(
       theme: 'light',
       fontSize: 16,
       selectedCategory: null,
-      bookmarks: [],
+      // bookmarks: [],
       recentlyViewed: [],
 
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
@@ -33,21 +33,21 @@ export const useUIStore = create<UIState>()(
       
       setSelectedCategory: (category) => set({ selectedCategory: category }),
       
-      toggleBookmark: (item) => {
-        const { bookmarks } = get()
-        const isBookmarked = bookmarks.some(b => b.id === item.id)
+      // toggleBookmark: (item) => {
+      //   const { bookmarks } = get()
+      //   const isBookmarked = bookmarks.some(b => b.id === item.id)
         
-        // if (isBookmarked) {
-        //   set({ bookmarks: bookmarks.filter(b => b.id !== item.id) })
-        // } else {
-        //   set({ 
-        //     bookmarks: [...bookmarks, { 
-        //       ...item, 
-        //       bookmarkedAt: new Date().toISOString() 
-        //     }] 
-        //   })
-        // }
-      },
+      //   if (isBookmarked) {
+      //     set({ bookmarks: bookmarks.filter(b => b.id !== item.id) })
+      //   } else {
+      //     set({ 
+      //       bookmarks: [...bookmarks, { 
+      //         ...item, 
+      //         bookmarkedAt: new Date().toISOString() 
+      //       }] 
+      //     })
+      //   }
+      // },
       
       addToRecentlyViewed: (item) => {
         const { recentlyViewed } = get()
