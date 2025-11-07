@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes, forwardRef } from 'react'
 import { cn } from '@/lib/utils'
+import { LoadingSpinner } from './LoadingSpinner'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
