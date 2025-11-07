@@ -2,9 +2,9 @@
 
 import React from 'react'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
-import { ShareIcon } from '@/components/ui/Icons'
-import { useUIStore } from '@/stores/uiStore'
-import { cn, formatDate, getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils'
+// import { ShareIcon } from '@/components/ui/Icons'
+// import { useUIStore } from '@/stores/uiStore'
+import {  getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils'
 import { NewsItem } from '@/types/fetchData'
 import { ThemedText } from '../ThemedText'
 
