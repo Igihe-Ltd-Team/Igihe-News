@@ -11,7 +11,7 @@ export default function Categories({ categories }: CategorySectionProps) {
 
     return (
         <div className="container p-2">
-            <div className="row g-3">
+            <div className="row g-4">
 
                 {
                     categories.slice(0, 4).map((category, i) => (
