@@ -1,3 +1,4 @@
+import { Category, NewsItem } from '@/types/fetchData'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
@@ -6,7 +7,7 @@ interface UIState {
   theme: 'light' | 'dark'
   fontSize: number
   selectedCategory: Category | null
-  bookmarks: Bookmark[]
+  bookmarks: []
   recentlyViewed: NewsItem[]
   
   // Actions
@@ -36,16 +37,16 @@ export const useUIStore = create<UIState>()(
         const { bookmarks } = get()
         const isBookmarked = bookmarks.some(b => b.id === item.id)
         
-        if (isBookmarked) {
-          set({ bookmarks: bookmarks.filter(b => b.id !== item.id) })
-        } else {
-          set({ 
-            bookmarks: [...bookmarks, { 
-              ...item, 
-              bookmarkedAt: new Date().toISOString() 
-            }] 
-          })
-        }
+        // if (isBookmarked) {
+        //   set({ bookmarks: bookmarks.filter(b => b.id !== item.id) })
+        // } else {
+        //   set({ 
+        //     bookmarks: [...bookmarks, { 
+        //       ...item, 
+        //       bookmarkedAt: new Date().toISOString() 
+        //     }] 
+        //   })
+        // }
       },
       
       addToRecentlyViewed: (item) => {

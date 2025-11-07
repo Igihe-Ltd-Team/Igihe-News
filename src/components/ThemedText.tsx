@@ -5,7 +5,7 @@ import { HTMLAttributes } from 'react';
 export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold';
+  type?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold' | 'size20';
 };
 
 export function ThemedText({
@@ -29,6 +29,7 @@ export function ThemedText({
     title: 'fs-1 lh-1 fw-bold', // fs-1 ≈ 32px
     subtitle: 'fs-3 lh-sm fw-bold', // fs-3 ≈ 20px
     link: 'fs-5 lh-lg text-primary text-decoration-underline cursor-pointer fw-normal',
+    size20:'fs-4 lh-sm fw-bold'
   };
 
   // Combine all classes

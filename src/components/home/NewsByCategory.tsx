@@ -29,7 +29,7 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
     
     return (
         <div>
-            <HeaderDivider title={categoryName} />
+            <HeaderDivider title={categoryName} titleStyle={'size20'}/>
             {allArticles.slice(0, 1).map((article, index) => (
                 <DynamicArticleCard
                     key={index}
