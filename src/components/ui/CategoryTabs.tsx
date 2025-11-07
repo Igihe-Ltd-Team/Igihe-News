@@ -1,7 +1,7 @@
 'use client'
 
-import { Category } from '@/types/news'
 import { cn } from '@/lib/utils'
+import { Category } from '@/types/fetchData'
 
 interface CategoryTabsProps {
   categories: Category[]

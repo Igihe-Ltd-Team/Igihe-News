@@ -28,15 +28,15 @@ export async function prefetchCategoryArticles(categoryId: number) {
 }
 
 // Server component wrapper
-export async function PrefetchedHomepage() {
-  await Promise.all([
-    prefetchCategories(),
-    prefetchFeaturedArticles(),
-  ])
+// export async function PrefetchedHomepage() {
+//   await Promise.all([
+//     prefetchCategories(),
+//     prefetchFeaturedArticles(),
+//   ])
 
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <HomepageClient />
-    </HydrationBoundary>
-  )
-}
+//   return (
+//     <HydrationBoundary state={dehydrate(queryClient)}>
+//       <HomepageClient />
+//     </HydrationBoundary>
+//   )
+// }

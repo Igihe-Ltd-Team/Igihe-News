@@ -2,6 +2,7 @@
 
 import { queryKeys } from '@/lib/queryKeys'
 import { ApiService } from '@/services/apiService'
+import { articleResponse, NewsItem } from '@/types/fetchData'
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export function useNewsData() {
@@ -45,28 +46,28 @@ export function useNewsData() {
   }
 
   // Search mutation
-  const searchMutation = useMutation({
-    mutationFn: ({ query, categoryId }: { query: string; categoryId?: number }) => {
-      if (categoryId) {
-        return ApiService.fetchArticles({
-          search: query,
-          categories: [categoryId],
-          per_page: 20,
-        })
-      }
-      return Promise.all([
-        ApiService.fetchArticles({ search: query, per_page: 20 }),
-        ApiService.fetchVideos({ search: query, per_page: 20 }),
-      ])
-    },
-    onSuccess: (data, variables) => {
-      // Update cache with search results
-      queryClient.setQueryData(
-        queryKeys.search.query(variables.query, { categoryId: variables.categoryId }),
-        data
-      )
-    },
-  })
+  const searchMutation = useMutation<
+  { articles: articleResponse<NewsItem>; videos?: NewsItem[] },
+  Error,
+  { query: string; categoryId?: number }
+>({
+  mutationFn: async ({ query, categoryId }) => {
+    if (categoryId) {
+      const articles = await ApiService.fetchArticles({
+        search: query,
+        categories: [categoryId],
+        per_page: 20,
+      })
+      return { articles }
+    }
+
+    const [articles, videos] = await Promise.all([
+      ApiService.fetchArticles({ search: query, per_page: 20 }),
+      ApiService.fetchVideos({ search: query, per_page: 20 }),
+    ])
+    return { articles, videos }
+  },
+})
 
   // Prefetch articles on hover
   const prefetchArticle = (articleId: string) => {
