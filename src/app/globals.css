@@ -1,26 +1,108 @@
-@import "tailwindcss";
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.font-raleway {
+  font-family: var(--font-raleway);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Custom dark mode support */
+[data-bs-theme="dark"] .text-custom {
+  color: var(--dark-color, inherit);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Ensure proper font rendering */
+body {
+  font-family: var(--font-raleway);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: min(100%, 1240px) !important;
+  /* or any value you want */
+}
+
+.placeholder-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.placeholder-glow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 100%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.timeLine-line {
+  left: 28px;
+  top: 30px;
+  bottom: 30px;
+  width: 2px;
+  background-color: #2196F3
+}
+
+.timeLine-pointer {
+  left: -3px;
+  top: 8px;
+  width: 16px;
+  height: 16px;
+  border: 4px solid #2196F3
+}
+
+.divider-container {
+  max-width: 100%;
+  --divider-border-style: solid;
+  --divider-color: #e0e0e0;
+  --divider-border-width: 5px;
+  --divider-element-spacing: 20px;
+}
+
+.divider {
+  text-align: left;
+  padding-block-start: 0px;
+  padding-block-end: 0px;
+  display: flex;
+  box-sizing: border-box;
+
+  --divider-border-style: solid;
+  --divider-color: #e0e0e0: --divider-border-width: 5px;
+  --divider-element-spacing: 20px;
+}
+
+.divider-separator {
+  width: 100%;
+  margin: 0 auto;
+  margin-left: 0;
+  align-items: center;
+  text-align: left;
+  direction: ltr;
+  display: flex;
+}
+
+.divider__text {
+  color: #282F2F;
+  text-transform: capitalize;
+  margin-left: 0!important;
+  flex-shrink: 0;
+  margin: 0 20px;
+  max-width: 95%;
+}
+
+.divider-separator:after {
+  border-block-end: 0;
+  border-block-start: 5px solid #e0e0e0;
+  content: "";
+  display: block;
+  flex-grow: 1;
+  direction: ltr;
 }
