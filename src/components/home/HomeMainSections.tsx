@@ -47,7 +47,6 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
                         fill
                         height={207}
                         className="object-cover"
-                        loading="lazy"
                     />
                     
                     {asideNews.map((article) => (
