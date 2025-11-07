@@ -87,7 +87,7 @@ function DynamicArticleCard({
             showExpt &&
             <div>
           <ThemedText type='small'>
-            {stripHtml(article.excerpt.rendered)}
+            {stripHtml(article.excerpt?.rendered ?? '')}
           </ThemedText>
           </div>
           }
