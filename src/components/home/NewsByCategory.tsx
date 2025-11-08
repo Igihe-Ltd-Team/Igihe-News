@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
 import HeaderDivider from '../HeaderDivider'
 import DynamicArticleCard from '../news/DynamicArticleCard'
+import NewsSkeleton from '../NewsSkeleton'
 
 interface ArticleListProps {
     categoryId?: number,
@@ -27,6 +28,9 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
     }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
     const allArticles = data?.pages.flatMap(page => page.data) || []
     
+    if (!allArticles?.length) {
+            return <NewsSkeleton/>
+        }
     return (
         <div>
             <HeaderDivider title={categoryName} titleStyle={'size20'}/>

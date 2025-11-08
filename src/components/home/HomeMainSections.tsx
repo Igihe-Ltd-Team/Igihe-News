@@ -4,6 +4,7 @@ import { OptimizedImage } from '../ui/OptimizedImage'
 import { NewsItem } from '@/types/fetchData'
 import HeaderDivider from '../HeaderDivider'
 import TimeLine from '../ReUsable/TimeLine'
+import NewsSkeleton from '../NewsSkeleton'
 
 interface ArticlesProps {
     articles: NewsItem[]
@@ -17,7 +18,7 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
     }), [articles])
 
     if (!articles?.length) {
-        return null
+        return <NewsSkeleton/>
     }
 
     return (

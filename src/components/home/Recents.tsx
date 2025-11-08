@@ -3,6 +3,7 @@ import HeaderDivider from '../HeaderDivider'
 import { NewsItem } from '@/types/fetchData'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import TimeLine from '../ReUsable/TimeLine'
+import NewsSkeleton from '../NewsSkeleton'
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -83,6 +84,11 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
         featuredMain: featured?.[0],
         featuredTimeline: featured?.slice(1, 9) || []
     }), [latests, featured])
+
+    if (!latestsSidebar?.length) {
+                return <NewsSkeleton/>
+            }
+            
 
     return (
         <div className="container p-2">
