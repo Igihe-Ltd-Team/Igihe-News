@@ -4,8 +4,14 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "new.igihe.com",
+        pathname: "/**",
+      },
+    ],
     unoptimized: true,
-    domains: ['new.igihe.com'],
   },
 };
 
