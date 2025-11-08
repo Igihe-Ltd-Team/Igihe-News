@@ -44,7 +44,7 @@ const NewsSection = React.memo(({
                     <div className="row g-2">
                         {subArticles.map(article => (
                             <div 
-                                className="col-xl-6 col-lg-12 col-md-12" 
+                                className="col-xl-6 col-lg-6 col-md-6 col-6" 
                                 key={article.id || article.slug}
                             >
                                 <DynamicArticleCard
@@ -97,10 +97,10 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                     <HeaderDivider title="Latest news" />
                     <div className="row g-3">
                         <div className="col-xl-4 col-lg-6 col-md-6">
-                            <div className="py-4">
+                            <div className="py-4 row">
                                 {latestsSidebar.map(article => (
+                                    <div className="col-xl-12 col-lg-6 col-md-6 col-sd-6 col-6" key={article.id || article.slug}>
                                     <DynamicArticleCard
-                                        key={article.id || article.slug}
                                         article={article}
                                         showImage
                                         priority={false}
@@ -108,6 +108,7 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                                         bgColor="#1176BB08"
                                         bordered
                                     />
+                                    </div>
                                 ))}
                             </div>
                         </div>
