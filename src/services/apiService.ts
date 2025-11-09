@@ -163,7 +163,7 @@ export class ApiService {
     params?: {
       per_page?: number
       page?: number
-      orderby?: string
+      orderby?: 'date' | 'modified' | 'title' | 'comment_count'
       order?: 'asc' | 'desc'
     }
   ): Promise<{ data: NewsItem[]; category: Category | null }> {
@@ -229,17 +229,17 @@ static async fetchCategories(params?: {
 
   // Articles/Posts API
   static async fetchArticles(params?: {
-    page?: number
-    per_page?: number
-    categories?: number[]
-    search?: string
-    exclude?: number[]
-    include?: number[]
-    orderby?: 'date' | 'modified' | 'title' | 'comment_count'
-    order?: 'asc' | 'desc'
-    after?: string // ISO date for posts after this date
-    before?: string // ISO date for posts before this date
-  }): Promise<articleResponse<NewsItem>> {
+  page?: number
+  per_page?: number
+  categories?: number[]
+  search?: string
+  exclude?: number[]
+  include?: number[]
+  orderby?: 'date' | 'modified' | 'title' | 'comment_count' | 'relevance' | 'slug' | 'include' | 'id'
+  order?: 'asc' | 'desc'
+  after?: string
+  before?: string
+}): Promise<articleResponse<NewsItem>> {
     const queryParams: Record<string, any> = {
       page: params?.page || 1,
       per_page: params?.per_page || 20,
