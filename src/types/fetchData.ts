@@ -90,6 +90,63 @@ export interface NewsItem {
     'wp:term': Array<{ taxonomy: string; embeddable: boolean; href: string }>
     curies: Array<{ name: string; href: string; templated: boolean }>
   }
+
+  _embedded?: {
+    author?: Array<{
+      id: number
+      name: string
+      url: string
+      description: string
+      link: string
+      slug: string
+      avatar_urls: {
+        '24': string
+        '48': string
+        '96': string
+      }
+    }>
+    'wp:featuredmedia'?: Array<{
+      id: number
+      date: string
+      slug: string
+      type: string
+      link: string
+      title: {
+        rendered: string
+      }
+      author: number
+      caption: {
+        rendered: string
+      }
+      alt_text: string
+      media_type: string
+      mime_type: string
+      media_details: {
+        width: number
+        height: number
+        file: string
+        sizes: {
+          [key: string]: {
+            file: string
+            width: number
+            height: number
+            mime_type: string
+            source_url: string
+          }
+        }
+      }
+      source_url: string
+      _links: any
+    }>
+    'wp:term'?: Array<Array<{
+      id: number
+      link: string
+      name: string
+      slug: string
+      taxonomy: string
+      _links: any
+    }>>
+  }
   
   // SEO fields (might not exist in all posts)
   seo_title?: string
