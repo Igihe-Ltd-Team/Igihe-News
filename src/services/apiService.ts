@@ -642,7 +642,6 @@ static async fetchCategories(params?: {
       const categories = await this.fetchCategories({
         per_page: limit,
         orderby: 'count',
-        order: 'desc'
       })
 
       return categories.filter(category => category.count > 0)
