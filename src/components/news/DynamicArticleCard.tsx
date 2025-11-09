@@ -60,6 +60,7 @@ function DynamicArticleCard({
         <Link
           href={`/${article.slug}`}
           className="text-decoration-none text-reset"
+          style={{flex:1}}
         >
           <OptimizedImage
             src={featuredImage || '/images/placeholder.jpg'}
@@ -70,7 +71,7 @@ function DynamicArticleCard({
           />
         </Link>
       }
-      <div className='d-flex align-items-center gap-2'>
+      <div className='d-flex align-items-center gap-2' style={{flex:2}}>
         {
           leftNumber &&
           <div className='rounded-circle p-2' style={{ backgroundColor: '#F0F0F0' }}>
@@ -125,8 +126,8 @@ function DynamicArticleCard({
             </div>
             {
               showExpt &&
-              <div>
-                <ThemedText type='small'>
+              <div className='pt-3'>
+                <ThemedText type='small' className='line-clamp-3'>
                   {stripHtml(article.excerpt?.rendered ?? '')}
                 </ThemedText>
               </div>

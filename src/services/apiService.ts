@@ -1,4 +1,4 @@
-import { articleResponse, Category, NewsItem } from '@/types/fetchData'
+import { articleResponse, Author, Category, NewsItem } from '@/types/fetchData'
 
 // Configuration
 const API_CONFIG = {
@@ -189,13 +189,14 @@ export class ApiService {
       return { data: [], category: null }
     }
   }
-  
+
 
   static async fetchCategories(params?: {
     page?: number
     per_page?: number
     exclude?: number[]
     include?: number[]
+    orderby: 'count',
   }): Promise<Category[]> {
     const queryParams: Record<string, any> = {
       page: params?.page,
@@ -634,4 +635,242 @@ export class ApiService {
       memoryUsage: JSON.stringify(entries).length,
     }
   }
+
+
+  static async fetchPopularCategories(limit: number = 10): Promise<Category[]> {
+    try {
+      const categories = await this.fetchCategories({
+        per_page: limit,
+        orderby: 'count',
+        order: 'desc'
+      })
+
+      return categories.filter(category => category.count > 0)
+    } catch (error) {
+      console.error('Error fetching popular categories:', error)
+      return []
+    }
+  }
+
+
+
+  static async fetchCategoriesWithPosts(limit: number = 20): Promise<Array<Category & { recent_posts: NewsItem[] }>> {
+    try {
+      const categories = await this.fetchPopularCategories(limit)
+      
+      const categoriesWithPosts = await Promise.all(
+        categories.map(async (category) => {
+          try {
+            const postsResponse = await this.fetchArticles({
+              categories: [category.id],
+              per_page: 5, // Get 5 recent posts for each category
+              orderby: 'date',
+              order: 'desc'
+            })
+
+            return {
+              ...category,
+              recent_posts: postsResponse.data || []
+            }
+          } catch (error) {
+            console.error(`Error fetching posts for category ${category.name}:`, error)
+            return {
+              ...category,
+              recent_posts: []
+            }
+          }
+        })
+      )
+
+      return categoriesWithPosts
+    } catch (error) {
+      console.error('Error fetching categories with posts:', error)
+      return []
+    }
+  }
+
+static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}/users?slug=${slug}&_embed`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const authors = await response.json()
+      return authors[0] || null
+    } catch (error) {
+      console.error('Error fetching author by slug:', error)
+      throw error
+    }
+  }
+
+  static async fetchAuthorById(id: number): Promise<Author | null> {
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}/users/${id}?_embed`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const author = await response.json()
+      return author || null
+    } catch (error) {
+      console.error('Error fetching author by ID:', error)
+      throw error
+    }
+  }
+
+
+  static async fetchAllAuthors(params?: {
+    per_page?: number
+    page?: number
+    orderby?: string
+    order?: 'asc' | 'desc'
+  }): Promise<Author[]> {
+    try {
+      const defaultParams = {
+        per_page: 50,
+        orderby: 'name',
+        order: 'asc',
+        ...params
+      }
+
+      const queryParams = new URLSearchParams()
+      Object.entries(defaultParams).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString())
+        }
+      })
+
+      const response = await fetch(`${API_CONFIG.baseURL}/users?${queryParams}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const authors = await response.json()
+      return authors || []
+    } catch (error) {
+      console.error('Error fetching authors:', error)
+      return []
+    }
+  }
+
+
+  static async fetchPostsByAuthorSlug(
+    slug: string, 
+    params?: {
+      per_page?: number
+      page?: number
+      orderby?: string
+      order?: 'asc' | 'desc'
+    }
+  ): Promise<{ data: NewsItem[]; author: Author | null }> {
+    try {
+      // First get the author by slug
+      const author = await this.fetchAuthorBySlug(slug)
+      
+      if (!author) {
+        console.warn(`Author with slug "${slug}" not found`)
+        return { data: [], author: null }
+      }
+
+      // Then fetch posts for this author
+      const postsResponse = await this.fetchArticles({
+        author: author.id,
+        ...params
+      })
+
+      // Ensure we always return a valid data structure
+      return {
+        data: postsResponse?.data || [],
+        author
+      }
+    } catch (error) {
+      console.error('Error fetching posts by author slug:', error)
+      // Return empty data structure instead of throwing
+      return { data: [], author: null }
+    }
+  }
+
+
+
+  static async fetchPostsByAuthorId(
+    authorId: number, 
+    params?: {
+      per_page?: number
+      page?: number
+      orderby?: string
+      order?: 'asc' | 'desc'
+    }
+  ): Promise<NewsItem[]> {
+    try {
+      const postsResponse = await this.fetchArticles({
+        author: authorId,
+        ...params
+      })
+      
+      return postsResponse.data || []
+    } catch (error) {
+      console.error('Error fetching posts by author ID:', error)
+      return []
+    }
+  }
+
+
+  static async fetchPopularAuthors(limit: number = 10): Promise<Author[]> {
+    try {
+      const authors = await this.fetchAllAuthors({
+        per_page: limit,
+        orderby: 'count',
+        order: 'desc'
+      })
+
+      return authors.filter(author => author.post_count > 0)
+    } catch (error) {
+      console.error('Error fetching popular authors:', error)
+      return []
+    }
+  }
+
+  /**
+   * Fetch authors with recent posts
+   */
+  static async fetchAuthorsWithPosts(limit: number = 10): Promise<Array<Author & { recent_posts: NewsItem[] }>> {
+    try {
+      const authors = await this.fetchPopularAuthors(limit)
+      
+      const authorsWithPosts = await Promise.all(
+        authors.map(async (author) => {
+          try {
+            const postsResponse = await this.fetchArticles({
+              author: author.id,
+              per_page: 3, // Get 3 recent posts for each author
+              orderby: 'date',
+              order: 'desc'
+            })
+
+            return {
+              ...author,
+              recent_posts: postsResponse.data || []
+            }
+          } catch (error) {
+            console.error(`Error fetching posts for author ${author.name}:`, error)
+            return {
+              ...author,
+              recent_posts: []
+            }
+          }
+        })
+      )
+
+      return authorsWithPosts
+    } catch (error) {
+      console.error('Error fetching authors with posts:', error)
+      return []
+    }
+  }
+
+
 }

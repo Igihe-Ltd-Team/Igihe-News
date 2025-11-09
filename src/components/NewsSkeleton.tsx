@@ -1,7 +1,10 @@
 'use client';
 
-export default function NewsSkeleton() {
-  const items = Array.from({ length: 6 });
+interface SkeletonProps {
+    count?: number
+}
+export default function NewsSkeleton({count = 6}:SkeletonProps) {
+  const items = Array.from({ length: count });
 
   return (
     <div className="container">

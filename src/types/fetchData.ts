@@ -96,3 +96,36 @@ export interface NewsItem {
     }>
   }
 }
+
+
+export interface Author {
+  id: number
+  name: string
+  url: string
+  description: string
+  link: string
+  slug: string
+  avatar_urls: {
+    '24': string
+    '48': string
+    '96': string
+  }
+  meta: any[]
+  acf: any[]
+  _links: {
+    self: Array<{ href: string }>
+    collection: Array<{ href: string }>
+  }
+  // WordPress user fields
+  post_count?: number
+  registered_date?: string
+  roles?: string[]
+  capabilities?: Record<string, boolean>
+  extra_capabilities?: Record<string, boolean>
+}
+
+// Extended author with posts
+export interface AuthorWithPosts extends Author {
+  recent_posts: NewsItem[]
+  total_posts: number
+}
