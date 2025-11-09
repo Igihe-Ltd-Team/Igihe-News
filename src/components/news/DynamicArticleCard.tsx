@@ -58,7 +58,7 @@ function DynamicArticleCard({
       {
         showImage &&
         <Link
-          href={`/news/${article.slug}`}
+          href={`/${article.slug}`}
           className="text-decoration-none text-reset"
         >
           <OptimizedImage
@@ -107,7 +107,7 @@ function DynamicArticleCard({
             </div>
           }
           <Link
-            href={`/news/${article.slug}`}
+            href={`/${article.slug}`}
             className="text-decoration-none text-reset"
           >
             <div className='d-flex'>

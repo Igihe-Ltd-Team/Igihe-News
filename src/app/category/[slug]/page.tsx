@@ -7,7 +7,8 @@ interface CategoryPageProps {
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const category = await ApiService.fetchCategoryBySlug(params.slug)
+  // const category = await ApiService.fetchCategoryBySlug(params.slug)
+  const category = {}
   const articles = await ApiService.fetchArticles({ 
     categories: [category.id], 
     per_page: 20 
