@@ -114,7 +114,7 @@ export default async function SingleNewsPage({ params }: PageProps) {
     // Prefetch related posts only if we have a valid post
     await queryClient.prefetchQuery({
       queryKey: queryKeys.articles.related(String(post.id), post.categories?.[0]?.id),
-      queryFn: () => ApiService.fetchRelatedPosts(String(post.id), post.categories?.[0]?.id),
+      queryFn: () => ApiService.fetchRelatedPosts(String(post.id), [post?.categories?.[0]?.id]),
     })
 
     const dehydratedState = dehydrate(queryClient)
