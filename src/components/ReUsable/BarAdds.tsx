@@ -11,7 +11,7 @@ function BarAdds({ adds }: SectionProps) {
         <Container>
             <Row>
                 {adds.map((add, i) =>
-                    <Col className={adds?.length > 1 ? 'my-4':'g-0 my-4'} md={adds?.length > 1 ? 6 : 12} key={i}>
+                    <Col className={adds?.length > 1 ? '':'g-0'} md={adds?.length > 1 ? 6 : 12} key={i}>
                         <OptimizedImage
                             src="https://new.igihe.com/wp-content/uploads/2025/06/caa3f25a5ccb242364ace735995d9556d6af4ae4-2048x289.png"
                             alt="Featured content"

@@ -12,6 +12,8 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.articles.details(), id] as const,
     list: (filters: any) => [...queryKeys.articles.lists(), filters] as const,
     infinite: (filters: any) => [...queryKeys.articles.lists(), 'infinite', filters] as const,
+    related: (postId: string, categoryId?: number) => 
+      [...queryKeys.articles.all, 'related', postId, categoryId] as const,
   },
   videos: {
     all: ['videos'] as const,
@@ -28,4 +30,6 @@ export const queryKeys = {
     recommendations: ['ai', 'recommendations'] as const,
     dailyDigest: ['ai', 'dailyDigest'] as const,
   },
+
+  
 } as const

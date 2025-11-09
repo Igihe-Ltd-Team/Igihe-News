@@ -21,6 +21,38 @@ body {
   /* or any value you want */
 }
 
+
+/* Site Header styles */
+.site-header{
+  background-image: url('/assets/headerBG.webp');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  min-height: 301.4px
+} 
+
+/* Menu section styles */
+.igihe-nav-menu{
+min-height: 48px;
+padding-right: 20px;
+padding-left: 20px;
+opacity: 1;
+
+background: #FFFFFF;
+box-shadow: 0px 4px 4px 0px #00000017;
+}
+
+.igihe-nav-men .nav-link{
+font-weight: 500;
+font-size: 14px;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+
+}
+
+
 .placeholder-glow {
   position: relative;
   overflow: hidden;
@@ -105,4 +137,93 @@ body {
   display: block;
   flex-grow: 1;
   direction: ltr;
+}
+
+
+.excerpt-section{
+  margin-top: 24;
+  margin-bottom: 15;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+}
+
+/* Ensure all content stays within bounds */
+.post-content * {
+  max-width: 100%;
+}
+
+.social-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            margin-bottom: 10px;
+        }
+        
+        .title-underline {
+            width: 60px;
+            height: 4px;
+            background-color: #1176BB;
+            margin-top: 10px;
+        }
+        
+        .social-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .social-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .social-icon {
+            font-size: 24px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .social-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+            margin: 0;
+        }
+        
+        .facebook { color: #1877f2; }
+        .youtube { color: #ff0000; }
+        .tiktok { color: #000000; }
+        .whatsapp { color: #25d366; }
+        .twitter { color: #000000; }
+        .instagram { color: #e4405f; }
+
+
+        .social-media-title{
+                border-bottom-width: 1px;
+                border-bottom-style: solid;
+                border-bottom-color: #F0F0F0;
+                margin: 20px 0;
+                gap: 20px;
+            }
+
+
+           .site-header .overlay {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+background: linear-gradient(0deg,rgba(255, 255, 255, 1) 7%, rgba(255, 255, 255, 0) 18%);
 }

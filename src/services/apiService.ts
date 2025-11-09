@@ -129,6 +129,13 @@ export class ApiService {
     }
   }
 
+  static async fetchPostBySlug(slug: string): Promise<NewsItem> {
+    const response = await fetch(`${API_CONFIG.baseURL}/posts?slug=${slug}&_embed`)
+    const posts = await response.json()
+    return posts[0] || null // WordPress REST API returns array
+  }
+  
+
   // Categories API
   static async fetchCategories(params?: {
     page?: number
@@ -365,7 +372,7 @@ export class ApiService {
         return this.fetchArticles({ per_page: 6 }).then(res => res.data)
       }
 
-      return data
+      return data || []
     })
   }
 
