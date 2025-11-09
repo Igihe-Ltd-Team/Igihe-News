@@ -191,19 +191,18 @@ export class ApiService {
     }
   }
 
-
-  static async fetchCategories(params?: {
+static async fetchCategories(params?: {
     page?: number
     per_page?: number
     exclude?: number[]
     include?: number[]
-    orderby: 'count',
+    orderby?: 'id' | 'count' | 'name' | 'slug' | 'include' | 'term_group' // Make it optional
   }): Promise<Category[]> {
     const queryParams: Record<string, any> = {
       page: params?.page,
       per_page: params?.per_page || 100,
       _fields: 'id,name,slug,count,description',
-      orderby: 'count',
+      orderby: params?.orderby || 'count', // Use param or default to 'count'
       order: 'desc',
     }
 
