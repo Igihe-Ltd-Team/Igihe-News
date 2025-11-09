@@ -48,5 +48,13 @@ export const queryKeys = {
     popular: (limit: number) => [...queryKeys.authors.all, 'popular', limit] as const,
     withPosts: (limit: number) => [...queryKeys.authors.all, 'withPosts', limit] as const,
   },
+
+  ads: {
+    all: ['ads'] as const,
+    lists: () => [...queryKeys.ads.all, 'list'] as const,
+    byPosition: (position: string) => [...queryKeys.ads.all, 'position', position] as const,
+    byPositions: (positions: string[]) => [...queryKeys.ads.all, 'positions', ...positions] as const,
+  },
+
   
 } as const

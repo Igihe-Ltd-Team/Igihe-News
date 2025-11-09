@@ -9,7 +9,6 @@ interface PopularProps {
 }
 
 function PopularNews({ articles, name = "Popular News" }: PopularProps) {
-  // Early return for empty/invalid data
   if (!articles || articles.length === 0) {
     return (
       <div className="py-8 text-center text-gray-500">
@@ -24,8 +23,7 @@ function PopularNews({ articles, name = "Popular News" }: PopularProps) {
   return (
     <section aria-labelledby="popular-news-heading">
       <HeaderDivider title={name}/>
-      
-      {/* Featured Article */}
+    
       <div className="pt-2">
         <DynamicArticleCard
           article={featuredArticle}
@@ -39,8 +37,6 @@ function PopularNews({ articles, name = "Popular News" }: PopularProps) {
           bottomBorder
         />
       </div>
-
-      {/* Remaining Articles */}
       {remainingArticles.length > 0 && (
         <div className="pt-2">
           {remainingArticles.map((article, index) => (

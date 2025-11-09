@@ -166,3 +166,41 @@ export interface AuthorWithPosts extends Author {
   recent_posts: NewsItem[]
   total_posts: number
 }
+
+
+
+export interface Advertisement {
+  id: number
+  slug: string
+  title: {
+    rendered: string
+  }
+  menu_order: number
+  class_list: string[]
+  acf: {
+    ads_image: number
+    ads_image_source: {
+      formatted_value: {
+        url: string
+        width: number
+        height: number
+        sizes?: {
+          thumbnail?: string
+          medium?: string
+          large?: string
+          '1536x1536'?: string
+          '2048x2048'?: string
+        }
+      }
+    }
+    igh_ad_url: string
+    ad_position: number[]
+  }
+  link: string
+}
+
+export interface AdPosition {
+  id: string
+  name: string
+  ads: Advertisement[]
+}

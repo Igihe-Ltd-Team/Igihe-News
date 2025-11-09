@@ -7,7 +7,8 @@ import NewsSkeleton from '../NewsSkeleton'
 import SectionWithToggle from '../ReUsable/SectionWithToggle'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ThemedText } from '../ThemedText'
-import BarAdds from '../ReUsable/BarAdds'
+import { Col, Row } from 'react-bootstrap'
+import AdManager from '../ads/AdManager'
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -141,18 +142,30 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                         </div>
                     </div>
 
-                    <BarAdds adds={['1']}/>
+                    <Row>
+                        <Col>
+                            <AdManager
+                                position="header-landscape-ad-2"
+                                priority={true}
+                                className="mb-2"
+                            /></Col>
+                    </Row>
                     <NewsSection title="Great Lakes Region" articles={featured} />
-                    <BarAdds adds={['1']}/>
+                    <Row>
+                        <Col>
+                            <AdManager
+                                position="header-landscape-ad-1"
+                                priority={true}
+                                className="mb-2"
+                            /></Col>
+                    </Row>
                     <NewsSection title="Entertainment" articles={featured} />
-                    <div className='mt-3 p-2' style={{backgroundColor:'#f5f5f5'}}>
+                    <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
                         <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
-                        <OptimizedImage
-                            src="https://new.igihe.com/wp-content/uploads/2025/06/ca68c8f5595ed47529d84f21ab560f08e700bd97-1.gif"
-                            alt="Featured content"
-                            fill
-                            height={387}
-                            className="object-cover"
+                        <AdManager
+                            position="home-after-highlights"
+                            priority={true}
+                            className="mb-2"
                         />
                     </div>
                     <NewsSection title="Africa" articles={featured} />
@@ -188,12 +201,12 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                         )}
                     </div>
                     <div className='pt-2'>
-                        <SectionWithToggle title='Advertorials' showImgs showDate titleBG='#1176BB'/>
+                        <SectionWithToggle title='Advertorials' showImgs showDate titleBG='#1176BB' />
                     </div>
                     <div className='pt-3'>
-                        <SectionWithToggle title='Announcements' titleBG='#282F2F'/>
+                        <SectionWithToggle title='Announcements' titleBG='#282F2F' />
                     </div>
-                    <div className='mt-3 p-2' style={{backgroundColor:'#f5f5f5'}}>
+                    <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
                         <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
                         <OptimizedImage
                             src="https://new.igihe.com/wp-content/uploads/2025/06/ca68c8f5595ed47529d84f21ab560f08e700bd97-1.gif"

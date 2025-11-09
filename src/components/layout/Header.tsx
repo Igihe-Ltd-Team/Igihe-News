@@ -2,15 +2,12 @@
 import Link from 'next/link'
 import React from 'react'
 import { styled } from '@mui/material/styles';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch, { SwitchProps } from '@mui/material/Switch';
-import { ThemedText } from '../ThemedText';
 import Languages from '../ui/Languages';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
-import BarAdds from '../ReUsable/BarAdds';
-import { Col } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 import { useNewsData } from '@/hooks/useNewsData';
+import AdManager from '../ads/AdManager';
 
 
 const menus = [
@@ -114,8 +111,21 @@ export default function Header() {
             <div className="overlay"></div>
             <div className="container p-2 z-1 position-relative">
                 {/* Top section with adds */}
+                <Row>
+                    <Col>
+                        <AdManager
+                            position="header-landscape-ad-1"
+                            priority={true}
+                            className="mb-2"
+                        /></Col>
+                    <Col>
+                        <AdManager
+                            position="header-landscape-ad-2"
+                            priority={true}
+                            className="mb-2"
+                        /></Col>
+                </Row>
 
-                <BarAdds adds={['1', '2']} />
                 {/* Langauge switch section */}
                 <div className="row mx-1 align-items-center justify-content-between bg-white">
                     <div className="col-md-8 lang-switcher d-flex align-items-center">
@@ -159,7 +169,13 @@ export default function Header() {
                             </span>
                         </Link>
                     </div>
-                    <Col md={7}><BarAdds adds={['1']} /></Col>
+                    <Col md={7}>
+                        <AdManager
+                            position="header-landscape-ad-2"
+                            priority={true}
+                            className="mb-2"
+                        />
+                    </Col>
                 </div>
 
                 {/* Menus section */}

@@ -1,4 +1,5 @@
-import { articleResponse, Author, Category, NewsItem } from '@/types/fetchData'
+import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
+import { Advertisement, articleResponse, Author, Category, NewsItem } from '@/types/fetchData'
 
 // Configuration
 const API_CONFIG = {
@@ -873,4 +874,52 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   }
 
 
+
+
+
+  static async fetchAdvertisements(): Promise<Advertisement[]> {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_fields=id,slug,title,menu_order,class_list,acf,link`
+      )
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const ads = await response.json()
+      return ads || []
+    } catch (error) {
+      console.error('Error fetching advertisements:', error)
+      return []
+    }
+  }
+
+  static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+    try {
+      const ads = await this.fetchAdvertisements()
+      return getAdsByPosition(ads, position)
+    } catch (error) {
+      console.error('Error fetching ads by position:', error)
+      return []
+    }
+  }
+
+  static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
+    try {
+      const ads = await this.fetchAdvertisements()
+      const result: Record<AdPositionKey, Advertisement[]> = {} as any
+      
+      positions.forEach(position => {
+        result[position] = getAdsByPosition(ads, position)
+      })
+      
+      return result
+    } catch (error) {
+      console.error('Error fetching ads by positions:', error)
+      return {} as Record<AdPositionKey, Advertisement[]>
+    }
+  }
+
+  
 }

@@ -7,12 +7,12 @@ import { queryKeys } from '@/lib/queryKeys'
 import NewsSkeleton from '../NewsSkeleton'
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
-import BarAdds from '../ReUsable/BarAdds'
 import { ThemedText } from '../ThemedText'
-import { extractImagesFromHtml, extractYouTubeEmbed, getFeaturedImage, stripHtml } from '@/lib/utils'
+import {  extractYouTubeEmbed, getFeaturedImage, stripHtml } from '@/lib/utils'
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
+import AdManager from '../ads/AdManager'
 
 interface SingleNewsContentProps {
     slug: string
@@ -85,9 +85,22 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     return (
         <Container>
             <div className='pb-4'>
-                <BarAdds adds={['1', '2']} />
+                <Row>
+                    <Col>
+                        <AdManager
+                            position="header-landscape-ad-1"
+                            priority={true}
+                            className="mb-2"
+                        /></Col>
+                    <Col>
+                        <AdManager
+                            position="header-landscape-ad-2"
+                            priority={true}
+                            className="mb-2"
+                        /></Col>
+                </Row>
             </div>
-            
+
             <article>
                 <Col xl="8" md="12">
                     <ThemedText type='title'>{stripHtml(post.title.rendered)}</ThemedText>
@@ -114,12 +127,12 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                             </div>
                         }
                         <div
-                        className="post-content"
-                        style={{
-                            overflow:'hidden',
-                            width:'100%'
-                        }}
-                        dangerouslySetInnerHTML={{ __html: post?.content?.rendered || '' }}
+                            className="post-content"
+                            style={{
+                                overflow: 'hidden',
+                                width: '100%'
+                            }}
+                            dangerouslySetInnerHTML={{ __html: post?.content?.rendered || '' }}
                         />
                         {/* {post?.content?.rendered && (
                             <div>
@@ -165,7 +178,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                     </Col>
                     <Col md="4">
                         <CardAdds size={290} />
-                        <SocialMedias/>
+                        <SocialMedias />
                     </Col>
                 </Row>
 

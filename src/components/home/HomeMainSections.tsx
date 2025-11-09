@@ -5,6 +5,7 @@ import { NewsItem } from '@/types/fetchData'
 import HeaderDivider from '../HeaderDivider'
 import TimeLine from '../ReUsable/TimeLine'
 import NewsSkeleton from '../NewsSkeleton'
+import AdManager from '../ads/AdManager'
 
 interface ArticlesProps {
     articles: NewsItem[]
@@ -42,12 +43,10 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
                 </div>
 
                 <div className="col-xl-3 col-lg-6 col-md-6">
-                    <OptimizedImage
-                        src="https://new.igihe.com/wp-content/uploads/2025/06/ca68c8f5595ed47529d84f21ab560f08e700bd97-1.gif"
-                        alt="Featured content"
-                        fill
-                        height={207}
-                        className="object-cover"
+                    <AdManager
+                        position="home-section-1"
+                        priority={true}
+                        className="mb-2"
                     />
                     
                     {asideNews.map((article) => (
