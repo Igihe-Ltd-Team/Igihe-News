@@ -193,9 +193,9 @@ export default function Header() {
 
                                 <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style={{ ['--bs-scroll-height' as any]: '100px;' }}>
                                     <li className="nav-item">
-                                        <a className="nav-link active" aria-current="page" href="#">
+                                        <Link className="nav-link active" aria-current="page" href="/">
                                             Home
-                                        </a>
+                                        </Link>
                                     </li>
 
                                     {categories && categories.length > 0 ? (
