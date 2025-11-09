@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { ApiService } from '@/services/apiService'
-import AuthorsList from '@/components/author/AuthorsList'
+// import AuthorsList from '@/components/author/AuthorsList'
 
 export const metadata: Metadata = {
   title: 'Our Authors',
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 export default async function AuthorsPage() {
   const authors = await ApiService.fetchAuthorsWithPosts(50)
 
-  return <AuthorsList authors={authors} />
+  return <></>
 }
