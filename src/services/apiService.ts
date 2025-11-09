@@ -41,9 +41,12 @@ export class ApiService {
         ...options,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; NextJS/14.0)', // ADD THIS
+        'Accept': 'application/json', // ADD THIS
+        ...options.headers,
+      },
+
       })
 
       clearTimeout(id)
@@ -131,7 +134,7 @@ export class ApiService {
   }
 
   static async fetchPostBySlug(slug: string): Promise<NewsItem> {
-    const response = await fetch(`${API_CONFIG.baseURL}/posts?slug=${slug}&_embed`)
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?slug=${slug}&_embed`)
     const posts = await response.json()
     return posts[0] || null // WordPress REST API returns array
   }
@@ -141,7 +144,9 @@ export class ApiService {
 
   static async fetchCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}/categories?slug=${slug}&_embed`)
+      const response = await this.fetchWithTimeout(
+      `${API_CONFIG.baseURL}/categories?slug=${slug}&_embed`
+    )
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -691,7 +696,7 @@ static async fetchCategories(params?: {
 
 static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}/users?slug=${slug}&_embed`)
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/users?slug=${slug}&_embed`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -707,7 +712,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
 
   static async fetchAuthorById(id: number): Promise<Author | null> {
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}/users/${id}?_embed`)
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/users/${id}?_embed`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -799,7 +804,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       if (params?.orderby) queryParams.append('orderby', params.orderby)
       if (params?.order) queryParams.append('order', params.order)
 
-      const response = await fetch(`${API_CONFIG.baseURL}/users?${queryParams}`)
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/users?${queryParams}`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -850,7 +855,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
 
   static async fetchAdvertisements(): Promise<Advertisement[]> {
     try {
-      const response = await fetch(
+      const response = await this.fetchWithTimeout(
         `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_fields=id,slug,title,menu_order,class_list,acf,link`
       )
       
