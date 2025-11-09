@@ -16,7 +16,12 @@ export const queryKeys = {
       [...queryKeys.articles.all, 'related', postId, categoryId] as const,
     byAuthorSlug: (slug: string, params?: any) => 
       [...queryKeys.articles.all, 'byAuthorSlug', slug, params] as const,
+    byCategorySlug: (slug: string, params?: any) => 
+      [...queryKeys.articles.all, 'byCategorySlug', slug, params] as const,
   },
+
+
+
   videos: {
     all: ['videos'] as const,
     lists: () => [...queryKeys.videos.all, 'list'] as const,
