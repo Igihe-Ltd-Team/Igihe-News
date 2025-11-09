@@ -7,7 +7,7 @@ interface TimeLineProps {
 }
 export default function TimeLine({ articles }: TimeLineProps) {
     return (
-        <div className="px-4 position-relative" style={{ minHeight: '100%' }}>
+        <div className="px-4 position-relative">
             <div className="position-absolute timeLine-line" />
 
             {articles.map((item) => (

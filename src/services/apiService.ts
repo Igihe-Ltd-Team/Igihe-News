@@ -137,6 +137,60 @@ export class ApiService {
   
 
   // Categories API
+
+  static async fetchCategoryBySlug(slug: string): Promise<Category | null> {
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}/categories?slug=${slug}&_embed`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const categories = await response.json()
+      
+      // Return the first category or null if not found
+      return categories[0] || null
+    } catch (error) {
+      console.error('Error fetching category by slug:', error)
+      throw error
+    }
+  }
+
+
+  static async fetchPostsByCategorySlug(
+    slug: string, 
+    params?: {
+      per_page?: number
+      page?: number
+      orderby?: string
+      order?: 'asc' | 'desc'
+    }
+  ): Promise<{ data: NewsItem[]; category: Category | null }> {
+    try {
+      // First get the category by slug
+      const category = await this.fetchCategoryBySlug(slug)
+      
+      if (!category) {
+        return { data: [], category: null }
+      }
+
+      // Then fetch posts for this category
+      const postsResponse = await this.fetchArticles({
+        categories: [category.id],
+        ...params
+      })
+
+      return {
+        data: postsResponse.data || [],
+        category
+      }
+    } catch (error) {
+      console.error('Error fetching posts by category slug:', error)
+      return { data: [], category: null }
+    }
+  }
+  
+
   static async fetchCategories(params?: {
     page?: number
     per_page?: number

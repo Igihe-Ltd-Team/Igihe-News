@@ -14,11 +14,8 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-
-  
   try {
     const post = await ApiService.fetchPostBySlug(slug)
-    
     if (!post) {
       return {
         title: 'Article Not Found',
