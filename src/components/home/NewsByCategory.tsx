@@ -43,6 +43,7 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
                     priority
                     imgHeight={185}
                     titleStyle={'defaultSemiBold'}
+                    bottomBorder
                 />
             ))}
             <div className='py-2'>
@@ -51,6 +52,7 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
                     key={index}
                     article={article}
                     priority
+                    bottomBorder
                 />
             ))}
         </div>

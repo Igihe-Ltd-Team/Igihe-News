@@ -4,6 +4,10 @@ import { NewsItem } from '@/types/fetchData'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import TimeLine from '../ReUsable/TimeLine'
 import NewsSkeleton from '../NewsSkeleton'
+import SectionWithToggle from '../ReUsable/SectionWithToggle'
+import { OptimizedImage } from '../ui/OptimizedImage'
+import { ThemedText } from '../ThemedText'
+import BarAdds from '../ReUsable/BarAdds'
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -12,12 +16,12 @@ interface RecentProps {
     advertorials?: NewsItem[]
 }
 
-const NewsSection = React.memo(({ 
-    title, 
-    articles 
-}: { 
+const NewsSection = React.memo(({
+    title,
+    articles
+}: {
     title: string
-    articles?: NewsItem[] 
+    articles?: NewsItem[]
 }) => {
     const { mainArticle, subArticles, listArticles } = useMemo(() => ({
         mainArticle: articles?.[0],
@@ -43,8 +47,8 @@ const NewsSection = React.memo(({
                     )}
                     <div className="row g-2">
                         {subArticles.map(article => (
-                            <div 
-                                className="col-xl-6 col-lg-6 col-md-6 col-6" 
+                            <div
+                                className="col-xl-6 col-lg-6 col-md-6 col-6"
                                 key={article.id || article.slug}
                             >
                                 <DynamicArticleCard
@@ -86,9 +90,9 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
     }), [latests, featured])
 
     if (!latestsSidebar?.length) {
-                return <NewsSkeleton/>
-            }
-            
+        return <NewsSkeleton />
+    }
+
 
     return (
         <div className="container p-2">
@@ -100,14 +104,14 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                             <div className="py-4 row">
                                 {latestsSidebar.map(article => (
                                     <div className="col-xl-12 col-lg-6 col-md-6 col-sd-6 col-6" key={article.id || article.slug}>
-                                    <DynamicArticleCard
-                                        article={article}
-                                        showImage
-                                        priority={false}
-                                        imgHeight={143}
-                                        bgColor="#1176BB08"
-                                        bordered
-                                    />
+                                        <DynamicArticleCard
+                                            article={article}
+                                            showImage
+                                            priority={false}
+                                            imgHeight={143}
+                                            bgColor="#1176BB08"
+                                            bordered
+                                        />
                                     </div>
                                 ))}
                             </div>
@@ -124,24 +128,84 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                                         imgHeight={321}
                                         bordered
                                         showExpt
-                                        titleStyle={'subtitle'}
+                                        titleStyle={'size20'}
                                     />
                                 )}
                             </div>
                             <div className="py-2">
                                 <HeaderDivider title="Featured News" />
-                                <TimeLine articles={featuredTimeline} />
+                                <div>
+                                    <TimeLine articles={featuredTimeline} />
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <BarAdds adds={['1']}/>
                     <NewsSection title="Great Lakes Region" articles={featured} />
+                    <BarAdds adds={['1']}/>
                     <NewsSection title="Entertainment" articles={featured} />
+                    <div className='mt-3 p-2' style={{backgroundColor:'#f5f5f5'}}>
+                        <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
+                        <OptimizedImage
+                            src="https://new.igihe.com/wp-content/uploads/2025/06/ca68c8f5595ed47529d84f21ab560f08e700bd97-1.gif"
+                            alt="Featured content"
+                            fill
+                            height={387}
+                            className="object-cover"
+                        />
+                    </div>
                     <NewsSection title="Africa" articles={featured} />
                 </div>
 
                 <div className="col-xl-4 col-lg-12">
                     <HeaderDivider title="Popular News" />
-                    {/* Add popular news content here */}
+                    <div className='pt-4'>
+                        {featuredMain && (
+                            <DynamicArticleCard
+                                article={featuredMain}
+                                showImage
+                                showHeader
+                                priority
+                                imgHeight={246}
+                                titleStyle={'size20'}
+                                showDate={false}
+                                numbers={'01'} bottomBorder
+                            />
+                        )}
+                    </div>
+                    <div className='pt-2'>
+                        {latestsSidebar && (
+                            latestsSidebar.slice(1, 5).map((article, i) =>
+                                <DynamicArticleCard
+                                    key={i}
+                                    article={article}
+                                    priority
+                                    imgHeight={246}
+                                    leftNumber={`0${i + 2}`}
+                                />
+                            )
+                        )}
+                    </div>
+                    <div className='pt-2'>
+                        <SectionWithToggle title='Advertorials' showImgs showDate titleBG='#1176BB'/>
+                    </div>
+                    <div className='pt-3'>
+                        <SectionWithToggle title='Announcements' titleBG='#282F2F'/>
+                    </div>
+                    <div className='mt-3 p-2' style={{backgroundColor:'#f5f5f5'}}>
+                        <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
+                        <OptimizedImage
+                            src="https://new.igihe.com/wp-content/uploads/2025/06/ca68c8f5595ed47529d84f21ab560f08e700bd97-1.gif"
+                            alt="Featured content"
+                            fill
+                            height={290}
+                            className="object-cover"
+                        />
+                    </div>
+                    <div className='pt-3'>
+                        <HeaderDivider title="Opinions" />
+                    </div>
                 </div>
             </div>
         </div>

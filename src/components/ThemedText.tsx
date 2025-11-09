@@ -4,14 +4,13 @@ import { HTMLAttributes } from 'react';
 
 export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   lightColor?: string;
-  darkColor?: string;
-  type?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold' | 'size20';
+  type?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold' | 'size20' | 'italic34' | 'italic18';
+  className?:string
 };
 
 export function ThemedText({
   style,
   lightColor,
-  darkColor,
   type = 'default',
   className = '',
   ...rest
@@ -29,7 +28,9 @@ export function ThemedText({
     title: 'fs-1 lh-1 fw-bold', // fs-1 ≈ 32px
     subtitle: 'fs-3 lh-sm fw-bold', // fs-3 ≈ 20px
     link: 'fs-5 lh-lg text-primary text-decoration-underline cursor-pointer fw-normal',
-    size20:'fs-4 lh-sm fw-bold'
+    size20:'fs-4 lh-sm fw-bold',
+    italic34: 'fs-1 fw-light lh-1 fst-italic',
+    italic18: 'fs-4 fw-light lh-1 fst-italic'
   };
 
   // Combine all classes
