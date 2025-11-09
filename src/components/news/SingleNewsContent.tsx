@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+
 import { useQuery } from '@tanstack/react-query'
 import { ApiService } from '@/services/apiService'
 import { queryKeys } from '@/lib/queryKeys'
@@ -8,7 +8,7 @@ import NewsSkeleton from '../NewsSkeleton'
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
-import {  extractYouTubeEmbed, getFeaturedImage, stripHtml } from '@/lib/utils'
+import {  getFeaturedImage, stripHtml } from '@/lib/utils'
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
@@ -40,10 +40,10 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     })
 
 
-    const embeddedYouTubeId = useMemo(
-        () => extractYouTubeEmbed(post?.content?.rendered || ""),
-        [post?.content?.rendered]
-    );
+    // const embeddedYouTubeId = useMemo(
+    //     () => extractYouTubeEmbed(post?.content?.rendered || ""),
+    //     [post?.content?.rendered]
+    // );
 
 
     //   const { data: relatedPosts } = useQuery({

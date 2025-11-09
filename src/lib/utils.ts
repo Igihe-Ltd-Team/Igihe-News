@@ -53,12 +53,46 @@ export const stripHtml = (html:string) => {
     .trim();
 };
 
-export const getFeaturedImage = (articleData:NewsItem) => {
-    if (articleData?._embedded && articleData?._embedded['wp:featuredmedia']) {
-        return articleData?._embedded['wp:featuredmedia'][0]?.source_url;
+
+// Alternative: More robust version with fallbacks
+export const getFeaturedImage = (articleData: NewsItem) => {
+    if (!articleData) return null;
+    
+    // Check if _embedded data exists and has featured media
+    const featuredMedia = articleData._embedded?.['wp:featuredmedia']?.[0];
+    
+    if (featuredMedia?.source_url) {
+        return featuredMedia.source_url;
     }
+    
+    // Fallback: Check if there's a featured_media ID but no embedded data
+    if (articleData.featured_media && !featuredMedia) {
+        console.warn('Featured media ID exists but no embedded data. Consider adding _embed to API call.');
+    }
+    
     return null;
-};
+}
+
+// Get multiple image sizes
+export const getFeaturedImageWithSizes = (articleData: NewsItem) => {
+    if (!articleData?._embedded?.['wp:featuredmedia']?.[0]) {
+        return null;
+    }
+    
+    const media = articleData._embedded['wp:featuredmedia'][0];
+    
+    return {
+        original: media.source_url,
+        large: media.media_details?.sizes?.large?.source_url || media.source_url,
+        medium: media.media_details?.sizes?.medium?.source_url || media.source_url,
+        thumbnail: media.media_details?.sizes?.thumbnail?.source_url || media.source_url,
+        alt: media.alt_text || articleData.title.rendered,
+        caption: media.caption?.rendered || ''
+    };
+}
+
+
+
 
 export const getCategoryName = (articleData:NewsItem) => {
     if (articleData?._embedded && articleData?._embedded['wp:term'] && articleData?._embedded['wp:term'][0]) {
