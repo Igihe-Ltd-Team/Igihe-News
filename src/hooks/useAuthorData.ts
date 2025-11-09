@@ -89,14 +89,7 @@ export function useAuthorData() {
     })
   }
 
-  // Fetch popular authors
-  const usePopularAuthors = (limit: number = 10) => {
-    return useQuery({
-      queryKey: queryKeys.authors.popular(limit),
-      queryFn: () => ApiService.fetchPopularAuthors(limit),
-      staleTime: 10 * 60 * 1000,
-    })
-  }
+  
 
   // Fetch authors with recent posts
   const useAuthorsWithPosts = (limit: number = 10) => {
@@ -113,7 +106,6 @@ export function useAuthorData() {
     useAuthorById,
     useAllAuthors,
     usePostsByAuthorSlug,
-    usePopularAuthors,
     useAuthorsWithPosts,
   }
 }

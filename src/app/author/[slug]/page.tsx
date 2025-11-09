@@ -66,16 +66,6 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
     }
 }
 
-export async function generateStaticParams() {
-    try {
-        const authors = await ApiService.fetchPopularAuthors(50)
-        return authors.map((author) => ({
-            slug: author.slug,
-        }))
-    } catch (error) {
-        return []
-    }
-}
 
 // Separate component for the main content that can be suspended
 async function AuthorContent({ slug, currentPage }: { slug: string; currentPage: number }) {

@@ -238,7 +238,8 @@ static async fetchCategories(params?: {
   orderby?: 'date' | 'modified' | 'title' | 'comment_count' | 'relevance' | 'slug' | 'include' | 'id'
   order?: 'asc' | 'desc'
   after?: string
-  before?: string
+  before?: string,
+  author?:number
 }): Promise<articleResponse<NewsItem>> {
     const queryParams: Record<string, any> = {
       page: params?.page || 1,
@@ -742,8 +743,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
 
       // Then fetch posts for this author
       const postsResponse = await this.fetchArticles({
-        author: author.id,
-        ...params
+        author: author.id
       })
 
       // Ensure we always return a valid data structure
@@ -771,8 +771,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   ): Promise<NewsItem[]> {
     try {
       const postsResponse = await this.fetchArticles({
-        author: authorId,
-        ...params
+        author: authorId
       })
       
       return postsResponse.data || []
