@@ -782,21 +782,6 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   }
 
 
-  static async fetchPopularAuthors(limit: number = 10): Promise<Author[]> {
-    try {
-      const authors = await this.fetchAllAuthors({
-        per_page: limit,
-        orderby: 'count',
-        order: 'desc'
-      })
-
-      return authors.filter(author => author.post_count > 0)
-    } catch (error) {
-      console.error('Error fetching popular authors:', error)
-      return []
-    }
-  }
-
   /**
    * Fetch authors with recent posts
    */
