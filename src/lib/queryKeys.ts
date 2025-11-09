@@ -39,11 +39,8 @@ export const queryKeys = {
   },
   authors: {
     all: ['authors'] as const,
-    lists: (filters?: any) => [...queryKeys.authors.all, 'list', filters] as const,
-    detail: (slug: string) => {
-      if (!slug) throw new Error('Slug is required for author detail')
-      return [...queryKeys.authors.all, 'detail', slug] as const
-    },
+    lists: (filters?: any) => [...queryKeys.authors.all, 'list', filters] as const, // This is 'lists'
+    detail: (slug: string) => [...queryKeys.authors.all, 'detail', slug] as const,
     byId: (id: number) => [...queryKeys.authors.all, 'byId', id] as const,
     popular: (limit: number) => [...queryKeys.authors.all, 'popular', limit] as const,
     withPosts: (limit: number) => [...queryKeys.authors.all, 'withPosts', limit] as const,

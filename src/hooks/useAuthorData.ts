@@ -1,4 +1,3 @@
-// hooks/useAuthorData.ts
 'use client'
 
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
@@ -26,20 +25,20 @@ export function useAuthorData() {
     })
   }
 
-  // Fetch all authors
+  // Fetch all authors - FIXED: Use 'lists' instead of 'list'
   const useAllAuthors = (params?: {
     per_page?: number
     orderby?: string
     order?: 'asc' | 'desc'
   }) => {
     return useQuery({
-      queryKey: queryKeys.authors.list(params),
+      queryKey: queryKeys.authors.lists(params), // Changed from .list to .lists
       queryFn: () => ApiService.fetchAllAuthors(params),
       staleTime: 10 * 60 * 1000,
     })
   }
 
-  // Fetch posts by author slug with infinite loading - FIXED VERSION
+  // Fetch posts by author slug with infinite loading
   const usePostsByAuthorSlug = (
     slug: string, 
     params?: {
@@ -57,7 +56,6 @@ export function useAuthorData() {
             page: pageParam,
           })
           
-          // Ensure data is always an array and handle undefined cases
           const postsData = result?.data || []
           const perPage = params?.per_page || 10
           
@@ -71,7 +69,6 @@ export function useAuthorData() {
           }
         } catch (error) {
           console.error('Error in usePostsByAuthorSlug:', error)
-          // Return empty data structure on error
           return {
             data: [],
             author: null,
@@ -84,7 +81,6 @@ export function useAuthorData() {
       },
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
-        // Safely check if there's a next page
         return lastPage?.pagination?.hasNextPage 
           ? lastPage.pagination.currentPage + 1 
           : undefined

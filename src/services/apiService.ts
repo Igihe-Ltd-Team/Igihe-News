@@ -1,5 +1,5 @@
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
-import { Advertisement, articleResponse, Author, Category, NewsItem } from '@/types/fetchData'
+import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, NewsItem } from '@/types/fetchData'
 
 // Configuration
 const API_CONFIG = {
@@ -722,41 +722,6 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   }
 
 
-  static async fetchAllAuthors(params?: {
-    per_page?: number
-    page?: number
-    orderby?: string
-    order?: 'asc' | 'desc'
-  }): Promise<Author[]> {
-    try {
-      const defaultParams = {
-        per_page: 50,
-        orderby: 'name',
-        order: 'asc',
-        ...params
-      }
-
-      const queryParams = new URLSearchParams()
-      Object.entries(defaultParams).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString())
-        }
-      })
-
-      const response = await fetch(`${API_CONFIG.baseURL}/users?${queryParams}`)
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const authors = await response.json()
-      return authors || []
-    } catch (error) {
-      console.error('Error fetching authors:', error)
-      return []
-    }
-  }
-
 
   static async fetchPostsByAuthorSlug(
     slug: string, 
@@ -837,29 +802,53 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   /**
    * Fetch authors with recent posts
    */
-  static async fetchAuthorsWithPosts(limit: number = 10): Promise<Array<Author & { recent_posts: NewsItem[] }>> {
+
+
+
+  static async fetchAllAuthors(params?: {
+    per_page?: number
+    orderby?: string
+    order?: 'asc' | 'desc'
+  }): Promise<Author[]> {
     try {
-      const authors = await this.fetchPopularAuthors(limit)
+      const queryParams = new URLSearchParams()
+      if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+      if (params?.orderby) queryParams.append('orderby', params.orderby)
+      if (params?.order) queryParams.append('order', params.order)
+
+      const response = await fetch(`${API_CONFIG.baseURL}/users?${queryParams}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const authors = await response.json()
+      return authors || []
+    } catch (error) {
+      console.error('Error fetching all authors:', error)
+      return []
+    }
+  }
+
+  static async fetchAuthorsWithPosts(limit: number = 10): Promise<AuthorWithPosts[]> {
+    try {
+      const authors = await this.fetchAllAuthors({ per_page: limit })
       
       const authorsWithPosts = await Promise.all(
         authors.map(async (author) => {
           try {
-            const postsResponse = await this.fetchArticles({
-              author: author.id,
-              per_page: 3, // Get 3 recent posts for each author
-              orderby: 'date',
-              order: 'desc'
-            })
-
+            const posts = await this.fetchPostsByAuthorId(author.id, { per_page: 3 })
             return {
               ...author,
-              recent_posts: postsResponse.data || []
+              recent_posts: posts,
+              total_posts: author.post_count || 0
             }
           } catch (error) {
             console.error(`Error fetching posts for author ${author.name}:`, error)
             return {
               ...author,
-              recent_posts: []
+              recent_posts: [],
+              total_posts: author.post_count || 0
             }
           }
         })
@@ -871,7 +860,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       return []
     }
   }
-
+  
 
 
 
