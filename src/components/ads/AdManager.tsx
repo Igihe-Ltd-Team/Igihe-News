@@ -5,6 +5,7 @@ import { ApiService } from '@/services/apiService'
 import AdUnit from './AdUnit'
 import { queryKeys } from '@/lib/queryKeys'
 import { AdPositionKey } from '@/lib/adPositions'
+import { Spinner } from 'react-bootstrap'
 
 interface AdManagerProps {
   position: AdPositionKey
@@ -31,17 +32,7 @@ export default function AdManager({
 
   if (isLoading) {
     return (
-      <div 
-        className={`ad-placeholder loading ${className}`}
-        style={{ 
-          width: 300, 
-          height: 250 
-        }}
-      >
-        <div className="spinner-border spinner-border-sm" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
+      <Spinner/>
     )
   }
 
