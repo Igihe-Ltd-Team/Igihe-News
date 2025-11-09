@@ -28,6 +28,15 @@ export interface Category {
 
 
 
+export interface Tag {
+  id: number
+  name: string
+  slug: string
+  description?: string
+  count?: number
+}
+
+
 // types/fetchData.ts
 export interface NewsItem {
   id: number
@@ -64,8 +73,8 @@ export interface NewsItem {
     _acf_changed: boolean
     footnotes: string
   }
-  categories: number[]
-  tags: number[]
+  categories: Category[]
+  tags: Tag[]
   class_list: string[]
   acf: any[]
   _links: {

@@ -13,6 +13,7 @@ interface PageProps {
 }
 
 
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const {slug} = await params
   try {
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title,
       description,
-      keywords: post.tags?.map(tag => tag?.name).join(', '),
+      keywords: post.tags?.map(tag => tag.name).join(', '),
       openGraph: {
         title: (post as any).yoast_head_json?.og_title || title,
         description: (post as any).yoast_head_json?.og_description || description,
