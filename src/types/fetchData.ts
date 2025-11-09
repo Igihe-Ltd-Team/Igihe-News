@@ -26,8 +26,11 @@ export interface Category {
   description?: string
 }
 
+
+
+// types/fetchData.ts
 export interface NewsItem {
-  id: string
+  id: number
   date: string
   date_gmt: string
   guid: {
@@ -37,65 +40,89 @@ export interface NewsItem {
   modified_gmt: string
   slug: string
   status: string
-  type: 'post' | 'igh-yt-videos'
+  type: string
   link: string
   title: {
     rendered: string
   }
-  content?: {
+  content: {
     rendered: string
     protected: boolean
   }
-  excerpt?: {
+  excerpt: {
     rendered: string
     protected: boolean
   }
-  author?: number
+  author: number
   featured_media: number
-  categories?: number[]
-  tags?: number[]
-  comment_count?: number
-  acf?: {
-    igh_yt_video_url?: string
-    igh_yt_video_url_source?: {
-      label: string
-      type: string
-      formatted_value: string
-    }
+  comment_status: string
+  ping_status: string
+  sticky: boolean
+  template: string
+  format: string
+  meta: {
+    _acf_changed: boolean
+    footnotes: string
   }
-  _embedded?: {
-    'wp:featuredmedia'?: Array<{
-      id: number
-      source_url: string
-      media_details?: {
-        width: number
-        height: number
-        sizes: {
-          medium?: { source_url: string }
-          large?: { source_url: string }
-          thumbnail?: { source_url: string }
-          medium_large?: { source_url: string }
-          full?: { source_url: string }
-        }
-      }
+  categories: number[]
+  tags: number[]
+  class_list: string[]
+  acf: any[]
+  _links: {
+    self: Array<{ href: string }>
+    collection: Array<{ href: string }>
+    about: Array<{ href: string }>
+    author: Array<{ embeddable: boolean; href: string }>
+    replies: Array<{ embeddable: boolean; href: string }>
+    'version-history': Array<{ count: number; href: string }>
+    'predecessor-version': Array<{ id: number; href: string }>
+    'wp:featuredmedia': Array<{ embeddable: boolean; href: string }>
+    'wp:attachment': Array<{ href: string }>
+    'wp:term': Array<{ taxonomy: string; embeddable: boolean; href: string }>
+    curies: Array<{ name: string; href: string; templated: boolean }>
+  }
+  
+  // SEO fields (might not exist in all posts)
+  seo_title?: string
+  meta_description?: string
+  yoast_head_json?: {
+    title?: string
+    description?: string
+    canonical?: string
+    og_title?: string
+    og_description?: string
+    og_image?: Array<{
+      url: string
+      width: number
+      height: number
     }>
-    'wp:term'?: Array<Array<{
-      id: number
-      name: string
-      slug: string
-      taxonomy: string
-    }>>
-    author?: Array<{
-      id: number
-      name: string
-      avatar_urls: {
-        24: string
-        48: string
-        96: string
-      }
-    }>
+    twitter_title?: string
+    twitter_description?: string
+    twitter_image?: string
   }
 }
+
+// Extended interface with guaranteed SEO fields
+export interface NewsItemWithSEO extends NewsItem {
+  seo_title: string
+  meta_description: string
+  yoast_head_json: {
+    title: string
+    description: string
+    canonical: string
+    og_title: string
+    og_description: string
+    og_image?: Array<{
+      url: string
+      width: number
+      height: number
+    }>
+    twitter_title: string
+    twitter_description: string
+    twitter_image?: string
+  }
+}
+
 
 
 export interface Author {
@@ -105,10 +132,11 @@ export interface Author {
   description: string
   link: string
   slug: string
-  avatar_urls: {
+  avatar_urls?: {
     '24': string
     '48': string
     '96': string
+    '512'?: string // Make 512 optional since it might not exist
   }
   meta: any[]
   acf: any[]

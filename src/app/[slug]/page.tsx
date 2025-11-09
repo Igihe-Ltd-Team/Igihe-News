@@ -12,10 +12,12 @@ interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
+  const {slug} = await params
   try {
     const post = await ApiService.fetchPostBySlug(slug)
+
     if (!post) {
       return {
         title: 'Article Not Found',
@@ -23,24 +25,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }
     }
 
+    // Safe access to SEO properties with fallbacks
+    const title = (post as any).seo_title ||
+      (post as any).yoast_head_json?.title ||
+      post.title.rendered.replace(/<[^>]*>/g, '')
+
+    const description = (post as any).meta_description ||
+      (post as any).yoast_head_json?.description ||
+      post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160)
+
+    const ogImage = (post as any).yoast_head_json?.og_image?.[0]?.url ||
+      post.featured_media
+
     return {
-      title: post.seo_title || post.title,
-      description: post.meta_description || post.excerpt,
-      keywords: post.tags?.map(tag => tag.name).join(', '),
+      title,
+      description,
+      keywords: post.tags?.map(tag => tag?.name).join(', '),
       openGraph: {
-        title: post.seo_title || post.title,
-        description: post.meta_description || post.excerpt,
-        images: post.featured_image ? [post.featured_image] : [],
+        title: (post as any).yoast_head_json?.og_title || title,
+        description: (post as any).yoast_head_json?.og_description || description,
+        images: ogImage ? [ogImage] : [],
         type: 'article',
-        publishedTime: post.published_at,
-        modifiedTime: post.updated_at,
-        authors: post.authors?.map(author => author.name),
+        publishedTime: post.date,
+        modifiedTime: post.modified,
       },
       twitter: {
         card: 'summary_large_image',
-        title: post.seo_title || post.title,
-        description: post.meta_description || post.excerpt,
-        images: post.featured_image ? [post.featured_image] : [],
+        title: (post as any).yoast_head_json?.twitter_title || title,
+        description: (post as any).yoast_head_json?.twitter_description || description,
+        images: ogImage ? [ogImage] : [],
       },
     }
   } catch (error) {
@@ -50,6 +63,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 }
+
+
 
 export async function generateStaticParams() {
   try {
@@ -64,7 +79,7 @@ export async function generateStaticParams() {
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const queryClient = getQueryClient()
-const { slug } = await params
+  const { slug } = await params
   try {
     // Validate slug parameter
     if (!slug || typeof slug !== 'string') {
@@ -76,12 +91,12 @@ const { slug } = await params
       queryKey: queryKeys.articles.detail(slug),
       queryFn: async () => {
         const post = await ApiService.fetchPostBySlug(slug)
-        
+
         // Ensure we never return undefined
         if (!post) {
           throw new Error('Post not found')
         }
-        
+
         return post
       },
     })

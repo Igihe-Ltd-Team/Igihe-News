@@ -45,11 +45,6 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
         [post?.content?.rendered]
     );
 
-    const contentImages = useMemo(
-        () => extractImagesFromHtml(post?.content?.rendered || ""),
-        [post?.content?.rendered]
-    );
-
 
     //   const { data: relatedPosts } = useQuery({
     //     queryKey: queryKeys.articles.related(post?.id, post?.categories?.[0]?.id),
@@ -89,7 +84,10 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
 
     return (
         <Container>
-            <BarAdds adds={['1', '2']} />
+            <div className='pb-4'>
+                <BarAdds adds={['1', '2']} />
+            </div>
+            
             <article>
                 <Col xl="8" md="12">
                     <ThemedText type='title'>{stripHtml(post.title.rendered)}</ThemedText>
