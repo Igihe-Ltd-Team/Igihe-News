@@ -39,7 +39,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { Providers } from './providers';
 import { raleway } from '@/lib/fonts';
-import Header from '@/components/layout/Header';
 
 export const metadata = {
   title: 'IGIHE',
@@ -57,8 +56,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={raleway.variable}>
         <Providers>
-          <Header />
-          {children}</Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
