@@ -19,6 +19,9 @@ export const queryKeys = {
       [...queryKeys.articles.all, 'byAuthorSlug', slug, params] as const,
     byCategorySlug: (slug: string, params?: any) => 
       [...queryKeys.articles.all, 'byCategorySlug', slug, params] as const,
+    infiniteBySlug: (filters?: { categorySlug?: string }) => 
+      ['articles', 'infiniteBySlug', filters] as const,
+
 
   },
 

@@ -1,6 +1,9 @@
 'use client'
 
 
+import { useQuery } from '@tanstack/react-query'
+import { ApiService } from '@/services/apiService'
+import { queryKeys } from '@/lib/queryKeys'
 import NewsSkeleton from '../NewsSkeleton'
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
@@ -10,24 +13,34 @@ import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
 import AdManager from '../ads/AdManager'
-import { useArticleDetails } from '@/hooks/useNewsData'
 
 interface SingleNewsContentProps {
     slug: string
 }
 
 export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
-
     const {
-    article,
-    // relatedPosts,
-    articleLoading,
-    // relatedPostsLoading,
-    articleError,
-    // refetchArticle
-  } = useArticleDetails(slug)
+        data: post,
+        isLoading,
+        error,
+        refetch
+    } = useQuery({
+        queryKey: queryKeys.articles.detail(slug),
+        queryFn: async () => {
+            const post = await ApiService.fetchPostBySlug(slug)
 
-    if (articleLoading) {
+            if (!post) {
+                throw new Error('Post not found')
+            }
+
+            return post
+        },
+        staleTime: 5 * 60 * 1000,
+        retry: 2, // Retry failed requests twice
+    })
+
+
+    if (isLoading) {
         return (
             <div className="min-h-screen d-flex align-items-center justify-content-center">
                 <NewsSkeleton />
@@ -35,20 +48,20 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
         )
     }
 
-    if (articleError || !article) {
+    if (error || !post) {
         return (
             <div className="container py-5">
                 <EnhancedErrorMessage
                     title="Article Not Found"
                     message="The article you're looking for doesn't exist or failed to load."
-                    // onRetry={() => refetch()}
+                    onRetry={() => refetch()}
                     retryText="Try Again"
                     type="error"
                 />
             </div>
         )
     }
-    const featuredImage = getFeaturedImage(article);
+    const featuredImage = getFeaturedImage(post);
 
 
 
@@ -73,7 +86,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
 
             <article>
                 <Col xl="8" md="12">
-                    <ThemedText type='title'>{stripHtml(article.title.rendered)}</ThemedText>
+                    <ThemedText type='title'>{stripHtml(post.title.rendered)}</ThemedText>
                 </Col>
                 <Row>
                     <Col></Col>
@@ -83,16 +96,16 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                     <Col md="8">
                         <OptimizedImage
                             src={featuredImage || '/images/placeholder.jpg'}
-                            alt={article.title.rendered}
+                            alt={post.title.rendered}
                             fill
                             height={554}
                             className="object-cover"
                         />
                         {
-                            article?.excerpt?.rendered &&
+                            post?.excerpt?.rendered &&
                             <div className='excerpt-section'>
                                 <ThemedText type='defaultItalic'>
-                                    {stripHtml(article?.excerpt?.rendered)}
+                                    {stripHtml(post?.excerpt?.rendered)}
                                 </ThemedText>
                             </div>
                         }
@@ -102,7 +115,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                                 overflow: 'hidden',
                                 width: '100%'
                             }}
-                            dangerouslySetInnerHTML={{ __html: article?.content?.rendered || '' }}
+                            dangerouslySetInnerHTML={{ __html: post?.content?.rendered || '' }}
                         />
                         {/* {post?.content?.rendered && (
                             <div>

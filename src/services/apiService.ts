@@ -3,16 +3,16 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, News
 
 // Configuration
 const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://new.igihe.com/wp-json/wp/v2',
-  timeout: 10000,
+  baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://your-wordpress-site.com/wp-json/wp/v2',
+  timeout: 10000, // 10 seconds
   retryAttempts: 2,
-  cacheTimeout: 5 * 60 * 1000,
+  cacheTimeout: 5 * 60 * 1000, // 5 minutes
 }
 
-
+// Request cache for deduplication
 const requestCache = new Map<string, { data: any; timestamp: number }>()
 
-
+// Rate limiting
 const rateLimit = {
   requests: new Map<string, number[]>(),
   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
@@ -33,43 +33,33 @@ const rateLimit = {
 
 export class ApiService {
   private static async fetchWithTimeout(url: string, options: RequestInit = {}, timeout = API_CONFIG.timeout) {
-  const controller = new AbortController()
-  const id = setTimeout(() => controller.abort(), timeout)
+    const controller = new AbortController()
+    const id = setTimeout(() => controller.abort(), timeout)
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         ...options.headers,
       },
-    })
 
-    clearTimeout(id)
+      })
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
+      clearTimeout(id)
 
-    return response
-  } catch (error) {
-    clearTimeout(id)
-    
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        throw new Error(`Request timeout after ${timeout}ms`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
-      if (error.message.includes('fetch failed')) {
-        throw new Error('Network error: Failed to connect to server')
-      }
+
+      return response
+    } catch (error) {
+      clearTimeout(id)
+      throw error
     }
-    
-    throw error
   }
-}
-
 
   private static async cachedFetch<T>(
     cacheKey: string, 
@@ -142,58 +132,21 @@ export class ApiService {
     }
   }
 
-  // static async fetchPostBySlug(slug: string): Promise<NewsItem> {
-  //   const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?slug=${slug}&_embed`)
-  //   const posts = await response.json()
-  //   return posts[0] || null // WordPress REST API returns array
-  // }
-  
+  static async fetchPostBySlug(slug: string): Promise<NewsItem> {
+
+    const cacheKey = `post:${slug}`
+
+    return this.cachedFetch(cacheKey, async () => {
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/posts/${slug}?_embed=1`
+      )
+
+      return await response.json()
+    }, 10 * 60 * 1000) // 10 minutes cache for single posts
 
 
-  static async fetchPostBySlug(slug: string): Promise<NewsItem | null> {
-  try {
-    // Validate input
-    if (!slug || typeof slug !== 'string') {
-      console.error('Invalid slug provided:', slug)
-      return null
-    }
-
-    // Encode the slug for URL safety
-    const encodedSlug = encodeURIComponent(slug)
-    const url = `${API_CONFIG.baseURL}/posts?slug=${encodedSlug}&_embed`
-    
-    console.log('Fetching from URL:', url) // Debug log
-
-    const response = await this.fetchWithTimeout(url)
-    const posts = await response.json()
-
-    // Validate response structure
-    if (!Array.isArray(posts)) {
-      console.error('Expected array but got:', typeof posts, posts)
-      return null
-    }
-
-    if (posts.length === 0) {
-      console.log('No post found for slug:', slug)
-      return null
-    }
-
-    const post = posts[0]
-
-    // Validate post structure
-    if (!post || typeof post !== 'object') {
-      console.error('Invalid post data:', post)
-      return null
-    }
-
-    return post
-
-  } catch (error) {
-    console.error('Error in fetchPostBySlug for slug:', slug, error)
-    return null
   }
-}
-
+  
 
   // Categories API
 
@@ -217,39 +170,35 @@ export class ApiService {
     }
   }
 
+  
 
   static async fetchPostsByCategorySlug(
-    slug: string, 
-    params?: {
-      per_page?: number
-      page?: number
-      orderby?: 'date' | 'modified' | 'title' | 'comment_count'
-      order?: 'asc' | 'desc'
-    }
-  ): Promise<{ data: NewsItem[]; category: Category | null }> {
-    try {
-      // First get the category by slug
-      const category = await this.fetchCategoryBySlug(slug)
-      
-      if (!category) {
-        return { data: [], category: null }
-      }
-
-      // Then fetch posts for this category
-      const postsResponse = await this.fetchArticles({
-        categories: [category.id],
-        ...params
-      })
-
-      return {
-        data: postsResponse.data || [],
-        category
-      }
-    } catch (error) {
-      console.error('Error fetching posts by category slug:', error)
-      return { data: [], category: null }
-    }
+  slug: string, 
+  params?: {
+    per_page?: number
+    page?: number
+    orderby?: 'date' | 'modified' | 'title' | 'comment_count'
+    order?: 'asc' | 'desc'
   }
+): Promise<articleResponse<NewsItem> | null> {
+  try {
+    const category = await this.fetchCategoryBySlug(slug)
+    if (!category) {
+      console.log('Category not found for slug:', slug)
+      return null
+    }
+    const postsResponse = await this.fetchArticles({
+      categories: [category.id],
+      ...params
+    })
+
+    return postsResponse
+  } catch (error) {
+    console.error('Error fetching posts by category slug:', error)
+    return null
+  }
+}
+
 
 static async fetchCategories(params?: {
     page?: number
@@ -288,6 +237,7 @@ static async fetchCategories(params?: {
   }
 
   // Articles/Posts API
+
   static async fetchArticles(params?: {
   page?: number
   per_page?: number
@@ -305,26 +255,6 @@ static async fetchCategories(params?: {
       page: params?.page || 1,
       per_page: params?.per_page || 20,
       _embed: '1',
-      // _fields: [
-      //   'id',
-      //   'date',
-      //   'date_gmt',
-      //   'modified',
-      //   'modified_gmt',
-      //   'slug',
-      //   'status',
-      //   'type',
-      //   'link',
-      //   'title',
-      //   'content',
-      //   'excerpt',
-      //   'author',
-      //   'featured_media',
-      //   'categories',
-      //   'tags',
-      //   'acf',
-      //   '_embedded'
-      // ].join(','),
       orderby: params?.orderby || 'date',
       order: params?.order || 'desc',
     }
@@ -416,26 +346,7 @@ static async fetchCategories(params?: {
 
     return this.cachedFetch(cacheKey, async () => {
       const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts/${id}?_embed=1&_fields=${[
-          'id',
-          'date',
-          'date_gmt',
-          'modified',
-          'modified_gmt',
-          'slug',
-          'status',
-          'type',
-          'link',
-          'title',
-          'content',
-          'excerpt',
-          'author',
-          'featured_media',
-          'categories',
-          'tags',
-          'acf',
-          '_embedded'
-        ].join(',')}`
+        `${API_CONFIG.baseURL}/posts/${id}?_embed=1`
       )
 
       return await response.json()

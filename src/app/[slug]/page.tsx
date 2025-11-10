@@ -17,7 +17,6 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const {slug} = await params
-  
   try {
     const post = await ApiService.fetchPostBySlug(slug)
 
@@ -27,14 +26,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: 'The requested article could not be found.',
       }
     }
-
-    if (!post.title || !post.excerpt) {
-      return {
-        title: 'Article Not Found',
-        description: 'The requested article could not be found.',
-      }
-    }
-
 
     // Safe access to SEO properties with fallbacks
     const title = (post as any).seo_title ||
@@ -88,37 +79,32 @@ export async function generateStaticParams() {
   }
 }
 
-
 export default async function SingleNewsPage({ params }: PageProps) {
   const queryClient = getQueryClient()
   const { slug } = await params
-  
   try {
     // Validate slug parameter
     if (!slug || typeof slug !== 'string') {
       notFound()
     }
 
+    // Prefetch the post data with proper error handling
     await queryClient.prefetchQuery({
       queryKey: queryKeys.articles.detail(slug),
       queryFn: async () => {
-        try {
-          const post = await ApiService.fetchPostBySlug(slug)
-          
-          if (!post || !post.id || !post.title) {
-            throw new Error('Invalid post data')
-          }
-          
-          return post
-        } catch (error) {
-          console.error('Error fetching post:', error)
-          throw new Error('Failed to fetch post')
+        const post = await ApiService.fetchPostBySlug(slug)
+
+        // Ensure we never return undefined
+        if (!post) {
+          throw new Error('Post not found')
         }
+
+        return post
       },
     })
 
-    // Get the post to check if it exists
-    const post = queryClient.getQueryData<NewsItem>(
+    // Get the post to check if it exists and prefetch related posts
+    const post = await queryClient.getQueryData<NewsItem>(
       queryKeys.articles.detail(slug)
     )
 
@@ -126,14 +112,11 @@ export default async function SingleNewsPage({ params }: PageProps) {
       notFound()
     }
 
-    // Only prefetch related posts if we have valid category data
-    const categoryId = post.categories?.[0]?.id
-    if (categoryId) {
-      await queryClient.prefetchQuery({
-        queryKey: queryKeys.articles.related(String(post.id), categoryId),
-        queryFn: () => ApiService.fetchRelatedPosts(String(post.id), [categoryId]),
-      })
-    }
+    // Prefetch related posts only if we have a valid post
+    await queryClient.prefetchQuery({
+      queryKey: queryKeys.articles.related(String(post.id), post.categories?.[0]?.id),
+      queryFn: () => ApiService.fetchRelatedPosts(String(post.id), [post?.categories?.[0]?.id]),
+    })
 
     const dehydratedState = dehydrate(queryClient)
 

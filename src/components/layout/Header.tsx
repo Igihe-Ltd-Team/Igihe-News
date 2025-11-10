@@ -201,7 +201,7 @@ export default function Header() {
                                     {categories && categories.length > 0 ? (
                                         orderedCategories.map((NavItem: any, index: number) => (
                                             <li className="nav-item" key={index}>
-                                                <Link href={`/category/${NavItem.id}`} className="nav-link active">{NavItem?.name || 'Home'}</Link>
+                                                <Link href={`/category/${NavItem.slug}`} className="nav-link active">{NavItem?.name || 'Home'}</Link>
                                             </li>
                                         ))
                                     ) : (

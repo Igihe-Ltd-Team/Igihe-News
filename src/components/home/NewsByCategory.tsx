@@ -1,3 +1,5 @@
+"use client"
+
 import { useNewsData } from '@/hooks/useNewsData'
 import React, { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'

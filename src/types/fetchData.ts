@@ -4,6 +4,8 @@ export interface PaginationInfo {
   totalPages: number
   totalItems: number
   hasNextPage: boolean
+  totalPosts?: number
+  hasPrevPage?: boolean
 }
 
 export interface articleResponse<T> {
