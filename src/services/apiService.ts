@@ -379,7 +379,6 @@ static async fetchCategories(params?: {
       per_page: 6,
       exclude: [postId],
       _embed: '1',
-      _fields: ['id', 'slug', 'title', 'date', 'featured_media', '_embedded'].join(','),
     }
 
     // Prioritize same category posts, then tag-based

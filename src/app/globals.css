@@ -1,4 +1,7 @@
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css');
+/* @import url('owl.carousel/dist/assets/owl.carousel.css');
+@import url('owl.carousel/dist/assets/owl.theme.default.css'); */
+/* @import './owl-custom.css'; */
 
 .font-raleway {
   font-family: var(--font-raleway);
@@ -241,4 +244,11 @@ background: linear-gradient(0deg,rgba(255, 255, 255, 1) 7%, rgba(255, 255, 255, 
   -webkit-line-clamp: 2; /* number of lines to show */
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+
+
+.swiper-navigation-icon{
+  width: 50%!important;
+  height: 50%!important;
 }

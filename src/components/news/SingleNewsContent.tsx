@@ -4,13 +4,24 @@ import NewsSkeleton from '../NewsSkeleton'
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
-import {  getFeaturedImage, stripHtml } from '@/lib/utils'
+import { getFeaturedImage, stripHtml } from '@/lib/utils'
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
 import AdManager from '../ads/AdManager'
 import { NewsItem } from '@/types/fetchData'
 import { useNewsData } from '@/hooks/useNewsData'
+import DynamicArticleCard from './DynamicArticleCard'
+import HeaderDivider from '../HeaderDivider'
+
+
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Navigation, Pagination, Autoplay } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+
+
 
 interface SingleNewsContentProps {
     slug: string,
@@ -20,11 +31,12 @@ interface SingleNewsContentProps {
 export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     const { useArticleDetails } = useNewsData()
     const {
-    article,
-    // relatedPosts,
-    articleLoading,
-    refetchArticle
-  } = useArticleDetails(slug)
+        article,
+        relatedPosts,
+        articleLoading,
+        refetchArticle,
+        relatedPostsLoading
+    } = useArticleDetails(slug)
 
     if (articleLoading) {
         return (
@@ -34,7 +46,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
         )
     }
 
-    if ( !article) {
+    if (!article) {
         return (
             <div className="container py-5">
                 <EnhancedErrorMessage
@@ -141,6 +153,60 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                             </div>
                         ))} */}
 
+                        <div className='pt-4 g-3'>
+                            <HeaderDivider title="Related Articles" />
+                            <div className="position-relative">
+                              <Swiper
+                                spaceBetween={30}
+                                slidesPerView={3}
+                                navigation={{
+                                  nextEl: '.swiper-button-next',
+                                  prevEl: '.swiper-button-prev',
+                                }}
+                                pagination={{
+                                  clickable: true,
+                                  el: '.swiper-pagination',
+                                }}
+                                autoplay={{
+                                  delay: 5000,
+                                  disableOnInteraction: false,
+                                }}
+                                modules={[Navigation, Pagination, Autoplay]}
+                                breakpoints={{
+                                  320: {
+                                    slidesPerView: 2,
+                                    spaceBetween: 10,
+                                  },
+                                  640: {
+                                    slidesPerView: 2,
+                                    spaceBetween: 20,
+                                  },
+                                  1024: {
+                                    slidesPerView: 3,
+                                    spaceBetween: 30,
+                                  },
+                                }}
+                              >
+                                {relatedPosts.map(article => (
+                                    <SwiperSlide key={article.id || article.slug}>
+                                        <DynamicArticleCard
+                                            article={article}
+                                            showImage
+                                            priority={false}
+                                            imgHeight={143}
+                                            bgColor="#1176BB08"
+                                            bordered
+                                        />
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>  
+                            <div className="swiper-button-prev !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
+                            <div className="swiper-button-next !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
+                            
+                            {/* Custom Pagination */}
+                            <div className="swiper-pagination !bottom-0 mt-4"></div>
+                            </div>
+                        </div>
                     </Col>
                     <Col md="4">
                         <CardAdds size={290} />

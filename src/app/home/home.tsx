@@ -5,6 +5,7 @@ import AdManager from '@/components/ads/AdManager'
 import Categories from '@/components/home/Categories'
 import HomeMainSections from '@/components/home/HomeMainSections'
 import Recents from '@/components/home/Recents'
+import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useNewsData } from '@/hooks/useNewsData'
 import { useUIStore } from '@/stores/uiStore'
@@ -31,6 +32,9 @@ export function Home() {
 
   return (
     <>
+    <Container>
+    <Slides articles={featuredArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll/>
+    </Container>
       <HomeMainSections articles={featuredArticles} />
       <Recents latests={featuredArticles}
         popular={featuredArticles}

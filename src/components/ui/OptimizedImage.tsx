@@ -44,7 +44,12 @@ export function OptimizedImage({
   const imageSrc = hasError ? '/images/placeholder.jpg' : src
 
   return (
-    <div className={'position-relative w-100'} style={{minHeight:height,maxHeight:'100%'}}>
+    <div className={'position-relative w-100'} 
+    style={{
+      minHeight:height,
+      maxHeight:'100%',
+      height: Math.max(Number(height), 100) + 'px'
+    }}>
       <Image
         src={imageSrc}
         alt={alt}
