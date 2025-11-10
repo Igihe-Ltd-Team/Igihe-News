@@ -9,6 +9,8 @@ interface PageProps {
 }
 
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   try {
@@ -63,10 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 
 
-export async function generateStaticParams() {
-  const posts = await ApiService.fetchArticles({ per_page: 50 })
-  return posts.data.map((post) => ({ slug: post.slug }))
-}
+
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const { slug } = await params
