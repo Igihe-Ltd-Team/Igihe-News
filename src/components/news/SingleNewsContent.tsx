@@ -13,55 +13,50 @@ import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
 import AdManager from '../ads/AdManager'
+import { NewsItem } from '@/types/fetchData'
+import { useNewsData } from '@/hooks/useNewsData'
 
 interface SingleNewsContentProps {
-    slug: string
+    slug: string,
+    initialArticle: NewsItem
 }
 
-export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
+export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
+    const { useArticleDetails } = useNewsData()
     const {
-        data: post,
-        isLoading,
-        error,
-        refetch
-    } = useQuery({
-        queryKey: queryKeys.articles.detail(slug),
-        queryFn: async () => {
-            const post = await ApiService.fetchPostBySlug(slug)
+    article: clientArticle,
+    // relatedPosts,
+    // articleLoading,
+    // refetchArticle
+  } = useArticleDetails(slug)
 
-            if (!post) {
-                throw new Error('Post not found')
-            }
-
-            return post
-        },
-        staleTime: 5 * 60 * 1000,
-        retry: 2, // Retry failed requests twice
-    })
+  const article = clientArticle || initialArticle
 
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen d-flex align-items-center justify-content-center">
-                <NewsSkeleton />
-            </div>
-        )
-    }
 
-    if (error || !post) {
-        return (
-            <div className="container py-5">
-                <EnhancedErrorMessage
-                    title="Article Not Found"
-                    message="The article you're looking for doesn't exist or failed to load."
-                    onRetry={() => refetch()}
-                    retryText="Try Again"
-                    type="error"
-                />
-            </div>
-        )
-    }
-    const featuredImage = getFeaturedImage(post);
+
+    // if (isLoading) {
+    //     return (
+    //         <div className="min-h-screen d-flex align-items-center justify-content-center">
+    //             <NewsSkeleton />
+    //         </div>
+    //     )
+    // }
+
+    // if (error || !post) {
+    //     return (
+    //         <div className="container py-5">
+    //             <EnhancedErrorMessage
+    //                 title="Article Not Found"
+    //                 message="The article you're looking for doesn't exist or failed to load."
+    //                 onRetry={() => refetch()}
+    //                 retryText="Try Again"
+    //                 type="error"
+    //             />
+    //         </div>
+    //     )
+    // }
+    const featuredImage = getFeaturedImage(article);
 
 
 
@@ -86,7 +81,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
 
             <article>
                 <Col xl="8" md="12">
-                    <ThemedText type='title'>{stripHtml(post.title.rendered)}</ThemedText>
+                    <ThemedText type='title'>{stripHtml(article.title.rendered)}</ThemedText>
                 </Col>
                 <Row>
                     <Col></Col>
@@ -96,16 +91,16 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                     <Col md="8">
                         <OptimizedImage
                             src={featuredImage || '/images/placeholder.jpg'}
-                            alt={post.title.rendered}
+                            alt={article.title.rendered}
                             fill
                             height={554}
                             className="object-cover"
                         />
                         {
-                            post?.excerpt?.rendered &&
+                            article?.excerpt?.rendered &&
                             <div className='excerpt-section'>
                                 <ThemedText type='defaultItalic'>
-                                    {stripHtml(post?.excerpt?.rendered)}
+                                    {stripHtml(article?.excerpt?.rendered)}
                                 </ThemedText>
                             </div>
                         }
@@ -115,7 +110,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                                 overflow: 'hidden',
                                 width: '100%'
                             }}
-                            dangerouslySetInnerHTML={{ __html: post?.content?.rendered || '' }}
+                            dangerouslySetInnerHTML={{ __html: article?.content?.rendered || '' }}
                         />
                         {/* {post?.content?.rendered && (
                             <div>

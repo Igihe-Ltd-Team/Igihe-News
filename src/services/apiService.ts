@@ -132,20 +132,25 @@ export class ApiService {
     }
   }
 
-  static async fetchPostBySlug(slug: string): Promise<NewsItem> {
+  static async fetchPostBySlug(slug: string): Promise<NewsItem | null> {
+  const cacheKey = `post:${slug}`
 
-    const cacheKey = `post:${slug}`
-
-    return this.cachedFetch(cacheKey, async () => {
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts/${slug}?_embed=1`
-      )
-
-      return await response.json()
-    }, 10 * 60 * 1000) // 10 minutes cache for single posts
-
-
-  }
+  return this.cachedFetch(cacheKey, async () => {
+    const response = await this.fetchWithTimeout(
+      `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
+    )
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const posts = await response.json()
+    if (!Array.isArray(posts) || posts.length === 0) {
+      return null
+    }
+    return posts[0]
+  }, 10 * 60 * 1000)
+}
   
 
   // Categories API

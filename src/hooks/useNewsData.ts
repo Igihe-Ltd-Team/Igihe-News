@@ -4,6 +4,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { ApiService } from '@/services/apiService'
 import { articleResponse, NewsItem } from '@/types/fetchData'
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 export function useNewsData() {
   const queryClient = useQueryClient()
@@ -79,6 +80,86 @@ export function useNewsData() {
   }
 
 
+  const useCategoryInfo = (slug?: string) => {
+    return useQuery({
+      queryKey: ['category', slug],
+      queryFn: async () => {
+        if (!slug) {
+          return null
+        }
+        return ApiService.fetchCategoryBySlug(slug)
+      },
+      enabled: !!slug,
+      staleTime: 5 * 60 * 1000,
+      retry: 2,
+    })
+  }
+
+  const useArticleDetails = (slug: string) => {
+
+    const articleQuery = useQuery({
+      queryKey: queryKeys.articles.detail(slug),
+      queryFn: () => ApiService.fetchPostBySlug(slug),
+      enabled: !!slug && typeof slug === 'string',
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
+    })
+
+
+    const relatedPostsQuery = useQuery<NewsItem[], Error>({
+      queryKey: queryKeys.articles.related(
+        articleQuery.data?.id?.toString() || '',
+        articleQuery.data?.categories?.[0]?.id
+      ),
+      queryFn: async () => {
+        if (!articleQuery.data) return []
+        return ApiService.fetchRelatedPosts(
+          articleQuery.data.id.toString(),
+          [articleQuery.data.categories[0].id]
+        )
+      },
+      enabled: !!articleQuery.data && !!articleQuery.data.id,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
+    })
+
+    useEffect(() => {
+      if (articleQuery.data?.categories?.[0]?.id) {
+        queryClient.prefetchQuery({
+          queryKey: queryKeys.categories.detail(articleQuery.data.categories[0].id),
+          queryFn: () => ApiService.fetchCategoryBySlug(articleQuery.data!.categories![0].slug),
+        })
+      }
+    }, [articleQuery.data])
+
+
+
+    return {
+      // Article data
+      article: articleQuery.data,
+      articleLoading: articleQuery.isLoading,
+      articleError: articleQuery.error,
+
+      // Related posts
+      relatedPosts: relatedPostsQuery.data || [],
+      relatedPostsLoading: relatedPostsQuery.isLoading,
+
+      // Combined states
+      isLoading: articleQuery.isLoading,
+      isError: articleQuery.isError,
+
+      // Refetch functions
+      refetchArticle: articleQuery.refetch,
+      refetchRelated: relatedPostsQuery.refetch,
+
+      // Individual query objects for advanced usage
+      articleQuery,
+      relatedPostsQuery,
+    }
+
+  }
+
+
 
 
   // Search mutation
@@ -144,5 +225,8 @@ export function useNewsData() {
     useCategorySlugArticles,
     // Query client for direct access
     queryClient,
+
+    useArticleDetails
+    
   }
 }
