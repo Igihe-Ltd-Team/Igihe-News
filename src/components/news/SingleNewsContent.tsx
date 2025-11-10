@@ -208,7 +208,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                             </div>
                         </div>
                     </Col>
-                    <Col md="4">
+                    <Col md="4" className='sticky-sidebar'>
                         <CardAdds size={290} />
                         <SocialMedias />
                     </Col>

@@ -80,7 +80,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               ))}
             </div>
           </Col>
-          <Col md={4}>
+          <Col md={4} className='sticky-sidebar'>
             <PopularNews articles={posts} name={`Popular In ${slug}`} />
           </Col>
         </Row>

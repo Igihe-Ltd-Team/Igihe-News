@@ -252,3 +252,9 @@ background: linear-gradient(0deg,rgba(255, 255, 255, 1) 7%, rgba(255, 255, 255, 
   width: 50%!important;
   height: 50%!important;
 }
+
+.sticky-sidebar {
+  position: sticky;
+  top: 10px; /* Adjust offset */
+  align-self: flex-start;
+}
