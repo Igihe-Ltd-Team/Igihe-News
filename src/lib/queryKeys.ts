@@ -4,6 +4,7 @@ export const queryKeys = {
     lists: () => [...queryKeys.categories.all, 'list'] as const,
     details: () => [...queryKeys.categories.all, 'detail'] as const,
     detail: (id: number) => [...queryKeys.categories.details(), id] as const,
+    bySlug: (slug: string) => ['categories', 'slug', slug] as const
   },
   articles: {
     all: ['articles'] as const,
@@ -18,6 +19,7 @@ export const queryKeys = {
       [...queryKeys.articles.all, 'byAuthorSlug', slug, params] as const,
     byCategorySlug: (slug: string, params?: any) => 
       [...queryKeys.articles.all, 'byCategorySlug', slug, params] as const,
+
   },
 
 

@@ -16,6 +16,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params
   const category: Category | null = await ApiService.fetchCategoryBySlug(slug)
   const categoryId = category ? category.id : undefined;
+
+
+
+  
   const articles = await ApiService.fetchArticles({
     categories: categoryId ? [categoryId] : [],
     per_page: 20,
