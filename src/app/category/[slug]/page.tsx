@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect,use } from 'react'
 import { notFound } from 'next/navigation'
 import { ApiService } from '@/services/apiService'
 import DynamicArticleCard from '@/components/news/DynamicArticleCard'
@@ -7,31 +10,47 @@ import PopularNews from '@/components/news/PopularNews'
 import { Category } from '@/types/fetchData'
 import HeaderDivider from '@/components/HeaderDivider'
 import AdManager from '@/components/ads/AdManager'
+import { useNewsData } from '@/hooks/useNewsData'
+import { useInView } from 'react-intersection-observer'
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { slug } = await params
-  const category: Category | null = await ApiService.fetchCategoryBySlug(slug)
-  const categoryId = category ? category.id : undefined;
+export default function CategoryPage({ params }: CategoryPageProps) {
+  const { useCategoryArticles } = useNewsData()
+  const { inView } = useInView()
+  const { slug } = use(params)
 
-
+  console.log(slug)
 
   
-  const articles = await ApiService.fetchArticles({
-    categories: categoryId ? [categoryId] : [],
-    per_page: 20,
-  });
+      const {
+          data,
+          fetchNextPage,
+          hasNextPage,
+          isFetchingNextPage,
+          status,
+      } = useCategoryArticles(Number(slug))
+  
+      useEffect(() => {
+              if (inView && hasNextPage && !isFetchingNextPage) {
+                  fetchNextPage()
+              }
+          }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
+          const allArticles = data?.pages.flatMap(page => page.data) || []
 
-  if (!category) {
+
+
+
+
+  if (!slug) {
     notFound()
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <CategoryMainSection articles={articles.data} />
+      <CategoryMainSection articles={allArticles} />
       <div className='pt-2 pb-4'>
         <Row>
           <Col>
@@ -54,7 +73,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <Col md={8}>
             <HeaderDivider title={'Latest Politics News'} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {articles.data.map((article) => (
+              {allArticles.map((article) => (
                 <DynamicArticleCard
                   key={article.id}
                   article={article}
@@ -67,7 +86,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </div>
           </Col>
           <Col md={4}>
-            <PopularNews articles={articles.data} name={`Popular In ${category.name}`} />
+            <PopularNews articles={allArticles} name={`Popular In ${slug}`} />
           </Col>
         </Row>
       </div>
