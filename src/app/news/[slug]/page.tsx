@@ -8,9 +8,6 @@ interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-
-export const dynamic = 'force-dynamic'
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   try {
@@ -23,7 +20,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }
     }
 
-    // Safe access to SEO properties with fallbacks
     const title = (post as any).seo_title ||
       (post as any).yoast_head_json?.title ||
       stripHtml(post.title.rendered)
@@ -62,8 +58,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-
-
+export async function generateStaticParams() {
+  try {
+    // Generate only a few popular pages statically
+    const posts = await ApiService.fetchArticles({ 
+      per_page: 20, // Reduced for faster builds
+      orderby: 'date',
+      order: 'desc'
+    })
+    
+    console.log(`Generating ${posts.data.length} static pages`)
+    return posts.data.map((post) => ({ slug: post.slug }))
+  } catch (error) {
+    console.error('Error in generateStaticParams:', error)
+    // Return empty array - other pages will be generated on-demand
+    return []
+  }
+}
 
 
 
