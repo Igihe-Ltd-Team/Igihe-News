@@ -3,16 +3,16 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, News
 
 // Configuration
 const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://your-wordpress-site.com/wp-json/wp/v2',
-  timeout: 10000, // 10 seconds
+  baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://new.igihe.com/wp-json/wp/v2',
+  timeout: 10000,
   retryAttempts: 2,
-  cacheTimeout: 5 * 60 * 1000, // 5 minutes
+  cacheTimeout: 5 * 60 * 1000,
 }
 
-// Request cache for deduplication
+
 const requestCache = new Map<string, { data: any; timestamp: number }>()
 
-// Rate limiting
+
 const rateLimit = {
   requests: new Map<string, number[]>(),
   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
@@ -33,41 +33,43 @@ const rateLimit = {
 
 export class ApiService {
   private static async fetchWithTimeout(url: string, options: RequestInit = {}, timeout = API_CONFIG.timeout) {
-    const controller = new AbortController()
-    const id = setTimeout(() => controller.abort(), timeout)
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeout)
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-        headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Referer': 'https://new.igihe.com/',
-        'Origin': 'https://new.igihe.com',
-        'Connection': 'keep-alive',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin',
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
         ...options.headers,
       },
+    })
 
-      })
+    clearTimeout(id)
 
-      clearTimeout(id)
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return response
-    } catch (error) {
-      clearTimeout(id)
-      throw error
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
+
+    return response
+  } catch (error) {
+    clearTimeout(id)
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error(`Request timeout after ${timeout}ms`)
+      }
+      if (error.message.includes('fetch failed')) {
+        throw new Error('Network error: Failed to connect to server')
+      }
+    }
+    
+    throw error
   }
+}
+
 
   private static async cachedFetch<T>(
     cacheKey: string, 
@@ -140,12 +142,58 @@ export class ApiService {
     }
   }
 
-  static async fetchPostBySlug(slug: string): Promise<NewsItem> {
-    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?slug=${slug}&_embed`)
-    const posts = await response.json()
-    return posts[0] || null // WordPress REST API returns array
-  }
+  // static async fetchPostBySlug(slug: string): Promise<NewsItem> {
+  //   const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?slug=${slug}&_embed`)
+  //   const posts = await response.json()
+  //   return posts[0] || null // WordPress REST API returns array
+  // }
   
+
+
+  static async fetchPostBySlug(slug: string): Promise<NewsItem | null> {
+  try {
+    // Validate input
+    if (!slug || typeof slug !== 'string') {
+      console.error('Invalid slug provided:', slug)
+      return null
+    }
+
+    // Encode the slug for URL safety
+    const encodedSlug = encodeURIComponent(slug)
+    const url = `${API_CONFIG.baseURL}/posts?slug=${encodedSlug}&_embed`
+    
+    console.log('Fetching from URL:', url) // Debug log
+
+    const response = await this.fetchWithTimeout(url)
+    const posts = await response.json()
+
+    // Validate response structure
+    if (!Array.isArray(posts)) {
+      console.error('Expected array but got:', typeof posts, posts)
+      return null
+    }
+
+    if (posts.length === 0) {
+      console.log('No post found for slug:', slug)
+      return null
+    }
+
+    const post = posts[0]
+
+    // Validate post structure
+    if (!post || typeof post !== 'object') {
+      console.error('Invalid post data:', post)
+      return null
+    }
+
+    return post
+
+  } catch (error) {
+    console.error('Error in fetchPostBySlug for slug:', slug, error)
+    return null
+  }
+}
+
 
   // Categories API
 

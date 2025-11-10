@@ -6,6 +6,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query'
 import { getQueryClient } from '@/lib/react-query'
 import { NewsItem } from '@/types/fetchData'
+import { stripHtml } from '@/lib/utils'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -26,14 +27,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }
     }
 
+    if (!post.title || !post.excerpt) {
+      return {
+        title: 'Article Not Found',
+        description: 'The requested article could not be found.',
+      }
+    }
+
+
     // Safe access to SEO properties with fallbacks
     const title = (post as any).seo_title ||
       (post as any).yoast_head_json?.title ||
-      post.title.rendered.replace(/<[^>]*>/g, '')
+      stripHtml(post.title.rendered)
 
     const description = (post as any).meta_description ||
       (post as any).yoast_head_json?.description ||
-      post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160)
+      stripHtml(post.excerpt.rendered).substring(0, 160)
 
     const ogImage = (post as any).yoast_head_json?.og_image?.[0]?.url ||
       post.featured_media
@@ -78,32 +87,37 @@ export async function generateStaticParams() {
   }
 }
 
+
 export default async function SingleNewsPage({ params }: PageProps) {
   const queryClient = getQueryClient()
   const { slug } = await params
+  
   try {
     // Validate slug parameter
     if (!slug || typeof slug !== 'string') {
       notFound()
     }
 
-    // Prefetch the post data with proper error handling
     await queryClient.prefetchQuery({
       queryKey: queryKeys.articles.detail(slug),
       queryFn: async () => {
-        const post = await ApiService.fetchPostBySlug(slug)
-
-        // Ensure we never return undefined
-        if (!post) {
-          throw new Error('Post not found')
+        try {
+          const post = await ApiService.fetchPostBySlug(slug)
+          
+          if (!post || !post.id || !post.title) {
+            throw new Error('Invalid post data')
+          }
+          
+          return post
+        } catch (error) {
+          console.error('Error fetching post:', error)
+          throw new Error('Failed to fetch post')
         }
-
-        return post
       },
     })
 
-    // Get the post to check if it exists and prefetch related posts
-    const post = await queryClient.getQueryData<NewsItem>(
+    // Get the post to check if it exists
+    const post = queryClient.getQueryData<NewsItem>(
       queryKeys.articles.detail(slug)
     )
 
@@ -111,11 +125,14 @@ export default async function SingleNewsPage({ params }: PageProps) {
       notFound()
     }
 
-    // Prefetch related posts only if we have a valid post
-    await queryClient.prefetchQuery({
-      queryKey: queryKeys.articles.related(String(post.id), post.categories?.[0]?.id),
-      queryFn: () => ApiService.fetchRelatedPosts(String(post.id), [post?.categories?.[0]?.id]),
-    })
+    // Only prefetch related posts if we have valid category data
+    const categoryId = post.categories?.[0]?.id
+    if (categoryId) {
+      await queryClient.prefetchQuery({
+        queryKey: queryKeys.articles.related(String(post.id), categoryId),
+        queryFn: () => ApiService.fetchRelatedPosts(String(post.id), [categoryId]),
+      })
+    }
 
     const dehydratedState = dehydrate(queryClient)
 

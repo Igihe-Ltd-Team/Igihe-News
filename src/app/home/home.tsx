@@ -9,7 +9,7 @@ import NewsSkeleton from '@/components/NewsSkeleton'
 import { useNewsData } from '@/hooks/useNewsData'
 import { useUIStore } from '@/stores/uiStore'
 import React from 'react'
-import { Col, Row } from 'react-bootstrap'
+import { Col, Container, Row } from 'react-bootstrap'
 
 
 export function Home() {
@@ -37,35 +37,42 @@ export function Home() {
         featured={featuredArticles}
         advertorials={featuredArticles}
       />
-      <Row>
-        <Col>
-          <AdManager
-            position="header-landscape-ad-1"
-            priority={true}
-            className="mb-2"
-          /></Col>
-        <Col>
-          <AdManager
-            position="header-landscape-ad-2"
-            priority={true}
-            className="mb-2"
-          /></Col>
-      </Row>
+      <Container>
+        <Row>
+          <Col>
+            <AdManager
+              position="header-landscape-ad-1"
+              priority={true}
+              className="mb-2"
+            /></Col>
+          <Col>
+            <AdManager
+              position="header-landscape-ad-2"
+              priority={true}
+              className="mb-2"
+            />
+          </Col>
+        </Row>
+      </Container>
       <Categories categories={categories} />
-      <Row>
-        <Col>
-          <AdManager
-            position="header-landscape-ad-1"
-            priority={true}
-            className="mb-2"
-          /></Col>
-        <Col>
-          <AdManager
-            position="header-landscape-ad-2"
-            priority={true}
-            className="mb-2"
-          /></Col>
-      </Row>
+      <Container>
+        <Row>
+          <Col>
+            <AdManager
+              position="header-landscape-ad-1"
+              priority={true}
+              className="mb-2"
+            />
+          </Col>
+          <Col>
+            <AdManager
+              position="header-landscape-ad-2"
+              priority={true}
+              className="mb-2"
+            /></Col>
+        </Row>
+      </Container>
+
       <Categories categories={categories} />
     </>
   )

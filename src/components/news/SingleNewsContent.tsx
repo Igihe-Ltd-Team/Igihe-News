@@ -32,30 +32,11 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
             if (!post) {
                 throw new Error('Post not found')
             }
-
             return post
         },
         staleTime: 5 * 60 * 1000,
-        retry: 2, // Retry failed requests twice
+        retry: 2,
     })
-
-
-    // const embeddedYouTubeId = useMemo(
-    //     () => extractYouTubeEmbed(post?.content?.rendered || ""),
-    //     [post?.content?.rendered]
-    // );
-
-
-    //   const { data: relatedPosts } = useQuery({
-    //     queryKey: queryKeys.articles.related(post?.id, post?.categories?.[0]?.id),
-    //     queryFn: () => {
-    //       if (!post) {
-    //         return { data: [] }
-    //       }
-    //       return ApiService.fetchRelatedPosts(post.id, post.categories?.[0]?.id)
-    //     },
-    //     enabled: !!post, // Only run if post exists
-    //   })
 
     if (isLoading) {
         return (
