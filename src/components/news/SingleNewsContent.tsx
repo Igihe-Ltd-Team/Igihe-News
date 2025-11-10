@@ -1,9 +1,5 @@
 'use client'
 
-
-import { useQuery } from '@tanstack/react-query'
-import { ApiService } from '@/services/apiService'
-import { queryKeys } from '@/lib/queryKeys'
 import NewsSkeleton from '../NewsSkeleton'
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
@@ -18,48 +14,40 @@ import { useNewsData } from '@/hooks/useNewsData'
 
 interface SingleNewsContentProps {
     slug: string,
-    initialArticle: NewsItem
+    initialArticle?: NewsItem
 }
 
-export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
+export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     const { useArticleDetails } = useNewsData()
     const {
-    article: clientArticle,
+    article,
     // relatedPosts,
-    // articleLoading,
-    // refetchArticle
+    articleLoading,
+    refetchArticle
   } = useArticleDetails(slug)
 
-  const article = clientArticle || initialArticle
+    if (articleLoading) {
+        return (
+            <div className="min-h-screen d-flex align-items-center justify-content-center">
+                <NewsSkeleton />
+            </div>
+        )
+    }
 
-
-
-
-    // if (isLoading) {
-    //     return (
-    //         <div className="min-h-screen d-flex align-items-center justify-content-center">
-    //             <NewsSkeleton />
-    //         </div>
-    //     )
-    // }
-
-    // if (error || !post) {
-    //     return (
-    //         <div className="container py-5">
-    //             <EnhancedErrorMessage
-    //                 title="Article Not Found"
-    //                 message="The article you're looking for doesn't exist or failed to load."
-    //                 onRetry={() => refetch()}
-    //                 retryText="Try Again"
-    //                 type="error"
-    //             />
-    //         </div>
-    //     )
-    // }
+    if ( !article) {
+        return (
+            <div className="container py-5">
+                <EnhancedErrorMessage
+                    title="Article Not Found"
+                    message="The article you're looking for doesn't exist or failed to load."
+                    onRetry={() => refetchArticle()}
+                    retryText="Try Again"
+                    type="error"
+                />
+            </div>
+        )
+    }
     const featuredImage = getFeaturedImage(article);
-
-
-
     return (
         <Container>
             <div className='pb-4'>

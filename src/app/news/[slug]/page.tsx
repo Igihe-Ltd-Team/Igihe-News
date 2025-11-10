@@ -3,6 +3,8 @@ import { Metadata } from 'next'
 import { ApiService } from '@/services/apiService'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
+import { useNewsData } from '@/hooks/useNewsData'
+import { HydrationBoundary } from '@tanstack/react-query'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -80,11 +82,22 @@ export async function generateStaticParams() {
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const { slug } = await params
-  const post = await ApiService.fetchPostBySlug(slug)
+  // const post = await ApiService.fetchPostBySlug(slug)
+  // const { useArticleDetails } = useNewsData()
+  //     const {
+  //     article: clientArticle,
+  //     // relatedPosts,
+  //     // articleLoading,
+  //     // refetchArticle
+  //   } = useArticleDetails(slug)
 
-  console.log('post', post)
+  // console.log('post', post)
 
-  if (!post) notFound()
+  // if (!post) notFound()
 
-  return <SingleNewsContent slug={slug} initialArticle={post} />
+  return(
+    <>
+     <SingleNewsContent slug={slug}/>
+     </>
+     )
 }
