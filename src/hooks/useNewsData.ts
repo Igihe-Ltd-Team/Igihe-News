@@ -137,24 +137,24 @@ export function useArticleDetails(slug: string) {
   })
 
   // Related posts query (auto-fetched when article is loaded)
-  const relatedPostsQuery = useQuery({
-    queryKey: queryKeys.articles.related(
-      articleQuery.data?.id?.toString() || '',
-      articleQuery.data?.categories?.[0]?.id
-    ),
-    queryFn: () => {
-      if (!articleQuery.data) {
-        return { data: [] }
-      }
-      return ApiService.fetchRelatedPosts(
-        articleQuery.data.id.toString(),
-        articleQuery.data.categories?.[0]?.id ? [articleQuery.data.categories[0].id] : []
-      )
-    },
-    enabled: !!articleQuery.data && !!articleQuery.data.id,
-    staleTime: 5 * 60 * 1000,
-    retry: 2,
-  })
+  // const relatedPostsQuery = useQuery({
+  //   queryKey: queryKeys.articles.related(
+  //     articleQuery.data?.id?.toString() || '',
+  //     articleQuery.data?.categories?.[0]?.id
+  //   ),
+  //   queryFn: () => {
+  //     if (!articleQuery.data) {
+  //       return { data: [] }
+  //     }
+  //     return ApiService.fetchRelatedPosts(
+  //       articleQuery.data.id.toString(),
+  //       articleQuery.data.categories?.[0]?.id ? [articleQuery.data.categories[0].id] : []
+  //     )
+  //   },
+  //   enabled: !!articleQuery.data && !!articleQuery.data.id,
+  //   staleTime: 5 * 60 * 1000,
+  //   retry: 2,
+  // })
 
   // Prefetch category data when article is loaded
   useEffect(() => {
@@ -173,8 +173,8 @@ export function useArticleDetails(slug: string) {
     articleError: articleQuery.error,
     
     // Related posts
-    relatedPosts: relatedPostsQuery.data || [],
-    relatedPostsLoading: relatedPostsQuery.isLoading,
+    // relatedPosts: relatedPostsQuery.data || [],
+    // relatedPostsLoading: relatedPostsQuery.isLoading,
     
     // Combined states
     isLoading: articleQuery.isLoading,
@@ -182,10 +182,10 @@ export function useArticleDetails(slug: string) {
     
     // Refetch functions
     refetchArticle: articleQuery.refetch,
-    refetchRelated: relatedPostsQuery.refetch,
+    // refetchRelated: relatedPostsQuery.refetch,
     useArticleDetails,
     // Individual query objects for advanced usage
     articleQuery,
-    relatedPostsQuery,
+    // relatedPostsQuery,
   }
 }

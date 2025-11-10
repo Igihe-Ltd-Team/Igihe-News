@@ -20,11 +20,11 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
 
     const {
     article,
-    relatedPosts,
+    // relatedPosts,
     articleLoading,
-    relatedPostsLoading,
+    // relatedPostsLoading,
     articleError,
-    refetchArticle
+    // refetchArticle
   } = useArticleDetails(slug)
 
     if (articleLoading) {
