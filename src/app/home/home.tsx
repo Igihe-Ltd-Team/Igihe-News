@@ -20,7 +20,9 @@ export function Home() {
     featuredArticlesLoading,
     videos,
     videosLoading,
-    prefetchCategory
+    prefetchCategory,
+    popularArticles, 
+    popularArticlesLoading,
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
 

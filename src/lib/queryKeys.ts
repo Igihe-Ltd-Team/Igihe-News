@@ -21,6 +21,11 @@ export const queryKeys = {
       [...queryKeys.articles.all, 'byCategorySlug', slug, params] as const,
     infiniteBySlug: (filters?: { categorySlug?: string }) => 
       ['articles', 'infiniteBySlug', filters] as const,
+    popular: (params: { period?: string } = {}) => 
+      ['articles', 'popular', params],
+    popularByCategory: (categoryId: number, params: { period?: string } = {}) =>
+      ['articles', 'popular', 'category', categoryId, params],
+    trending: () => ['articles', 'trending'],
 
 
   },

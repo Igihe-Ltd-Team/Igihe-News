@@ -26,6 +26,39 @@ export function useNewsData(initialData?: {
   //   queryFn: () => ApiService.fetchArticles({ per_page: 15 }),
   // })
 
+
+  const popularArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.popular({ period: 'week' }),
+    queryFn: () => ApiService.fetchMostPopularArticles({ 
+      period: 'week', 
+      per_page: 10 
+    }),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  })
+
+  const trendingArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.trending(),
+    queryFn: () => ApiService.fetchMostPopularArticles({
+      period: 'day',
+      per_page: 5
+    }),
+    staleTime: 5 * 60 * 1000, // 5 minutes for trending
+  })
+
+
+  const usePopularByCategory = (categoryId?: number) => {
+    return useQuery({
+      queryKey: queryKeys.articles.popularByCategory(categoryId!, { period: 'week' }),
+      queryFn: () => ApiService.fetchPopularArticlesByCategory(categoryId!, {
+        period: 'week',
+        per_page: 5
+      }),
+      enabled: !!categoryId,
+      staleTime: 10 * 60 * 1000,
+    })
+  }
+
+
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
     queryFn: () => ApiService.fetchArticles({ per_page: 15 }),
@@ -236,7 +269,23 @@ export function useNewsData(initialData?: {
     // Query client for direct access
     queryClient,
 
-    useArticleDetails
+    useArticleDetails,
+
+
+    popularArticles: popularArticlesQuery.data?.data || [],
+    popularArticlesLoading: popularArticlesQuery.isLoading,
+
+
+    // Trending articles
+    trendingArticles: trendingArticlesQuery.data?.data || [],
+    trendingArticlesLoading: trendingArticlesQuery.isLoading,
+
+    // Methods
+    usePopularByCategory,
+
+    // Individual queries
+    popularArticlesQuery,
+    trendingArticlesQuery,
     
   }
 }

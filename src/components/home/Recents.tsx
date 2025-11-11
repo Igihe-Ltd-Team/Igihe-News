@@ -10,6 +10,7 @@ import { ThemedText } from '../ThemedText'
 import { Col, Row } from 'react-bootstrap'
 import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
+import PopularNews from '../news/PopularNews'
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -179,34 +180,7 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                 </div>
 
                 <div className="col-xl-4 col-lg-12">
-                    <HeaderDivider title="Popular News" />
-                    <div className='pt-4'>
-                        {featuredMain && (
-                            <DynamicArticleCard
-                                article={featuredMain}
-                                showImage
-                                showHeader
-                                priority
-                                imgHeight={246}
-                                titleStyle={'size20'}
-                                showDate={false}
-                                numbers={'01'} bottomBorder
-                            />
-                        )}
-                    </div>
-                    <div className='pt-2'>
-                        {latestsSidebar && (
-                            latestsSidebar.slice(1, 5).map((article, i) =>
-                                <DynamicArticleCard
-                                    key={i}
-                                    article={article}
-                                    priority
-                                    imgHeight={246}
-                                    leftNumber={`0${i + 2}`}
-                                />
-                            )
-                        )}
-                    </div>
+                    <PopularNews articles={popular} name='Popular News'/>
                     <div className='pt-2'>
                         <SectionWithToggle title='Advertorials' showImgs showDate titleBG='#1176BB' />
                     </div>

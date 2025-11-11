@@ -244,6 +244,95 @@ export class ApiService {
     return posts[0]
   }, 10 * 60 * 1000)
 }
+
+
+
+static async fetchMostPopularArticles(params?: {
+    period?: 'day' | 'week' | 'month' | 'all'
+    per_page?: number
+    page?: number
+  }) {
+    const defaultParams = {
+      period: 'week',
+      per_page: 10,
+      page: 1,
+      ...params
+    }
+
+    const query = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries({
+        orderby: 'popularity',
+        order: 'desc',
+        ...defaultParams,
+      }).map(([k, v]) => [k, String(v)])
+    )
+  )
+
+    // console.log(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
+    // const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed`)
+    return response.json()
+  }
+
+
+  static async fetchPopularArticlesByCategory(categoryId: number, params?: {
+    period?: 'day' | 'week' | 'month' | 'all'
+    per_page?: number
+    page?: number
+  }) {
+    const defaultParams = {
+      period: 'week',
+      per_page: 5,
+      page: 1,
+      ...params
+    }
+const query = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries({
+        categories: categoryId.toString(),
+        orderby: 'popularity',
+        order: 'desc',
+        ...defaultParams,
+      }).map(([k, v]) => [k, String(v)])
+    )
+  )
+
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
+
+    return response.json()
+  }
+
+
+
+   static async fetchPopularArticlesByCategorySlug(slug: string, params?: {
+    period?: 'day' | 'week' | 'month' | 'all'
+    per_page?: number
+    page?: number
+  }) {
+    const defaultParams = {
+      period: 'week',
+      per_page: 5,
+      page: 1,
+      ...params
+    }
+
+    const query = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries({
+        category_slug: slug,
+        orderby: 'popularity',
+        order: 'desc',
+        ...defaultParams,
+      }).map(([k, v]) => [k, String(v)])
+    )
+  )
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
+
+    return response.json()
+  }
+
+
   
 
   // Categories API
