@@ -5,6 +5,7 @@ import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
 import { useNewsData } from '@/hooks/useNewsData'
 import { HydrationBoundary } from '@tanstack/react-query'
+import SingleSkeleton from '@/components/Loading/SingleSkeleton'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -97,6 +98,7 @@ export default async function SingleNewsPage({ params }: PageProps) {
 
   return(
     <>
+    {/* <SingleSkeleton/> */}
      <SingleNewsContent slug={slug}/>
      </>
      )

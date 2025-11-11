@@ -1,6 +1,6 @@
 'use client'
 
-import NewsSkeleton from '../NewsSkeleton'
+
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
@@ -21,6 +21,8 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import { useResponsive } from '@/hooks/useResponsive'
+import SingleSkeleton from '../Loading/SingleSkeleton'
+import NewsSkeleton from '../NewsSkeleton'
 
 
 
@@ -44,7 +46,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     if (articleLoading) {
         return (
             <div className="min-h-screen d-flex align-items-center justify-content-center">
-                <NewsSkeleton />
+                <SingleSkeleton />
             </div>
         )
     }
@@ -190,6 +192,10 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                                   },
                                 }}
                               >
+                                {
+                                    relatedPostsLoading &&
+                                    <NewsSkeleton count={3}/>
+                                }
                                 {relatedPosts.map(article => (
                                     <SwiperSlide key={article.id || article.slug}>
                                         <DynamicArticleCard

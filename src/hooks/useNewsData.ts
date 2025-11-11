@@ -21,6 +21,11 @@ export function useNewsData(initialData?: {
   })
 
   // Featured articles (homepage)
+  // const featuredArticlesQuery = useQuery({
+  //   queryKey: queryKeys.articles.list({ featured: true }),
+  //   queryFn: () => ApiService.fetchArticles({ per_page: 15 }),
+  // })
+
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
     queryFn: () => ApiService.fetchArticles({ per_page: 15 }),

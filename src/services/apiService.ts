@@ -7,12 +7,91 @@ const API_CONFIG = {
   timeout: 10000, // 10 seconds
   retryAttempts: 2,
   cacheTimeout: 5 * 60 * 1000, // 5 minutes
+  maxCacheSize: 100,
 }
 
 // Request cache for deduplication
-const requestCache = new Map<string, { data: any; timestamp: number }>()
+// const requestCache = new Map<string, { data: any; timestamp: number }>()
 
 // Rate limiting
+// const rateLimit = {
+//   requests: new Map<string, number[]>(),
+//   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
+//     const now = Date.now()
+//     const windowStart = now - windowMs
+//     const requests = rateLimit.requests.get(key) || []
+//     const recentRequests = requests.filter(time => time > windowStart)
+    
+//     if (recentRequests.length >= maxRequests) {
+//       throw new Error('Rate limit exceeded')
+//     }
+    
+//     recentRequests.push(now)
+//     rateLimit.requests.set(key, recentRequests)
+//     return true
+//   }
+// }
+
+
+
+class LRUCache<T> {
+  private cache = new Map<string, { data: T; timestamp: number }>()
+  private readonly maxSize: number
+
+  constructor(maxSize: number = 100) {
+    this.maxSize = maxSize
+  }
+
+  get(key: string): { data: T; timestamp: number } | undefined {
+    const item = this.cache.get(key)
+    if (item) {
+      // Move to end (most recently used)
+      this.cache.delete(key)
+      this.cache.set(key, item)
+    }
+    return item
+  }
+
+  set(key: string, value: { data: T; timestamp: number }): void {
+    // Remove if exists (to re-add at end)
+    if (this.cache.has(key)) {
+      this.cache.delete(key)
+    }
+    
+    // Remove oldest if at capacity
+    if (this.cache.size >= this.maxSize) {
+      const firstKey = this.cache.keys().next().value
+      this.cache.delete(firstKey)
+    }
+    
+    this.cache.set(key, value)
+  }
+
+  has(key: string): boolean {
+    return this.cache.has(key)
+  }
+
+  delete(key: string): boolean {
+    return this.cache.delete(key)
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+
+  size(): number {
+    return this.cache.size
+  }
+
+  keys(): string[] {
+    return Array.from(this.cache.keys())
+  }
+}
+
+const requestCache = new LRUCache<any>(API_CONFIG.maxCacheSize)
+const inFlightRequests = new Map<string, Promise<any>>()
+
+
 const rateLimit = {
   requests: new Map<string, number[]>(),
   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
@@ -31,7 +110,21 @@ const rateLimit = {
   }
 }
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public isRetryable: boolean = false
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+
+
 export class ApiService {
+
   private static async fetchWithTimeout(url: string, options: RequestInit = {}, timeout = API_CONFIG.timeout) {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)

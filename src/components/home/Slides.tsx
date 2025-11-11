@@ -66,6 +66,7 @@ function Slides({
                             article={article}
                             showImage
                             imgHeight={60}
+                            titleStyle='small'
                             className='d-flex flex-row gap-3'
                         />
                     </SwiperSlide>

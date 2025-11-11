@@ -20,8 +20,8 @@ export function ThemedText({
   
   // Type-specific Bootstrap classes
   const typeClasses = {
-    small: 'fs-7 lh-sm fw-light', // fs-6 ≈ 12px, fw-light
-    smallBold: 'fs-7 lh-1 fw-medium',
+    small: 'small-txt lh-sm fw-medium', // fs-6 ≈ 12px, fw-light
+    smallBold: 'small-txt lh-1 fw-medium',
     default: 'fs-6 lh-sm fw-medium', // fs-5 ≈ 16px
     defaultItalic: 'fs-6 lh-sm fw-normal fst-italic',
     defaultSemiBold: 'fs-6 lh-base fw-semibold',
