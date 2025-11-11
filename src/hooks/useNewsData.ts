@@ -6,7 +6,12 @@ import { articleResponse, NewsItem } from '@/types/fetchData'
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-export function useNewsData() {
+export function useNewsData(initialData?: {
+  categories?: any[]
+  featuredArticles?: any
+  videos?: any[]
+  breakingNews?: any
+}) {
   const queryClient = useQueryClient()
 
   // Categories
@@ -204,7 +209,7 @@ export function useNewsData() {
 
   return {
     // Queries
-    categories: categoriesQuery.data || [],
+    categories: initialData?.categories || categoriesQuery.data || [],
     categoriesLoading: categoriesQuery.isLoading,
     categoriesError: categoriesQuery.error,
 

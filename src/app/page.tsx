@@ -1,9 +1,10 @@
 import { ApiService } from '@/services/apiService'
 import { Home } from './home/home'
 import { PrefetchHomeData } from './prefetch-home-data'
+import { cache } from 'react'
 
-// This will be automatically cached and deduped by React
-async function getHomeData() {
+// Use React cache to dedupe requests
+const getHomeData = cache(async () => {
   try {
     const [categories, featuredArticles, videos, breakingNews] = await Promise.all([
       ApiService.fetchCategories({ per_page: 100 }),
@@ -30,7 +31,7 @@ async function getHomeData() {
       breakingNews: { data: [], pagination: { currentPage: 1, totalPages: 0, hasNextPage: false } },
     }
   }
-}
+})
 
 export default async function HomePage() {
   const homeData = await getHomeData()

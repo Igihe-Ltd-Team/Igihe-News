@@ -1,6 +1,5 @@
 'use client'
 
-
 import AdManager from '@/components/ads/AdManager'
 import Categories from '@/components/home/Categories'
 import HomeMainSections from '@/components/home/HomeMainSections'
