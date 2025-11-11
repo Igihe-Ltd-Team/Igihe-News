@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { ThemedText } from '../ThemedText'
+import { useResponsive } from '@/hooks/useResponsive'
 
 function Languages() {
+    const { isMobile } = useResponsive()
     return (
         <ul className="language-list d-flex align-items-center gap-4 list-unstyled m-0">
             <li className='d-flex align-items-center gap-2'>
@@ -56,7 +58,10 @@ function Languages() {
                         <path fillRule="evenodd" clipRule="evenodd" d="M15.8669 5.48781C15.9623 5.48777 16.0568 5.50657 16.145 5.54315C16.2332 5.57972 16.3132 5.63334 16.3806 5.70093C16.448 5.76852 16.5014 5.84875 16.5377 5.93702C16.574 6.02529 16.5925 6.11987 16.5922 6.21531C16.5914 6.40833 16.5144 6.59321 16.3778 6.72957C16.2412 6.86594 16.0561 6.94271 15.8631 6.94312C15.6703 6.94164 15.4858 6.86421 15.3497 6.72762C15.2136 6.59102 15.1368 6.40628 15.1359 6.21344C15.1369 6.02035 15.2143 5.83551 15.3514 5.69947C15.4884 5.56343 15.6738 5.48731 15.8669 5.48781Z" fill="#E4BD01" />
                         <path d="M0 9.375H20V13.125H0V9.375Z" fill="#F9CB38" />
                     </svg>
-                    <ThemedText type='small'> Kinyarwanda</ThemedText>
+                {
+                    !isMobile && <ThemedText type='small'> Kinyarwanda</ThemedText>
+                }
+                    
                 </Link>
             </li>
 
@@ -145,8 +150,9 @@ function Languages() {
                             </clipPath>
                         </defs>
                     </svg>
-
-                    <ThemedText type='small'> English</ThemedText>
+{
+                    !isMobile && <ThemedText type='small'> English</ThemedText>
+                }
                 </Link>
             </li>
 
@@ -164,7 +170,9 @@ function Languages() {
                             </clipPath>
                         </defs>
                     </svg>
-                    <ThemedText type='small'> Franch</ThemedText>
+                    {
+                    !isMobile && <ThemedText type='small'> Franch</ThemedText>
+                }
                 </Link>
             </li>
 

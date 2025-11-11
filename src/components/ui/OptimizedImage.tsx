@@ -13,7 +13,7 @@ interface OptimizedImageProps {
   priority?: boolean
   className?: string
   sizes?: string
-  onLoad?: () => void
+  onLoad?: () => void,
 }
 
 export function OptimizedImage({
@@ -21,7 +21,6 @@ export function OptimizedImage({
   alt,
   width,
   height,
-  fill = false,
   priority = false,
   className,
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
@@ -44,7 +43,7 @@ export function OptimizedImage({
   const imageSrc = hasError ? '/images/placeholder.jpg' : src
 
   return (
-    <div className={'position-relative w-100'} 
+    <div className={`position-relative w-100 igihe-img ${className}`} 
     style={{
       minHeight:height,
       maxHeight:'100%',
@@ -56,12 +55,14 @@ export function OptimizedImage({
         fill
         priority={priority}
         sizes={sizes}
+        style={{objectFit:'cover'}}
         
         onLoad={handleLoad}
         onError={handleError}
         placeholder="blur"
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
       />
+
     </div>
   )
 }

@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react'
 import DynamicArticleCard from '../news/DynamicArticleCard'
-import { OptimizedImage } from '../ui/OptimizedImage'
 import { NewsItem } from '@/types/fetchData'
-import HeaderDivider from '../HeaderDivider'
 import TimeLine from '../ReUsable/TimeLine'
 import NewsSkeleton from '../NewsSkeleton'
 import AdManager from '../ads/AdManager'
+import { useResponsive } from '@/hooks/useResponsive'
 
 interface ArticlesProps {
     articles: NewsItem[]
 }
 
 export default function HomeMainSections({ articles }: ArticlesProps) {
+    const { isMobile } = useResponsive()
     const { mainArticle, timeLineNews, asideNews } = useMemo(() => ({
         mainArticle: articles[0],
         timeLineNews: articles.slice(1, 5),
@@ -43,19 +43,25 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
                 </div>
 
                 <div className="col-xl-3 col-lg-6 col-md-6">
+                    
                     <AdManager
                         position="home-section-1"
                         priority={true}
                         className="mb-2"
                     />
-                    
+                    <div style={{paddingTop:isMobile?'15px':''}}>
                     {asideNews.map((article) => (
                         <DynamicArticleCard 
                             key={article.id || article.slug}
                             article={article}
                             bottomBorder 
+
+                            showImage={isMobile}
+                            imgHeight={40}
+                            className='d-flex flex-row gap-3'
                         />
                     ))}
+                    </div>
                 </div>
             </div>
         </div>

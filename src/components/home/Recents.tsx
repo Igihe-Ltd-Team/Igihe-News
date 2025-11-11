@@ -9,6 +9,7 @@ import { OptimizedImage } from '../ui/OptimizedImage'
 import { ThemedText } from '../ThemedText'
 import { Col, Row } from 'react-bootstrap'
 import AdManager from '../ads/AdManager'
+import { useResponsive } from '@/hooks/useResponsive'
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -24,6 +25,8 @@ const NewsSection = React.memo(({
     title: string
     articles?: NewsItem[]
 }) => {
+
+    const { isMobile } = useResponsive()
     const { mainArticle, subArticles, listArticles } = useMemo(() => ({
         mainArticle: articles?.[0],
         subArticles: articles?.slice(1, 3) || [],
@@ -42,7 +45,7 @@ const NewsSection = React.memo(({
                             key={mainArticle.id || mainArticle.slug}
                             article={mainArticle}
                             showImage
-                            priority={false} // Only first section should be priority
+                            priority={false}
                             imgHeight={300}
                         />
                     )}
@@ -69,6 +72,10 @@ const NewsSection = React.memo(({
                             article={article}
                             bottomBorder
                             priority={false}
+
+                            showImage={isMobile}
+                            imgHeight={40}
+                            className='d-flex flex-row gap-3'
                         />
                     ))}
                 </div>

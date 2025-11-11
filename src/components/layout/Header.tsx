@@ -8,6 +8,7 @@ import ThemeSwitcher from '../ui/ThemeSwitcher';
 import { Col, Row } from 'react-bootstrap';
 import { useNewsData } from '@/hooks/useNewsData';
 import AdManager from '../ads/AdManager';
+import { useResponsive } from '@/hooks/useResponsive';
 
 
 const menus = [
@@ -29,7 +30,7 @@ const menus = [
 
 
 export default function Header() {
-
+const { isMobile } = useResponsive()
 
     const {
         categories
@@ -111,7 +112,9 @@ export default function Header() {
             <div className="overlay"></div>
             <div className="container p-2 z-1 position-relative">
                 {/* Top section with adds */}
-                <Row>
+                {
+                    !isMobile &&
+                    <Row>
                     <Col>
                         <AdManager
                             position="header-landscape-ad-1"
@@ -125,9 +128,11 @@ export default function Header() {
                             className="mb-2"
                         /></Col>
                 </Row>
+                }
+                
 
                 {/* Langauge switch section */}
-                <div className="row mx-1 align-items-center justify-content-between bg-white">
+                <div className="d-flex mx-1 align-items-center justify-content-between bg-white px-4">
                     <div className="col-md-8 lang-switcher d-flex align-items-center">
                         <Languages />
                     </div>
@@ -141,12 +146,11 @@ export default function Header() {
                     </FormGroup> */}
 
                     </div>
-
                 </div>
 
                 {/* Logo and banner */}
                 <div className="row flex align-items-center py-3 justify-content-between">
-                    <div className="col-md-5 site-logo-wrapper">
+                    <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
                         <Link href="#">
                             <span className='site-logo'>
                                 <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -168,7 +172,23 @@ export default function Header() {
 
                             </span>
                         </Link>
+
+{
+    isMobile && 
+    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+                                <span className="navbar-toggler-icon"> 
+                                    <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
+                                        <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
+                                        <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
+                                    </svg>
+                                </span>
+                            </button>
+}
+                        
                     </div>
+                    {
+                        !isMobile &&
                     <Col md={7}>
                         <AdManager
                             position="header-landscape-ad-2"
@@ -176,18 +196,22 @@ export default function Header() {
                             className="mb-2"
                         />
                     </Col>
+                    }
                 </div>
 
                 {/* Menus section */}
+                { !isMobile &&
                 <div className="igihe-nav-menu">
                     <nav className="navbar navbar-expand-lg">
                         <div>
                             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
-                                <span className="navbar-toggler-icon"> <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
-                                    <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
-                                    <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
-                                </svg></span>
+                                <span className="navbar-toggler-icon"> 
+                                    <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
+                                        <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
+                                        <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
+                                    </svg>
+                                </span>
                             </button>
                             <div className="collapse navbar-collapse gap-3" id="navbarScroll d-flex justify-content-between">
 
@@ -233,6 +257,7 @@ export default function Header() {
                         </div>
                     </nav>
                 </div>
+                }
             </div>
         </div>
     )

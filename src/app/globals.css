@@ -32,7 +32,7 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
-  min-height: 301.4px
+  /* min-height: 301.4px */
 } 
 
 /* Menu section styles */

@@ -2,8 +2,6 @@
 
 import React from 'react'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
-// import { ShareIcon } from '@/components/ui/Icons'
-// import { useUIStore } from '@/stores/uiStore'
 import { formatDate, getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils'
 import { NewsItem } from '@/types/fetchData'
 import { ThemedText } from '../ThemedText'
@@ -25,7 +23,8 @@ interface ArticleCardProps {
   titleStyle?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold' | 'size20' | 'italic18',
   showDate?: boolean,
   numbers?: string,
-  leftNumber?: string
+  leftNumber?: string,
+  mobileImgHeight?: number
 }
 
 
@@ -61,6 +60,7 @@ function DynamicArticleCard({
           href={`/news/${article.slug}`}
           className="text-decoration-none text-reset"
           style={{flex:1}}
+          aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
         >
           <OptimizedImage
             src={featuredImage || '/images/placeholder.jpg'}
@@ -110,6 +110,7 @@ function DynamicArticleCard({
           <Link
             href={`/news/${article.slug}`}
             className="text-decoration-none text-reset"
+            aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           >
             <div className='d-flex'>
               <ThemedText type={titleStyle}>

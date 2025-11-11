@@ -6,13 +6,15 @@ import { useInView } from 'react-intersection-observer'
 import HeaderDivider from '../HeaderDivider'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import NewsSkeleton from '../NewsSkeleton'
+import { useResponsive } from '@/hooks/useResponsive'
 
 interface ArticleListProps {
     categoryId?: number,
     categoryName?:string
 }
 export default function NewsByCategory({ categoryId,categoryName }: ArticleListProps) {
-    const { ref, inView } = useInView()
+    const { isMobile, isTablet, deviceType, width } = useResponsive()
+    const { inView } = useInView()
     const { useCategoryArticles } = useNewsData()
 
     const {
@@ -43,7 +45,7 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
                     showImage
                     showHeader
                     priority
-                    imgHeight={185}
+                    imgHeight={isMobile ? 250 : 185}
                     titleStyle={'defaultSemiBold'}
                     bottomBorder
                 />
@@ -55,6 +57,10 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
                     article={article}
                     priority
                     bottomBorder
+                    showImage={isMobile}
+                    imgHeight={40}
+                    className='d-flex flex-row gap-3'
+
                 />
             ))}
         </div>

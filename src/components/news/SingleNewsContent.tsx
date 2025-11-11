@@ -20,6 +20,7 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
+import { useResponsive } from '@/hooks/useResponsive'
 
 
 
@@ -29,6 +30,8 @@ interface SingleNewsContentProps {
 }
 
 export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
+    const { isMobile, isTablet, deviceType, width } = useResponsive()
+    
     const { useArticleDetails } = useNewsData()
     const {
         article,
@@ -91,9 +94,9 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                     <Col md="8">
                         <OptimizedImage
                             src={featuredImage || '/images/placeholder.jpg'}
-                            alt={article.title.rendered}
+                            alt={stripHtml(article.title.rendered)}
                             fill
-                            height={554}
+                            height={isMobile ? 300: isTablet ? 400:554}
                             className="object-cover"
                         />
                         {
