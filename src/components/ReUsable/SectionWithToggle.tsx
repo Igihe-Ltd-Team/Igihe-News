@@ -1,52 +1,23 @@
 import React from 'react';
 import { useState } from "react";
 import { ThemedText } from '../ThemedText';
-import { formatDate, getCategoryName } from '@/lib/utils';
+import { formatDate, getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils';
 import { OptimizedImage } from '../ui/OptimizedImage';
+import { NewsItem } from '@/types/fetchData';
 interface SectionProps {
     title?: string,
     titleBG?: string,
     showImgs?: boolean,
-    showDate?: boolean
+    showDate?: boolean,
+    articles?: NewsItem[]
 }
-const advertorials = [
-    {
-        id: 1,
-        image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400&h=300&fit=crop",
-        title: "Discover Rwanda: Thrilling Adventures and Unforgettable Experiences Await You",
-        timeAgo: "5 hours ago"
-    },
-    {
-        id: 2,
-        image: "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=400&h=300&fit=crop",
-        title: "Exploring Rwanda: Exciting Activities and Cultural Treasures",
-        timeAgo: "5 hours ago"
-    },
-    {
-        id: 3,
-        image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=400&h=300&fit=crop",
-        title: "Rwanda Revealed: Engaging Activities and Breathtaking Landscapes",
-        timeAgo: "5 hours ago"
-    },
-    {
-        id: 4,
-        image: "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=400&h=300&fit=crop",
-        title: "Rwanda Adventures: Exciting Activities and Stunning Scenery",
-        timeAgo: "5 hours ago"
-    },
-    {
-        id: 5,
-        image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=300&fit=crop",
-        title: "Rwanda's Hidden Gems: Activities and Attractions for Everyone",
-        timeAgo: "5 hours ago"
-    }
-];
 
-const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate }: SectionProps) => {
+
+const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, articles = [] }: SectionProps) => {
     const [expanded, setExpanded] = useState(false);
 
 
-    const visiblePosts = expanded ? advertorials : advertorials.slice(0, 4);
+    const visiblePosts = expanded ? articles : articles.slice(0, 4);
 
     return (
         <div className="card rounded-0 border-0" style={{ backgroundColor: '#F5F6F799' }}>
@@ -83,8 +54,8 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate }: S
                                 showImgs &&
                                 <div className="col-4">
                                     <OptimizedImage
-                                        src={item.image || '/images/placeholder.jpg'}
-                                        alt={item.title}
+                                        src={getFeaturedImage(item) || '/images/placeholder.jpg'}
+                                        alt={stripHtml(item.title.rendered)}
                                         fill
                                         height={100}
                                         className="object-cover"
@@ -98,19 +69,18 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate }: S
                                     <div className="mb-2">
                                         <small style={{ color: '#999' }}>
                                             <ThemedText className="me-3" type='small'>
-                                                {/* {
-                                      formatDate(article.date)
-                                    } */} 1234 fd
+                                                {
+                                                    formatDate(item.date)
+                                                }
                                             </ThemedText>
                                             <ThemedText type='small'>
-                                                {/* {getCategoryName(article)} */}
-                                                fvddcsvfdsc
+                                                {getCategoryName(item)}
                                             </ThemedText>
                                         </small>
                                     </div>
                                 }
                                 <ThemedText>
-                                    {item.title}
+                                    {stripHtml(item.title.rendered)}
                                 </ThemedText>
                             </div>
                         </div>

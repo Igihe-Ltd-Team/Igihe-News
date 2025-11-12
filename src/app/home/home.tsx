@@ -8,7 +8,7 @@ import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useNewsData } from '@/hooks/useNewsData'
 import { useUIStore } from '@/stores/uiStore'
-import React, { useMemo } from 'react'
+import React, { Suspense, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 
 
@@ -34,76 +34,90 @@ export function Home() {
     africaArticlesLoading,
 
     entertainmentArticles,
-    entertainmentArticlesLoading
+    entertainmentArticlesLoading,
+
+    featuredAdvertorial,
+    featuredAdvertorialLoading
 
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
 
 
   const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
-          sliderFeaturedArticles: featuredArticles.slice(0, 8),
-          otherFeaturedArticle: featuredArticles.slice(9, 20),
-      }), [featuredArticles])
-
-
-  // console.log('featuredArticles',featuredArticles)
+    sliderFeaturedArticles: featuredArticles.slice(0, 8),
+    otherFeaturedArticle: featuredArticles.slice(9, 20),
+  }), [featuredArticles])
 
   if (categoriesLoading && featuredArticlesLoading) {
     return <NewsSkeleton />
   }
-
+// console.log()
   return (
     <>
       <Container>
         <Slides articles={sliderFeaturedArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
       </Container>
-      <HomeMainSections 
-        articles={HighlightArticles} />
-      <Recents
-        latests={latestArticles}
-        popular={popularArticles}
-        featured={otherFeaturedArticle}
-        advertorials={featuredArticles}
-        africaArticles={africaArticles}
-        entertainment={entertainmentArticles}
-      />
-      <Container>
-        <Row>
-          <Col>
-            <AdManager
-              position="header-landscape-ad-1"
-              priority={true}
-              className="mb-2"
-            /></Col>
-          <Col>
-            <AdManager
-              position="header-landscape-ad-2"
-              priority={true}
-              className="mb-2"
-            />
-          </Col>
-        </Row>
-      </Container>
-      <Categories categories={categories} />
-      <Container>
-        <Row>
-          <Col>
-            <AdManager
-              position="header-landscape-ad-1"
-              priority={true}
-              className="mb-2"
-            />
-          </Col>
-          <Col>
-            <AdManager
-              position="header-landscape-ad-2"
-              priority={true}
-              className="mb-2"
-            /></Col>
-        </Row>
-      </Container>
 
+      <Suspense fallback={<NewsSkeleton />}>
+        <HomeMainSections
+          articles={HighlightArticles} />
+      </Suspense>
+      <Suspense fallback={<NewsSkeleton />}>
+        <Recents
+          latests={latestArticles}
+          popular={popularArticles}
+          featured={otherFeaturedArticle}
+          advertorials={featuredArticles}
+          africaArticles={africaArticles}
+          entertainment={entertainmentArticles}
+          advertorial={featuredAdvertorial}
+        />
+      </Suspense>
+      <Suspense fallback={null}>
+        <Container>
+          <Row>
+            <Col>
+              <AdManager
+                position="header-landscape-ad-1"
+                priority={true}
+                className="mb-2"
+              /></Col>
+            <Col>
+              <AdManager
+                position="header-landscape-ad-2"
+                priority={true}
+                className="mb-2"
+              />
+            </Col>
+          </Row>
+        </Container>
+      </Suspense>
+      <Suspense fallback={<NewsSkeleton />}>
+        <Categories categories={categories} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <Container>
+          <Row>
+            <Col>
+              <AdManager
+                position="header-landscape-ad-1"
+                priority={false}
+                className="mb-2"
+              />
+            </Col>
+            <Col>
+              <AdManager
+                position="header-landscape-ad-2"
+                priority={false}
+                className="mb-2"
+              /></Col>
+          </Row>
+        </Container>
+      </Suspense>
       <Categories categories={categories} />
+      <Suspense fallback={<NewsSkeleton />}>
+        <Categories categories={categories} />
+      </Suspense>
     </>
   )
 }

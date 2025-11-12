@@ -32,11 +32,11 @@ export const queryKeys = {
     highlightTagArticles: (tagId: number) => ['articles', 'highlightTag', tagId] as const,
     africa: () => ['articles', 'africa'] as const,
     entertainment: () => ['articles', 'entertainment'] as const,
-    
-
-
   },
-
+  advertorial:{
+    all:['advertorial'] as const,
+    lists:() => [...queryKeys.advertorial.all, 'list'] as const
+  },
 
 
   videos: {
