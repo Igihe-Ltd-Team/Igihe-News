@@ -164,7 +164,7 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
                                 className="mb-2"
                             /></Col>
                     </Row>
-                    <NewsSection title="Great Lakes Region" articles={africaArticles} />
+                    <NewsSection title="Africa" articles={africaArticles} />
                     <Row>
                         <Col>
                             <AdManager

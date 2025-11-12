@@ -52,7 +52,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       ApiService.fetchArticles({ per_page: 5, orderby: 'date' }),
       
       // Africa category articles (adjust category slug as needed)
-      ApiService.fetchPostsByCategorySlug('great-lakes-region', { per_page: 11 }),
+      ApiService.fetchPostsByCategorySlug('africa', { per_page: 11 }),
       
       // Entertainment articles
       ApiService.fetchPostsByCategorySlug('entertainment', { per_page: 11 }),

@@ -57,7 +57,7 @@ export function useNewsData() {
   const africaArticlesQuery = useQuery({
     queryKey: queryKeys.articles.africa(),
     queryFn: () =>
-      ApiService.fetchPostsByCategorySlug('great-lakes-region', { per_page: 11 }).then(
+      ApiService.fetchPostsByCategorySlug('africa', { per_page: 11 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
