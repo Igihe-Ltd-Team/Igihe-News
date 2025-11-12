@@ -8,7 +8,7 @@ import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useNewsData } from '@/hooks/useNewsData'
 import { useUIStore } from '@/stores/uiStore'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 
 
@@ -23,9 +23,30 @@ export function Home() {
     prefetchCategory,
     popularArticles,
     popularArticlesLoading,
+
+    HighlightArticles,
+    HighlightArticlesLoading,
+
+    latestArticles,
+    latestArticlesLoading,
+
+    africaArticles,
+    africaArticlesLoading,
+
+    entertainmentArticles,
+    entertainmentArticlesLoading
+
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
 
+
+  const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
+          sliderFeaturedArticles: featuredArticles.slice(0, 8),
+          otherFeaturedArticle: featuredArticles.slice(9, 20),
+      }), [featuredArticles])
+
+
+  // console.log('featuredArticles',featuredArticles)
 
   if (categoriesLoading && featuredArticlesLoading) {
     return <NewsSkeleton />
@@ -34,14 +55,17 @@ export function Home() {
   return (
     <>
       <Container>
-        <Slides articles={featuredArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+        <Slides articles={sliderFeaturedArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
       </Container>
-      <HomeMainSections articles={featuredArticles} />
+      <HomeMainSections 
+        articles={HighlightArticles} />
       <Recents
-        latests={featuredArticles}
+        latests={latestArticles}
         popular={popularArticles}
-        featured={featuredArticles}
+        featured={otherFeaturedArticle}
         advertorials={featuredArticles}
+        africaArticles={africaArticles}
+        entertainment={entertainmentArticles}
       />
       <Container>
         <Row>

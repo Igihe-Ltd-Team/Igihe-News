@@ -5,6 +5,7 @@ import TimeLine from '../ReUsable/TimeLine'
 import NewsSkeleton from '../NewsSkeleton'
 import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
+import SingleSkeleton from '../Loading/SingleSkeleton'
 
 interface ArticlesProps {
     articles: NewsItem[]
@@ -19,7 +20,7 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
     }), [articles])
 
     if (!articles?.length) {
-        return <NewsSkeleton/>
+        return <SingleSkeleton/>
     }
 
     return (

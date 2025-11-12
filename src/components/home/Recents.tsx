@@ -17,6 +17,8 @@ interface RecentProps {
     popular?: NewsItem[]
     featured?: NewsItem[]
     advertorials?: NewsItem[]
+    africaArticles?:NewsItem[]
+    entertainment?:NewsItem[]
 }
 
 const NewsSection = React.memo(({
@@ -87,15 +89,17 @@ const NewsSection = React.memo(({
 
 NewsSection.displayName = 'NewsSection'
 
-export default function Recents({ latests, featured, popular }: RecentProps) {
+export default function Recents({ latests, featured, popular,africaArticles,entertainment }: RecentProps) {
     const {
+        mainLatest,
         latestsSidebar,
-        featuredMain,
+        // featuredMain,
         featuredTimeline
     } = useMemo(() => ({
-        latestsSidebar: latests?.slice(0, 5) || [],
-        featuredMain: featured?.[0],
-        featuredTimeline: featured?.slice(1, 9) || []
+        mainLatest:latests?.[0],
+        latestsSidebar: latests?.slice(1, 6) || [],
+        // featuredMain: featured?.[0],
+        featuredTimeline: featured?.slice(0, 9) || [],
     }), [latests, featured])
 
     if (!latestsSidebar?.length) {
@@ -127,10 +131,10 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                         </div>
                         <div className="col-xl-8 col-lg-6 col-md-6">
                             <div className="py-4">
-                                {featuredMain && (
+                                {mainLatest && (
                                     <DynamicArticleCard
-                                        key={featuredMain.id || featuredMain.slug}
-                                        article={featuredMain}
+                                        key={mainLatest.id || mainLatest.slug}
+                                        article={mainLatest}
                                         showImage
                                         showHeader
                                         priority={true}
@@ -158,7 +162,7 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                                 className="mb-2"
                             /></Col>
                     </Row>
-                    <NewsSection title="Great Lakes Region" articles={featured} />
+                    <NewsSection title="Great Lakes Region" articles={africaArticles} />
                     <Row>
                         <Col>
                             <AdManager
@@ -167,7 +171,7 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                                 className="mb-2"
                             /></Col>
                     </Row>
-                    <NewsSection title="Entertainment" articles={featured} />
+                    <NewsSection title="Entertainment" articles={entertainment} />
                     <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
                         <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
                         <AdManager

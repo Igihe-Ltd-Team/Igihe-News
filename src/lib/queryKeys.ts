@@ -28,6 +28,13 @@ export const queryKeys = {
     trending: () => ['articles', 'trending'],
 
 
+    latest: () => ['articles', 'latest'] as const,
+    highlightTagArticles: (tagId: number) => ['articles', 'highlightTag', tagId] as const,
+    africa: () => ['articles', 'africa'] as const,
+    entertainment: () => ['articles', 'entertainment'] as const,
+    
+
+
   },
 
 

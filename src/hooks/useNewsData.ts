@@ -2,15 +2,21 @@
 
 import { queryKeys } from '@/lib/queryKeys'
 import { ApiService } from '@/services/apiService'
-import { articleResponse, NewsItem } from '@/types/fetchData'
+import { articleResponse, Category, NewsItem } from '@/types/fetchData'
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 export function useNewsData(initialData?: {
-  categories?: any[]
-  featuredArticles?: any
-  videos?: any[]
-  breakingNews?: any
+  categories: Category[]
+      featuredArticles: NewsItem[]
+      popularArticles: NewsItem[]
+      highlightTagArticles: NewsItem[]
+      latestArticles: NewsItem[]
+      africaArticles: NewsItem[]
+      EntertainmentArticles: NewsItem[]
+      videos: NewsItem[]
+      breakingNews: NewsItem[]
+
 }) {
   const queryClient = useQueryClient()
 
@@ -25,6 +31,39 @@ export function useNewsData(initialData?: {
   //   queryKey: queryKeys.articles.list({ featured: true }),
   //   queryFn: () => ApiService.fetchArticles({ per_page: 15 }),
   // })
+
+
+  const highlightTagArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.highlightTagArticles(39),
+    queryFn: () => ApiService.fetchArticles({ tags: [39], per_page: 7 }).then(res => res.data),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const latestArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.latest(),
+    queryFn: () => ApiService.fetchArticles({ per_page: 6 }).then(res => res.data),
+    staleTime: 2 * 60 * 1000,
+  })
+
+  const africaArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.africa(),
+    queryFn: () => ApiService.fetchPostsByCategorySlug('great-lakes-region', { per_page: 11 }).then(res => res?.data || []),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const entertainmentArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.entertainment(),
+    queryFn: () => ApiService.fetchPostsByCategorySlug('entertainment', { per_page: 11 }).then(res => res?.data || []),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const featuredArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.list({ featured: true }),
+    queryFn: () => ApiService.fetchArticles({ tags: [39], per_page: 20 }).then(res => res?.data || []),
+    staleTime: 5 * 60 * 1000,
+    // queryFn: () => ApiService.fetchArticles({ per_page: 20 }),
+  })
+
 
 
   const popularArticlesQuery = useQuery({
@@ -59,10 +98,7 @@ export function useNewsData(initialData?: {
   }
 
 
-  const featuredArticlesQuery = useQuery({
-    queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ per_page: 15 }),
-  })
+  
 
   // Videos
   const videosQuery = useQuery({
@@ -251,7 +287,7 @@ export function useNewsData(initialData?: {
     categoriesLoading: categoriesQuery.isLoading,
     categoriesError: categoriesQuery.error,
 
-    featuredArticles: featuredArticlesQuery.data?.data || [],
+    featuredArticles: initialData?.featuredArticles || featuredArticlesQuery.data || [],
     featuredArticlesLoading: featuredArticlesQuery.isLoading,
 
     videos: videosQuery.data || [],
@@ -279,6 +315,19 @@ export function useNewsData(initialData?: {
     // Trending articles
     trendingArticles: trendingArticlesQuery.data || [],
     trendingArticlesLoading: trendingArticlesQuery.isLoading,
+
+    HighlightArticles: initialData?.highlightTagArticles || highlightTagArticlesQuery.data || [],
+    HighlightArticlesLoading:highlightTagArticlesQuery.isLoading,
+
+    latestArticles: initialData?.latestArticles || latestArticlesQuery.data || [],
+    latestArticlesLoading:latestArticlesQuery.isLoading,
+
+    africaArticles: initialData?.africaArticles || africaArticlesQuery.data || [],
+    africaArticlesLoading: africaArticlesQuery.isLoading,
+
+
+    entertainmentArticles: initialData?.EntertainmentArticles || entertainmentArticlesQuery.data || [],
+    entertainmentArticlesLoading: entertainmentArticlesQuery.isLoading,
 
     // Methods
     usePopularByCategory,
