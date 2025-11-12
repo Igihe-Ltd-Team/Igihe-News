@@ -63,7 +63,7 @@ export function Home() {
 
       <Suspense fallback={<NewsSkeleton />}>
         <HomeMainSections
-          articles={HighlightArticles} />
+          articles={highlightArticles} />
       </Suspense>
       <Suspense fallback={<NewsSkeleton />}>
         <Recents
