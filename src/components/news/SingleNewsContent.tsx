@@ -23,6 +23,9 @@ import 'swiper/css/pagination'
 import { useResponsive } from '@/hooks/useResponsive'
 import SingleSkeleton from '../Loading/SingleSkeleton'
 import NewsSkeleton from '../NewsSkeleton'
+import { useGemini } from '@/hooks/useGemini'
+import { useState } from 'react'
+import AIChatButton from './AIChatButton'
 
 
 
@@ -33,6 +36,7 @@ interface SingleNewsContentProps {
 
 export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
+   
     
     const { useArticleDetails } = useNewsData()
     const {
@@ -101,6 +105,9 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                             height={isMobile ? 300: isTablet ? 400:554}
                             className="object-cover"
                         />
+
+
+
                         {
                             article?.excerpt?.rendered &&
                             <div className='excerpt-section'>
@@ -117,46 +124,8 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                             }}
                             dangerouslySetInnerHTML={{ __html: article?.content?.rendered || '' }}
                         />
-                        {/* {post?.content?.rendered && (
-                            <div>
-                                <ThemedText style={{ whiteSpace: 'pre-wrap' }}>
-                                    {stripHtml(post?.content?.rendered)}
-                                </ThemedText>
-                            </div>
-                        )} */}
-
-
-                        {/* {embeddedYouTubeId && (
-                            <iframe
-                                src={`https://www.youtube.com/embed/${embeddedYouTubeId}`}
-                                frameBorder="0"
-                                allowFullScreen
-                            />
-                        )}
-
-                        {contentImages.map((imageData, index) => (
-                            <div key={index} className="pt-2">
-                                <div className="text-center">
-                                    <div className="position-relative overflow-hidden rounded-4">
-                                        <OptimizedImage
-                                            src={imageData?.url || '/images/placeholder.jpg'}
-                                            alt={imageData?.alt || "Post image"}
-                                            fill
-                                            height={554}
-                                            className="object-cover img-fluid rounded-4"
-                                        />
-                                    </div>
-
-                                    {(imageData?.caption || imageData?.alt) && (
-                                        <div className="mt-2 px-3 py-2 rounded-3">
-                                            <ThemedText type='small' className={`text-muted d-block`}>
-                                                {imageData?.caption || imageData?.alt}
-                                            </ThemedText>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))} */}
+                        <AIChatButton article={article} />
+                        
 
                         <div className='pt-4 g-3'>
                             <HeaderDivider title="Related Articles" />
