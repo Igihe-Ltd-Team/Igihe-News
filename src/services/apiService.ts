@@ -798,18 +798,18 @@ static async fetchCategories(params?: {
   }
 
   // Get cache statistics (for monitoring)
-  static getCacheStats() {
-    const now = Date.now()
-    const entries = Array.from(requestCache.entries())
+  // static getCacheStats() {
+  //   const now = Date.now()
+  //   const entries = Array.from(requestCache.entries())
     
-    return {
-      totalEntries: entries.length,
-      expiredEntries: entries.filter(([_, value]) => 
-        (now - value.timestamp) > API_CONFIG.cacheTimeout
-      ).length,
-      memoryUsage: JSON.stringify(entries).length,
-    }
-  }
+  //   return {
+  //     totalEntries: entries.length,
+  //     expiredEntries: entries.filter(([_, value]) => 
+  //       (now - value.timestamp) > API_CONFIG.cacheTimeout
+  //     ).length,
+  //     memoryUsage: JSON.stringify(entries).length,
+  //   }
+  // }
 
 
   static async fetchPopularCategories(limit: number = 10): Promise<Category[]> {
