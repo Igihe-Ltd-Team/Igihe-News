@@ -64,7 +64,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         
         // Latest articles
         queryClient.setQueryData(
-          queryKeys.articles.list({ orderby: 'date' }),
+          queryKeys.articles.latest(),
           { data: initialData.latestArticles, pagination: {} }
         )
         
@@ -83,7 +83,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         // Africa articles (by category)
         if (initialData.africaArticles?.length > 0) {
           queryClient.setQueryData(
-            queryKeys.articles.list({ categories: ['africa'] }),
+            queryKeys.articles.africa(),
             { data: initialData.africaArticles, pagination: {} }
           )
         }
@@ -91,7 +91,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         // Entertainment articles
         if (initialData.EntertainmentArticles?.length > 0) {
           queryClient.setQueryData(
-            queryKeys.articles.list({ categories: ['entertainment'] }),
+            queryKeys.articles.entertainment(),
             { data: initialData.EntertainmentArticles, pagination: {} }
           )
         }
@@ -99,7 +99,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         // Highlight tag articles
         if (initialData.highlightTagArticles?.length > 0) {
           queryClient.setQueryData(
-            queryKeys.articles.list({ tags: ['highlight'] }),
+            queryKeys.articles.highlightTagArticles(39),
             { data: initialData.highlightTagArticles, pagination: {} }
           )
         }

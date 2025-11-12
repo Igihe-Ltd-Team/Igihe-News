@@ -24,8 +24,8 @@ export function Home() {
     popularArticles,
     popularArticlesLoading,
 
-    HighlightArticles,
-    HighlightArticlesLoading,
+    highlightArticles,
+    highlightArticlesLoading,
 
     latestArticles,
     latestArticlesLoading,

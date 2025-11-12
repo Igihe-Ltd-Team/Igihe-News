@@ -26,37 +26,39 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       popularArticles,
       latestResponse,
       videos,
+      highlightResponse,
       breakingResponse,
       africaResponse,
       entertainmentResponse,
-      highlightResponse
+      // advertoralsResponse,
+      // announcementResponse
     ] = await Promise.allSettled([
       // Categories
       ApiService.fetchCategories({ per_page: 100 }),
       
       // Featured articles
-      ApiService.fetchArticles({ per_page: 15, orderby: 'date' }),
-      
+      ApiService.fetchArticles({ tags: [39], per_page: 20 }),
       // Popular articles
       ApiService.fetchMostPopularArticles({ period: 'week', per_page: 10 }),
       
       // Latest articles
-      ApiService.fetchArticles({ per_page: 20, orderby: 'date' }),
+      ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
       
       // Videos
       ApiService.fetchVideos({ per_page: 21 }),
-      
+      // highlight
+      ApiService.fetchArticles({ tags: [39], per_page: 15, orderby: 'date' }),
       // Breaking news (customize based on your tag/category structure)
       ApiService.fetchArticles({ per_page: 5, orderby: 'date' }),
       
       // Africa category articles (adjust category slug as needed)
-      ApiService.fetchPostsByCategorySlug('africa', { per_page: 10 }),
+      ApiService.fetchPostsByCategorySlug('great-lakes-region', { per_page: 11 }),
       
       // Entertainment articles
-      ApiService.fetchPostsByCategorySlug('entertainment', { per_page: 10 }),
-      
-      // Highlight tag articles (you might need to adjust this based on your API)
-      ApiService.fetchArticles({tags:[39], per_page: 15, orderby: 'date' })
+      ApiService.fetchPostsByCategorySlug('entertainment', { per_page: 11 }),
+
+      // ApiService.fetchAdvertorals(),
+      // ApiService.fetchAnnouncement()
     ])
 
     return {
@@ -68,7 +70,9 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       breakingNews: breakingResponse.status === 'fulfilled' ? breakingResponse.value.data : [],
       africaArticles: africaResponse.status === 'fulfilled' && africaResponse.value ? africaResponse.value.data : [],
       EntertainmentArticles: entertainmentResponse.status === 'fulfilled' && entertainmentResponse.value ? entertainmentResponse.value.data : [],
-      highlightTagArticles: highlightResponse.status === 'fulfilled' ? highlightResponse.value.data : []
+      highlightTagArticles: highlightResponse.status === 'fulfilled' ? highlightResponse.value.data : [],
+      // advertoralsArticles:advertoralsResponse.status === 'fulfilled' ? advertoralsResponse.value : [], 
+      // announcementArticles:announcementResponse.status === 'fulfilled' ? announcementResponse.value : [], 
     }
   } catch (error) {
     console.error('Error prefetching home data:', error)
@@ -84,6 +88,8 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       EntertainmentArticles: [],
       videos: [],
       breakingNews: []
+      // advertoralsArticles:[]
+      // announcementArticles:[]
     }
   }
 }
