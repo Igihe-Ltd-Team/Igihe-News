@@ -1035,6 +1035,26 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
     }
   }
 
+
+
+  static async fetchAnnouncement(): Promise<NewsItem[]> {
+    try {
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/announcement?_embed`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const ads = await response.json()
+      return ads || []
+    } catch (error) {
+      console.error('Error fetching advertisements:', error)
+      return []
+    }
+  }
+
+
+
+  
   
   
   

@@ -20,6 +20,7 @@ interface RecentProps {
     africaArticles?:NewsItem[]
     entertainment?:NewsItem[]
     advertorial?:NewsItem[]
+    announcement?:NewsItem[]
 }
 
 const NewsSection = React.memo(({
@@ -90,7 +91,7 @@ const NewsSection = React.memo(({
 
 NewsSection.displayName = 'NewsSection'
 
-export default function Recents({ latests, featured, popular,africaArticles,entertainment,advertorial }: RecentProps) {
+export default function Recents({ latests, featured, popular,africaArticles,entertainment,advertorial,announcement }: RecentProps) {
     const {
         mainLatest,
         latestsSidebar,
@@ -190,7 +191,7 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
                         <SectionWithToggle title='Advertorials' articles={advertorial} showImgs showDate titleBG='#1176BB' />
                     </div>
                     <div className='pt-3'>
-                        <SectionWithToggle title='Announcements' articles={[]} titleBG='#282F2F' />
+                        <SectionWithToggle title='Announcements' articles={announcement} titleBG='#282F2F' />
                     </div>
                     <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
                         <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>

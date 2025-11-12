@@ -71,6 +71,14 @@ export function useNewsData(initialData?: {
     // queryFn: () => ApiService.fetchArticles({ per_page: 20 }),
   })
 
+  const featuredAnnouncementQuery = useQuery({
+    queryKey: queryKeys.announcement.lists(),
+    queryFn: () => ApiService.fetchAnnouncement().then(res => res || []),
+    staleTime: 10 * 60 * 1000,
+    // queryFn: () => ApiService.fetchArticles({ per_page: 20 }),
+  })
+
+  
 
 
   const popularArticlesQuery = useQuery({
@@ -338,9 +346,13 @@ export function useNewsData(initialData?: {
     entertainmentArticlesLoading: entertainmentArticlesQuery.isLoading,
 
 
-
     featuredAdvertorial: featuredAdvertorialQuery.data || [],
     featuredAdvertorialLoading: featuredAdvertorialQuery.isLoading,
+
+
+    featuredAnnouncement:featuredAnnouncementQuery.data || [],
+    featuredAnnouncementLoading:featuredAnnouncementQuery.isLoading,
+
     // Methods
     usePopularByCategory,
 

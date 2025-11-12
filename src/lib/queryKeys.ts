@@ -37,7 +37,10 @@ export const queryKeys = {
     all:['advertorial'] as const,
     lists:() => [...queryKeys.advertorial.all, 'list'] as const
   },
-
+  announcement:{
+    all:['announcement'] as const,
+    lists:() => [...queryKeys.announcement.all, 'list'] as const
+  },
 
   videos: {
     all: ['videos'] as const,

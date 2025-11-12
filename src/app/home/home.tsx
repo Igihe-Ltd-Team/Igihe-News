@@ -37,7 +37,10 @@ export function Home() {
     entertainmentArticlesLoading,
 
     featuredAdvertorial,
-    featuredAdvertorialLoading
+    featuredAdvertorialLoading,
+
+    featuredAnnouncement,
+    featuredAnnouncementLoading
 
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
@@ -71,6 +74,7 @@ export function Home() {
           africaArticles={africaArticles}
           entertainment={entertainmentArticles}
           advertorial={featuredAdvertorial}
+          announcement={featuredAnnouncement}
         />
       </Suspense>
       <Suspense fallback={null}>
