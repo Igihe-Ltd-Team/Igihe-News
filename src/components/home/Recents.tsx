@@ -180,7 +180,7 @@ export default function Recents({ latests, featured, popular }: RecentProps) {
                 </div>
 
                 <div className="col-xl-4 col-lg-12">
-                    <PopularNews articles={popular} name='Popular News'/>
+                    <PopularNews articles={popular || []} name='Popular News'/>
                     <div className='pt-2'>
                         <SectionWithToggle title='Advertorials' showImgs showDate titleBG='#1176BB' />
                     </div>

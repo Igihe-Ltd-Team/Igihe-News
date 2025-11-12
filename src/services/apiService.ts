@@ -251,7 +251,7 @@ static async fetchMostPopularArticles(params?: {
     period?: 'day' | 'week' | 'month' | 'all'
     per_page?: number
     page?: number
-  }) {
+  }): Promise<NewsItem[]> {
     const defaultParams = {
       period: 'week',
       per_page: 10,
@@ -268,12 +268,24 @@ static async fetchMostPopularArticles(params?: {
       }).map(([k, v]) => [k, String(v)])
     )
   )
+  const cacheKey = `popular:${query}`
 
-    // console.log(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
-    // const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
-    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed`)
-    return response.json()
+    return this.cachedFetch(cacheKey, async () => {
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
+    // const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&`)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const posts = await response.json()
+    return Array.isArray(posts) ? posts : []
+  }, 10 * 60 * 1000)
+
   }
+
+
+  
 
 
   static async fetchPopularArticlesByCategory(categoryId: number, params?: {
@@ -287,16 +299,16 @@ static async fetchMostPopularArticles(params?: {
       page: 1,
       ...params
     }
-const query = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries({
-        categories: categoryId.toString(),
-        orderby: 'popularity',
-        order: 'desc',
-        ...defaultParams,
-      }).map(([k, v]) => [k, String(v)])
+    const query = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries({
+          categories: categoryId.toString(),
+          orderby: 'popularity',
+          order: 'desc',
+          ...defaultParams,
+        }).map(([k, v]) => [k, String(v)])
+      )
     )
-  )
 
     const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
 

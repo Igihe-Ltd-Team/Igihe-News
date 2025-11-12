@@ -26,7 +26,7 @@ export function Home() {
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
 
-
+  
   if (categoriesLoading && featuredArticlesLoading) {
     return <NewsSkeleton />
   }
@@ -37,8 +37,9 @@ export function Home() {
     <Slides articles={featuredArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll/>
     </Container>
       <HomeMainSections articles={featuredArticles} />
-      <Recents latests={featuredArticles}
-        popular={featuredArticles}
+      <Recents 
+      latests={featuredArticles}
+        popular={popularArticles}
         featured={featuredArticles}
         advertorials={featuredArticles}
       />

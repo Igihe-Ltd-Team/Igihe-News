@@ -272,12 +272,12 @@ export function useNewsData(initialData?: {
     useArticleDetails,
 
 
-    popularArticles: popularArticlesQuery.data?.data || [],
+    popularArticles: popularArticlesQuery.data || [],
     popularArticlesLoading: popularArticlesQuery.isLoading,
 
 
     // Trending articles
-    trendingArticles: trendingArticlesQuery.data?.data || [],
+    trendingArticles: trendingArticlesQuery.data || [],
     trendingArticlesLoading: trendingArticlesQuery.isLoading,
 
     // Methods
