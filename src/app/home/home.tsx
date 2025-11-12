@@ -21,24 +21,24 @@ export function Home() {
     videos,
     videosLoading,
     prefetchCategory,
-    popularArticles, 
+    popularArticles,
     popularArticlesLoading,
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
 
-  
+
   if (categoriesLoading && featuredArticlesLoading) {
     return <NewsSkeleton />
   }
 
   return (
     <>
-    <Container>
-    <Slides articles={featuredArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll/>
-    </Container>
+      <Container>
+        <Slides articles={featuredArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+      </Container>
       <HomeMainSections articles={featuredArticles} />
-      <Recents 
-      latests={featuredArticles}
+      <Recents
+        latests={featuredArticles}
         popular={popularArticles}
         featured={featuredArticles}
         advertorials={featuredArticles}

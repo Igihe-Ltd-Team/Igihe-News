@@ -3,14 +3,15 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import { useEffect } from 'react'
+import { NewsItem } from '@/types/fetchData'
 
 interface PrefetchHomeDataProps {
   children: React.ReactNode
   initialData: {
     categories: any[]
-    featuredArticles: any
-    videos: any[]
-    breakingNews: any
+    featuredArticles: NewsItem[]
+    videos: NewsItem[]
+    breakingNews: NewsItem[]
   }
 }
 
