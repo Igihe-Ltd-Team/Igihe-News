@@ -1,44 +1,39 @@
-import { ApiService } from '@/services/apiService'
-import { Home } from './home/home'
+
+import { prefetchHomeData } from '@/lib/prefetch-home-data'
 import { PrefetchHomeData } from './prefetch-home-data'
-import { cache } from 'react'
+import { Home } from './home/home'
 
-// Use React cache to dedupe requests
-const getHomeData = cache(async () => {
-  try {
-    const [categories, featuredArticles, videos, breakingNews] = await Promise.all([
-      ApiService.fetchCategories({ per_page: 100 }),
-      ApiService.fetchArticles({ per_page: 15 }),
-      ApiService.fetchVideos({ per_page: 21 }),
-      ApiService.fetchArticles({ 
-        categories: [1], // Breaking news category
-        per_page: 5 
-      }),
-    ])
+// Enable ISR with revalidation every 5 minutes
+export const revalidate = 300
 
-    return {
-      categories,
-      featuredArticles,
-      videos,
-      breakingNews,
-    }
-  } catch (error) {
-    console.error('Error fetching home data:', error)
-    return {
-      categories: [],
-      featuredArticles: { data: [], pagination: { currentPage: 1, totalPages: 0, hasNextPage: false } },
-      videos: [],
-      breakingNews: { data: [], pagination: { currentPage: 1, totalPages: 0, hasNextPage: false } },
-    }
+// Optional: Enable dynamic rendering for high-traffic sites
+// export const dynamic = 'force-dynamic'
+
+// Generate metadata
+export async function generateMetadata() {
+  return {
+    title: 'Home - IGIHE News',
+    description: 'Latest news and updates',
   }
-})
+}
 
 export default async function HomePage() {
-  const homeData = await getHomeData()
-
+  // Fetch all data on the server
+  const initialData = await prefetchHomeData()
+  
   return (
-    <PrefetchHomeData initialData={homeData}>
+    <PrefetchHomeData initialData={initialData}>
       <Home />
     </PrefetchHomeData>
+  )
+}
+
+// Optional: Add error boundary
+export function ErrorBoundary({ error }: { error: Error }) {
+  return (
+    <div className="container mx-auto p-4">
+      <h2>Something went wrong loading the homepage</h2>
+      <p>{error.message}</p>
+    </div>
   )
 }

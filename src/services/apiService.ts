@@ -449,7 +449,8 @@ static async fetchCategories(params?: {
   order?: 'asc' | 'desc'
   after?: string
   before?: string,
-  author?:number
+  author?:number,
+  tags?:number[]
 }): Promise<articleResponse<NewsItem>> {
     const queryParams: Record<string, any> = {
       page: params?.page || 1,
@@ -461,6 +462,9 @@ static async fetchCategories(params?: {
 
     if (params?.categories?.length) {
       queryParams.categories = params.categories.join(',')
+    }
+    if(params?.tags?.length){
+      queryParams.tags = params.tags.join(',')
     }
 
     if (params?.search) {
