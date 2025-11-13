@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { raleway } from '@/lib/fonts';
 import Header from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 export const metadata = {
   title: 'IGIHE',
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Header />
           <main className="py-4">{children}</main>
+          <Footer/>
         </Providers>
       </body>
     </html>
