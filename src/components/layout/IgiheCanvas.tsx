@@ -66,14 +66,16 @@ export default function IgiheCanvas({categories}:menuItemProps) {
                                         </li>
 
                                         {categories && categories.length > 0 ? (
-                                            categories.map((category: Category, index: number) => (
-                                                <li className="nav-item" key={index}>
-                                                    <Link href={`/category/${category.slug}`} className="nav-link active">{category?.name || 'Home'}</Link>
-                                                </li>
-                                            ))
-                                        ) : (
-                                            <li className="nav-item text-muted"></li>
-                                        )}
+                                    categories
+                                        .filter((category): category is Category => category !== undefined)
+                                        .map((category: Category, index: number) => (
+                                            <li className="nav-item" key={category.id}>
+                                                <Link href={`/category/${category.slug}`} className="nav-link active">
+                                                    {category.name}
+                                                </Link>
+                                            </li>
+                                        ))
+                                ) : null}
 
 
                                     </ul>
