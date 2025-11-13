@@ -51,6 +51,10 @@ export function Home() {
   otherFeaturedArticle: safeFeaturedArticles.slice(8, 20),
 }), [safeFeaturedArticles]);
 
+
+console.log('featured',featuredArticles)
+
+
   if (categoriesLoading && featuredArticlesLoading) {
     return <NewsSkeleton />
   }

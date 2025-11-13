@@ -38,6 +38,7 @@ const NewsSection = React.memo(({
         subArticles: safeArticles?.slice(1, 3) || [],
         listArticles: safeArticles?.slice(0, 7) || []
     }), [safeArticles])
+    
 
     if (!articles?.length) return null
 
@@ -96,6 +97,9 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
 
     const safeLatests = Array.isArray(latests) ? latests : [];
     const safeFeatured = Array.isArray(featured) ? featured : [];
+
+    
+
     const {
         mainLatest,
         latestsSidebar,

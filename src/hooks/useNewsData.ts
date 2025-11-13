@@ -26,7 +26,7 @@ export function useNewsData() {
 
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [39], per_page: 20 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [31], per_page: 20 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
