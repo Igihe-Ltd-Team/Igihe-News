@@ -11,11 +11,15 @@ interface ArticlesProps {
 }
 
 export default function CategoryMainSection({ articles }: ArticlesProps) {
-    const { mainArticle, timeLineNews, asideNews } = useMemo(() => ({
-        mainArticle: articles[0],
-        timeLineNews: articles.slice(1, 5),
-        asideNews: articles.slice(5, 7)
-    }), [articles])
+
+    const safeArticles = Array.isArray(articles) ? articles : [];
+    
+        const { mainArticle, timeLineNews, asideNews } = useMemo(() => ({
+            mainArticle: safeArticles?.[0],
+            timeLineNews: safeArticles.slice(1, 5),
+            asideNews: safeArticles.slice(5, 7)
+        }), [safeArticles])
+
 
     if (!articles?.length) {
         return <NewsSkeleton/>
