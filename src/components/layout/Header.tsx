@@ -123,7 +123,7 @@ export default function Header() {
 
                         {
                             isMobile &&
-                            <IgiheCanvas categories={orderedCategories}/>
+                            <IgiheCanvas categories={orderedCategories.filter(Boolean)}/>
                         }
 
                     </div>
@@ -188,7 +188,7 @@ export default function Header() {
                                             </svg>
 
                                         </div>
-                                        <IgiheCanvas categories={otherCategories}/>
+                                        <IgiheCanvas categories={otherCategories.filter(Boolean)}/>
                                     </div>
                                 </div>
                             </div>
