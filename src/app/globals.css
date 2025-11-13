@@ -3,6 +3,34 @@
 @import url('owl.carousel/dist/assets/owl.theme.default.css'); */
 /* @import './owl-custom.css'; */
 
+
+html.dark {
+  --bs-body-bg: #121212;
+  --bs-body-color: #f8f9fa;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+
+html.dark .site-header .overlay {
+  background: #000;
+background: linear-gradient(0deg,#121212 7%, rgba(0, 0, 0, 0) 18%);
+}
+
+html.light .site-header .overlay {
+  background: #ffffff;
+background: linear-gradient(0deg,rgba(255, 255, 255, 1) 7%, rgba(255, 255, 255, 0) 18%);
+}
+
+
+html.dark .bg-white-black{
+  background-color: #121212;
+}
+
+html.light .bg-white-black{
+  background-color: #fff;
+}
+
 .font-raleway {
   font-family: var(--font-raleway);
 }
@@ -227,8 +255,6 @@ vertical-align: middle;
            .site-header .overlay {
   position: absolute;
   inset: 0;
-  background: #ffffff;
-background: linear-gradient(0deg,rgba(255, 255, 255, 1) 7%, rgba(255, 255, 255, 0) 18%);
 }
 
 
@@ -286,9 +312,9 @@ background: linear-gradient(0deg,rgba(255, 255, 255, 1) 7%, rgba(255, 255, 255, 
 }
 
 
-.footer-bg ul li{
+/* .footer-bg ul li{
   color: #282F2F;
-}
+} */
 .service-list{
   gap: 10px;
 }

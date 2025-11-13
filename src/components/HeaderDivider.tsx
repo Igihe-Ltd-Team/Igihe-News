@@ -10,7 +10,7 @@ export default function HeaderDivider({title,titleStyle='subtitle'}:DividerProps
         <div className="divider-container">
             <div className="divider">
                 <span className="divider-separator">
-                    <ThemedText type={titleStyle} className="divider__text">{title}</ThemedText>
+                    <ThemedText type={titleStyle} lightColor='#282F2F' darkColor='#fff' className="divider__text" >{title}</ThemedText>
                 </span>
             </div>
         </div>

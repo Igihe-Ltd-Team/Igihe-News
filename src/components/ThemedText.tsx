@@ -1,9 +1,11 @@
 'use client';
 
+import { useTheme } from 'next-themes';
 import { HTMLAttributes } from 'react';
 
 export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   lightColor?: string;
+  darkColor?: string;
   type?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold' | 'size20' | 'italic34' | 'italic18';
   className?:string
 };
@@ -11,13 +13,14 @@ export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
 export function ThemedText({
   style,
   lightColor,
+  darkColor,
   type = 'default',
   className = '',
   ...rest
 }: ThemedTextProps) {
   // Base Bootstrap classes
   const baseClasses = 'font-raleway';
-  
+  const { theme, systemTheme } = useTheme();
   // Type-specific Bootstrap classes
   const typeClasses = {
     small: 'small-txt lh-sm fw-medium', // fs-6 ≈ 12px, fw-light
@@ -39,7 +42,9 @@ export function ThemedText({
   
   const customStyles: React.CSSProperties = {
     ...style,
-    ...(lightColor && { color: lightColor }),
+    color: theme === "dark" ? darkColor : lightColor
+    // ...(lightColor && { color: lightColor }),
+    // ...(darkColor && { color: darkColor})
   };
 
   return (

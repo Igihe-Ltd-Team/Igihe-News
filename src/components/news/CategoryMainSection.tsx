@@ -41,7 +41,7 @@ export default function CategoryMainSection({ articles }: ArticlesProps) {
                     )}
                 </div>
 
-                <div className="col-xl-5 col-lg-6 col-md-6 bg-white">
+                <div className="col-xl-5 col-lg-6 col-md-6">
                     <TimeLine articles={timeLineNews}/>
                 </div>
             </div>

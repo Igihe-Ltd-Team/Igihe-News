@@ -196,7 +196,13 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
                 <div className="col-xl-4 col-lg-12">
                     <PopularNews articles={popular || []} name='Popular News'/>
                     <div className='pt-2'>
-                        <SectionWithToggle title='Advertorials' articles={advertorial} showImgs showDate titleBG='#1176BB' />
+                        <SectionWithToggle 
+                            title='Advertorials' 
+                            articles={advertorial} 
+                            showImgs 
+                            showDate 
+                            titleBG='#1176BB'
+                        />
                     </div>
                     <div className='pt-3'>
                         <SectionWithToggle title='Announcements' articles={announcement} titleBG='#282F2F' />

@@ -4,6 +4,7 @@ import { ThemedText } from '../ThemedText';
 import { formatDate, getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils';
 import { OptimizedImage } from '../ui/OptimizedImage';
 import { NewsItem } from '@/types/fetchData';
+import { useTheme } from 'next-themes';
 interface SectionProps {
     title?: string,
     titleBG?: string,
@@ -15,12 +16,13 @@ interface SectionProps {
 
 const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, articles = [] }: SectionProps) => {
     const [expanded, setExpanded] = useState(false);
+      const { theme, setTheme, systemTheme } = useTheme();
 
 
     const visiblePosts = expanded ? articles : articles.slice(0, 4);
 
     return (
-        <div className="card rounded-0 border-0" style={{ backgroundColor: '#F5F6F799' }}>
+        <div className="card rounded-0 border-0" style={{ backgroundColor: theme === 'dark' ? '#1D3D47': '#F5F6F799' }}>
 
             <div style={{ backgroundColor: titleBG }} className="card-header text-white d-flex justify-content-between align-items-center py-2">
                 <ThemedText type='size20'>{title}</ThemedText>
@@ -79,7 +81,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                                         </small>
                                     </div>
                                 }
-                                <ThemedText>
+                                <ThemedText darkColor='#fff' lightColor='#282F2F'>
                                     {stripHtml(item.title.rendered)}
                                 </ThemedText>
                             </div>
