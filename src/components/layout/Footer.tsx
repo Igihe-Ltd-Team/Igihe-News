@@ -1,13 +1,21 @@
+import { ThemedText } from "../ThemedText";
+
 export function Footer() {
   return (
-    <footer className="bg-gray-900 d-flex justify-content-center text-white py-12 footer-bg">
+    <footer className="bg-gray-900 d-flex justify-content-center py-12 footer-bg">
       <div className="container d-flex justify-content-center flex-column">
         <div className="row bottom-container">
           <div className="col-md-4 has-border-left">
             <h4 className="footer--heading">Newsletter</h4>
-            <h5 className="newsletter-desc">THE MOST IMPORTANT WORLD NEWS AND EVENTS OF THE DAY</h5>
-            <p>Subscribe to our mailing list to receives daily
-              updates direct to your inbox!</p>
+            <div className="col-md-8">
+              <ThemedText type="smallBold">THE MOST IMPORTANT WORLD NEWS AND EVENTS OF THE DAY</ThemedText>
+            </div>
+            <div className="col-md-10 py-3">
+              <ThemedText>
+                Subscribe to our mailing list to receives daily
+                updates direct to your inbox!
+              </ThemedText>
+            </div>
 
             <div className="newsletter-form">
               <form action="" className="sm-d-flex">
