@@ -45,11 +45,11 @@ export function Home() {
   } = useNewsData()
   const { selectedCategory, setSelectedCategory } = useUIStore()
 
-
+  const safeFeaturedArticles = Array.isArray(featuredArticles) ? featuredArticles : [];
   const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
-    sliderFeaturedArticles: featuredArticles.slice(0, 8),
-    otherFeaturedArticle: featuredArticles.slice(9, 20),
-  }), [featuredArticles])
+  sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
+  otherFeaturedArticle: safeFeaturedArticles.slice(8, 20),
+}), [safeFeaturedArticles]);
 
   if (categoriesLoading && featuredArticlesLoading) {
     return <NewsSkeleton />

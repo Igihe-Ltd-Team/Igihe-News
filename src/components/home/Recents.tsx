@@ -32,11 +32,12 @@ const NewsSection = React.memo(({
 }) => {
 
     const { isMobile } = useResponsive()
+    const safeArticles = Array.isArray(articles) ? articles : [];
     const { mainArticle, subArticles, listArticles } = useMemo(() => ({
-        mainArticle: articles?.[0],
-        subArticles: articles?.slice(1, 3) || [],
-        listArticles: articles?.slice(0, 7) || []
-    }), [articles])
+        mainArticle: safeArticles?.[0],
+        subArticles: safeArticles?.slice(1, 3) || [],
+        listArticles: safeArticles?.slice(0, 7) || []
+    }), [safeArticles])
 
     if (!articles?.length) return null
 
@@ -92,17 +93,20 @@ const NewsSection = React.memo(({
 NewsSection.displayName = 'NewsSection'
 
 export default function Recents({ latests, featured, popular,africaArticles,entertainment,advertorial,announcement }: RecentProps) {
+
+    const safeLatests = Array.isArray(latests) ? latests : [];
+    const safeFeatured = Array.isArray(featured) ? featured : [];
     const {
         mainLatest,
         latestsSidebar,
         // featuredMain,
         featuredTimeline
     } = useMemo(() => ({
-        mainLatest:latests?.[0],
-        latestsSidebar: latests?.slice(1, 6) || [],
+        mainLatest:safeLatests?.[0],
+        latestsSidebar: safeLatests?.slice(1, 6) || [],
         // featuredMain: featured?.[0],
-        featuredTimeline: featured?.slice(0, 9) || [],
-    }), [latests, featured])
+        featuredTimeline: safeFeatured?.slice(0, 9) || [],
+    }), [safeLatests, safeFeatured])
 
     if (!latestsSidebar?.length) {
         return <NewsSkeleton />
