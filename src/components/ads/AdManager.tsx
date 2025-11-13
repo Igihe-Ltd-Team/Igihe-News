@@ -32,7 +32,7 @@ export default function AdManager({
 
   if (isLoading) {
     return (
-      <Spinner/>
+      <></>
     )
   }
 
