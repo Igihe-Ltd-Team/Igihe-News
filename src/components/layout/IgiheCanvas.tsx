@@ -70,7 +70,7 @@ export default function IgiheCanvas({categories}:menuItemProps) {
                                         .filter((category): category is Category => category !== undefined)
                                         .map((category: Category, index: number) => (
                                             <li className="nav-item" key={category.id}>
-                                                <Link href={`/category/${category.slug}`} className="nav-link active">
+                                                <Link href={`/category/${category.slug}`} style={{textTransform:'capitalize'}} className="nav-link active">
                                                     {category.name}
                                                 </Link>
                                             </li>

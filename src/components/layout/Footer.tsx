@@ -27,9 +27,8 @@ export function Footer() {
           <div className="col-md-4 has-left-space has-border-left md-pb-4">
             <h4 className="footer--heading">Our Services</h4>
             <ul className="service-list list-unstyled d-flex flex-column">
-              <li>
-                <ThemedText className="service-item">Advertisement</ThemedText>
-                
+              <li className="service-item">
+                Advertisement
               </li>
               <li className="service-item">Web Development</li>
               <li className="service-item">Hosting</li>

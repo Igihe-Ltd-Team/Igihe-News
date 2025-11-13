@@ -168,7 +168,7 @@ export default function Header() {
                                             orderedCategories.map((NavItem: any, index: number) => (
                                                 <li className="nav-item" key={index}>
                                                     <Link href={`/category/${NavItem.slug}`} className="nav-link active">
-                                                        <ThemedText darkColor='#fff' lightColor='#282F2F'>
+                                                        <ThemedText style={{textTransform:'capitalize'}} darkColor='#fff' lightColor='#282F2F'>
                                                             {NavItem?.name || 'Home'}
                                                         </ThemedText>
                                                     </Link>

@@ -21,22 +21,23 @@ export default function CategoryMainSection({ articles }: ArticlesProps) {
         }), [safeArticles])
 
 
-    if (!articles?.length) {
+    if (!safeArticles?.length) {
         return <></>
     }
 
     return (
         <div className="container p-2">
             <div className="row g-0">
-                <div className="col-xl-7 col-lg-12">
+                <div className={`${safeArticles?.length > 1 ? 'col-xl-7':'col-xl-12'} col-xl-7 col-lg-12`}>
                     {mainArticle && (
                         <DynamicArticleCard 
                             article={mainArticle} 
                             showImage 
                             showHeader 
                             priority
-                            imgHeight={370}
+                            imgHeight={safeArticles?.length > 1 ? 370 : 600}
                             titleStyle={'subtitle'}
+                            showExpt={safeArticles?.length  === 1}
                         />
                     )}
                 </div>
