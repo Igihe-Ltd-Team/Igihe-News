@@ -1,5 +1,5 @@
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
-import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, NewsItem } from '@/types/fetchData'
+import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem } from '@/types/fetchData'
 
 // Configuration
 const API_CONFIG = {
@@ -380,7 +380,7 @@ static async fetchMostPopularArticles(params?: {
     orderby?: 'date' | 'modified' | 'title' | 'comment_count'
     order?: 'asc' | 'desc'
   }
-): Promise<articleResponse<NewsItem> | null> {
+): Promise<CategoryPostsResponse | null> {
   try {
     const category = await this.fetchCategoryBySlug(slug)
     if (!category) {
@@ -391,8 +391,10 @@ static async fetchMostPopularArticles(params?: {
       categories: [category.id],
       ...params
     })
-
-    return postsResponse
+    return {
+      posts: postsResponse,
+      category: category
+    }
   } catch (error) {
     console.error('Error fetching posts by category slug:', error)
     return null
@@ -498,7 +500,7 @@ static async fetchCategories(params?: {
       const data = await response.json()
       return this.buildPaginationResponse(data, response, {
         page: params?.page,
-        per_page: params?.per_page
+        per_page: params?.per_page,
       })
     }, 2 * 60 * 1000) // 2 minutes cache for articles
   }

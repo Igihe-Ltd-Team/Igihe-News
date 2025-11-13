@@ -52,7 +52,7 @@ export function Home() {
 }), [safeFeaturedArticles]);
 
 
-console.log('featured',featuredArticles)
+
 
 
   if (categoriesLoading && featuredArticlesLoading) {

@@ -24,7 +24,6 @@ const menus = [
     { name: "Economy" },
     { name: "People" },
     { name: "Tourism" },
-    { name: "Economy" },
     { name: "Environment" },
     { name: "Religion" },
     { name: "News" },
@@ -34,7 +33,6 @@ const menus = [
 
 export default function Header() {
     const { isMobile } = useResponsive()
-    const { theme } = useTheme()
     const {
         categories
     } = useNewsData()
@@ -42,15 +40,19 @@ export default function Header() {
     const normalizedCategories = categories.map((cat) => ({
         ...cat,
         name: cat.name?.trim().toLowerCase(),
-    }));
+    }))
 
-    const orderedCategories = menus
-        .map((menu) => {
-            return normalizedCategories.find(
-                (cat) => cat.name === menu.name.toLowerCase()
-            );
-        })
-        .filter(Boolean);
+    const normalizedMenus = menus.map((m) => m.name.toLowerCase())
+
+    const orderedCategories = normalizedMenus
+        .map((menuName) =>
+            normalizedCategories.find((cat) => cat.name === menuName)
+        )
+        .filter(Boolean)
+
+    const otherCategories = normalizedCategories.filter(
+        (cat) => !normalizedMenus.includes(cat.name)
+    )
 
 
     return (
@@ -121,7 +123,7 @@ export default function Header() {
 
                         {
                             isMobile &&
-                            <IgiheCanvas />
+                            <IgiheCanvas categories={orderedCategories}/>
                         }
 
                     </div>
@@ -141,7 +143,7 @@ export default function Header() {
                 {!isMobile &&
                     <div className={`igihe-nav-menu bg-white-black`}>
                         <nav className="navbar navbar-expand-lg">
-                            <div>
+                            <div style={{ flex: 1 }}>
                                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                                     <span className="navbar-toggler-icon">
                                         <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -186,7 +188,7 @@ export default function Header() {
                                             </svg>
 
                                         </div>
-                                        <IgiheCanvas />
+                                        <IgiheCanvas categories={otherCategories}/>
                                     </div>
                                 </div>
                             </div>

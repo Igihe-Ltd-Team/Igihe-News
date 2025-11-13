@@ -32,6 +32,9 @@ export const queryKeys = {
     highlightTagArticles: (tagId: number) => ['articles', 'highlightTag', tagId] as const,
     africa: () => ['articles', 'africa'] as const,
     entertainment: () => ['articles', 'entertainment'] as const,
+    categoryTagArticles: (tagId: number, categoryId?: number) => 
+      ['articles', 'category-tag', tagId, ...(categoryId ? [categoryId] : [])] as const,
+    
   },
   advertorial:{
     all:['advertorial'] as const,

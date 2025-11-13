@@ -22,7 +22,7 @@ export default function CategoryMainSection({ articles }: ArticlesProps) {
 
 
     if (!articles?.length) {
-        return <NewsSkeleton/>
+        return <></>
     }
 
     return (

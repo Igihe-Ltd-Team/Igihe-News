@@ -1,49 +1,21 @@
 'use client'
 
 import { useNewsData } from '@/hooks/useNewsData'
+import { Category } from '@/types/fetchData'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Offcanvas, Button, Container, Row, Col } from 'react-bootstrap'
 
-const menus = [
-    { name: "Politics" },
-    { name: "Health" },
-    { name: "Sports" },
-    { name: "Entertainment" },
-    { name: "Technology" },
-    { name: "Culture" },
-    { name: "Economy" },
-    { name: "People" },
-    { name: "Tourism" },
-    { name: "Economy" },
-    { name: "Environment" },
-    { name: "Religion" },
-    { name: "News" },
-]
+interface menuItemProps{
+    categories?:Category[]
+}
 
-
-export default function IgiheCanvas() {
-    const {
-            categories
-        } = useNewsData()
+export default function IgiheCanvas({categories}:menuItemProps) {
+    
     const [show, setShow] = useState(false)
 
     const handleClose = () => setShow(false)
     const handleShow = () => setShow(true)
-
-
-    const normalizedCategories = categories.map((cat) => ({
-        ...cat,
-        name: cat.name?.trim().toLowerCase(),
-    }));
-
-    const orderedCategories = menus
-        .map((menu) => {
-            return normalizedCategories.find(
-                (cat) => cat.name === menu.name.toLowerCase()
-            );
-        })
-        .filter(Boolean);
 
     return (
             <Row className="justify-content-center">
@@ -94,9 +66,9 @@ export default function IgiheCanvas() {
                                         </li>
 
                                         {categories && categories.length > 0 ? (
-                                            orderedCategories.map((NavItem: any, index: number) => (
+                                            categories.map((category: Category, index: number) => (
                                                 <li className="nav-item" key={index}>
-                                                    <Link href={`/category/${NavItem.slug}`} className="nav-link active">{NavItem?.name || 'Home'}</Link>
+                                                    <Link href={`/category/${category.slug}`} className="nav-link active">{category?.name || 'Home'}</Link>
                                                 </li>
                                             ))
                                         ) : (

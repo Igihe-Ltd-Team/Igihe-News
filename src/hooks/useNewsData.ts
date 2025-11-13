@@ -48,6 +48,19 @@ export function useNewsData() {
     staleTime: 5 * 60 * 1000,
   })
 
+  function useCategoryTagArticles(tagId: number, categoryId?: number) {
+  return useQuery({
+    queryKey: queryKeys.articles.categoryTagArticles(tagId, categoryId),
+    queryFn: () => ApiService.fetchArticles({ 
+      tags: [tagId], 
+      ...(categoryId && { categories: [categoryId] }),
+      per_page: 7 
+    }).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!tagId,
+  })
+}
+
   const latestArticlesQuery = useQuery({
     queryKey: queryKeys.articles.latest(),
     queryFn: () => ApiService.fetchArticles({ per_page: 6 }).then(r => r.data),
@@ -58,7 +71,7 @@ export function useNewsData() {
     queryKey: queryKeys.articles.africa(),
     queryFn: () =>
       ApiService.fetchPostsByCategorySlug('africa', { per_page: 11 }).then(
-        r => r?.data || []
+        r => r?.posts.data || []
       ),
     staleTime: 5 * 60 * 1000,
   })
@@ -67,7 +80,7 @@ export function useNewsData() {
     queryKey: queryKeys.articles.entertainment(),
     queryFn: () =>
       ApiService.fetchPostsByCategorySlug('entertainment', { per_page: 11 }).then(
-        r => r?.data || []
+        r => r?.posts.data || []
       ),
     staleTime: 5 * 60 * 1000,
   })
@@ -116,14 +129,14 @@ export function useNewsData() {
         if (!slug) throw new Error('Category slug is required')
         const response = await ApiService.fetchPostsByCategorySlug(slug, {
           page: pageParam,
-          per_page: 20,
+          per_page: 8,
         })
         if (!response) throw new Error(`No posts found for category: ${slug}`)
         return response
       },
       initialPageParam: 1,
       getNextPageParam: lastPage =>
-        lastPage.pagination.hasNextPage ? lastPage.pagination.currentPage + 1 : undefined,
+        lastPage.posts.pagination.hasNextPage ? lastPage.posts.pagination.currentPage + 1 : undefined,
       enabled: !!slug,
       retry: (failureCount, error) => {
         if (
@@ -286,5 +299,9 @@ export function useNewsData() {
     prefetchArticle,
     prefetchCategory,
     queryClient,
+
+
+
+    useCategoryTagArticles
   }
 }

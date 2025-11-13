@@ -13,6 +13,13 @@ export interface articleResponse<T> {
   pagination: PaginationInfo
 }
 
+
+export interface CategoryPostsResponse {
+  posts: articleResponse<NewsItem>
+  category: Category
+}
+
+
 export interface ApiError {
   message: string
   status: number
