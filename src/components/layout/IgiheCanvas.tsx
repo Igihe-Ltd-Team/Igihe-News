@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Offcanvas, Button, Container, Row, Col } from 'react-bootstrap'
 
 interface menuItemProps{
-    categories?:Category[]
+    categories?: (Category | undefined)[]
 }
 
 export default function IgiheCanvas({categories}:menuItemProps) {
