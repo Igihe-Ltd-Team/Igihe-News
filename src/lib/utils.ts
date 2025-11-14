@@ -100,7 +100,12 @@ export const getCategoryName = (articleData:NewsItem) => {
     }
     return 'General';
 };
-
+export const getCategorySlug = (articleData:NewsItem) => {
+    if (articleData?._embedded && articleData?._embedded['wp:term'] && articleData?._embedded['wp:term'][0]) {
+        return articleData?._embedded['wp:term'][0][0]?.slug || 'General';
+    }
+    return 'General';
+};
 
 
 

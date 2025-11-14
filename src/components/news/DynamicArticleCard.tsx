@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
-import { formatDate, getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils'
+import { formatDate, getCategoryName, getCategorySlug, getFeaturedImage, stripHtml } from '@/lib/utils'
 import { NewsItem } from '@/types/fetchData'
 import { ThemedText } from '../ThemedText'
 import Link from 'next/link'
@@ -57,7 +57,7 @@ function DynamicArticleCard({
       {
         showImage &&
         <Link
-          href={`/news/${article.slug}`}
+          href={`/${getCategorySlug(article)}/${article.slug}`}
           className="text-decoration-none text-reset"
           style={{flex:1}}
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
@@ -108,7 +108,7 @@ function DynamicArticleCard({
             </div>
           }
           <Link
-            href={`/news/${article.slug}`}
+            href={`/${getCategorySlug(article)}/${article.slug}`}
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           >
