@@ -6,34 +6,35 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Offcanvas, Button, Container, Row, Col } from 'react-bootstrap'
 
-interface menuItemProps{
+interface menuItemProps {
     categories?: (Category | undefined)[]
+    showHome?: boolean
 }
 
-export default function IgiheCanvas({categories}:menuItemProps) {
-    
+export default function IgiheCanvas({ categories, showHome }: menuItemProps) {
+
     const [show, setShow] = useState(false)
 
     const handleClose = () => setShow(false)
     const handleShow = () => setShow(true)
 
     return (
-            <Row className="justify-content-center">
-                <Col md={6} className="text-center">
-                    <Button variant='light' onClick={handleShow}>
-                        <span className="navbar-toggler-icon">
-                            <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
-                                <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
-                                <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
-                            </svg>
-                        </span>
-                    </Button>
+        <Row className="justify-content-center">
+            <Col md={6} className="text-center">
+                <Button variant='light' onClick={handleShow}>
+                    <span className="navbar-toggler-icon">
+                        <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
+                            <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
+                            <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
+                        </svg>
+                    </span>
+                </Button>
 
-                    <Offcanvas show={show} onHide={handleClose} placement={'end'}>
-                        <Offcanvas.Header closeButton>
-                            <Offcanvas.Title className='d-flex justify-content-center py-4' style={{flex:1}}>
-                                <span className='site-logo'>
+                <Offcanvas show={show} onHide={handleClose} placement={'end'}>
+                    <Offcanvas.Header closeButton>
+                        <Offcanvas.Title className='d-flex justify-content-center py-4' style={{ flex: 1 }}>
+                            <span className='site-logo'>
                                 <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clipPath="url(#clip0_2928_1291)">
                                         <path d="M123.532 18.5566C123.532 13.8136 123.532 9.0673 123.532 4.32431C123.532 3.6701 123.555 3.6434 124.198 3.6434C127.981 3.6434 131.768 3.6434 135.551 3.6434C136.208 3.6434 136.234 3.6701 136.234 4.30762C136.234 7.38506 136.234 10.4658 136.234 13.5433C136.234 14.0673 136.271 14.1074 136.804 14.1074C139.324 14.1074 141.841 14.1074 144.361 14.1074C144.941 14.1074 144.967 14.0773 144.967 13.4965C144.967 10.4058 144.967 7.31163 144.967 4.22084C144.967 3.68679 145.004 3.6434 145.527 3.6434C149.244 3.6434 152.964 3.6434 156.68 3.6434C157.27 3.6434 157.303 3.68012 157.303 4.28426C157.303 13.8136 157.303 23.343 157.303 32.8724C157.303 33.4098 157.283 33.4298 156.74 33.4298C152.997 33.4298 149.25 33.4298 145.507 33.4298C145.004 33.4298 144.971 33.3964 144.971 32.8791C144.971 29.1074 144.971 25.3357 144.971 21.564C144.971 20.9398 144.961 20.9298 144.351 20.9298C141.844 20.9298 139.341 20.9298 136.834 20.9298C136.278 20.9298 136.238 20.9665 136.238 21.5106C136.238 25.2823 136.238 29.054 136.238 32.8256C136.238 33.4031 136.214 33.4264 135.624 33.4264C131.801 33.4264 127.975 33.4264 124.151 33.4264C123.548 33.4264 123.535 33.4131 123.535 32.7889C123.535 28.0459 123.535 23.2996 123.535 18.5566H123.532Z" fill="#1176BB" />
@@ -52,25 +53,33 @@ export default function IgiheCanvas({categories}:menuItemProps) {
                                 </svg>
 
                             </span>
-                            </Offcanvas.Title>
-                        </Offcanvas.Header>
-                        <Offcanvas.Body>
+                        </Offcanvas.Title>
+                    </Offcanvas.Header>
+                    <Offcanvas.Body>
 
 
-                            <div className=" gap-3" id="navbarScroll d-flex justify-content-between">
-                                    <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                                        <li className="nav-item">
-                                            <Link className="nav-link active" aria-current="page" href="/videos">
-                                                Videos
-                                            </Link>
-                                        </li>
+                        <div className=" gap-3" id="navbarScroll d-flex justify-content-between">
+                            <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
+                                {
+                                    showHome &&
+                                    <li className="nav-item">
+                                        <Link className="nav-link active" aria-current="page" href="/">
+                                            Home
+                                        </Link>
+                                    </li>
+                                }
+                                <li className="nav-item">
+                                    <Link className="nav-link active" aria-current="page" href="/videos">
+                                        Videos
+                                    </Link>
+                                </li>
 
-                                        {categories && categories.length > 0 ? (
+                                {categories && categories.length > 0 ? (
                                     categories
                                         .filter((category): category is Category => category !== undefined)
                                         .map((category: Category, index: number) => (
                                             <li className="nav-item" key={category.id}>
-                                                <Link href={`/news/${category.slug}`} style={{textTransform:'capitalize'}} className="nav-link active">
+                                                <Link href={`/news/${category.slug}`} style={{ textTransform: 'capitalize' }} className="nav-link active">
                                                     {category.name}
                                                 </Link>
                                             </li>
@@ -78,12 +87,12 @@ export default function IgiheCanvas({categories}:menuItemProps) {
                                 ) : null}
 
 
-                                    </ul>
-                                </div>
+                            </ul>
+                        </div>
 
-                        </Offcanvas.Body>
-                    </Offcanvas>
-                </Col>
-            </Row>
+                    </Offcanvas.Body>
+                </Offcanvas>
+            </Col>
+        </Row>
     )
 }

@@ -123,7 +123,7 @@ export default function Header() {
 
                         {
                             isMobile &&
-                            <IgiheCanvas categories={orderedCategories.filter(Boolean)}/>
+                            <IgiheCanvas categories={orderedCategories.filter(Boolean)} showHome/>
                         }
 
                     </div>
