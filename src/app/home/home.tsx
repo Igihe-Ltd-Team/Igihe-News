@@ -55,21 +55,23 @@ export function Home() {
 
 
 
-  if (categoriesLoading && featuredArticlesLoading) {
-    return <NewsSkeleton />
-  }
+  // if (categoriesLoading && featuredArticlesLoading) {
+  //   return <NewsSkeleton />
+  // }
 // console.log()
   return (
     <>
       <Container>
-        <Slides articles={sliderFeaturedArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+        <Suspense fallback={<NewsSkeleton count={3}/>}>
+          <Slides articles={sliderFeaturedArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+        </Suspense>
       </Container>
 
-      <Suspense fallback={<NewsSkeleton />}>
+      <Suspense fallback={<NewsSkeleton count={3}/>}>
         <HomeMainSections
           articles={highlightArticles} />
       </Suspense>
-      <Suspense fallback={<NewsSkeleton />}>
+      <Suspense fallback={<NewsSkeleton count={3}/>}>
         <Recents
           latests={latestArticles}
           popular={popularArticles}
@@ -100,7 +102,7 @@ export function Home() {
           </Row>
         </Container>
       </Suspense>
-      <Suspense fallback={<NewsSkeleton />}>
+      <Suspense fallback={<NewsSkeleton count={3}/>}>
         <Categories categories={categories} />
       </Suspense>
       <Suspense fallback={null}>
@@ -123,7 +125,7 @@ export function Home() {
         </Container>
       </Suspense>
       <Categories categories={categories} />
-      <Suspense fallback={<NewsSkeleton />}>
+      <Suspense fallback={<NewsSkeleton count={3}/>}>
         <Categories categories={categories} />
       </Suspense>
     </>

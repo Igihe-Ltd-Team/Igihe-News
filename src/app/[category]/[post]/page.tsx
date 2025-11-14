@@ -11,6 +11,10 @@ interface PageProps {
   params: Promise<{ post: string }>
 }
 
+
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post } = await params
   try {
@@ -61,23 +65,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    // Generate only a few popular pages statically
-    const fetchedPosts = await ApiService.fetchArticles({ 
-      per_page: 20, // Reduced for faster builds
-      orderby: 'date',
-      order: 'desc'
-    })
+// export async function generateStaticParams() {
+//   try {
+//     // Generate only a few popular pages statically
+//     const fetchedPosts = await ApiService.fetchArticles({ 
+//       per_page: 20, // Reduced for faster builds
+//       orderby: 'date',
+//       order: 'desc'
+//     })
     
-    console.log(`Generating ${fetchedPosts.data.length} static pages`)
-    return fetchedPosts.data.map((post) => ({ slug: post.slug }))
-  } catch (error) {
-    console.error('Error in generateStaticParams:', error)
-    // Return empty array - other pages will be generated on-demand
-    return []
-  }
-}
+//     console.log(`Generating ${fetchedPosts.data.length} static pages`)
+//     return fetchedPosts.data.map((post) => ({ slug: post.slug }))
+//   } catch (error) {
+//     console.error('Error in generateStaticParams:', error)
+//     // Return empty array - other pages will be generated on-demand
+//     return []
+//   }
+// }
 
 
 

@@ -112,9 +112,9 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
         featuredTimeline: safeFeatured?.slice(0, 9) || [],
     }), [safeLatests, safeFeatured])
 
-    if (!latestsSidebar?.length) {
-        return <NewsSkeleton />
-    }
+    // if (!latestsSidebar?.length) {
+    //     return <NewsSkeleton />
+    // }
 
 
     return (

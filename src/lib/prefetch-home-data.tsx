@@ -37,7 +37,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       ApiService.fetchCategories({ per_page: 100 }),
       
       // Featured articles
-      ApiService.fetchArticles({ tags: [39], per_page: 20 }),
+      ApiService.fetchArticles({ tags: [31], per_page: 20 }),
       // Popular articles
       ApiService.fetchMostPopularArticles({ period: 'week', per_page: 10 }),
       

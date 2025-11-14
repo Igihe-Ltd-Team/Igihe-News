@@ -112,6 +112,9 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
       }
     }
 
+    
+
+
     // Use requestIdleCallback for better performance
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       requestIdleCallback(() => {
@@ -123,7 +126,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         prefetchData()
       }, 100)
     }
-  }, [queryClient]) // Remove initialData from deps to prevent re-runs
+  }, []) // Remove initialData from deps to prevent re-runs
 
   return <>{children}</>
 }
