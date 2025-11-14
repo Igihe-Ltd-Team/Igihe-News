@@ -90,6 +90,7 @@ export default function AdUnit({
           height={positionConfig.dimensions.height}
           className="img-fluid rounded"
           priority={priority}
+          imgClass="object-fit-contain"
         />
       </a>
       {/* {showLabel && (

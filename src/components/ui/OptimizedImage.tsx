@@ -14,6 +14,7 @@ interface OptimizedImageProps {
   className?: string
   sizes?: string
   onLoad?: () => void,
+  imgClass?:string
 }
 
 export function OptimizedImage({
@@ -24,7 +25,8 @@ export function OptimizedImage({
   priority = false,
   className,
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
-  onLoad
+  onLoad,
+  imgClass
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -55,8 +57,7 @@ export function OptimizedImage({
         fill
         priority={priority}
         sizes={sizes}
-        style={{objectFit:'cover'}}
-        
+        className={imgClass}
         onLoad={handleLoad}
         onError={handleError}
         placeholder="blur"

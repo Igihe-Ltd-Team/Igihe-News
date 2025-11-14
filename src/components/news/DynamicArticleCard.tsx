@@ -67,7 +67,7 @@ function DynamicArticleCard({
             alt={article.title.rendered}
             fill
             height={imgHeight}
-            className="object-fit-cover"
+            imgClass="object-fit-cover"
           />
         </Link>
       }
