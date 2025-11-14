@@ -57,7 +57,7 @@ function DynamicArticleCard({
       {
         showImage &&
         <Link
-          href={`/${getCategorySlug(article)}/${article.slug}`}
+          href={`/news/${getCategorySlug(article)}/${article.slug}`}
           className="text-decoration-none text-reset"
           style={{flex:1}}
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
@@ -108,7 +108,7 @@ function DynamicArticleCard({
             </div>
           }
           <Link
-            href={`/${getCategorySlug(article)}/${article.slug}`}
+            href={`/news/${getCategorySlug(article)}/${article.slug}`}
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           >

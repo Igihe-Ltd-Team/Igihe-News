@@ -70,8 +70,8 @@ export function useNewsData() {
   const africaArticlesQuery = useQuery({
     queryKey: queryKeys.articles.africa(),
     queryFn: () =>
-      ApiService.fetchPostsByCategorySlug('africa', { per_page: 11 }).then(
-        r => r?.posts.data || []
+      ApiService.fetchArticles({ categories: [25], per_page: 11 }).then(
+        r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
   })
@@ -79,8 +79,8 @@ export function useNewsData() {
   const entertainmentArticlesQuery = useQuery({
     queryKey: queryKeys.articles.entertainment(),
     queryFn: () =>
-      ApiService.fetchPostsByCategorySlug('entertainment', { per_page: 11 }).then(
-        r => r?.posts.data || []
+      ApiService.fetchArticles({ categories: [7], per_page: 11 }).then(
+        r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
   })

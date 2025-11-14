@@ -56,6 +56,7 @@ export const stripHtml = (html:string) => {
 
 // Alternative: More robust version with fallbacks
 export const getFeaturedImage = (articleData: NewsItem) => {
+  // console.log(articleData)
     if (!articleData) return null;
     
     // Check if _embedded data exists and has featured media
@@ -114,4 +115,11 @@ export const extractYouTubeEmbed = (html: string): string | null => {
   const youtubeRegex = /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/;
   const match = html.match(youtubeRegex);
   return match ? match[1] : null;
+};
+
+export const getYouTubeVideoId = (url:string) => {
+    if (!url) return null;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
 };

@@ -60,8 +60,8 @@ export default function IgiheCanvas({categories}:menuItemProps) {
                             <div className=" gap-3" id="navbarScroll d-flex justify-content-between">
                                     <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
                                         <li className="nav-item">
-                                            <Link className="nav-link active" aria-current="page" href="/">
-                                                Home
+                                            <Link className="nav-link active" aria-current="page" href="/videos">
+                                                Videos
                                             </Link>
                                         </li>
 
@@ -70,7 +70,7 @@ export default function IgiheCanvas({categories}:menuItemProps) {
                                         .filter((category): category is Category => category !== undefined)
                                         .map((category: Category, index: number) => (
                                             <li className="nav-item" key={category.id}>
-                                                <Link href={`/${category.slug}`} style={{textTransform:'capitalize'}} className="nav-link active">
+                                                <Link href={`/news/${category.slug}`} style={{textTransform:'capitalize'}} className="nav-link active">
                                                     {category.name}
                                                 </Link>
                                             </li>

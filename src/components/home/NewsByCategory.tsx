@@ -32,9 +32,9 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
     }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
     const allArticles = data?.pages.flatMap(page => page.data) || []
     
-    if (!allArticles?.length) {
-            return <NewsSkeleton/>
-        }
+    // if (!allArticles?.length) {
+    //         return <NewsSkeleton/>
+    //     }
     return (
         <div>
             <HeaderDivider title={categoryName} titleStyle={'size20'}/>

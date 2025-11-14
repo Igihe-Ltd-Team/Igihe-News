@@ -102,7 +102,7 @@ export function Home() {
           </Row>
         </Container>
       </Suspense>
-      <Suspense fallback={<NewsSkeleton count={3}/>}>
+      <Suspense fallback={<NewsSkeleton count={1}/>}>
         <Categories categories={categories} />
       </Suspense>
       <Suspense fallback={null}>
@@ -125,7 +125,7 @@ export function Home() {
         </Container>
       </Suspense>
       <Categories categories={categories} />
-      <Suspense fallback={<NewsSkeleton count={3}/>}>
+      <Suspense fallback={<NewsSkeleton count={1}/>}>
         <Categories categories={categories} />
       </Suspense>
     </>

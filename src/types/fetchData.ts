@@ -214,7 +214,14 @@ export interface Author {
     '512'?: string // Make 512 optional since it might not exist
   }
   meta: any[]
-  acf: any[]
+  acf?: {
+    igh_yt_video_url?: string;
+    igh_yt_video_url_source?: {
+      label: string;
+      type: string;
+      formatted_value: string;
+    };
+  }
   _links: {
     self: Array<{ href: string }>
     collection: Array<{ href: string }>

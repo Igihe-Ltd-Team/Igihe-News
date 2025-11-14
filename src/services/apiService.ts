@@ -126,34 +126,39 @@ export class ApiError extends Error {
 
 export class ApiService {
 
-  private static async fetchWithTimeout(url: string, options: RequestInit = {}, timeout = API_CONFIG.timeout) {
-    const controller = new AbortController()
-    const id = setTimeout(() => controller.abort(), timeout)
+  private static async fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeout = API_CONFIG.timeout
+) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
         ...options.headers,
       },
+    });
 
-      })
-
-      clearTimeout(id)
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return response
-    } catch (error) {
-      clearTimeout(id)
-      throw error
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    return response;
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error("Request timed out");
+    }
+    throw error;
+  } finally {
+    clearTimeout(id); // ALWAYS clear
   }
+}
 
   private static async cachedFetch<T>(
     cacheKey: string, 
@@ -516,10 +521,7 @@ static async fetchCategories(params?: {
     const queryParams: Record<string, any> = {
       page: params?.page,
       per_page: params?.per_page || 21,
-      _embed: '1',
-      _fields: [
-        'id', 'date', 'slug', 'title', 'acf', 'featured_media', '_embedded'
-      ].join(','),
+      _embed: '1'
     }
 
     if (params?.search) {

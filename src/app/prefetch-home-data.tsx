@@ -17,7 +17,7 @@ interface PrefetchHomeDataProps {
     africaArticles: NewsItem[]
     EntertainmentArticles: NewsItem[]
     videos: NewsItem[]
-    breakingNews: NewsItem[]
+    // breakingNews: NewsItem[]
   }
 }
 
@@ -75,10 +75,10 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         )
         
         // Breaking news
-        queryClient.setQueryData(
-          queryKeys.articles.list({ breaking: true }),
-          initialData.breakingNews
-        )
+        // queryClient.setQueryData(
+        //   queryKeys.articles.list({ breaking: true }),
+        //   initialData.breakingNews
+        // )
 
         // Africa articles (by category)
         if (initialData.africaArticles?.length > 0) {
