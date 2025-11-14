@@ -124,7 +124,6 @@ export function Home() {
           </Row>
         </Container>
       </Suspense>
-      <Categories categories={categories} />
       <Suspense fallback={<NewsSkeleton count={1}/>}>
         <Categories categories={categories} />
       </Suspense>

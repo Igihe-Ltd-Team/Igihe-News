@@ -10,7 +10,7 @@ export default function NewsSkeleton({count = 6}:SkeletonProps) {
     <div className="container">
       <div className="row g-4">
         {items.map((_, i) => (
-          <div className="col-md-4" key={i}>
+          <div className={count > 1 ?"col-md-4" : "col-md-12"} key={i}>
             <div className="card border-0 shadow-sm">
               <div
                 className="placeholder-glow"

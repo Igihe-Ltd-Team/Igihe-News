@@ -1,20 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import HeaderDivider from "@/components/HeaderDivider";
 import { useNewsData } from "@/hooks/useNewsData";
 import { useParams } from "next/navigation";
 import VideoCard from "@/components/videos/VideoCard";
-import { extractYouTubeEmbed, getYouTubeVideoId } from "@/lib/utils";
+import { extractYouTubeEmbed, getYouTubeVideoId, stripHtml } from "@/lib/utils";
+import NewsSkeleton from "@/components/NewsSkeleton";
+import { NewsItem } from "@/types/fetchData";
 
 export default function Page() {
   const { slug } = useParams(); // ✅ get the slug from the route
   const { videos, videosLoading } = useNewsData();
 
   // ✅ Find the video that matches the slug
-  const currentVideo = videos?.find((video: any) => video.slug === slug);
+  const currentVideo = videos?.find((video: NewsItem) => video.slug === slug);
 
-  const igiheVideoId = getYouTubeVideoId(currentVideo?.acf?.igh_yt_video_url)
+  const igiheVideoId = getYouTubeVideoId(currentVideo?.acf?.igh_yt_video_url!)
 
   const embedUrl = igiheVideoId
     ? `https://www.youtube.com/embed/${igiheVideoId}?controls=1&rel=0&playsinline=1`
@@ -25,8 +27,9 @@ export default function Page() {
       <div className="row">
         <div className="col-md-8">
           <div className="single-video-wrapper d-flex flex-column gap-4">
+            {/* <Suspense fallback={<NewsSkeleton/>}></Suspense> */}
             {videosLoading ? (
-              <p>Loading video...</p>
+              <NewsSkeleton/>
             ) : currentVideo && embedUrl ? (
               <>
                 <iframe
@@ -41,7 +44,7 @@ export default function Page() {
                 ></iframe>
 
                 <h1 className="video-title">
-                  {currentVideo?.title?.rendered || "Untitled Video"}
+                  {stripHtml(currentVideo?.title?.rendered) || "Untitled Video"}
                 </h1>
                 <p className="random-text">
                   {currentVideo?.excerpt?.rendered?.replace(/<[^>]+>/g, "") ||
@@ -58,7 +61,7 @@ export default function Page() {
           <HeaderDivider title="Related Videos" />
           <div className="related-videos">
             {videosLoading ? (
-              <p>Loading...</p>
+              <NewsSkeleton count={1}/>
             ) : videos && videos.length > 0 ? (
               videos
                 .filter((v: any) => v.slug !== slug).slice(0, 4)// exclude the current video

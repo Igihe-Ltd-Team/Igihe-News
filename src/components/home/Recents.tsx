@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { Suspense, useMemo } from 'react'
 import HeaderDivider from '../HeaderDivider'
 import { NewsItem } from '@/types/fetchData'
 import DynamicArticleCard from '../news/DynamicArticleCard'
@@ -11,16 +11,18 @@ import { Col, Row } from 'react-bootstrap'
 import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
 import PopularNews from '../news/PopularNews'
+import Videos from './Videos'
+import Opinios from './Opinion'
 
 interface RecentProps {
     latests?: NewsItem[]
     popular?: NewsItem[]
     featured?: NewsItem[]
     advertorials?: NewsItem[]
-    africaArticles?:NewsItem[]
-    entertainment?:NewsItem[]
-    advertorial?:NewsItem[]
-    announcement?:NewsItem[]
+    africaArticles?: NewsItem[]
+    entertainment?: NewsItem[]
+    advertorial?: NewsItem[]
+    announcement?: NewsItem[]
 }
 
 const NewsSection = React.memo(({
@@ -38,7 +40,7 @@ const NewsSection = React.memo(({
         subArticles: safeArticles?.slice(1, 3) || [],
         listArticles: safeArticles?.slice(0, 7) || []
     }), [safeArticles])
-    
+
 
     if (!articles?.length) return null
 
@@ -93,12 +95,12 @@ const NewsSection = React.memo(({
 
 NewsSection.displayName = 'NewsSection'
 
-export default function Recents({ latests, featured, popular,africaArticles,entertainment,advertorial,announcement }: RecentProps) {
+export default function Recents({ latests, featured, popular, africaArticles, entertainment, advertorial, announcement }: RecentProps) {
 
     const safeLatests = Array.isArray(latests) ? latests : [];
     const safeFeatured = Array.isArray(featured) ? featured : [];
 
-    
+
 
     const {
         mainLatest,
@@ -106,7 +108,7 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
         // featuredMain,
         featuredTimeline
     } = useMemo(() => ({
-        mainLatest:safeLatests?.[0],
+        mainLatest: safeLatests?.[0],
         latestsSidebar: safeLatests?.slice(1, 6) || [],
         // featuredMain: featured?.[0],
         featuredTimeline: safeFeatured?.slice(0, 9) || [],
@@ -173,6 +175,10 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
                             /></Col>
                     </Row>
                     <NewsSection title="Africa" articles={africaArticles} />
+
+                    <Suspense fallback={<NewsSkeleton count={3} />}>
+                        <Videos />
+                    </Suspense>
                     <Row>
                         <Col>
                             <AdManager
@@ -190,17 +196,17 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
                             className="mb-2"
                         />
                     </div>
-                    <NewsSection title="Africa" articles={featured} />
+                    {/* <NewsSection title="Africa" articles={featured} /> */}
                 </div>
 
                 <div className="col-xl-4 col-lg-12">
-                    <PopularNews articles={popular || []} name='Popular News'/>
+                    <PopularNews articles={popular || []} name='Popular News' />
                     <div className='pt-2'>
-                        <SectionWithToggle 
-                            title='Advertorials' 
-                            articles={advertorial} 
-                            showImgs 
-                            showDate 
+                        <SectionWithToggle
+                            title='Advertorials'
+                            articles={advertorial}
+                            showImgs
+                            showDate
                             titleBG='#1176BB'
                         />
                     </div>
@@ -209,17 +215,26 @@ export default function Recents({ latests, featured, popular,africaArticles,ente
                     </div>
                     <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
                         <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
-                        <OptimizedImage
-                            src="https://new.igihe.com/wp-content/uploads/2025/06/ca68c8f5595ed47529d84f21ab560f08e700bd97-1.gif"
-                            alt="Featured content"
-                            fill
-                            height={290}
-                            className="object-cover"
+                        <AdManager
+                            position="home-section-1"
+                            priority={true}
+                            className="mb-2"
                         />
                     </div>
                     <div className='pt-3'>
-                        <HeaderDivider title="Opinions" />
+                        <Opinios />
                     </div>
+                    <AdManager
+                        position="home-section-1"
+                        priority={true}
+                        className="mb-2"
+                    />
+                    <AdManager
+                        position="home-section-1"
+                        priority={true}
+                        className="mb-2"
+                    />
+
                 </div>
             </div>
         </div>

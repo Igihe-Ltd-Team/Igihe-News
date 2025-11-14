@@ -584,3 +584,65 @@ border-width: 1px;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+
+
+
+  /* Option card styles */
+.opion-card{
+border: 1px solid #88888826;
+opacity: 1;
+gap: 20px;
+padding-top: 12px;
+padding-right: 13px;
+padding-bottom: 13px;
+padding-left: 13px;
+border-radius: 4px;
+border-width: 1px;
+
+}
+.option-card-img{
+  border-radius: 37.5px;
+}
+
+
+/* RandomCard styles */
+  .RandomCard{
+    background: #FFF1C21A;
+    border: 1px solid #A0A0A0;
+    gap: 32px;
+    display: flex;
+    flex-direction: column;
+border-radius: 8px;
+border-width: 1px;
+padding: 1px;
+
+  }
+
+  .RandomCard .upper-space{
+    border-bottom: 1px solid #A0A0A0;
+min-height: 90px;
+
+padding-top: 20px;
+padding-right: 32px;
+padding-bottom: 21px;
+padding-left: 32px;
+
+  }
+
+  .RandomCard .lower-space{
+
+padding-right: 32px;
+padding-bottom: 40px;
+padding-left: 32px;
+
+  }
+ 
+  @media (max-width: 768px) {
+    .RandomCard .upper-space, .RandomCard .lower-space{
+      padding-right: 16px;
+      padding-left: 16px;
+      padding-bottom: 20px;
+    }
+    
+  }

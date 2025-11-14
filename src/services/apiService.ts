@@ -1040,6 +1040,32 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   }
 
 
+  static async fetchOpinions(params?: {
+    per_page?: number
+    orderby?: string
+    order?: 'asc' | 'desc'
+  }): Promise<NewsItem[]> {
+    try {
+
+      const queryParams = new URLSearchParams()
+      if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+      if (params?.orderby) queryParams.append('orderby', params.orderby)
+      if (params?.order) queryParams.append('order', params.order)
+
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?_embed&${queryParams}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const ads = await response.json()
+      return ads || []
+    } catch (error) {
+      console.error('Error fetching advertisements:', error)
+      return []
+    }
+  }
+
+
 
   static async fetchAnnouncement(): Promise<NewsItem[]> {
     try {
