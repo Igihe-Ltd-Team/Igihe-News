@@ -29,8 +29,8 @@ export function useYoutubeDuration(videoId: string | null) {
 
     async function fetchDuration() {
       try {
-        // const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-        const apiKey = "AIzaSyAoGM17iUisP-ia2F0jZC_0TElRQOmNJEo";
+         const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+     
      
         const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${apiKey}`;
 
