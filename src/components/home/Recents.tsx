@@ -13,6 +13,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 import PopularNews from '../news/PopularNews'
 import Videos from './Videos'
 import Opinios from './Opinion'
+import RandomCard from './RandomCard'
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -126,7 +127,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                     <HeaderDivider title="Latest news" />
                     <div className="row g-3">
                         <div className="col-xl-4 col-lg-6 col-md-6">
-                            <div className="py-4 row">
+                            <div className="row">
                                 {latestsSidebar.map(article => (
                                     <div className="col-xl-12 col-lg-6 col-md-6 col-sd-6 col-6" key={article.id || article.slug}>
                                         <DynamicArticleCard
@@ -142,7 +143,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                             </div>
                         </div>
                         <div className="col-xl-8 col-lg-6 col-md-6">
-                            <div className="py-4">
+                            <div className="">
                                 {mainLatest && (
                                     <DynamicArticleCard
                                         key={mainLatest.id || mainLatest.slug}
@@ -229,6 +230,11 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                         priority={true}
                         className="mb-2"
                     />
+                    <div className='py-4'>
+                        <Suspense fallback={null}>
+                            <RandomCard/>
+                        </Suspense>
+                    </div>
                     <AdManager
                         position="home-section-1"
                         priority={true}

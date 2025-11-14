@@ -7,7 +7,7 @@ interface DividerProps{
 }
 export default function HeaderDivider({title,titleStyle='subtitle'}:DividerProps) {
     return (
-        <div className="divider-container">
+        <div className="divider-container mb-2">
             <div className="divider">
                 <span className="divider-separator">
                     <ThemedText type={titleStyle} lightColor='#282F2F' darkColor='#fff' className="divider__text" >{title}</ThemedText>
