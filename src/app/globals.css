@@ -3,7 +3,10 @@
 @import url('owl.carousel/dist/assets/owl.theme.default.css'); */
 /* @import './owl-custom.css'; */
 
-
+html, body {
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
 html.dark {
   --bs-body-bg: #121212;
   --bs-body-color: #f8f9fa;
