@@ -223,7 +223,9 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                         />
                     </div>
                     <div className='pt-3'>
-                        <Opinios />
+                        <Suspense fallback={<NewsSkeleton count={1} />}>
+                            <Opinios />
+                        </Suspense>
                     </div>
                     <AdManager
                         position="home-section-1"
@@ -232,7 +234,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                     />
                     <div className='py-4'>
                         <Suspense fallback={null}>
-                            <RandomCard/>
+                            <RandomCard />
                         </Suspense>
                     </div>
                     <AdManager

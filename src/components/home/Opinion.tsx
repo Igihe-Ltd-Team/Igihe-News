@@ -20,7 +20,7 @@ export default function Opinios() {
     return (
       <>
         <HeaderDivider title="Opinions" />
-        <NewsSkeleton count={3}/>
+        <NewsSkeleton count={1}/>
       </>
     )
   }
