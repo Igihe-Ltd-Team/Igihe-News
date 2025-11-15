@@ -30,7 +30,7 @@ function CustomSlider({
     const childrenArray = React.Children.toArray(children)
     
     return (
-        <div className="position-relative">
+        <div className="position-relative video-slider">
             <Swiper
                 spaceBetween={spaceBetween}
                 slidesPerView={3}

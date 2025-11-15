@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={raleway.variable}>
         <Providers>
           <Header />
-          <main className="py-4">{children}</main>
+          <main className="py-2">{children}</main>
           <Footer/>
         </Providers>
       </body>
