@@ -201,7 +201,9 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                 </div>
 
                 <div className="col-xl-4 col-lg-12">
-                    <PopularNews articles={popular || []} name='Popular News' />
+                    <Suspense fallback={<NewsSkeleton count={1}/>}>
+                        <PopularNews articles={popular || []} name='Popular News' />
+                    </Suspense>
                     <div className='pt-2'>
                         <SectionWithToggle
                             title='Advertorials'

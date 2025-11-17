@@ -12,6 +12,7 @@ interface AdUnitProps {
   className?: string
   priority?: boolean
   showLabel?: boolean
+  imgClass?:string
 }
 
 export default function AdUnit({ 
@@ -19,7 +20,8 @@ export default function AdUnit({
   position, 
   className = '', 
   priority = false,
-  showLabel = true 
+  showLabel = true,
+  imgClass
 }: AdUnitProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [imageError, setImageError] = useState(false)
@@ -90,7 +92,7 @@ export default function AdUnit({
           height={positionConfig.dimensions.height}
           className="img-fluid rounded"
           priority={priority}
-          imgClass="object-fit-contain"
+          imgClass={`object-fit-contain ${imgClass}`}
         />
       </a>
       {/* {showLabel && (

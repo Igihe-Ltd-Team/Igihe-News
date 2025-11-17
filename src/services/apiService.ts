@@ -253,6 +253,50 @@ export class ApiService {
 
 
 
+static async fetchMostPopularArticlesFallback(params?: {
+  period?: 'day' | 'week' | 'month' | 'all'
+    per_page?: number
+    page?: number
+}): Promise<NewsItem[]> {
+  const defaultParams = {
+    period: 'week',
+    per_page: 5,
+    page: 1,
+    ...params
+  }
+
+  const query = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries({
+        orderby: 'meta_value_num',
+        order: 'desc',
+        meta_key: 'pvt_views',
+        ...defaultParams,
+      }).map(([k, v]) => [k, String(v)])
+    )
+  )
+  
+  const cacheKey = `popular:fallback:${query}`
+
+  return this.cachedFetch(cacheKey, async () => {
+    const response = await this.fetchWithTimeout(
+      `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
+    )
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const posts = await response.json()
+    return Array.isArray(posts) ? posts : []
+  }, 10 * 60 * 1000)
+}
+
+
+
+
+
+
 static async fetchMostPopularArticles(params?: {
     period?: 'day' | 'week' | 'month' | 'all'
     per_page?: number
@@ -277,8 +321,7 @@ static async fetchMostPopularArticles(params?: {
   const cacheKey = `popular:${query}`
 
     return this.cachedFetch(cacheKey, async () => {
-    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
-    // const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&`)
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -300,7 +343,7 @@ static async fetchMostPopularArticles(params?: {
     page?: number
   }) {
     const defaultParams = {
-      period: 'week',
+      period: 'all',
       per_page: 5,
       page: 1,
       ...params
@@ -315,8 +358,8 @@ static async fetchMostPopularArticles(params?: {
         }).map(([k, v]) => [k, String(v)])
       )
     )
-
-    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
+// popular-posts?category_id=3&period=month&per_page=10"
+    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/popular-posts?category_id=${categoryId}&${query}&_embed=1`)
 
     return response.json()
   }

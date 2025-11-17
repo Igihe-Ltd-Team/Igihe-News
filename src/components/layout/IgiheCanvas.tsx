@@ -9,9 +9,10 @@ import { Offcanvas, Button, Container, Row, Col } from 'react-bootstrap'
 interface menuItemProps {
     categories?: (Category | undefined)[]
     showHome?: boolean
+    btnVariant?:string
 }
 
-export default function IgiheCanvas({ categories, showHome }: menuItemProps) {
+export default function IgiheCanvas({ categories, showHome,btnVariant }: menuItemProps) {
 
     const [show, setShow] = useState(false)
 
@@ -19,9 +20,8 @@ export default function IgiheCanvas({ categories, showHome }: menuItemProps) {
     const handleShow = () => setShow(true)
 
     return (
-        <Row className="justify-content-center">
-            <Col md={6} className="text-center">
-                <Button variant='light' onClick={handleShow}>
+        <div className="justify-content-center">
+                <Button variant={btnVariant} onClick={handleShow}>
                     <span className="navbar-toggler-icon">
                         <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
@@ -92,7 +92,6 @@ export default function IgiheCanvas({ categories, showHome }: menuItemProps) {
 
                     </Offcanvas.Body>
                 </Offcanvas>
-            </Col>
-        </Row>
+        </div>
     )
 }

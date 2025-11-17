@@ -18,8 +18,8 @@ export default function ThemeSwitcher() {
       style={{
         borderRadius: "50%",
         boxShadow: "0 0 4px rgba(0,0,0,0.1)",
-        height:32,
-        width:32,
+        height:14,
+        width:14,
         justifyContent:'center',
         alignItems:'center',
         display:'flex'

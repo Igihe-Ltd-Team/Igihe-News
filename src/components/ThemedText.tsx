@@ -23,7 +23,7 @@ export function ThemedText({
   const { theme, systemTheme } = useTheme();
   // Type-specific Bootstrap classes
   const typeClasses = {
-    small: 'small-txt lh-sm fw-medium', // fs-6 ≈ 12px, fw-light
+    small: 'small-txt fw-normal', // fs-6 ≈ 12px, fw-light
     smallBold: 'small-txt lh-1 fw-bold',
     default: 'fs-6 lh-sm fw-medium', // fs-5 ≈ 16px
     defaultItalic: 'fs-6 lh-sm fw-normal fst-italic',

@@ -14,6 +14,7 @@ interface AdManagerProps {
   maxAds?: number
   showLabel?: boolean
   fallbackComponent?: React.ReactNode
+  imgClass?:string
 }
 
 export default function AdManager({ 
@@ -22,7 +23,8 @@ export default function AdManager({
   priority = false,
   maxAds = 1,
   showLabel = true,
-  fallbackComponent
+  fallbackComponent,
+  imgClass
 }: AdManagerProps) {
   const { data: ads, isLoading, error } = useQuery({
     queryKey: queryKeys.ads.byPosition(position),
@@ -55,6 +57,7 @@ export default function AdManager({
           priority={priority && index === 0}
           showLabel={showLabel}
           className={index > 0 ? 'mt-3' : ''}
+          imgClass={imgClass}
         />
       ))}
     </div>

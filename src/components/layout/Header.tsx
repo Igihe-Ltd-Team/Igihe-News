@@ -12,7 +12,7 @@ import { useResponsive } from '@/hooks/useResponsive';
 import IgiheCanvas from './IgiheCanvas';
 import { useTheme } from 'next-themes';
 import { ThemedText } from '../ThemedText';
-
+import { usePathname } from 'next/navigation'
 
 const menus = [
     { name: "Politics" },
@@ -32,6 +32,7 @@ const menus = [
 
 
 export default function Header() {
+    const pathname = usePathname()
     const { isMobile } = useResponsive()
     const {
         categories
@@ -58,7 +59,7 @@ export default function Header() {
     return (
         <div className='site-header'>
             <div className="overlay"></div>
-            <div className="container p-2 z-1 position-relative">
+            <div className="container z-1 position-relative">
                 {/* Top section with adds */}
                 {
                     !isMobile &&
@@ -67,20 +68,18 @@ export default function Header() {
                             <AdManager
                                 position="header-landscape-ad-1"
                                 priority={true}
-                                className="mb-2"
                             /></Col>
                         <Col>
                             <AdManager
                                 position="header-landscape-ad-2"
                                 priority={true}
-                                className="mb-2"
                             /></Col>
                     </Row>
                 }
 
 
                 {/* Langauge switch section */}
-                <div className={`d-flex mx-1 align-items-center justify-content-between bg-white-black px-4`}>
+                <div className={`d-flex align-items-center justify-content-between bg-white-black px-4`}>
                     <div className="col-md-8 lang-switcher d-flex align-items-center">
                         <Languages />
                     </div>
@@ -99,7 +98,7 @@ export default function Header() {
                 {/* Logo and banner */}
                 <div className="row flex align-items-center py-3 justify-content-between">
                     <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
-                        <Link href="#">
+                        <Link href="/">
                             <span className='site-logo'>
                                 <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clipPath="url(#clip0_2928_1291)">
@@ -123,7 +122,7 @@ export default function Header() {
 
                         {
                             isMobile &&
-                            <IgiheCanvas categories={orderedCategories.filter(Boolean)} showHome />
+                            <IgiheCanvas categories={orderedCategories.filter(Boolean)} showHome btnVariant='light' />
                         }
 
                     </div>
@@ -134,6 +133,7 @@ export default function Header() {
                                 position="header-landscape-ad-2"
                                 priority={true}
                                 className="mb-2"
+                                imgClass="object-position-right"
                             />
                         </Col>
                     }
@@ -177,7 +177,7 @@ export default function Header() {
                                                     </svg>
 
                                                 </span>
-                                                <ThemedText darkColor='#fff' lightColor='#282F2F'>
+                                                <ThemedText type={pathname === `/` ? 'defaultSemiBold':'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB':'#282F2F'}>
                                                     Home
                                                 </ThemedText>
                                             </Link>
@@ -204,9 +204,12 @@ export default function Header() {
                                                                     </clipPath>
                                                                 </defs>
                                                             </svg>
-
                                                         </span>
-                                                        <ThemedText style={{ textTransform: 'capitalize' }} darkColor='#fff' lightColor='#282F2F'>
+                                                        <ThemedText 
+                                                            style={{ textTransform: 'capitalize' }} 
+                                                            type={pathname === `/news/${NavItem.slug}` ? 'defaultSemiBold':'default'} 
+                                                            darkColor='#fff' 
+                                                            lightColor={pathname === `/news/${NavItem.slug}` ? '#1176BB':'#282F2F'}>
                                                             {NavItem?.name || 'Home'}
                                                         </ThemedText>
                                                     </Link>
@@ -216,17 +219,15 @@ export default function Header() {
                                             <li className="nav-item text-muted"></li>
                                         )}
 
-
                                     </ul>
 
                                     <div className="right-options d-flex align-items-center">
                                         <div className="searchButton">
-                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M17.5 17.5L14.5834 14.5833M16.6667 9.58333C16.6667 13.4953 13.4953 16.6667 9.58333 16.6667C5.67132 16.6667 2.5 13.4953 2.5 9.58333C2.5 5.67132 5.67132 2.5 9.58333 2.5C13.4953 2.5 16.6667 5.67132 16.6667 9.58333Z" stroke="black" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
-
                                         </div>
-                                        <IgiheCanvas categories={otherCategories.filter(Boolean)} />
+                                        <IgiheCanvas btnVariant='' categories={otherCategories.filter(Boolean)} />
                                     </div>
                                 </div>
                             </div>

@@ -31,8 +31,8 @@ export function useNewsData() {
   })
 
   const popularArticlesQuery = useQuery({
-    queryKey: queryKeys.articles.popular({ period: 'week' }),
-    queryFn: () => ApiService.fetchMostPopularArticles({ period: 'week', per_page: 10 }),
+    queryKey: queryKeys.articles.popular({ period: 'all' }),
+    queryFn: () => ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
     staleTime: 10 * 60 * 1000,
   })
 

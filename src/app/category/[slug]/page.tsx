@@ -8,7 +8,7 @@ import PopularNews from '@/components/news/PopularNews'
 import HeaderDivider from '@/components/HeaderDivider'
 import AdManager from '@/components/ads/AdManager'
 import { useNewsData } from '@/hooks/useNewsData'
-import { use, useEffect, useState } from 'react'
+import { Suspense, use, useEffect, useMemo, useState } from 'react'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import SingleSkeleton from '@/components/Loading/SingleSkeleton'
 
@@ -22,7 +22,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   
   // Then declare all hooks
   const [showLoadMore, setShowLoadMore] = useState(false)
-  const { useCategorySlugArticles,useCategoryTagArticles } = useNewsData()
+  const { useCategorySlugArticles,useCategoryTagArticles,usePopularByCategory } = useNewsData()
   
   // Now use the hook with the resolved slug
   const {
@@ -34,17 +34,19 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     isError,
     error
   } = useCategorySlugArticles(slug)
-  console.log(data)
+const categoryId = useMemo(() => data?.pages?.[0]?.category?.id, [data])
+  const posts = useMemo(() => data?.pages.flatMap(page => page.posts.data) || [], [data])
+
 
   const {
     data: highlightArticles = [],
     isLoading:highLightLoading
-  } = useCategoryTagArticles(39,data?.pages?.[0]?.category?.id)
+  } = useCategoryTagArticles(39,categoryId)
+  const {data:popular,isLoading:popularLoading} = usePopularByCategory(categoryId)
 
-  console.log('featured',data?.pages?.[0]?.category?.id)
 
 
-  const posts = data?.pages.flatMap(page => page.posts.data) || []
+  
 
   // Effect to show load more button
   useEffect(() => {
@@ -176,7 +178,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           </Col>
           
           <Col md={4} className='sticky-sidebar'>
-            <PopularNews articles={posts} name={`Popular In ${categoryName}`} />
+          <Suspense fallback={<NewsSkeleton count={1}/>}>
+            <PopularNews articles={popular} name={`Popular In ${categoryName}`} />
+          </Suspense>
           </Col>
         </Row>
       </div>
