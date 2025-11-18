@@ -29,7 +29,7 @@ export default function RandomCard() {
             <div className="lower-space">
                 <ThemedText>
                     {
-                        stripHtml(data?.[0].excerpt.rendered || '')
+                        stripHtml(data?.[0]?.excerpt.rendered || '')
                     }
                 </ThemedText>
             </div>

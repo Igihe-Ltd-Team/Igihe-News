@@ -3,14 +3,34 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, Cate
 
 // Configuration
 const API_CONFIG = {
-  // baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
-  baseURL: '/api/wp/v2',
+  baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://your-wordpress-site.com/wp-json/wp/v2',
   timeout: 10000, // 10 seconds
   retryAttempts: 2,
   cacheTimeout: 5 * 60 * 1000, // 5 minutes
   maxCacheSize: 100,
 }
 
+// Request cache for deduplication
+// const requestCache = new Map<string, { data: any; timestamp: number }>()
+
+// Rate limiting
+// const rateLimit = {
+//   requests: new Map<string, number[]>(),
+//   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
+//     const now = Date.now()
+//     const windowStart = now - windowMs
+//     const requests = rateLimit.requests.get(key) || []
+//     const recentRequests = requests.filter(time => time > windowStart)
+
+//     if (recentRequests.length >= maxRequests) {
+//       throw new Error('Rate limit exceeded')
+//     }
+
+//     recentRequests.push(now)
+//     rateLimit.requests.set(key, recentRequests)
+//     return true
+//   }
+// }
 
 
 
@@ -37,14 +57,14 @@ class LRUCache<T> {
     if (this.cache.has(key)) {
       this.cache.delete(key)
     }
-    
+
     // Remove oldest if at capacity
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value
-      if(firstKey)
+      if (firstKey)
         this.cache.delete(firstKey)
     }
-    
+
     this.cache.set(key, value)
   }
 
@@ -80,11 +100,11 @@ const rateLimit = {
     const windowStart = now - windowMs
     const requests = rateLimit.requests.get(key) || []
     const recentRequests = requests.filter(time => time > windowStart)
-    
+
     if (recentRequests.length >= maxRequests) {
       throw new Error('Rate limit exceeded')
     }
-    
+
     recentRequests.push(now)
     rateLimit.requests.set(key, recentRequests)
     return true
@@ -102,46 +122,95 @@ export class ApiError extends Error {
   }
 }
 
-
+const pendingRequests = new Map<string, Promise<any>>()
 
 export class ApiService {
 
-  private static async fetchWithTimeout(
-  url: string,
-  options: RequestInit = {},
-  timeout = API_CONFIG.timeout
-) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+
+  private static async dedupedFetch<T>(
+    cacheKey: string,
+    fetchFn: () => Promise<T>,
+    ttl: number = API_CONFIG.cacheTimeout
+  ): Promise<T> {
+    const now = Date.now()
+    const cached = requestCache.get(cacheKey)
+
+    // Return cached data if not expired
+    if (cached && (now - cached.timestamp) < ttl) {
+      return cached.data
     }
 
-    return response;
-  } catch (error) {
-    if (controller.signal.aborted) {
-      throw new Error("Request timed out");
+    // Check if same request is already in flight
+    if (pendingRequests.has(cacheKey)) {
+      return pendingRequests.get(cacheKey)!
     }
-    throw error;
-  } finally {
-    clearTimeout(id); // ALWAYS clear
+
+    // Rate limiting check
+    rateLimit.check('api_requests', 100, 60000)
+
+    try {
+      const requestPromise = fetchFn()
+      pendingRequests.set(cacheKey, requestPromise)
+
+      const data = await requestPromise
+
+      // Cache the successful response
+      requestCache.set(cacheKey, { data, timestamp: now })
+
+      return data
+    } catch (error) {
+      // On error, return cached data even if expired (stale-while-revalidate)
+      if (cached) {
+        console.warn('Using stale cache due to API error:', error)
+        return cached.data
+      }
+      throw error
+    } finally {
+      // Always remove from pending requests
+      pendingRequests.delete(cacheKey)
+    }
   }
-}
+
+
+
+  private static async fetchWithTimeout(
+    url: string,
+    options: RequestInit = {},
+    timeout = API_CONFIG.timeout
+  ) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response;
+    } catch (error) {
+      if (controller.signal.aborted) {
+        throw new Error("Request timed out");
+      }
+      throw error;
+    } finally {
+      clearTimeout(id); // ALWAYS clear
+    }
+  }
 
   private static async cachedFetch<T>(
-    cacheKey: string, 
+    cacheKey: string,
     fetchFn: () => Promise<T>,
     ttl: number = API_CONFIG.cacheTimeout
   ): Promise<T> {
@@ -158,10 +227,10 @@ export class ApiService {
 
     try {
       const data = await fetchFn()
-      
+
       // Cache the successful response
       requestCache.set(cacheKey, { data, timestamp: now })
-      
+
       return data
     } catch (error) {
       // On error, return cached data even if expired (stale-while-revalidate)
@@ -190,8 +259,8 @@ export class ApiService {
   }
 
   private static buildPaginationResponse<T>(
-    data: T[], 
-    response: Response, 
+    data: T[],
+    response: Response,
     params: { page?: number; per_page?: number }
   ): articleResponse<T> {
     const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1')
@@ -212,72 +281,72 @@ export class ApiService {
   }
 
   static async fetchPostBySlug(slug: string): Promise<NewsItem | null> {
-  const cacheKey = `post:${slug}`
+    const cacheKey = `post:${slug}`
 
-  return this.cachedFetch(cacheKey, async () => {
-    const response = await this.fetchWithTimeout(
-      `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
-    )
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const posts = await response.json()
-    if (!Array.isArray(posts) || posts.length === 0) {
-      return null
-    }
-    return posts[0]
-  }, 10 * 60 * 1000)
-}
+    return this.cachedFetch(cacheKey, async () => {
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
+      )
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-
-static async fetchMostPopularArticlesFallback(params?: {
-  period?: 'day' | 'week' | 'month' | 'all'
-    per_page?: number
-    page?: number
-}): Promise<NewsItem[]> {
-  const defaultParams = {
-    period: 'week',
-    per_page: 5,
-    page: 1,
-    ...params
+      const posts = await response.json()
+      if (!Array.isArray(posts) || posts.length === 0) {
+        return null
+      }
+      return posts[0]
+    }, 10 * 60 * 1000)
   }
 
-  const query = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries({
-        orderby: 'meta_value_num',
-        order: 'desc',
-        meta_key: 'pvt_views',
-        ...defaultParams,
-      }).map(([k, v]) => [k, String(v)])
-    )
-  )
-  
-  const cacheKey = `popular:fallback:${query}`
 
-  return this.cachedFetch(cacheKey, async () => {
-    const response = await this.fetchWithTimeout(
-      `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
-    )
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+
+  static async fetchMostPopularArticlesFallback(params?: {
+    period?: 'day' | 'week' | 'month' | 'all'
+    per_page?: number
+    page?: number
+  }): Promise<NewsItem[]> {
+    const defaultParams = {
+      period: 'week',
+      per_page: 5,
+      page: 1,
+      ...params
     }
-    
-    const posts = await response.json()
-    return Array.isArray(posts) ? posts : []
-  }, 10 * 60 * 1000)
-}
+
+    const query = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries({
+          orderby: 'meta_value_num',
+          order: 'desc',
+          meta_key: 'pvt_views',
+          ...defaultParams,
+        }).map(([k, v]) => [k, String(v)])
+      )
+    )
+
+    const cacheKey = `popular:fallback:${query}`
+
+    return this.cachedFetch(cacheKey, async () => {
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const posts = await response.json()
+      return Array.isArray(posts) ? posts : []
+    }, 10 * 60 * 1000)
+  }
 
 
 
 
 
 
-static async fetchMostPopularArticles(params?: {
+  static async fetchMostPopularArticles(params?: {
     period?: 'day' | 'week' | 'month' | 'all'
     per_page?: number
     page?: number
@@ -290,31 +359,31 @@ static async fetchMostPopularArticles(params?: {
     }
 
     const query = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries({
-        orderby: 'popularity',
-        order: 'desc',
-        ...defaultParams,
-      }).map(([k, v]) => [k, String(v)])
+      Object.fromEntries(
+        Object.entries({
+          orderby: 'popularity',
+          order: 'desc',
+          ...defaultParams,
+        }).map(([k, v]) => [k, String(v)])
+      )
     )
-  )
-  const cacheKey = `popular:${query}`
+    const cacheKey = `popular:${query}`
 
     return this.cachedFetch(cacheKey, async () => {
-    const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const posts = await response.json()
-    return Array.isArray(posts) ? posts : []
-  }, 10 * 60 * 1000)
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const posts = await response.json()
+      return Array.isArray(posts) ? posts : []
+    }, 10 * 60 * 1000)
 
   }
 
 
-  
+
 
 
   static async fetchPopularArticlesByCategory(categoryId: number, params?: {
@@ -338,7 +407,7 @@ static async fetchMostPopularArticles(params?: {
         }).map(([k, v]) => [k, String(v)])
       )
     )
-// popular-posts?category_id=3&period=month&per_page=10"
+    // popular-posts?category_id=3&period=month&per_page=10"
     const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/popular-posts?category_id=${categoryId}&${query}&_embed=1`)
 
     return response.json()
@@ -346,7 +415,7 @@ static async fetchMostPopularArticles(params?: {
 
 
 
-   static async fetchPopularArticlesByCategorySlug(slug: string, params?: {
+  static async fetchPopularArticlesByCategorySlug(slug: string, params?: {
     period?: 'day' | 'week' | 'month' | 'all'
     per_page?: number
     page?: number
@@ -359,37 +428,37 @@ static async fetchMostPopularArticles(params?: {
     }
 
     const query = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries({
-        category_slug: slug,
-        orderby: 'popularity',
-        order: 'desc',
-        ...defaultParams,
-      }).map(([k, v]) => [k, String(v)])
+      Object.fromEntries(
+        Object.entries({
+          category_slug: slug,
+          orderby: 'popularity',
+          order: 'desc',
+          ...defaultParams,
+        }).map(([k, v]) => [k, String(v)])
+      )
     )
-  )
     const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/posts?_embed&${query}`)
 
     return response.json()
   }
 
 
-  
+
 
   // Categories API
 
   static async fetchCategoryBySlug(slug: string): Promise<Category | null> {
     try {
       const response = await this.fetchWithTimeout(
-      `${API_CONFIG.baseURL}/categories?slug=${slug}&_embed`
-    )
-      
+        `${API_CONFIG.baseURL}/categories?slug=${slug}&_embed`
+      )
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const categories = await response.json()
-      
+
       // Return the first category or null if not found
       return categories[0] || null
     } catch (error) {
@@ -398,50 +467,47 @@ static async fetchMostPopularArticles(params?: {
     }
   }
 
-  
+
 
   static async fetchPostsByCategorySlug(
-  slug: string, 
-  params?: {
-    per_page?: number
-    page?: number
-    orderby?: 'date' | 'modified' | 'title' | 'comment_count'
-    order?: 'asc' | 'desc'
-  }
-): Promise<CategoryPostsResponse | null> {
-  try {
-    const category = await this.fetchCategoryBySlug(slug)
-    if (!category) {
-      console.log('Category not found for slug:', slug)
+    slug: string,
+    params?: {
+      per_page?: number
+      page?: number
+      orderby?: 'date' | 'modified' | 'title' | 'comment_count'
+      order?: 'asc' | 'desc'
+    }
+  ): Promise<CategoryPostsResponse | null> {
+    try {
+      const category = await this.fetchCategoryBySlug(slug)
+      if (!category) {
+        console.log('Category not found for slug:', slug)
+        return null
+      }
+      const postsResponse = await this.fetchArticles({
+        categories: [category.id],
+        ...params
+      })
+      return {
+        posts: postsResponse,
+        category: category
+      }
+    } catch (error) {
+      console.error('Error fetching posts by category slug:', error)
       return null
     }
-    const postsResponse = await this.fetchArticles({
-      categories: [category.id],
-      ...params
-    })
-    return {
-      posts: postsResponse,
-      category: category
-    }
-  } catch (error) {
-    console.error('Error fetching posts by category slug:', error)
-    return null
   }
-}
 
 
-static async fetchCategories(params?: {
-    page?: number
-    per_page?: number
-    exclude?: number[]
-    include?: number[]
-    orderby?: 'id' | 'count' | 'name' | 'slug' | 'include' | 'term_group' // Make it optional
-  }): Promise<Category[]> {
+  static async fetchCategories(params?: any): Promise<Category[]> {
+  const cacheKey = `categories:${JSON.stringify(params)}`
+  
+  return this.dedupedFetch(cacheKey, async () => {
+    // Your existing categories fetch logic
     const queryParams: Record<string, any> = {
-      page: params?.page,
       per_page: params?.per_page || 100,
       _fields: 'id,name,slug,count,description',
-      orderby: params?.orderby || 'count', // Use param or default to 'count'
+      orderby: params?.orderby || 'count',
       order: 'desc',
     }
 
@@ -449,39 +515,32 @@ static async fetchCategories(params?: {
       queryParams.exclude = params.exclude.join(',')
     }
 
-    if (params?.include?.length) {
-      queryParams.include = params.include.join(',')
-    }
+    const queryString = this.buildQuery(queryParams)
+    const response = await this.fetchWithTimeout(
+      `${API_CONFIG.baseURL}/categories?${queryString}`
+    )
 
-    const cacheKey = `categories:${JSON.stringify(queryParams)}`
-
-    return this.cachedFetch(cacheKey, async () => {
-      const queryString = this.buildQuery(queryParams)
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/categories?${queryString}`
-      )
-
-      const data = await response.json()
-      return data.filter((category: Category) => category.count > 0)
-    }, 10 * 60 * 1000) // 10 minutes cache for categories
-  }
+    const data = await response.json()
+    return data.filter((category: Category) => category.count > 0)
+  }, 30 * 60 * 1000) // 30 minutes cache for categories
+}
 
   // Articles/Posts API
 
   static async fetchArticles(params?: {
-  page?: number
-  per_page?: number
-  categories?: number[]
-  search?: string
-  exclude?: number[]
-  include?: number[]
-  orderby?: 'date' | 'modified' | 'title' | 'comment_count' | 'relevance' | 'slug' | 'include' | 'id'
-  order?: 'asc' | 'desc'
-  after?: string
-  before?: string,
-  author?:number,
-  tags?:number[]
-}): Promise<articleResponse<NewsItem>> {
+    page?: number
+    per_page?: number
+    categories?: number[]
+    search?: string
+    exclude?: number[]
+    include?: number[]
+    orderby?: 'date' | 'modified' | 'title' | 'comment_count' | 'relevance' | 'slug' | 'include' | 'id'
+    order?: 'asc' | 'desc'
+    after?: string
+    before?: string,
+    author?: number,
+    tags?: number[]
+  }): Promise<articleResponse<NewsItem>> {
     const queryParams: Record<string, any> = {
       page: params?.page || 1,
       per_page: params?.per_page || 20,
@@ -493,7 +552,7 @@ static async fetchCategories(params?: {
     if (params?.categories?.length) {
       queryParams.categories = params.categories.join(',')
     }
-    if(params?.tags?.length){
+    if (params?.tags?.length) {
       queryParams.tags = params.tags.join(',')
     }
 
@@ -623,7 +682,7 @@ static async fetchCategories(params?: {
       )
 
       const data = await response.json()
-      
+
       // If no results, fall back to latest posts
       if (data.length === 0) {
         return this.fetchArticles({ per_page: 6 }).then(res => res.data)
@@ -680,18 +739,18 @@ static async fetchCategories(params?: {
 
     return this.cachedFetch(cacheKey, async () => {
       const [posts, videos] = await Promise.allSettled([
-        params?.type !== 'videos' ? 
-          this.fetchArticles({ 
-            search: query, 
-            per_page: params?.per_page || 20 
-          }).then(res => res.data) : 
+        params?.type !== 'videos' ?
+          this.fetchArticles({
+            search: query,
+            per_page: params?.per_page || 20
+          }).then(res => res.data) :
           Promise.resolve([]),
-        
-        params?.type !== 'posts' ? 
-          this.fetchVideos({ 
-            search: query, 
-            per_page: params?.per_page || 20 
-          }) : 
+
+        params?.type !== 'posts' ?
+          this.fetchVideos({
+            search: query,
+            per_page: params?.per_page || 20
+          }) :
           Promise.resolve([])
       ])
 
@@ -749,7 +808,7 @@ static async fetchCategories(params?: {
     )
 
     // Invalidate comments cache for this post
-    const cacheKeys = Array.from(requestCache.keys()).filter(key => 
+    const cacheKeys = Array.from(requestCache.keys()).filter(key =>
       key.startsWith(`comments:${postId}`)
     )
     cacheKeys.forEach(key => requestCache.delete(key))
@@ -771,10 +830,10 @@ static async fetchCategories(params?: {
   }
 
   // Batch requests for better performance
-  static async batchRequests(requests: Array<{ 
-    method: string; 
-    url: string; 
-    params?: Record<string, any> 
+  static async batchRequests(requests: Array<{
+    method: string;
+    url: string;
+    params?: Record<string, any>
   }>): Promise<any[]> {
     return Promise.allSettled(
       requests.map(async (request) => {
@@ -793,8 +852,8 @@ static async fetchCategories(params?: {
             throw new Error(`Unknown method: ${request.method}`)
         }
       })
-    ).then(results => 
-      results.map(result => 
+    ).then(results =>
+      results.map(result =>
         result.status === 'fulfilled' ? result.value : null
       )
     )
@@ -828,7 +887,7 @@ static async fetchCategories(params?: {
   // static getCacheStats() {
   //   const now = Date.now()
   //   const entries = Array.from(requestCache.entries())
-    
+
   //   return {
   //     totalEntries: entries.length,
   //     expiredEntries: entries.filter(([_, value]) => 
@@ -858,7 +917,7 @@ static async fetchCategories(params?: {
   static async fetchCategoriesWithPosts(limit: number = 20): Promise<Array<Category & { recent_posts: NewsItem[] }>> {
     try {
       const categories = await this.fetchPopularCategories(limit)
-      
+
       const categoriesWithPosts = await Promise.all(
         categories.map(async (category) => {
           try {
@@ -890,14 +949,14 @@ static async fetchCategories(params?: {
     }
   }
 
-static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
+  static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
     try {
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/users?slug=${slug}&_embed`)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const authors = await response.json()
       return authors[0] || null
     } catch (error) {
@@ -909,11 +968,11 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   static async fetchAuthorById(id: number): Promise<Author | null> {
     try {
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/users/${id}?_embed`)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const author = await response.json()
       return author || null
     } catch (error) {
@@ -925,7 +984,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
 
 
   static async fetchPostsByAuthorSlug(
-    slug: string, 
+    slug: string,
     params?: {
       per_page?: number
       page?: number
@@ -936,7 +995,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
     try {
       // First get the author by slug
       const author = await this.fetchAuthorBySlug(slug)
-      
+
       if (!author) {
         console.warn(`Author with slug "${slug}" not found`)
         return { data: [], author: null }
@@ -962,7 +1021,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
 
 
   static async fetchPostsByAuthorId(
-    authorId: number, 
+    authorId: number,
     params?: {
       per_page?: number
       page?: number
@@ -974,7 +1033,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       const postsResponse = await this.fetchArticles({
         author: authorId
       })
-      
+
       return postsResponse.data || []
     } catch (error) {
       console.error('Error fetching posts by author ID:', error)
@@ -1001,11 +1060,11 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       if (params?.order) queryParams.append('order', params.order)
 
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/users?${queryParams}`)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const authors = await response.json()
       return authors || []
     } catch (error) {
@@ -1017,7 +1076,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
   static async fetchAuthorsWithPosts(limit: number = 10): Promise<AuthorWithPosts[]> {
     try {
       const authors = await this.fetchAllAuthors({ per_page: limit })
-      
+
       const authorsWithPosts = await Promise.all(
         authors.map(async (author) => {
           try {
@@ -1044,7 +1103,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       return []
     }
   }
-  
+
 
 
   static async fetchAdvertorals(): Promise<NewsItem[]> {
@@ -1053,7 +1112,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const ads = await response.json()
       return ads || []
     } catch (error) {
@@ -1079,7 +1138,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const ads = await response.json()
       return ads || []
     } catch (error) {
@@ -1105,7 +1164,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const ads = await response.json()
       return ads || []
     } catch (error) {
@@ -1122,7 +1181,7 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const ads = await response.json()
       return ads || []
     } catch (error) {
@@ -1133,27 +1192,26 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
 
 
 
-  
-  
-  
-  
+
+
+
+
   static async fetchAdvertisements(): Promise<Advertisement[]> {
-    try {
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_fields=id,slug,title,menu_order,class_list,acf,link`
-      )
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const ads = await response.json()
-      return ads || []
-    } catch (error) {
-      console.error('Error fetching advertisements:', error)
-      return []
+  const cacheKey = 'advertisements:all'
+  
+  return this.dedupedFetch(cacheKey, async () => {
+    const response = await this.fetchWithTimeout(
+      `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
+    )
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-  }
+    
+    const ads = await response.json()
+    return ads || []
+  }, 10 * 60 * 1000) // 10 minutes cache for ads
+}
 
   static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
     try {
@@ -1169,11 +1227,11 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
     try {
       const ads = await this.fetchAdvertisements()
       const result: Record<AdPositionKey, Advertisement[]> = {} as any
-      
+
       positions.forEach(position => {
         result[position] = getAdsByPosition(ads, position)
       })
-      
+
       return result
     } catch (error) {
       console.error('Error fetching ads by positions:', error)
@@ -1181,5 +1239,5 @@ static async fetchAuthorBySlug(slug: string): Promise<Author | null> {
     }
   }
 
-  
+
 }
