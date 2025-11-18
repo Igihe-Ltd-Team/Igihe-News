@@ -24,29 +24,6 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
 
-  headers: async () => [
-    {
-      source: '/(.*)',
-      headers: [
-        {
-          key: 'Cache-Control',
-          value: 's-maxage=3600, stale-while-revalidate=86400',
-        },
-        {
-          key: 'X-Content-Type-Options',
-          value: 'nosniff'
-        },
-        {
-          key: 'X-Frame-Options',
-          value: 'DENY'
-        },
-        {
-          key: 'X-XSS-Protection',
-          value: '1; mode=block'
-        }
-      ],
-    }
-  ]
 
 };
 
