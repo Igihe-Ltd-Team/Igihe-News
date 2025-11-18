@@ -11,27 +11,6 @@ const API_CONFIG = {
   maxCacheSize: 100,
 }
 
-// Request cache for deduplication
-// const requestCache = new Map<string, { data: any; timestamp: number }>()
-
-// Rate limiting
-// const rateLimit = {
-//   requests: new Map<string, number[]>(),
-//   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
-//     const now = Date.now()
-//     const windowStart = now - windowMs
-//     const requests = rateLimit.requests.get(key) || []
-//     const recentRequests = requests.filter(time => time > windowStart)
-    
-//     if (recentRequests.length >= maxRequests) {
-//       throw new Error('Rate limit exceeded')
-//     }
-    
-//     recentRequests.push(now)
-//     rateLimit.requests.set(key, recentRequests)
-//     return true
-//   }
-// }
 
 
 

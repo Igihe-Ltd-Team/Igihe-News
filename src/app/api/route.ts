@@ -78,12 +78,12 @@ export async function GET(
   } catch (error) {
     console.error('Proxy error:', error)
     
-    if (error.name === 'TimeoutError') {
+    // if (error.name === 'TimeoutError') {
       return NextResponse.json(
         { error: 'Request timeout' },
         { status: 504 }
       )
-    }
+    // }
     
     return NextResponse.json(
       { error: 'Internal server error' },
