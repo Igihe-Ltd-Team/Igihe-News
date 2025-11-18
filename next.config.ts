@@ -12,8 +12,6 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   images: {
-    formats: ['image/avif', 'image/webp'],
-    domains: ['stage.igihe.com', 'new.igihe.com'],
     remotePatterns: [
       {
         protocol: "https",
