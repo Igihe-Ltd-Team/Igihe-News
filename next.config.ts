@@ -29,6 +29,10 @@ const nextConfig: NextConfig = {
       source: '/(.*)',
       headers: [
         {
+          key: 'Cache-Control',
+          value: 's-maxage=3600, stale-while-revalidate=86400',
+        },
+        {
           key: 'X-Content-Type-Options',
           value: 'nosniff'
         },
@@ -43,7 +47,7 @@ const nextConfig: NextConfig = {
       ],
     }
   ]
-  
+
 };
 
 export default nextConfig;

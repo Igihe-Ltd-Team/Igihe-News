@@ -6,9 +6,9 @@ export interface HomePageData {
   featuredArticles: NewsItem[]
   popularArticles: NewsItem[]
   highlightTagArticles: NewsItem[]
-  latestArticles: NewsItem[]
-  africaArticles: NewsItem[]
-  EntertainmentArticles: NewsItem[]
+  // latestArticles: NewsItem[]
+  // africaArticles: NewsItem[]
+  // EntertainmentArticles: NewsItem[]
 }
 
 export async function prefetchHomeData(): Promise<HomePageData> {
@@ -18,10 +18,10 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       categories,
       featuredResponse,
       popularArticles,
-      latestResponse,
+      // latestResponse,
       highlightResponse,
-      africaResponse,
-      entertainmentResponse,
+      // africaResponse,
+      // entertainmentResponse,
     ] = await Promise.allSettled([
       // Categories
       ApiService.fetchCategories({ per_page: 100 }),
@@ -32,16 +32,16 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
       
       // Latest articles
-      ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
+      // ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
       
       // highlight
       ApiService.fetchArticles({ tags: [39], per_page: 15, orderby: 'date' }),
       
       // Africa category articles (adjust category slug as needed)
-      ApiService.fetchArticles({ categories: [25], per_page: 11 }),
+      // ApiService.fetchArticles({ categories: [25], per_page: 11 }),
       
       // Entertainment articles
-      ApiService.fetchArticles({ categories: [7], per_page: 11 }),
+      // ApiService.fetchArticles({ categories: [7], per_page: 11 }),
 
     ])
 
@@ -49,9 +49,9 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       categories: categories.status === 'fulfilled' ? categories.value : [],
       featuredArticles: featuredResponse.status === 'fulfilled' ? featuredResponse.value.data : [],
       popularArticles: popularArticles.status === 'fulfilled' ? popularArticles.value : [],
-      latestArticles: latestResponse.status === 'fulfilled' ? latestResponse.value.data : [],
-      africaArticles: africaResponse.status === 'fulfilled' && africaResponse.value ? africaResponse.value.data : [],
-      EntertainmentArticles: entertainmentResponse.status === 'fulfilled' && entertainmentResponse.value ? entertainmentResponse.value.data : [],
+      // latestArticles: latestResponse.status === 'fulfilled' ? latestResponse.value.data : [],
+      // africaArticles: africaResponse.status === 'fulfilled' && africaResponse.value ? africaResponse.value.data : [],
+      // EntertainmentArticles: entertainmentResponse.status === 'fulfilled' && entertainmentResponse.value ? entertainmentResponse.value.data : [],
       highlightTagArticles: highlightResponse.status === 'fulfilled' ? highlightResponse.value.data : [],
     }
   } catch (error) {
@@ -63,9 +63,9 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       featuredArticles: [],
       popularArticles: [],
       highlightTagArticles: [],
-      latestArticles: [],
-      africaArticles: [],
-      EntertainmentArticles: [],
+      // latestArticles: [],
+      // africaArticles: [],
+      // EntertainmentArticles: [],
     }
   }
 }

@@ -13,9 +13,9 @@ interface PrefetchHomeDataProps {
     featuredArticles: NewsItem[]
     popularArticles: NewsItem[]
     highlightTagArticles: NewsItem[]
-    latestArticles: NewsItem[]
-    africaArticles: NewsItem[]
-    EntertainmentArticles: NewsItem[]
+    // latestArticles: NewsItem[]
+    // africaArticles: NewsItem[]
+    // EntertainmentArticles: NewsItem[]
   }
 }
 
@@ -61,27 +61,27 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         )
         
         // Latest articles
-        queryClient.setQueryData(
-          queryKeys.articles.latest(),
-          { data: initialData.latestArticles, pagination: {} }
-        )
+        // queryClient.setQueryData(
+        //   queryKeys.articles.latest(),
+        //   { data: initialData.latestArticles, pagination: {} }
+        // )
         
 
         // Africa articles (by category)
-        if (initialData.africaArticles?.length > 0) {
-          queryClient.setQueryData(
-            queryKeys.articles.africa(),
-            { data: initialData.africaArticles, pagination: {} }
-          )
-        }
+        // if (initialData.africaArticles?.length > 0) {
+        //   queryClient.setQueryData(
+        //     queryKeys.articles.africa(),
+        //     { data: initialData.africaArticles, pagination: {} }
+        //   )
+        // }
 
         // Entertainment articles
-        if (initialData.EntertainmentArticles?.length > 0) {
-          queryClient.setQueryData(
-            queryKeys.articles.entertainment(),
-            { data: initialData.EntertainmentArticles, pagination: {} }
-          )
-        }
+        // if (initialData.EntertainmentArticles?.length > 0) {
+        //   queryClient.setQueryData(
+        //     queryKeys.articles.entertainment(),
+        //     { data: initialData.EntertainmentArticles, pagination: {} }
+        //   )
+        // }
 
         // Highlight tag articles
         if (initialData.highlightTagArticles?.length > 0) {
