@@ -13,7 +13,7 @@ export const revalidate = 300
 export async function generateMetadata() {
   return {
     title: 'Home - IGIHE News',
-    description: 'Latest news and updates',
+    description: 'IGIHE news brings you the latest and breaking news, trending topics, and discussions from all over the world.',
   }
 }
 
