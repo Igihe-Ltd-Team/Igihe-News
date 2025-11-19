@@ -2,7 +2,7 @@ import { ApiService } from '@/services/apiService'
 import { Category, NewsItem } from '@/types/fetchData'
 
 export interface HomePageData {
-  categories: Category[]
+  // categories: Category[]
   featuredArticles: NewsItem[]
   popularArticles: NewsItem[]
   highlightTagArticles: NewsItem[]
@@ -15,7 +15,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
   try {
     // Fetch all data in parallel for maximum performance
     const [
-      categories,
+      // categories,
       featuredResponse,
       popularArticles,
       // latestResponse,
@@ -24,7 +24,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       // entertainmentResponse,
     ] = await Promise.allSettled([
       // Categories
-      ApiService.fetchCategories({ per_page: 100 }),
+      // ApiService.fetchCategories({ per_page: 100 }),
       
       // Featured articles
       ApiService.fetchArticles({ tags: [31], per_page: 20 }),
@@ -46,7 +46,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
     ])
 
     return {
-      categories: categories.status === 'fulfilled' ? categories.value : [],
+      // categories: categories.status === 'fulfilled' ? categories.value : [],
       featuredArticles: featuredResponse.status === 'fulfilled' ? featuredResponse.value.data : [],
       popularArticles: popularArticles.status === 'fulfilled' ? popularArticles.value : [],
       // latestArticles: latestResponse.status === 'fulfilled' ? latestResponse.value.data : [],
@@ -59,7 +59,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
     
     // Return empty data structure on error
     return {
-      categories: [],
+      // categories: [],
       featuredArticles: [],
       popularArticles: [],
       highlightTagArticles: [],

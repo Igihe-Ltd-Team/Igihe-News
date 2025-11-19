@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query'
 interface PrefetchHomeDataProps {
   children: React.ReactNode
   initialData: {
-    categories: Category[]
+    // categories: Category[]
     featuredArticles: NewsItem[]
     popularArticles: NewsItem[]
     highlightTagArticles: NewsItem[]
@@ -30,23 +30,23 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
     }
     
     // Check if data is already in cache
-    const hasCategories = queryClient.getQueryData(queryKeys.categories.lists())
+    // const hasCategories = queryClient.getQueryData(queryKeys.categories.lists())
     
     // If we already have data, skip prefetching but mark as done
-    if (hasCategories) {
-      hasPrefetched.current = true
-      PrefetchTracker.markPrefetched()
-      return
-    }
+    // if (hasCategories) {
+    //   hasPrefetched.current = true
+    //   PrefetchTracker.markPrefetched()
+    //   return
+    // }
 
     // Batch all cache updates together
     const prefetchData = () => {
       try {
         // Categories
-        queryClient.setQueryData(
-          queryKeys.categories.lists(),
-          initialData.categories
-        )
+        // queryClient.setQueryData(
+        //   queryKeys.categories.lists(),
+        //   initialData.categories
+        // )
         
         // Featured articles
         queryClient.setQueryData(

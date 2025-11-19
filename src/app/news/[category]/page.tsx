@@ -34,7 +34,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     isError,
     error
   } = useCategorySlugArticles(category)
-  console.log(data)
+  // console.log(data)
 
   const {
     data: highlightArticles = [],

@@ -123,3 +123,79 @@ export const getYouTubeVideoId = (url:string) => {
     const match = url.match(regex);
     return match ? match[1] : null;
 };
+
+
+
+export const categoryIcons = [
+  {
+    icon: 'institution',
+    en: 'politics',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-heart-pulse-fill',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-trophy-fill',
+    en: 'sports',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-bullseye',
+    en: 'entertainment',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-laptop',
+    en: 'technology',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-translate',
+    en: 'culture',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-airplane-fill',
+    en: 'tourism',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-graph-up-arrow',
+    en: 'economy',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-people-fill',
+    en: 'people',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-fire',
+    en: 'environment',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'mosque',
+    en: 'religion',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-newspaper',
+    en: 'news',
+    fr: '',
+    kin: ''
+  }, {
+    icon: 'bi-globe-europe-africa',
+    en: 'africa',
+    fr: '',
+    kin: ''
+  },{
+    icon: 'ideal',
+    en: 'opinion',
+    fr: '',
+    kin: ''
+  },
+
+]
