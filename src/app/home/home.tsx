@@ -8,7 +8,8 @@ import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useNewsData } from '@/hooks/useNewsData'
 import { useUIStore } from '@/stores/uiStore'
-import React, { Suspense, useMemo } from 'react'
+import { prefetchCategoryArticles } from '@/utils/prefetch'
+import React, { Suspense, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 
 
@@ -18,9 +19,7 @@ export function Home() {
     categoriesLoading,
     featuredArticles,
     featuredArticlesLoading,
-    videos,
-    videosLoading,
-    prefetchCategory,
+    // prefetchCategory,
     popularArticles,
     popularArticlesLoading,
 
@@ -43,35 +42,39 @@ export function Home() {
     featuredAnnouncementLoading
 
   } = useNewsData()
-  const { selectedCategory, setSelectedCategory } = useUIStore()
+  // const { selectedCategory, setSelectedCategory } = useUIStore()
 
   const safeFeaturedArticles = Array.isArray(featuredArticles) ? featuredArticles : [];
   const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
-  sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
-  otherFeaturedArticle: safeFeaturedArticles.slice(8, 20),
-}), [safeFeaturedArticles]);
+    sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
+    otherFeaturedArticle: safeFeaturedArticles.slice(8, 20),
+  }), [safeFeaturedArticles]);
 
-
+  // useEffect(() => {
+  //   (async () => {
+  //     console.log('prefetchCategory', await prefetchCategoryArticles(31))
+  //   })
+  // }, [])
 
 
 
   // if (categoriesLoading && featuredArticlesLoading) {
   //   return <NewsSkeleton />
   // }
-// console.log()
+  // console.log()
   return (
     <>
       <Container>
-        <Suspense fallback={<NewsSkeleton count={3}/>}>
+        <Suspense fallback={<NewsSkeleton count={3} />}>
           <Slides articles={sliderFeaturedArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
         </Suspense>
       </Container>
 
-      <Suspense fallback={<NewsSkeleton count={3}/>}>
+      <Suspense fallback={<NewsSkeleton count={3} />}>
         <HomeMainSections
           articles={highlightArticles} />
       </Suspense>
-      <Suspense fallback={<NewsSkeleton count={3}/>}>
+      <Suspense fallback={<NewsSkeleton count={3} />}>
         <Recents
           latests={latestArticles}
           popular={popularArticles}
@@ -102,7 +105,7 @@ export function Home() {
           </Row>
         </Container>
       </Suspense>
-      <Suspense fallback={<NewsSkeleton count={1}/>}>
+      <Suspense fallback={<NewsSkeleton count={1} />}>
         <Categories categories={categories} />
       </Suspense>
       <Suspense fallback={null}>
@@ -124,7 +127,7 @@ export function Home() {
           </Row>
         </Container>
       </Suspense>
-      <Suspense fallback={<NewsSkeleton count={1}/>}>
+      <Suspense fallback={<NewsSkeleton count={1} />}>
         <Categories categories={categories} />
       </Suspense>
     </>
