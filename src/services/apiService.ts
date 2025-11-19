@@ -4,34 +4,12 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, Cate
 // Configuration
 const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
-  baseURL: '/api',
+  baseURL: '/api/proxy',
   timeout: 10000, // 10 seconds
   retryAttempts: 2,
   cacheTimeout: 5 * 60 * 1000, // 5 minutes
   maxCacheSize: 100,
 }
-
-// Request cache for deduplication
-// const requestCache = new Map<string, { data: any; timestamp: number }>()
-
-// Rate limiting
-// const rateLimit = {
-//   requests: new Map<string, number[]>(),
-//   check: (key: string, maxRequests: number = 100, windowMs: number = 60000) => {
-//     const now = Date.now()
-//     const windowStart = now - windowMs
-//     const requests = rateLimit.requests.get(key) || []
-//     const recentRequests = requests.filter(time => time > windowStart)
-
-//     if (recentRequests.length >= maxRequests) {
-//       throw new Error('Rate limit exceeded')
-//     }
-
-//     recentRequests.push(now)
-//     rateLimit.requests.set(key, recentRequests)
-//     return true
-//   }
-// }
 
 
 
