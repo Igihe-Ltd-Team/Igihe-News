@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   images: {
+    domains: ['new.igihe.com', 'igihe.com'],
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+
     remotePatterns: [
       {
         protocol: "https",
@@ -22,7 +28,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
 
-headers: async () => [
+  headers: async () => [
     {
       source: '/(.*)',
       headers: [

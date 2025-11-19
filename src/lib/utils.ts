@@ -29,6 +29,26 @@ export function formatDate(dateString: string): string {
   }
 }
 
+export function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12; // convert 0 → 12 and 13-23 → 1-11
+
+  return `On ${month} ${day}, ${year} at ${hours}:${minutes} ${ampm}`;
+}
+
+
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
   return text.substring(0, maxLength).trim() + '...'

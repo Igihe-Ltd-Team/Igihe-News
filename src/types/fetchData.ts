@@ -108,19 +108,7 @@ export interface NewsItem {
   }
 
   _embedded?: {
-    author?: Array<{
-      id: number
-      name: string
-      url: string
-      description: string
-      link: string
-      slug: string
-      avatar_urls: {
-        '24': string
-        '48': string
-        '96': string
-      }
-    }>
+    author?: Author[]
     'wp:featuredmedia'?: Array<{
       id: number
       date: string
@@ -276,4 +264,20 @@ export interface AdPosition {
   id: string
   name: string
   ads: Advertisement[]
+}
+
+export interface Comment {
+  id: number;
+  parent: number;
+  author_name: string;
+  author_url: string;
+  date: string;
+  content: {
+    rendered: string;
+  };
+  author_avatar_urls: {
+    24: string;
+    48: string;
+    96: string;
+  };
 }
