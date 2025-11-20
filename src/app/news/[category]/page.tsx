@@ -124,7 +124,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         </Row>
       </div>
 
-      <div>
+      <div className='pb-4'>
         <Row>
           <Col md={8}>
             <HeaderDivider title={`Latest ${categoryName} News`} />

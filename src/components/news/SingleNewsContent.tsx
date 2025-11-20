@@ -112,6 +112,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                             fill
                             height={isMobile ? 300 : isTablet ? 400 : 554}
                             className="object-cover"
+                            imgClass='object-fit-cover'
                         />
 
 

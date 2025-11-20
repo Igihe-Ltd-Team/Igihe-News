@@ -9,7 +9,7 @@ if (!GEMINI_API_KEY) {
 }
 
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null
-const model = genAI?.getGenerativeModel({ model: 'gemini-2.5-flash' }) // or gemini-1.5-pro
+const model = genAI?.getGenerativeModel({ model: 'gemini-3-pro-preview' }) // or gemini-1.5-pro
 
 export class GeminiService {
     private static async generate(prompt: string): Promise<string> {
