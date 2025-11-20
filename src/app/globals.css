@@ -370,7 +370,7 @@ body {
 .sticky-sidebar {
   position: sticky;
   top: 10px;
-  /* Adjust offset */
+  z-index: 1020;
   align-self: flex-start;
 }
 
