@@ -1,12 +1,8 @@
 "use client"
 
-import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
-import { ApiService } from '@/services/apiService'
 import DynamicArticleCard from '@/components/news/DynamicArticleCard'
 import { Col, Row } from 'react-bootstrap'
 import HeaderDivider from '@/components/HeaderDivider'
-import { Metadata } from 'next'
 import AuthorBio from '@/components/author/AuthorBio'
 import LoadMoreArticles from '@/components/author/LoadMoreArticles'
 import CardAdds from '@/components/ReUsable/CardAdds'

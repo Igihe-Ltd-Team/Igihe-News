@@ -72,6 +72,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
 
     const articleCategory = article ? getCategoryName(article) : undefined;
     const publishDate = article ? formatDateTime(article.date) : '';
+    const author = article._embedded?.author?.[0];
     const authorsName = article._embedded?.author?.[0]?.name || '';
     const authorImage = article._embedded?.author?.[0]?.avatar_urls?.['96'];
     const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/news/${articleCategory?.toLowerCase()}/${article.slug}` : '';
@@ -100,7 +101,9 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                     <ThemedText type='title'>{stripHtml(article.title.rendered)}</ThemedText>
                 </Col>
                 {/* Render article/post meta data */}
-                <SinglePostMetaData authorName={authorsName}
+                <SinglePostMetaData 
+                author={author}
+                authorName={authorsName}
                     authorImage={authorImage || '/assets/user-avatar.png'}
                     publishDate={publishDate}
                     category={articleCategory} />

@@ -3,8 +3,10 @@ import React from 'react'
 import Link from 'next/link'
 import { ThemedText } from '../ThemedText'
 import { OptimizedImage } from '../ui/OptimizedImage'
-export default function SinglePostMetaData({ authorName, authorImage, publishDate, category }:
-    { authorName: string, authorImage: string, publishDate?: string, category: string | undefined }) {
+import { Author } from '@/types/fetchData'
+export default function SinglePostMetaData({ author, authorName, authorImage, publishDate, category }:
+    { author?: Author, authorName: string, authorImage: string, publishDate?: string, category: string | undefined }) {
+
     return (
         <div className="article-meta-data has-gray-border d-flex align-items-center justify-content-between mt-4 pt-4">
             <div className="meta-left d-flex align-items-center gap-5 w-75">
@@ -13,18 +15,21 @@ export default function SinglePostMetaData({ authorName, authorImage, publishDat
                 </Link>
 
                 <div className="meta-wrapper d-flex align-items-center gap-2 flex-wrap">
-                    <OptimizedImage // Author Image
-                        src={authorImage || '/assets/user-avatar.png'}
-                        alt={authorName || 'Author'}
-                        width={32}
-                        height={32}
-                        className="rounded-circle"
-                    />
-                    <ThemedText type='small' className='gray-color'>By</ThemedText>
 
-                    <ThemedText type='smallBold' className='ms-0'>
-                        {authorName}
-                    </ThemedText>
+                    <Link href={`/author/${author?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
+                        <OptimizedImage // Author Image
+                            src={authorImage || '/assets/user-avatar.png'}
+                            alt={authorName || 'Author'}
+                            width={32}
+                            height={32}
+                            className="rounded-circle"
+                        />
+                        <ThemedText type='small' className='gray-color'>By</ThemedText>
+                        <ThemedText type='smallBold' className='ms-0'>
+                            {authorName}
+                        </ThemedText>
+                    </Link>
+
                     <span className="d-flex align-items-center">
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clipPath="url(#clip0_1289_8821)">
