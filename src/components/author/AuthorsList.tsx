@@ -1,17 +1,19 @@
-'use client'
-
-import { AuthorWithPosts } from '@/types/fetchData'
+import { Author, AuthorWithPosts } from '@/types/fetchData'
 import Link from 'next/link'
 import { OptimizedImage } from '../ui/OptimizedImage'
+import { ApiService } from '@/services/apiService'
+import { Col, Row } from 'react-bootstrap'
+import { ThemedText } from '../ThemedText'
 
-interface AuthorsListProps {
-  authors: AuthorWithPosts[]
-}
 
-export default function AuthorsList({ authors }: AuthorsListProps) {
+export default async function AuthorsList() {
+  const authors = await ApiService.fetchAllAuthors()
+
   return (
+
     <div className="min-h-screen bg-light">
       <div className="container py-5">
+
         <div className="row">
           <div className="col-12">
             <nav aria-label="breadcrumb">
@@ -30,69 +32,35 @@ export default function AuthorsList({ authors }: AuthorsListProps) {
           </div>
         </div>
 
-        <div className="row g-4">
-          {authors.map((author) => (
-            <div key={author.id} className="col-12 col-md-6 col-lg-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
-                  {/* Author Avatar */}
-                  {author.avatar_urls && (
-                    <OptimizedImage
-                      src={author.avatar_urls['96']}
-                      alt={author.name}
-                      width={80}
-                      height={80}
-                      className="rounded-circle mb-3"
-                    />
-                  )}
 
-                  <h5 className="card-title mb-2">
-                    <Link 
-                      href={`/author/${author.slug}`}
-                      className="text-decoration-none text-dark"
-                    >
-                      {author.name}
-                    </Link>
-                  </h5>
-
-                  {author.description && (
-                    <p className="card-text text-muted small mb-3 line-clamp-3">
-                      {author.description.length > 120 
-                        ? `${author.description.substring(0, 120)}...` 
-                        : author.description
-                      }
-                    </p>
-                  )}
-
-                  <div className="d-flex justify-content-center align-items-center gap-3 text-muted small">
-                    <span>
-                      <strong>{author.post_count || author.recent_posts.length}</strong> articles
-                    </span>
+        <Row className="g-4">
+          {
+            authors.map((author) => {
+              return (
+                <Link href={`/author/${author.slug}`} className='feature col-md-4 text-decoration-none text-dark' key={author.id}>
+                  <div className="feature-icon">
+                    {author.avatar_urls && (
+                      <OptimizedImage
+                        src={author.avatar_urls['96']}
+                        alt={author.name}
+                        width={40}
+                        height={40}
+                        className="rounded-circle mb-3"
+                        imgClass="feature-icon"
+                      />
+                    )}
                   </div>
-                </div>
-
-                {/* Recent Posts */}
-                {author.recent_posts.length > 0 && (
-                  <div className="card-footer bg-transparent">
-                    <h6 className="small fw-bold mb-2">Recent Articles:</h6>
-                    <div className="d-flex flex-column gap-1">
-                      {author.recent_posts.slice(0, 3).map((post) => (
-                        <Link
-                          key={post.id}
-                          href={`/news/${post.slug}`}
-                          className="small text-decoration-none text-truncate"
-                          title={post.title.rendered}
-                        >
-                          {post.title.rendered}
-                        </Link>
-                      ))}
-                    </div>
+                  <div>
+                    <ThemedText type='defaultSemiBold'>{author.name}</ThemedText>
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                  <p className='line-clamp-3'>{author.description}</p>
+                </Link>
+              )
+            }
+            )
+          }
+        </Row>
+
       </div>
     </div>
   )

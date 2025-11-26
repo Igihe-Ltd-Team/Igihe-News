@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AuthorsPage() {
-  const authors = await ApiService.fetchAuthorsWithPosts(50)
-
-  return <AuthorsList authors={authors} />
+  // const authors = await ApiService.fetchAllAuthors()
+// console.log('authors',authors)
+  return <AuthorsList />
 }
