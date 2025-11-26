@@ -1,14 +1,24 @@
+"use client"
 import { Author, AuthorWithPosts } from '@/types/fetchData'
 import Link from 'next/link'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ApiService } from '@/services/apiService'
 import { Col, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
+import { useAuthorData } from '@/hooks/useAuthorData'
+import NewsSkeleton from '../NewsSkeleton'
 
 
 export default async function AuthorsList() {
-  const authors = await ApiService.fetchAllAuthors()
+  // const authors = await ApiService.fetchAllAuthors()
 
+  const {useAllAuthors} = useAuthorData()
+
+  const { data: authors, isLoading, error } = useAllAuthors()
+
+// console.log('authors',authors)
+if(isLoading)
+  return <NewsSkeleton/>
   return (
 
     <div className="min-h-screen bg-light">
@@ -35,7 +45,7 @@ export default async function AuthorsList() {
 
         <Row className="g-4">
           {
-            authors.map((author) => {
+            authors?.map((author) => {
               return (
                 <Link href={`/author/${author.slug}`} className='feature col-md-4 text-decoration-none text-dark' key={author.id}>
                   <div className="feature-icon">
