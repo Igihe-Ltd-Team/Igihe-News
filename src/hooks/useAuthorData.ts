@@ -100,6 +100,25 @@ export function useAuthorData() {
     })
   }
 
+  // const useAuthorWithPosts = (limit: number = 10,slug) => {
+  //   return useQuery({
+  //     queryKey: queryKeys.authors.withPosts(slug),
+  //     queryFn: () => ApiService.fetchPostsByAuthorSlug(slug),
+  //     staleTime: 5 * 60 * 1000,
+  //   })
+  // }
+
+
+  const useAuthorWithPosts = (slug:string) => {
+    return useQuery({
+      queryKey: queryKeys.authors.bySlug(slug),
+      queryFn: () => ApiService.fetchPostsByAuthorSlug(slug),
+      staleTime: 5 * 60 * 1000,
+    })
+  }
+
+
+
   return {
     // Queries
     useAuthorBySlug,
@@ -107,5 +126,6 @@ export function useAuthorData() {
     useAllAuthors,
     usePostsByAuthorSlug,
     useAuthorsWithPosts,
+    useAuthorWithPosts
   }
 }

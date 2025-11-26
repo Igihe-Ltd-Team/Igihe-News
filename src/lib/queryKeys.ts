@@ -65,6 +65,7 @@ export const queryKeys = {
     lists: (filters?: any) => [...queryKeys.authors.all, 'list', filters] as const, // This is 'lists'
     detail: (slug: string) => [...queryKeys.authors.all, 'detail', slug] as const,
     byId: (id: number) => [...queryKeys.authors.all, 'byId', id] as const,
+    bySlug: (slug: string) => [...queryKeys.authors.all, 'bySlug', slug] as const,
     popular: (limit: number) => [...queryKeys.authors.all, 'popular', limit] as const,
     withPosts: (limit: number) => [...queryKeys.authors.all, 'withPosts', limit] as const,
   },
