@@ -13,6 +13,51 @@ import React, { Suspense, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 
 
+const upperCats = [
+  {
+    id: 7,
+    name: 'Business',
+    slug: 'business'
+  },
+  {
+    id: 8,
+    name: 'Technology',
+    slug: 'science-technology'
+  },
+  {
+    id: 9,
+    name: 'Health',
+    slug: 'health'
+  },
+  {
+    id: 14,
+    name: 'Tourism',
+    slug: 'tourism'
+  }]
+
+const lowerCats = [
+  {
+    id: 10,
+    name: 'Sports',
+    slug: 'sports'
+  },
+  {
+    id: 11,
+    name: 'Arts & Culture',
+    slug: 'arts-culture'
+  },
+  {
+    id: 45,
+    name: 'Education',
+    slug: 'education'
+  },
+  {
+    id: 18,
+    name: 'Diaspora',
+    slug: 'diaspora'
+  }]
+  
+
 export function Home() {
   const {
     categories,
