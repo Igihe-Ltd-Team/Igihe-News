@@ -331,13 +331,14 @@ export function isImageMedia(featuredMedia: NewsItem): {
     slug: '',
     img: ''
   };
-  const media = featuredMedia._embedded?.['wp:featuredmedia']?.[0];
+  const media2 = featuredMedia._embedded?.['wp:featuredmedia']?.[0];
+  const media = featuredMedia.acf?.file_source;
 
   return {
-    isImage: media?.mime_type?.startsWith("image/") || false,
-    filePath: media?.source_url || '',
-    slug: media?.slug || '',
-    img: media?.source_url || ''
+    isImage: media?.type !== 'file' || false,
+    filePath: media?.formatted_value?.url || '',
+    slug: featuredMedia?.slug || '',
+    img: media2?.source_url || ''
   };
 }
 

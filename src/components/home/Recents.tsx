@@ -101,8 +101,6 @@ export default function Recents({ latests, featured, popular, africaArticles, en
     const safeLatests = Array.isArray(latests) ? latests : [];
     const safeFeatured = Array.isArray(featured) ? featured : [];
 
-
-
     const {
         mainLatest,
         latestsSidebar,

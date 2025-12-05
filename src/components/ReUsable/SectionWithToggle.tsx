@@ -150,11 +150,9 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
             >
                 {visiblePosts.map((item, index) => {
                     const chechedfile = isImageMedia(item)
-                    console.log(item)
-                    console.log(chechedfile)
                     return(
                     <Link 
-                        href={chechedfile.isImage? `/news/${getCategorySlug(item)}/${item.slug}` :chechedfile.filePath} 
+                        href={chechedfile.isImage? `/news/${getCategorySlug(item)}/${item.slug}` : chechedfile.filePath} 
                         key={item.id}
                         className={`list-group-item px-0 list-group-item-action ${index !== visiblePosts.length - 1 ? 'border-bottom' : ''}`}
                         style={{ cursor: 'pointer', backgroundColor: 'transparent' }}

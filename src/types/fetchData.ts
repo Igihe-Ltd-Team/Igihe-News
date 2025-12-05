@@ -92,6 +92,32 @@ export interface NewsItem {
       type: string;
       formatted_value: string;
     };
+    file_source?:{
+        label: string,
+        type: string,
+        formatted_value: {
+          ID: number,
+          id: number,
+          title: string,
+          filename: string,
+          filesize: number,
+          url: string,
+          link: string,
+          author: string,
+          description: string,
+          caption: string,
+          name: string,
+          status: string,
+          uploaded_to: number,
+          menu_order: number,
+          mime_type: string,
+          type: string,
+          subtype: string,
+          icon: string,
+          date: string,
+          modified: string
+        }
+      }
   }
   _links: {
     self: Array<{ href: string }>

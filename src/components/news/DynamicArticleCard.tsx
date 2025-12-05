@@ -93,7 +93,7 @@ function DynamicArticleCard({
 
           {
             showDate &&
-            <div className="mb-2">
+            <div className="">
               <small className='d-flex' style={{ color: '#999' }}>
                 <ThemedText className="me-3" type='small'>
                   {
@@ -139,7 +139,7 @@ function DynamicArticleCard({
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           >
-            <div className='d-flex'>
+            <div className='d-flex pt-3'>
               <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle}>
                 {stripHtml(article.title.rendered)}
               </ThemedText>
