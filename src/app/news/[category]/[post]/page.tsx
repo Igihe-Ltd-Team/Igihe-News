@@ -124,18 +124,5 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
-  
-  try {
-    // Verify the post exists before rendering
-    const postData = await ApiService.fetchPostBySlug(post)
-    
-    if (!postData) {
-      notFound()
-    }
-
-    return <SingleNewsContent slug={post} />
-  } catch (error) {
-    console.error('Error loading post:', error)
-    notFound()
-  }
+  return <SingleNewsContent slug={post} />
 }

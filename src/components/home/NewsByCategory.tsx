@@ -13,7 +13,7 @@ interface ArticleListProps {
     categoryName?:string
     categorySlug?:string
 }
-export default function NewsByCategory({ categoryId,categoryName }: ArticleListProps) {
+export default function NewsByCategory({ categoryId,categoryName,categorySlug }: ArticleListProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
     const { inView } = useInView()
     const { useCategoryArticles } = useNewsData()
@@ -38,7 +38,7 @@ export default function NewsByCategory({ categoryId,categoryName }: ArticleListP
     //     }
     return (
         <div>
-            <HeaderDivider title={categoryName} titleStyle={'size20'}/>
+            <HeaderDivider title={categoryName} titleStyle={'size20'} slug={categorySlug}/>
             {allArticles.slice(0, 1).map((article, index) => (
                 <DynamicArticleCard
                     key={index}

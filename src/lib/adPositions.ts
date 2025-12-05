@@ -25,7 +25,20 @@ export const AD_POSITIONS = {
   'home-after-highlights': {
     name: 'Home After Highlights',
     description: 'After highlights section',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 728, height: 250 },
+    priority: 2
+  },
+  
+  'home-bellow-hights': {
+    name: 'Home bellow Highlights',
+    description: 'bellow highlights section',
+    dimensions: { width: 728, height: 90 },
+    priority: 2
+  },
+  'home-bellow-hights-2': {
+    name: 'Home bellow Highlights',
+    description: 'bellow highlights section',
+    dimensions: { width: 728, height: 90 },
     priority: 2
   },
   'home-section-1': {

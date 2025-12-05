@@ -119,6 +119,26 @@ export function Home() {
         <HomeMainSections
           articles={highlightArticles} />
       </Suspense>
+
+
+       <Suspense fallback={null}>
+        <Container>
+          <Row>
+            <Col>
+              <AdManager
+                position="home-bellow-hights"
+                priority={true}
+              /></Col>
+            <Col>
+              <AdManager
+                position="home-bellow-hights-2"
+                priority={true}
+              />
+            </Col>
+          </Row>
+        </Container>
+      </Suspense>
+
       <Suspense fallback={<NewsSkeleton count={3} />}>
         <Recents
           latests={latestArticles}
