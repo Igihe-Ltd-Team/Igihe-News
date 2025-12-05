@@ -7,7 +7,7 @@ import { NewsItem } from '@/types/fetchData'
 import { ThemedText } from '../ThemedText'
 import Link from 'next/link'
 import { useNewsData } from '@/hooks/useNewsData'
-import { ApiService, requestCache } from '@/services/apiService'
+import { ApiService } from '@/services/apiService'
 
 interface ArticleCardProps {
   article: NewsItem
@@ -77,8 +77,8 @@ function DynamicArticleCard({
             isSlider ? { width:'20%' }:{ flex: 1 }
           }
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
-          prefetch={true}
-          onMouseEnter={() => mouseEnter(article.slug)}
+          // prefetch={true}
+          onMouseEnter={() => mouseEnter(article)}
         >
           <OptimizedImage
             src={featuredImage || '/images/placeholder.jpg'}
@@ -162,6 +162,7 @@ function DynamicArticleCard({
             href={`/news/${getCategorySlug(article)}/${article.slug}`}
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
+            onMouseEnter={() => mouseEnter(article)}
           >
             <div className='d-flex'>
               <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle} className={isSlider ? 'line-clamp-2':''}>

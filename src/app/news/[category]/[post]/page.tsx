@@ -11,6 +11,22 @@ interface PageProps {
 export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
+async function getCachedPost(slug: string): Promise<any | null> {
+  try {
+    // Try to get from cache first
+    const cacheKey = `post:${slug}`
+    const cached = ApiService.getCachedArticle(cacheKey)
+    
+    if (cached) {
+      return cached
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Cache retrieval error:', error)
+    return null
+  }
+}
 
 
 
@@ -19,11 +35,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   // Add timeout and better error handling
   try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
-    
-    const postData = await ApiService.fetchPostBySlug(post)
-    clearTimeout(timeoutId)
+
+    let postData = await getCachedPost(post)
+    let fromCache = !!postData
+
+    if (!postData) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 seconds for metadata
+      
+      postData = await ApiService.fetchPostBySlug(post)
+      clearTimeout(timeoutId)
+    }
+
 
     if (!postData) {
       console.error(`Post not found: ${post}`)

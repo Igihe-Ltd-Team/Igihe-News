@@ -104,19 +104,27 @@ const pendingRequests = new Map<string, Promise<any>>()
 
 export class ApiService {
 
+  static getCachedArticle(cacheKey: string): NewsItem | null {
+    const cached = requestCache.get(cacheKey);
+    // console.log('cacheKey',cacheKey)
+    // console.log('cached',cached)
+    if (cached) {
+      console.log('API Cache hit for:', cacheKey);
+      return cached.data;
+    }
+    return null;
+  }
+  
+ 
 
   static cacheArticles(article: NewsItem): void {
-
       if (article?.slug) {
         const cacheKey = `post:${article.slug}`
-        const cacheData = {
-          data: article,
-          timestamp: Date.now(),
-          expiresAt: Date.now() + API_CONFIG.timeout
+        if (pendingRequests.has(cacheKey)) {
+          return
         }
-        
         try {
-        requestCache.set(cacheKey, cacheData)
+        requestCache.set(cacheKey, {data:article,timestamp: Date.now()})
         } catch (error) {
           // sessionStorage might be full, that's ok
           console.debug('Failed to store in sessionStorage:', error)
@@ -149,9 +157,7 @@ export class ApiService {
     try {
       const requestPromise = fetchFn()
       pendingRequests.set(cacheKey, requestPromise)
-
       const data = await requestPromise
-
       // Cache the successful response
       requestCache.set(cacheKey, { data, timestamp: now })
 
@@ -220,7 +226,6 @@ export class ApiService {
 
     // Rate limiting check
     rateLimit.check('api_requests', 100, 60000)
-
     try {
       const data = await fetchFn()
 
