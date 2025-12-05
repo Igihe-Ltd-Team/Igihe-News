@@ -1,107 +1,155 @@
-// app/news/[post]/page.tsx
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
-import ClientMetadataProvider from '@/components/ClientMetadataProvider'
+import { stripHtml } from '@/lib/utils'
+import { ApiService } from '@/services/apiService'
+import { Tag } from '@/types/fetchData'
 
 interface PageProps {
   params: Promise<{ post: string }>
 }
 
-export const revalidate = 300
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
-// Server-side metadata (for initial SEO)
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { post } = await params
-  
+async function getCachedPost(slug: string): Promise<any | null> {
   try {
-    const WORDPRESS_API = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 
-                         'https://new.igihe.com/wp-json/wp/v2'
+    // Try to get from cache first
+    const cacheKey = `post:${slug}`
+    const cached = ApiService.getCachedArticle(cacheKey)
     
-    const response = await fetch(
-      `${WORDPRESS_API}/posts?slug=${post}&_embed=1`,
-      { next: { revalidate: 60 } }
-    )
-    
-    if (!response.ok) return getFallbackMetadata(post)
-    
-    const data = await response.json()
-    const postData = data[0]
-    
-    if (!postData) return getFallbackMetadata(post)
-    
-    const title = postData.title?.rendered || post.replace(/-/g, ' ')
-    const description = postData.excerpt?.rendered?.replace(/<[^>]*>/g, '').substring(0, 155) || ''
-    const image = postData._embedded?.['wp:featuredmedia']?.[0]?.source_url
-    
-    return {
-      title: `${title} | IGIHE`,
-      description,
-      openGraph: {
-        title,
-        description,
-        images: image ? [{ url: image }] : [],
-        type: 'article',
-        publishedTime: postData.date
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: image ? [image] : []
-      }
+    if (cached) {
+      return cached
     }
     
+    return null
   } catch (error) {
-    return getFallbackMetadata(post)
+    console.error('Cache retrieval error:', error)
+    return null
   }
 }
 
-function getFallbackMetadata(slug: string): Metadata {
-  const title = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-  return {
-    title: `${title} | IGIHE`,
-    description: 'Latest news from IGIHE'
+
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { post } = await params
+  
+  // Add timeout and better error handling
+  try {
+
+    let postData = await getCachedPost(post)
+    let fromCache = !!postData
+
+    if (!postData) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 seconds for metadata
+      
+      postData = await ApiService.fetchPostBySlug(post)
+      clearTimeout(timeoutId)
+    }
+
+
+    if (!postData) {
+      console.error(`Post not found: ${post}`)
+      return {
+        title: 'Article Not Found',
+        description: 'The requested article could not be found.',
+      }
+    }
+
+    // Safely extract metadata with fallbacks
+    const title = postData?.yoast_head_json?.title || 
+      postData?.title?.rendered || 
+      'News Article'
+
+    const cleanTitle = stripHtml(title)
+
+    const description = postData?.yoast_head_json?.description || 
+      postData?.excerpt?.rendered || 
+      ''
+
+    const cleanDescription = stripHtml(description).substring(0, 160)
+
+    // Get the best available image
+    const ogImage = postData?.yoast_head_json?.og_image?.[0]?.url || 
+      postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url
+
+    // Extract author information
+    const authorName = postData?._embedded?.author?.[0]?.name || 
+      postData?.author
+
+    // Build comprehensive metadata
+    return {
+      title: cleanTitle,
+      description: cleanDescription,
+      
+      // Add keywords if available
+      ...(postData?.tags && postData.tags.length > 0 && {
+        keywords: postData.tags.map((tag:Tag) => tag.name).join(', ')
+      }),
+
+      // Add canonical URL
+      alternates: {
+        canonical: postData?.link || `https://stage.igihe.com/news/news/${post}`
+      },
+
+      // Open Graph metadata
+      openGraph: {
+        title: postData?.yoast_head_json?.og_title || cleanTitle,
+        description: postData?.yoast_head_json?.og_description || cleanDescription,
+        url: postData?.link,
+        siteName: 'IGIHE',
+        locale: postData?.yoast_head_json?.og_locale || 'en_US',
+        type: 'article',
+        ...(postData?.date && { publishedTime: postData.date }),
+        ...(postData?.modified && { modifiedTime: postData.modified }),
+        ...(ogImage && { images: [{ url: ogImage, alt: cleanTitle }] }),
+        ...(authorName && { 
+          article: { 
+            authors: [authorName],
+            ...(postData?.tags && { tags: postData.tags.map((tag:Tag) => tag.name) })
+          }
+        })
+      },
+
+      // Twitter Card metadata
+      twitter: {
+        card: 'summary_large_image',
+        title: postData?.yoast_head_json?.twitter_title || cleanTitle,
+        description: postData?.yoast_head_json?.twitter_description || cleanDescription,
+        ...(ogImage && { images: [ogImage] }),
+        ...(authorName && { creator: `@${authorName}` })
+      },
+
+      // Additional SEO improvements
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
+    }
+  } catch (error) {
+    console.error('Error generating metadata:', error)
+    
+    // Return basic metadata instead of failing
+    return {
+      title: `${post.replace(/-/g, ' ')} | igihe.com`,
+      description: 'Read the latest news and updates.',
+      robots: {
+        index: false, // Don't index error pages
+        follow: true,
+      },
+    }
   }
 }
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
-  
-  try {
-    const WORDPRESS_API = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 
-                         'https://new.igihe.com/wp-json/wp/v2'
-    
-    const response = await fetch(
-      `${WORDPRESS_API}/posts?slug=${post}&_embed=1`,
-      { next: { revalidate: 60 } }
-    )
-    
-    if (!response.ok) notFound()
-    
-    const data = await response.json()
-    const postData = data[0]
-    
-    if (!postData) notFound()
-    
-    // Extract metadata for client-side updates
-    const metadata = {
-      title: postData.title?.rendered,
-      description: postData.excerpt?.rendered?.replace(/<[^>]*>/g, '').substring(0, 155),
-      image: postData._embedded?.['wp:featuredmedia']?.[0]?.source_url,
-      author: postData._embedded?.author?.[0]?.name,
-      publishedTime: postData.date,
-      keywords: postData.tags?.map((tag: any) => tag.name) || [],
-      canonicalUrl: postData.link || `https://stage.igihe.com/news/${post}`
-    }
-    
-    return (
-      <ClientMetadataProvider metadata={metadata}>
-        <SingleNewsContent slug={post} initialArticle={postData} />
-      </ClientMetadataProvider>
-    )
-    
-  } catch (error) {
-    notFound()
-  }
+  return <SingleNewsContent slug={post} />
 }
