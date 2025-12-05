@@ -1,127 +1,114 @@
-import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
 import { ApiService } from '@/services/apiService'
 import { Tag } from '@/types/fetchData'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic' // always fresh page
+
 interface PageProps {
   params: Promise<{ post: string }>
 }
 
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-
-async function getCachedPost(slug: string): Promise<any | null> {
+/* ------------------------ CACHE LOOKUP ------------------------ */
+async function getCachedPost(slug: string) {
   try {
-    // Try to get from cache first
     const cacheKey = `post:${slug}`
     const cached = ApiService.getCachedArticle(cacheKey)
-    
-    if (cached) {
-      return cached
-    }
-    
-    return null
-  } catch (error) {
-    console.error('Cache retrieval error:', error)
+    return cached ?? null
+  } catch (e) {
+    console.error("Cache error:", e)
     return null
   }
 }
 
-
-
+/* ------------------------ METADATA ------------------------ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post } = await params
-  
-  // Add timeout and better error handling
-  try {
 
+  try {
     let postData = await getCachedPost(post)
-    let fromCache = !!postData
 
     if (!postData) {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 seconds for metadata
-      
+      const timeoutId = setTimeout(() => controller.abort(), 4000)
+
       postData = await ApiService.fetchPostBySlug(post)
       clearTimeout(timeoutId)
     }
 
-
     if (!postData) {
-      console.error(`Post not found: ${post}`)
       return {
-        title: 'Article Not Found',
-        description: 'The requested article could not be found.',
+        title: "Article Not Found",
+        description: "The requested article could not be found.",
       }
     }
 
-    // Safely extract metadata with fallbacks
-    const title = postData?.yoast_head_json?.title || 
-      postData?.title?.rendered || 
-      'News Article'
+    /* ------------------------ TITLE + DESCRIPTION ------------------------ */
+    const rawTitle =
+      postData?.yoast_head_json?.title ||
+      postData?.title?.rendered ||
+      "News Article"
 
-    const cleanTitle = stripHtml(title)
+    const rawDescription =
+      postData?.yoast_head_json?.description ||
+      postData?.excerpt?.rendered ||
+      ""
 
-    const description = postData?.yoast_head_json?.description || 
-      postData?.excerpt?.rendered || 
-      ''
+    const title = stripHtml(rawTitle)
+    const description = stripHtml(rawDescription).substring(0, 160)
 
-    const cleanDescription = stripHtml(description).substring(0, 160)
+    /* ------------------------ IMAGE ------------------------ */
+    const ogImage =
+      postData?.yoast_head_json?.og_image?.[0]?.url ||
+      postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+      undefined
 
-    // Get the best available image
-    const ogImage = postData?.yoast_head_json?.og_image?.[0]?.url || 
-      postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url
+    /* ------------------------ AUTHOR ------------------------ */
+    const author =
+      postData?._embedded?.author?.[0]?.name ||
+      postData?.author ||
+      undefined
 
-    // Extract author information
-    const authorName = postData?._embedded?.author?.[0]?.name || 
-      postData?.author
-
-    // Build comprehensive metadata
+    /* ------------------------ FINAL METADATA ------------------------ */
     return {
-      title: cleanTitle,
-      description: cleanDescription,
-      
-      // Add keywords if available
-      ...(postData?.tags && postData.tags.length > 0 && {
-        keywords: postData.tags.map((tag:Tag) => tag.name).join(', ')
-      }),
+      title,
+      description,
+      keywords:
+        postData?.tags?.length
+          ? postData.tags.map((t: Tag) => t.name).join(', ')
+          : undefined,
 
-      // Add canonical URL
       alternates: {
         canonical: postData?.link || `https://stage.igihe.com/news/news/${post}`
       },
 
-      // Open Graph metadata
       openGraph: {
-        title: postData?.yoast_head_json?.og_title || cleanTitle,
-        description: postData?.yoast_head_json?.og_description || cleanDescription,
+        type: 'article',
+        title: postData?.yoast_head_json?.og_title || title,
+        description: postData?.yoast_head_json?.og_description || description,
         url: postData?.link,
         siteName: 'IGIHE',
         locale: postData?.yoast_head_json?.og_locale || 'en_US',
-        type: 'article',
-        ...(postData?.date && { publishedTime: postData.date }),
-        ...(postData?.modified && { modifiedTime: postData.modified }),
-        ...(ogImage && { images: [{ url: ogImage, alt: cleanTitle }] }),
-        ...(authorName && { 
-          article: { 
-            authors: [authorName],
-            ...(postData?.tags && { tags: postData.tags.map((tag:Tag) => tag.name) })
-          }
-        })
+        publishedTime: postData?.date,
+        modifiedTime: postData?.modified,
+
+        images: ogImage ? [{ url: ogImage, alt: title }] : [],
+        article: {
+          authors: author ? [author] : [],
+          tags: postData?.tags?.map((t: Tag) => t.name) || []
+        }
       },
 
-      // Twitter Card metadata
       twitter: {
         card: 'summary_large_image',
-        title: postData?.yoast_head_json?.twitter_title || cleanTitle,
-        description: postData?.yoast_head_json?.twitter_description || cleanDescription,
-        ...(ogImage && { images: [ogImage] }),
-        ...(authorName && { creator: `@${authorName}` })
+        title: postData?.yoast_head_json?.twitter_title || title,
+        description: postData?.yoast_head_json?.twitter_description || description,
+        images: ogImage ? [ogImage] : []
       },
 
-      // Additional SEO improvements
       robots: {
         index: true,
         follow: true,
@@ -130,25 +117,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           follow: true,
           'max-video-preview': -1,
           'max-image-preview': 'large',
-          'max-snippet': -1,
-        },
-      },
+          'max-snippet': -1
+        }
+      }
     }
   } catch (error) {
-    console.error('Error generating metadata:', error)
-    
-    // Return basic metadata instead of failing
+    console.error("Metadata error:", error)
+
     return {
       title: `${post.replace(/-/g, ' ')} | igihe.com`,
-      description: 'Read the latest news and updates.',
-      robots: {
-        index: false, // Don't index error pages
-        follow: true,
-      },
+      description: "Latest news updates",
+      robots: { index: false }
     }
   }
 }
 
+/* ------------------------ PAGE ------------------------ */
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
   return <SingleNewsContent slug={post} />
