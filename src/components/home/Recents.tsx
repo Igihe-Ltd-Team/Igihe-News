@@ -166,10 +166,10 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                         </div>
                     </div>
 
-                    <Row>
+                    <Row className='pt-4'>
                         <Col>
                             <AdManager
-                                position="header-landscape-ad-2"
+                                position="bellow-featured-news"
                                 priority={true}
                                 className="mb-2"
                             /></Col>

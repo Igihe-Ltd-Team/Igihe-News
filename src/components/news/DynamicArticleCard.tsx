@@ -26,6 +26,7 @@ interface ArticleCardProps {
   leftNumber?: string,
   mobileImgHeight?: number
   showCategorie?:boolean
+  isSlider?:boolean
 }
 
 
@@ -45,7 +46,9 @@ function DynamicArticleCard({
   showDate = true,
   numbers,
   leftNumber,
-  showCategorie = true
+  showCategorie = true,
+  isSlider = false
+
 }: ArticleCardProps) {
 
   const featuredImage = getFeaturedImage(article);
@@ -61,7 +64,9 @@ function DynamicArticleCard({
         <Link
           href={`/news/${getCategorySlug(article)}/${article.slug}`}
           className="text-decoration-none text-reset"
-          style={{ flex: 1 }}
+          style={
+            isSlider ? { width:'20%' }:{ flex: 1 }
+          }
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
         >
           <OptimizedImage
@@ -148,9 +153,10 @@ function DynamicArticleCard({
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           >
             <div className='d-flex'>
-              <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle}>
+              <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle} className={isSlider ? 'line-clamp-2':''}>
                 {stripHtml(article.title.rendered)}
               </ThemedText>
+              
               {
                 numbers &&
                 <div className='border-start p-2 m-2' style={{ height: '45%' }}>

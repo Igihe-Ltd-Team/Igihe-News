@@ -56,6 +56,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
 .container {
   max-width: min(100%, 1240px) !important;
   /* or any value you want */
@@ -71,6 +72,10 @@ body {
   position: relative;
   z-index: 1;
   /* min-height: 301.4px */
+}
+
+.btn:first-child:active{
+  border: none!important;
 }
 
 /* Menu section styles */
@@ -155,18 +160,18 @@ body {
 
 .timeLine-line {
   left: 28px;
-  top: 30px;
+  top: 10px;
   bottom: 30px;
   width: 2px;
   background-color: #2196F3
 }
 
 .timeLine-pointer {
-  left: -3px;
-  top: 8px;
-  width: 16px;
-  height: 16px;
-  border: 4px solid #2196F3
+  left: -1px;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #2196F3
 }
 
 .divider-container {
@@ -342,9 +347,9 @@ body {
 
 
 .border-bottom-custom .swiper-navigation-icon {
-  width: 11px !important;
-  height: 11px !important;
-  color: #A0A0A0;
+  width: 18px !important;
+  height: 18px !important;
+  color: #646464;
 }
 
 .swiper-navigation-icon {
@@ -694,7 +699,12 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
+.selectedArticleTitle{
+   display: -webkit-box!important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 
 

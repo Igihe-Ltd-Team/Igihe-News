@@ -24,7 +24,7 @@ function PopularNews({ articles, name = "Popular News" }: PopularProps) {
     <section aria-labelledby="popular-news-heading">
       <HeaderDivider title={name}/>
     
-      <div className="pt-2">
+      <div>
         <DynamicArticleCard
           article={featuredArticle}
           showImage

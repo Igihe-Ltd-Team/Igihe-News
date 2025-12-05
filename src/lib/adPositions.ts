@@ -41,6 +41,15 @@ export const AD_POSITIONS = {
     dimensions: { width: 728, height: 90 },
     priority: 2
   },
+  'bellow-featured-news': {
+    name: 'Home bellow Featured',
+    description: 'bellow Featured section',
+    dimensions: { width: 850, height: 91 },
+    priority: 2
+  },
+
+  
+
   'home-section-1': {
     name: 'Home Section 1',
     description: 'First content section',

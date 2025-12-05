@@ -28,8 +28,8 @@ export default function Videos() {
   if (error) {
     return (
       <>
-        <HeaderDivider title="Latest Videos" />
-        <div className="text-red-500">Failed to load videos</div>
+        {/* <HeaderDivider title="Latest Videos" />
+        <div className="text-red-500">Failed to load videos</div> */}
       </>
     )
   }
