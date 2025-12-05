@@ -11,6 +11,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 interface ArticleListProps {
     categoryId?: number,
     categoryName?:string
+    categorySlug?:string
 }
 export default function NewsByCategory({ categoryId,categoryName }: ArticleListProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
