@@ -345,21 +345,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
+  const postData = await fetchPostData(post, 8000)
+  return <SingleNewsContent slug={post} initialArticle={postData} />
   
-  try {
-    // Longer timeout for page render
-    const postData = await fetchPostData(post, 8000)
-    
-    // If no data, show 404
-    if (!postData) {
-      console.error(`[Page] Post not found: ${post}`)
-      notFound()
-    }
-
-    // Pass the fetched data to avoid re-fetching
-    return <SingleNewsContent slug={post} initialArticle={postData} />
-  } catch (error) {
-    console.error('[Page Error]:', error)
-    notFound()
-  }
 }
