@@ -161,7 +161,7 @@ export async function GET(
       
       return NextResponse.json(cached.data, {
         headers: {
-          'User-Agent': 'IGIHE/1.0',
+          'User-Agent': 'Igihe-NextJS-Proxy/2.0',
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
           'X-Cache': 'HIT',
           'X-Response-Time': `${responseTime}ms`,
@@ -198,6 +198,7 @@ export async function GET(
         
         return NextResponse.json(mockResponse, {
           headers: {
+            'User-Agent': 'Igihe-NextJS-Proxy/2.0',
             'Cache-Control': 'public, s-maxage=60',
             'X-Cache': 'MOCK',
             'X-Response-Time': `${Date.now() - startTime}ms`,
@@ -233,6 +234,7 @@ export async function GET(
         if (mockResponse !== undefined) {
           return NextResponse.json(mockResponse, {
             headers: {
+              'User-Agent': 'Igihe-NextJS-Proxy/2.0',
               'X-Cache': 'MOCK-FALLBACK',
               'X-Response-Time': `${Date.now() - startTime}ms`,
             },
@@ -264,6 +266,7 @@ export async function GET(
 
     return NextResponse.json(data, {
       headers: {
+        'User-Agent': 'Igihe-NextJS-Proxy/2.0',
         'Cache-Control': cacheControlValue,
         'X-Cache': 'MISS',
         'X-Response-Time': `${responseTime}ms`,
@@ -284,6 +287,7 @@ export async function GET(
       if (mockResponse !== undefined) {
         return NextResponse.json(mockResponse, {
           headers: {
+            'User-Agent': 'Igihe-NextJS-Proxy/2.0',
             'X-Cache': 'MOCK-ERROR',
             'X-Error': isTimeout ? 'timeout' : 'unknown',
           },
