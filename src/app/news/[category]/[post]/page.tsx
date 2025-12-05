@@ -3,7 +3,6 @@ import { Metadata } from 'next'
 import { ApiService } from '@/services/apiService'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
-import { useNewsData } from '@/hooks/useNewsData'
 
 interface PageProps {
   params: Promise<{ post: string }>
@@ -66,17 +65,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url || ''
 
     // Ensure absolute URL for images
-    // if (ogImage && !ogImage.startsWith('http')) {
-    //   ogImage = `https://stage.igihe.com${ogImage.startsWith('/') ? '' : '/'}${ogImage}`
-    // }
-
-    // Extract author information
+    if (ogImage && !ogImage.startsWith('http')) {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stage.igihe.com'
+      ogImage = `${baseUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`
+    }
+    
     const authorName = postData?._embedded?.author?.[0]?.name || ''
 
     // Extract category
     const category = postData?.categories?.[0]?.name || 
       postData?._embedded?.['wp:term']?.[0]?.[0]?.name ||
       ''
+
+    // Build URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stage.igihe.com'
+    const canonicalUrl = postData?.link || `${baseUrl}/news/${post}`
 
     // Build comprehensive metadata
     const metadata: Metadata = {
@@ -90,14 +93,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
       // Add canonical URL
       alternates: {
-        canonical: postData?.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${post}`
+        canonical: canonicalUrl
       },
 
       // Open Graph metadata
       openGraph: {
         title: postData?.yoast_head_json?.og_title || cleanTitle,
         description: postData?.yoast_head_json?.og_description || cleanDescription,
-        url: postData?.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${post}`,
+        url: canonicalUrl,
         siteName: 'IGIHE',
         locale: postData?.yoast_head_json?.og_locale || 'en_US',
         type: 'article',
@@ -175,7 +178,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${post.replace(/-/g, ' ').toUpperCase()} - IGIHE`,
       description: 'Read the latest news and updates on IGIHE.',
       alternates: {
-        canonical: `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${post}`
+        canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://stage.igihe.com'}/news/${post}`
       },
       robots: {
         index: false,
@@ -185,57 +188,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-// Helper function to fetch post data
+// Helper function to fetch post data DIRECTLY - NO HOOKS
 async function fetchPostData(slug: string) {
-const { useArticleDetails } = useNewsData()
-  const {
-          article,
-          relatedPosts,
-          articleLoading,
-          refetchArticle,
-          relatedPostsLoading
-      } = useArticleDetails(slug)
-      return article
-  // try {
-  //   const controller = new AbortController()
-  //   const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
-
-  //   const response = await fetch(
-  //     `https://stage.igihe.com/wp-json/wp/v2/posts?slug=${slug}&_embed`,
-  //     {
-  //       signal: controller.signal,
-  //       headers: {
-  //         'User-Agent': 'IGIHE-SEO-Bot/1.0',
-  //         'Accept': 'application/json',
-  //       },
-  //       next: {
-  //         revalidate: 60 // Cache for 60 seconds
-  //       }
-  //     }
-  //   )
-
-  //   clearTimeout(timeoutId)
-
-  //   if (!response.ok) {
-  //     throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-  //   }
-
-  //   const data = await response.json()
-    
-  //   if (!data || data.length === 0) {
-  //     return null
-  //   }
-
-  //   return data[0]
-
-  // } catch (error) {
-  //   console.error(`Failed to fetch post ${slug}:`, error)
-  //   return null
-  // }
+  try {
+    // Use your existing ApiService or fetch directly
+    return await ApiService.fetchPostBySlug(slug)
+  } catch (error) {
+    console.error(`Failed to fetch post ${slug}:`, error)
+    return null
+  }
 }
 
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
   
+  // Fetch data to check if post exists (for 404)
+  const postData = await fetchPostData(post)
+  
+  if (!postData || !postData.id) {
+    notFound()
+  }
+
   return <SingleNewsContent slug={post} />
 }
