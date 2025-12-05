@@ -200,7 +200,12 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                         <SocialShare postUrl={postUrls} />
                     </Col>
                     <Col md="4" className='sticky-sidebar'>
-                        <CardAdds size={290} />
+                        {/* <CardAdds size={290} /> */}
+                        <AdManager
+                                                position="home-section-1"
+                                                priority={true}
+                                                className="mb-2"
+                                            />
                         <SocialMedias />
                     </Col>
                 </Row>

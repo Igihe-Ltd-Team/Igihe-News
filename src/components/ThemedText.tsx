@@ -25,9 +25,9 @@ export function ThemedText({
   const typeClasses = {
     small: 'small-txt fw-normal', // fs-6 ≈ 12px, fw-light
     smallBold: 'small-txt lh-1 fw-bold',
-    default: 'fs-6 lh-sm fw-medium', // fs-5 ≈ 16px
-    defaultItalic: 'fs-6 lh-sm fw-normal fst-italic',
-    defaultSemiBold: 'fs-6 lh-base fw-semibold',
+    default: 'normal-text lh-sm fw-medium', // fs-5 ≈ 16px
+    defaultItalic: 'normal-text lh-sm fw-normal fst-italic',
+    defaultSemiBold: 'normal-text lh-base fw-semibold',
     title: 'fs-1 lh-1 fw-bold', // fs-1 ≈ 32px
     subtitle: 'fs-3 lh-sm fw-bold', // fs-3 ≈ 20px
     link: 'fs-5 lh-lg text-primary text-decoration-underline cursor-pointer fw-normal',
