@@ -9,7 +9,7 @@ interface PageProps {
   params: Promise<{ post: string }>
 }
 
-// export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function getCachedPost(slug: string): Promise<any | null> {
