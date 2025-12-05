@@ -96,10 +96,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         modifiedTime: postData?.modified,
 
         images: ogImage ? [{ url: ogImage, alt: title }] : [],
-        article: {
-          authors: author ? [author] : [],
-          tags: postData?.tags?.map((t: Tag) => t.name) || []
-        }
+        
       },
 
       twitter: {
