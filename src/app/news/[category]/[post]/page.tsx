@@ -90,14 +90,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
       // Add canonical URL
       alternates: {
-        canonical: postData?.link || `https://stage.igihe.com/news/${post}`
+        canonical: postData?.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${post}`
       },
 
       // Open Graph metadata
       openGraph: {
         title: postData?.yoast_head_json?.og_title || cleanTitle,
         description: postData?.yoast_head_json?.og_description || cleanDescription,
-        url: postData?.link || `https://stage.igihe.com/news/${post}`,
+        url: postData?.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${post}`,
         siteName: 'IGIHE',
         locale: postData?.yoast_head_json?.og_locale || 'en_US',
         type: 'article',
@@ -175,7 +175,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${post.replace(/-/g, ' ').toUpperCase()} - IGIHE`,
       description: 'Read the latest news and updates on IGIHE.',
       alternates: {
-        canonical: `https://stage.igihe.com/news/${post}`
+        canonical: `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${post}`
       },
       robots: {
         index: false,
