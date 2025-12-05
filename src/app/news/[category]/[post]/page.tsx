@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
 import { ApiService } from '@/services/apiService'
+import { Tag } from '@/types/fetchData'
 
 interface PageProps {
   params: Promise<{ post: string }>
@@ -84,7 +85,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       
       // Add keywords if available
       ...(postData?.tags && postData.tags.length > 0 && {
-        keywords: postData.tags.map(tag => tag.name).join(', ')
+        keywords: postData.tags.map((tag:Tag) => tag.name).join(', ')
       }),
 
       // Add canonical URL
@@ -106,7 +107,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         ...(authorName && { 
           article: { 
             authors: [authorName],
-            ...(postData?.tags && { tags: postData.tags.map(tag => tag.name) })
+            ...(postData?.tags && { tags: postData.tags.map((tag:Tag) => tag.name) })
           }
         })
       },
