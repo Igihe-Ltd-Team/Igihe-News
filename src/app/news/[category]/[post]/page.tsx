@@ -1,162 +1,3 @@
-// import { notFound } from 'next/navigation'
-// import { Metadata } from 'next'
-// import SingleNewsContent from '@/components/news/SingleNewsContent'
-// import { stripHtml } from '@/lib/utils'
-// import { ApiService } from '@/services/apiService'
-// import { Tag } from '@/types/fetchData'
-
-// interface PageProps {
-//   params: Promise<{ post: string }>
-// }
-
-// export const runtime = 'edge'
-// export const dynamic = 'force-dynamic'
-
-// async function getCachedPost(slug: string): Promise<any | null> {
-//   try {
-//     // Try to get from cache first
-//     const cacheKey = `post:${slug}`
-//     const cached = ApiService.getCachedArticle(cacheKey)
-    
-//     if (cached) {
-//       return cached
-//     }
-    
-//     return null
-//   } catch (error) {
-//     console.error('Cache retrieval error:', error)
-//     return null
-//   }
-// }
-
-
-
-// export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-//   const { post } = await params
-  
-//   // Add timeout and better error handling
-//   try {
-
-//     let postData = await getCachedPost(post)
-//     let fromCache = !!postData
-
-//     if (!postData) {
-//       const controller = new AbortController()
-//       const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 seconds for metadata
-      
-//       postData = await ApiService.fetchPostBySlug(post)
-//       clearTimeout(timeoutId)
-//     }
-
-
-//     if (!postData) {
-//       console.error(`Post not found: ${post}`)
-//       return {
-//         title: 'Article Not Found',
-//         description: 'The requested article could not be found.',
-//       }
-//     }
-
-//     // Safely extract metadata with fallbacks
-//     const title = postData?.yoast_head_json?.title || 
-//       postData?.title?.rendered || 
-//       'News Article'
-
-//     const cleanTitle = stripHtml(title)
-
-//     const description = postData?.yoast_head_json?.description || 
-//       postData?.excerpt?.rendered || 
-//       ''
-
-//     const cleanDescription = stripHtml(description).substring(0, 160)
-
-//     // Get the best available image
-//     const ogImage = postData?.yoast_head_json?.og_image?.[0]?.url || 
-//       postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url
-
-//     // Extract author information
-//     const authorName = postData?._embedded?.author?.[0]?.name || 
-//       postData?.author
-
-//     // Build comprehensive metadata
-//     return {
-//       title: cleanTitle,
-//       description: cleanDescription,
-      
-//       // Add keywords if available
-//       ...(postData?.tags && postData.tags.length > 0 && {
-//         keywords: postData.tags.map((tag:Tag) => tag.name).join(', ')
-//       }),
-
-//       // Add canonical URL
-//       alternates: {
-//         canonical: postData?.link || `https://stage.igihe.com/news/news/${post}`
-//       },
-
-//       // Open Graph metadata
-//       openGraph: {
-//         title: postData?.yoast_head_json?.og_title || cleanTitle,
-//         description: postData?.yoast_head_json?.og_description || cleanDescription,
-//         url: postData?.link,
-//         siteName: 'IGIHE',
-//         locale: postData?.yoast_head_json?.og_locale || 'en_US',
-//         type: 'article',
-//         ...(postData?.date && { publishedTime: postData.date }),
-//         ...(postData?.modified && { modifiedTime: postData.modified }),
-//         ...(ogImage && { images: [{ url: ogImage, alt: cleanTitle }] }),
-//         ...(authorName && { 
-//           article: { 
-//             authors: [authorName],
-//             ...(postData?.tags && { tags: postData.tags.map((tag:Tag) => tag.name) })
-//           }
-//         })
-//       },
-
-//       // Twitter Card metadata
-//       twitter: {
-//         card: 'summary_large_image',
-//         title: postData?.yoast_head_json?.twitter_title || cleanTitle,
-//         description: postData?.yoast_head_json?.twitter_description || cleanDescription,
-//         ...(ogImage && { images: [ogImage] }),
-//         ...(authorName && { creator: `@${authorName}` })
-//       },
-
-//       // Additional SEO improvements
-//       robots: {
-//         index: true,
-//         follow: true,
-//         googleBot: {
-//           index: true,
-//           follow: true,
-//           'max-video-preview': -1,
-//           'max-image-preview': 'large',
-//           'max-snippet': -1,
-//         },
-//       },
-//     }
-//   } catch (error) {
-//     console.error('Error generating metadata:', error)
-    
-//     // Return basic metadata instead of failing
-//     return {
-//       title: `${post.replace(/-/g, ' ')} | igihe.com`,
-//       description: 'Read the latest news and updates.',
-//       robots: {
-//         index: false, // Don't index error pages
-//         follow: true,
-//       },
-//     }
-//   }
-// }
-
-// export default async function SingleNewsPage({ params }: PageProps) {
-//   const { post } = await params
-//   const postData = await getCachedPost(post)
-//   return <SingleNewsContent slug={post} initialArticle={postData}/>
-// }
-
-
-
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
@@ -168,58 +9,18 @@ interface PageProps {
   params: Promise<{ post: string }>
 }
 
-// Keep edge runtime if you need it, but with optimizations
-export const runtime = 'edge'
-// Use ISR instead of force-dynamic for better performance
-export const revalidate = 600 // 10 minutes
-
-// Shared fetch function to avoid code duplication
-async function fetchPostData(slug: string, timeout = 5000): Promise<any | null> {
-  try {
-    // Check cache first
-    const cacheKey = `post:${slug}`
-    const cached = ApiService.getCachedArticle(cacheKey)
-    
-    if (cached) {
-      console.log(`[Cache HIT] ${slug}`)
-      return cached
-    }
-
-    console.log(`[Cache MISS] Fetching ${slug}`)
-
-    // Fetch with timeout
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-    
-    try {
-      const postData = await ApiService.fetchPostBySlug(slug)
-      clearTimeout(timeoutId)
-
-      
-      return postData
-    } catch (fetchError: any) {
-      clearTimeout(timeoutId)
-      
-      if (fetchError.name === 'AbortError') {
-        console.error(`[Timeout] ${slug} after ${timeout}ms`)
-      } else {
-        console.error(`[Fetch Error] ${slug}:`, fetchError.message)
-      }
-      
-      return null
-    }
-  } catch (error) {
-    console.error(`[Error] fetchPostData for ${slug}:`, error)
-    return null
-  }
-}
+// CRITICAL: Use Node.js runtime to work with your proxy architecture
+export const runtime = 'nodejs' // Changed from 'edge'!
+export const revalidate = 600 // 10 minutes ISR
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post } = await params
   
+  console.log(`[Metadata Start] ${post}`)
+  
   try {
-    // Shorter timeout for metadata (edge runtime has time limits)
-    const postData = await fetchPostData(post, 3000)
+    // Use your existing ApiService which handles proxy routing
+    const postData = await ApiService.fetchPostBySlug(post)
 
     if (!postData) {
       console.error(`[Metadata] Post not found: ${post}`)
@@ -233,7 +34,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }
     }
 
-    // Safely extract metadata with fallbacks
+    console.log(`[Metadata Success] ${post} - ID: ${postData.id}`)
+
+    // Extract metadata with fallbacks
     const rawTitle = postData?.yoast_head_json?.title || 
       postData?.title?.rendered || 
       'News Article'
@@ -248,21 +51,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     // Get the best available image
     const ogImage = postData?.yoast_head_json?.og_image?.[0]?.url || 
-      postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
-      postData?.featured_media_url
+      postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url
 
     // Extract author information
-    const authorName = postData?._embedded?.author?.[0]?.name || 
-      postData?.author_name ||
-      postData?.author ||
-      'IGIHE Editorial Team'
+    const authorName = postData?._embedded?.author?.[0]?.name || 'IGIHE Editorial Team'
 
     // Extract tags safely
     const tags = postData?.tags || postData?._embedded?.['wp:term']?.[1] || []
     const keywords = tags.length > 0 ? tags.map((tag: Tag) => tag.name).join(', ') : undefined
 
     // Build full URL
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://stage.igihe.com'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+      process.env.NEXT_PUBLIC_APP_URL || 
+      'https://stage.igihe.com'
     const fullUrl = postData?.link || `${baseUrl}/news/${post}`
 
     // Build comprehensive metadata
@@ -323,8 +124,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       category: postData?.categories?.[0]?.name || 
         postData?._embedded?.['wp:term']?.[0]?.[0]?.name,
     }
-  } catch (error) {
-    console.error('[Metadata Error]:', error)
+  } catch (error: any) {
+    console.error('[Metadata Error]:', {
+      slug: post,
+      message: error?.message,
+      stack: error?.stack
+    })
     
     // Return basic metadata instead of failing
     const fallbackTitle = post
@@ -336,7 +141,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${fallbackTitle} | IGIHE`,
       description: 'Read the latest news and updates from IGIHE.',
       robots: {
-        index: false, // Don't index error pages
+        index: false,
         follow: true,
       },
     }
@@ -346,20 +151,42 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
   
+  console.log(`[Page Start] ${post}`)
+  
   try {
-    // Longer timeout for page render
-    const postData = await fetchPostData(post, 8000)
+    // Check cache first
+    const cacheKey = `post:${post}`
+    let postData = ApiService.getCachedArticle(cacheKey)
     
-    // If no data, show 404
+    if (postData) {
+      console.log(`[Page Cache HIT] ${post}`)
+    } else {
+      console.log(`[Page Cache MISS] ${post} - Fetching...`)
+      // Use your existing ApiService
+      postData = await ApiService.fetchPostBySlug(post)
+      
+      if (postData) {
+        // Cache it for client-side use
+        ApiService.cacheArticles(postData)
+        console.log(`[Page Fetched & Cached] ${post}`)
+      }
+    }
+    
     if (!postData) {
       console.error(`[Page] Post not found: ${post}`)
       notFound()
     }
 
+    console.log(`[Page Success] ${post} - Rendering...`)
+
     // Pass the fetched data to avoid re-fetching
     return <SingleNewsContent slug={post} initialArticle={postData} />
-  } catch (error) {
-    console.error('[Page Error]:', error)
+  } catch (error: any) {
+    console.error('[Page Error]:', {
+      slug: post,
+      message: error?.message,
+      name: error?.name
+    })
     notFound()
   }
 }
