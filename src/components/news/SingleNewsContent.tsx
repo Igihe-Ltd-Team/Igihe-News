@@ -26,6 +26,7 @@ import NewsSkeleton from '../NewsSkeleton'
 import AIChatButton from './AIChatButton'
 import SinglePostMetaData from './SinglePostMetaData'
 import SocialShare from './SocialShare'
+import { usePostMetadata } from '@/hooks/usePostMetadata'
 
 
 
@@ -37,6 +38,18 @@ interface SingleNewsContentProps {
 export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
     const shouldFetch = !initialArticle
+
+
+    const { metadata, loading, error } = usePostMetadata(slug, {
+    title: initialArticle?.title?.rendered,
+    description: initialArticle?.excerpt?.rendered?.replace(/<[^>]*>/g, '').substring(0, 155),
+    image: initialArticle?._embedded?.['wp:featuredmedia']?.[0]?.source_url,
+    author: initialArticle?._embedded?.author?.[0]?.name,
+    publishedTime: initialArticle?.date,
+    keywords: initialArticle?.tags?.map((tag: any) => tag.name) || [],
+    canonicalUrl: initialArticle?.link || `https://stage.igihe.com/news/${slug}`
+  })
+  
 
 
     const { useArticleDetails } = useNewsData()
