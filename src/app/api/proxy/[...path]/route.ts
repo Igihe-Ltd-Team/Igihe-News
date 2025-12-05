@@ -161,6 +161,7 @@ export async function GET(
       
       return NextResponse.json(cached.data, {
         headers: {
+          'User-Agent': 'IGIHE/1.0',
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
           'X-Cache': 'HIT',
           'X-Response-Time': `${responseTime}ms`,
