@@ -10,7 +10,7 @@ interface PageProps {
 }
 
 // CRITICAL: Use Node.js runtime to work with your proxy architecture
-export const runtime = 'nodejs' // Changed from 'edge'!
+export const runtime = 'adge' // Changed from 'edge'!
 export const revalidate = 600 // 10 minutes ISR
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
