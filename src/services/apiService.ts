@@ -4,8 +4,7 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, Cate
 // Configuration
 const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
-  baseURL: process.env.NODE_ENV === 'production'  ? '/api/proxy':
-  process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
+  baseURL: process.env.NODE_ENV === 'production'  ? '/api/proxy' : process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
   timeout: 10000, // 10 seconds
   retryAttempts: 2,
   cacheTimeout: 5 * 60 * 1000, // 5 minutes
