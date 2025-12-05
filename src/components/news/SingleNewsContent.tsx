@@ -36,16 +36,21 @@ interface SingleNewsContentProps {
 
 export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
+    const shouldFetch = !initialArticle
 
 
     const { useArticleDetails } = useNewsData()
     const {
-        article,
+        article:fetchedArticle,
         relatedPosts,
-        articleLoading,
+        articleLoading:isLoading,
         refetchArticle,
         relatedPostsLoading
     } = useArticleDetails(slug)
+
+
+    const article = initialArticle || fetchedArticle
+    const articleLoading = shouldFetch && isLoading
 
     if (articleLoading) {
         return (
@@ -68,8 +73,8 @@ export default function SingleNewsContent({ slug,initialArticle }: SingleNewsCon
             </div>
         )
     }
-    const featuredImage = getFeaturedImage(article);
 
+    const featuredImage = getFeaturedImage(article);
     const articleCategory = article ? getCategoryName(article) : undefined;
     const publishDate = article ? formatDateTime(article.date) : '';
     const author = article._embedded?.author?.[0];
