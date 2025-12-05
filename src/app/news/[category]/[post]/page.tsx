@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: postData?.yoast_head_json?.og_title || cleanTitle,
         description: postData?.yoast_head_json?.og_description || cleanDescription,
         url: postData?.link,
-        siteName: 'Your Site Name',
+        siteName: 'IGIHE',
         locale: postData?.yoast_head_json?.og_locale || 'en_US',
         type: 'article',
         ...(postData?.date && { publishedTime: postData.date }),

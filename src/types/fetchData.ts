@@ -187,6 +187,7 @@ export interface NewsItem {
     canonical?: string
     og_title?: string
     og_description?: string
+    og_locale?:string
     og_image?: Array<{
       url: string
       width: number
