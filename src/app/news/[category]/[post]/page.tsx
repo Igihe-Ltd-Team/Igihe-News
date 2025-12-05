@@ -8,8 +8,8 @@ interface PageProps {
   params: Promise<{ post: string }>
 }
 
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+// export const runtime = 'edge'
+// export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post } = await params
