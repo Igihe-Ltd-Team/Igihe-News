@@ -76,7 +76,7 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
     const authorsName = article._embedded?.author?.[0]?.name || '';
     const authorImage = article._embedded?.author?.[0]?.avatar_urls?.['96'];
     const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/news/${articleCategory?.toLowerCase()}/${article.slug}` : '';
-    
+
     return (
         <Container>
             <div className='pb-4'>
@@ -101,9 +101,9 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                     <ThemedText type='title'>{stripHtml(article.title.rendered)}</ThemedText>
                 </Col>
                 {/* Render article/post meta data */}
-                <SinglePostMetaData 
-                author={author}
-                authorName={authorsName}
+                <SinglePostMetaData
+                    author={author}
+                    authorName={authorsName}
                     authorImage={authorImage || '/assets/user-avatar.png'}
                     publishDate={publishDate}
                     category={articleCategory} />
@@ -200,12 +200,11 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
                         <SocialShare postUrl={postUrls} />
                     </Col>
                     <Col md="4" className='sticky-sidebar'>
-                        {/* <CardAdds size={290} /> */}
                         <AdManager
-                                                position="home-section-1"
-                                                priority={true}
-                                                className="mb-2"
-                                            />
+                            position="home-section-1"
+                            priority={true}
+                            className="mb-2"
+                        />
                         <SocialMedias />
                     </Col>
                 </Row>

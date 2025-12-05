@@ -25,6 +25,7 @@ interface ArticleCardProps {
   numbers?: string,
   leftNumber?: string,
   mobileImgHeight?: number
+  showCategorie?:boolean
 }
 
 
@@ -43,7 +44,8 @@ function DynamicArticleCard({
   showExpt,
   showDate = true,
   numbers,
-  leftNumber
+  leftNumber,
+  showCategorie = true
 }: ArticleCardProps) {
 
   const featuredImage = getFeaturedImage(article);
@@ -68,6 +70,7 @@ function DynamicArticleCard({
             fill
             height={imgHeight}
             imgClass="object-fit-cover"
+            className={bordered ? "":'mb-2'}
           />
         </Link>
       }
@@ -93,16 +96,19 @@ function DynamicArticleCard({
 
           {
             showDate &&
-            <div className="">
+            <div className="mb-2">
               <small className='d-flex' style={{ color: '#999' }}>
                 <ThemedText className="me-3" type='small'>
                   {
                     formatDate(article.date)
                   }
                 </ThemedText>
-                <Link href={`/news/${getCategorySlug(article)}`}
+                {
+                  showCategorie &&
+                  <Link href={`/news/${getCategorySlug(article)}`}
                   className="text-decoration-none text-reset d-flex gap-1"
                   aria-label={`Read full article: ${getCategoryName(article)}`}
+                  style={{flex:1}}
                 >
                   <span className="d-flex flex-wrap align-items-center">
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -124,6 +130,8 @@ function DynamicArticleCard({
                   </span>
                   <ThemedText type='small'>{getCategoryName(article)}</ThemedText>
                 </Link>
+                }
+                
               </small>
             </div>
           }
@@ -139,7 +147,7 @@ function DynamicArticleCard({
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           >
-            <div className='d-flex pt-3'>
+            <div className='d-flex'>
               <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle}>
                 {stripHtml(article.title.rendered)}
               </ThemedText>

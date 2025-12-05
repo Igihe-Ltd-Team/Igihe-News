@@ -15,44 +15,44 @@ import { Col, Container, Row } from 'react-bootstrap'
 
 const upperCats = [
   {
-    id: 7,
+    id: 84,
     name: 'Business',
     slug: 'business'
   },
   {
-    id: 8,
+    id: 66,
     name: 'Technology',
     slug: 'science-technology'
   },
   {
-    id: 9,
+    id: 4,
     name: 'Health',
     slug: 'health'
   },
   {
-    id: 14,
+    id: 8,
     name: 'Tourism',
     slug: 'tourism'
   }]
 
 const lowerCats = [
   {
-    id: 10,
+    id: 5,
     name: 'Sports',
     slug: 'sports'
   },
   {
-    id: 11,
+    id: 67,
     name: 'Arts & Culture',
     slug: 'arts-culture'
   },
   {
-    id: 45,
-    name: 'Education',
-    slug: 'education'
+    id: 12,
+    name: 'Environment',
+    slug: 'environment'
   },
   {
-    id: 18,
+    id: 69,
     name: 'Diaspora',
     slug: 'diaspora'
   }]
@@ -151,7 +151,7 @@ export function Home() {
         </Container>
       </Suspense>
       <Suspense fallback={<NewsSkeleton count={1} />}>
-        <Categories categories={categories} />
+        <Categories categories={upperCats} />
       </Suspense>
       <Suspense fallback={null}>
         <Container>
@@ -173,7 +173,7 @@ export function Home() {
         </Container>
       </Suspense>
       <Suspense fallback={<NewsSkeleton count={1} />}>
-        <Categories categories={categories} />
+        <Categories categories={lowerCats} />
       </Suspense>
     </>
   )

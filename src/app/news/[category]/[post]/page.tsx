@@ -3,107 +3,139 @@ import { Metadata } from 'next'
 import { ApiService } from '@/services/apiService'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
-import { useNewsData } from '@/hooks/useNewsData'
-import { HydrationBoundary } from '@tanstack/react-query'
-import SingleSkeleton from '@/components/Loading/SingleSkeleton'
 
 interface PageProps {
   params: Promise<{ post: string }>
 }
-
 
 export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post } = await params
+  
+  // Add timeout and better error handling
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+    
     const postData = await ApiService.fetchPostBySlug(post)
+    clearTimeout(timeoutId)
 
     if (!postData) {
+      console.error(`Post not found: ${post}`)
       return {
         title: 'Article Not Found',
         description: 'The requested article could not be found.',
       }
     }
 
-    const title = (postData as any).seo_title ||
-      (postData as any).yoast_head_json?.title ||
-      stripHtml(postData.title.rendered)
+    // Safely extract metadata with fallbacks
+    const title = postData?.yoast_head_json?.title || 
+      postData?.title?.rendered || 
+      'News Article'
 
-    const description = (postData as any).meta_description ||
-      (postData as any).yoast_head_json?.description ||
-      stripHtml(postData.excerpt.rendered).substring(0, 160)
+    const cleanTitle = stripHtml(title)
 
-    const ogImage = (postData as any).yoast_head_json?.og_image?.[0]?.url ||
-      postData.featured_media
+    const description = postData?.yoast_head_json?.description || 
+      postData?.excerpt?.rendered || 
+      ''
 
+    const cleanDescription = stripHtml(description).substring(0, 160)
+
+    // Get the best available image
+    const ogImage = postData?.yoast_head_json?.og_image?.[0]?.url || 
+      postData?._embedded?.['wp:featuredmedia']?.[0]?.source_url
+
+    // Extract author information
+    const authorName = postData?._embedded?.author?.[0]?.name || 
+      postData?.author
+
+    // Build comprehensive metadata
     return {
-      title,
-      description,
-      keywords: postData.tags?.map(tag => tag.name).join(', '),
-      openGraph: {
-        title: (postData as any).yoast_head_json?.og_title || title,
-        description: (postData as any).yoast_head_json?.og_description || description,
-        images: ogImage ? [ogImage] : [],
-        type: 'article',
-        publishedTime: postData.date,
-        modifiedTime: postData.modified,
+      title: cleanTitle,
+      description: cleanDescription,
+      
+      // Add keywords if available
+      ...(postData?.tags && postData.tags.length > 0 && {
+        keywords: postData.tags.map(tag => tag.name).join(', ')
+      }),
+
+      // Add canonical URL
+      alternates: {
+        canonical: postData?.link || `https://stage.igihe.com/news/news/${post}`
       },
+
+      // Open Graph metadata
+      openGraph: {
+        title: postData?.yoast_head_json?.og_title || cleanTitle,
+        description: postData?.yoast_head_json?.og_description || cleanDescription,
+        url: postData?.link,
+        siteName: 'Your Site Name',
+        locale: postData?.yoast_head_json?.og_locale || 'en_US',
+        type: 'article',
+        ...(postData?.date && { publishedTime: postData.date }),
+        ...(postData?.modified && { modifiedTime: postData.modified }),
+        ...(ogImage && { images: [{ url: ogImage, alt: cleanTitle }] }),
+        ...(authorName && { 
+          article: { 
+            authors: [authorName],
+            ...(postData?.tags && { tags: postData.tags.map(tag => tag.name) })
+          }
+        })
+      },
+
+      // Twitter Card metadata
       twitter: {
         card: 'summary_large_image',
-        title: (postData as any).yoast_head_json?.twitter_title || title,
-        description: (postData as any).yoast_head_json?.twitter_description || description,
-        images: ogImage ? [ogImage] : [],
+        title: postData?.yoast_head_json?.twitter_title || cleanTitle,
+        description: postData?.yoast_head_json?.twitter_description || cleanDescription,
+        ...(ogImage && { images: [ogImage] }),
+        ...(authorName && { creator: `@${authorName}` })
+      },
+
+      // Additional SEO improvements
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
       },
     }
   } catch (error) {
+    console.error('Error generating metadata:', error)
+    
+    // Return basic metadata instead of failing
     return {
-      title: 'Article Not Found',
-      description: 'The requested article could not be found.',
+      title: `${post.replace(/-/g, ' ')} | Your Site`,
+      description: 'Read the latest news and updates.',
+      robots: {
+        index: false, // Don't index error pages
+        follow: true,
+      },
     }
   }
 }
 
-// export async function generateStaticParams() {
-//   try {
-//     // Generate only a few popular pages statically
-//     const fetchedPosts = await ApiService.fetchArticles({ 
-//       per_page: 20, // Reduced for faster builds
-//       orderby: 'date',
-//       order: 'desc'
-//     })
-    
-//     console.log(`Generating ${fetchedPosts.data.length} static pages`)
-//     return fetchedPosts.data.map((post) => ({ slug: post.slug }))
-//   } catch (error) {
-//     console.error('Error in generateStaticParams:', error)
-//     // Return empty array - other pages will be generated on-demand
-//     return []
-//   }
-// }
-
-
-
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post } = await params
-  // const post = await ApiService.fetchPostBySlug(slug)
-  // const { useArticleDetails } = useNewsData()
-  //     const {
-  //     article: clientArticle,
-  //     // relatedPosts,
-  //     // articleLoading,
-  //     // refetchArticle
-  //   } = useArticleDetails(slug)
+  
+  try {
+    // Verify the post exists before rendering
+    const postData = await ApiService.fetchPostBySlug(post)
+    
+    if (!postData) {
+      notFound()
+    }
 
-  // console.log('post', post)
-
-  // if (!post) notFound()
-
-  return(
-    <>
-    {/* <SingleSkeleton/> */}
-     <SingleNewsContent slug={post}/>
-     </>
-     )
+    return <SingleNewsContent slug={post} />
+  } catch (error) {
+    console.error('Error loading post:', error)
+    notFound()
+  }
 }

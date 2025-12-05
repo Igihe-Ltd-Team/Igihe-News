@@ -70,6 +70,7 @@ const NewsSection = React.memo(({
                                     showImage
                                     priority={false}
                                     imgHeight={140}
+                                    showCategorie={false}
                                 />
                             </div>
                         ))}
