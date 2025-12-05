@@ -105,6 +105,24 @@ const pendingRequests = new Map<string, Promise<any>>()
 export class ApiService {
 
 
+  static cacheArticles(article: NewsItem): void {
+
+      if (article?.slug) {
+        const cacheKey = `post:${article.slug}`
+        const cacheData = {
+          data: article,
+          timestamp: Date.now(),
+          expiresAt: Date.now() + API_CONFIG.timeout
+        }
+        
+        try {
+        requestCache.set(cacheKey, cacheData)
+        } catch (error) {
+          // sessionStorage might be full, that's ok
+          console.debug('Failed to store in sessionStorage:', error)
+        }
+      }
+  }
 
 
   private static async dedupedFetch<T>(

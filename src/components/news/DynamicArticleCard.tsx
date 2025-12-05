@@ -6,6 +6,8 @@ import { formatDate, getCategoryName, getCategorySlug, getFeaturedImage, stripHt
 import { NewsItem } from '@/types/fetchData'
 import { ThemedText } from '../ThemedText'
 import Link from 'next/link'
+import { useNewsData } from '@/hooks/useNewsData'
+import { ApiService, requestCache } from '@/services/apiService'
 
 interface ArticleCardProps {
   article: NewsItem
@@ -52,6 +54,13 @@ function DynamicArticleCard({
 }: ArticleCardProps) {
 
   const featuredImage = getFeaturedImage(article);
+
+  const mouseEnter = (articles:NewsItem)=>{
+    if (article?.slug) {
+      ApiService.cacheArticles(articles)
+    }
+  }
+      
   return (
     <div className={`my-2 position-relative ${className}`} style={{
       backgroundColor: bgColor ? bgColor : 'transparent',
@@ -68,6 +77,8 @@ function DynamicArticleCard({
             isSlider ? { width:'20%' }:{ flex: 1 }
           }
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
+          prefetch={true}
+          onMouseEnter={() => mouseEnter(article.slug)}
         >
           <OptimizedImage
             src={featuredImage || '/images/placeholder.jpg'}

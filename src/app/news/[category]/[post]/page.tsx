@@ -1,15 +1,18 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { ApiService } from '@/services/apiService'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
+import { ApiService } from '@/services/apiService'
 
 interface PageProps {
   params: Promise<{ post: string }>
 }
 
-// export const runtime = 'edge'
-// export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
+
+
+
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post } = await params

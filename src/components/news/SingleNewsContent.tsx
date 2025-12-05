@@ -34,7 +34,7 @@ interface SingleNewsContentProps {
     initialArticle?: NewsItem
 }
 
-export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
+export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
 
 
