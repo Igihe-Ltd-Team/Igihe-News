@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 interface PageProps {
-  params: Promise<{ post: string,category:string }>
+  params: Promise<{ post: string }>
 }
 
 /* ------------------------ SAFE DATA FETCHER ------------------------ */
@@ -12,7 +12,7 @@ async function getPostData(slug: string) {
   try {
     // Try to get from API
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}?slug=${slug}&_embed`,
+      `https://new.igihe.com/v_elementor/wp-json/wp/v2/posts?slug=${slug}&_embed`,
       { 
         next: { revalidate: 60 },
       }
@@ -34,7 +34,7 @@ async function getPostData(slug: string) {
 
 /* ------------------------ SAFE METADATA GENERATOR ------------------------ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { post: slug,category } = await params
+  const { post: slug } = await params
   
   try {
     // 1. Try to fetch post data
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           type: 'article',
           title: `${titleFromSlug} | IGIHE`,
           description: `Read "${titleFromSlug}" on IGIHE`,
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/news/${category}/${slug}`,
+          url: `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`,
           siteName: 'IGIHE',
           images: [{
             url: `${process.env.NEXT_PUBLIC_APP_URL}/og?title=` + encodeURIComponent(titleFromSlug),
@@ -86,14 +86,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       keywords: extractKeywords(postData),
       
       alternates: {
-        canonical: postData.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/${category}/${slug}`
+        canonical: postData.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`
       },
       
       openGraph: {
         type: 'article',
         title: `${title} | IGIHE`,
         description,
-        url: postData.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/${category}/${slug}`,
+        url: postData.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`,
         siteName: 'IGIHE',
         locale: 'en_US',
         publishedTime: date,
@@ -153,7 +153,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         type: 'article',
         title: `${titleFromSlug} | IGIHE`,
         description: `Read "${titleFromSlug}" on IGIHE`,
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/news/${category}/${slug}`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`,
         siteName: 'IGIHE',
         images: [{
           url: `${process.env.NEXT_PUBLIC_APP_URL}/api/og?title=` + encodeURIComponent(titleFromSlug),
@@ -296,11 +296,11 @@ export default async function SingleNewsPage({ params }: PageProps) {
   try {
     const postData = await getPostData(slug)
     
-    // if (!postData) {
-    //   notFound()
-    // }
+    if (!postData) {
+      notFound()
+    }
     
-  return <SingleNewsContent slug={slug} initialArticle={postData}/>
+  return <SingleNewsContent slug={slug} />
     
   } catch (error) {
     console.error('Page error:', error)
