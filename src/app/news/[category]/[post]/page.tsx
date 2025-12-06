@@ -296,9 +296,9 @@ export default async function SingleNewsPage({ params }: PageProps) {
   try {
     const postData = await getPostData(slug)
     
-    if (!postData) {
-      notFound()
-    }
+    // if (!postData) {
+    //   notFound()
+    // }
     
   return <SingleNewsContent slug={slug} initialArticle={postData}/>
     
