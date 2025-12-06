@@ -7,303 +7,150 @@ interface PageProps {
   params: Promise<{ post: string }>
 }
 
-/* ------------------------ SAFE DATA FETCHER ------------------------ */
+/* ------------------------ STRIP HTML ------------------------ */
+function stripHtml(html: string): string {
+  if (!html) return ''
+  return String(html)
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .trim()
+}
+
+/* ------------------------ FETCH POST ------------------------ */
 async function getPostData(slug: string) {
   try {
-    // Try to get from API
     const response = await fetch(
       `https://new.igihe.com/v_elementor/wp-json/wp/v2/posts?slug=${slug}&_embed`,
       { 
         next: { revalidate: 60 },
+        cache: 'no-store' // Force fresh data
       }
     )
     
-    if (!response.ok) {
-      console.error('API response not OK:', response.status)
-      return null
-    }
+    if (!response.ok) return null
     
     const posts = await response.json()
-    return posts[0] || null
+    return posts && posts.length > 0 ? posts[0] : null
     
   } catch (error) {
-    console.error('Error fetching post:', error)
+    console.error('❌ Fetch error:', error)
     return null
   }
 }
 
-/* ------------------------ SAFE METADATA GENERATOR ------------------------ */
+/* ------------------------ METADATA ------------------------ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post: slug } = await params
   
+  // Capitalize slug for fallback title
+  const fallbackTitle = slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+  
   try {
-    // 1. Try to fetch post data
     const postData = await getPostData(slug)
     
-    // 2. If no data, return basic metadata (NOT error message)
+    // If no post data, return simple metadata
     if (!postData) {
-      const titleFromSlug = slug
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-      
       return {
-        title: `${titleFromSlug} | IGIHE`,
-        description: `Read "${titleFromSlug}" on IGIHE - Latest news from Rwanda`,
-        openGraph: {
-          type: 'article',
-          title: `${titleFromSlug} | IGIHE`,
-          description: `Read "${titleFromSlug}" on IGIHE`,
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`,
-          siteName: 'IGIHE',
-          images: [{
-            url: `${process.env.NEXT_PUBLIC_APP_URL}/og?title=` + encodeURIComponent(titleFromSlug),
-            width: 1200,
-            height: 630,
-            alt: titleFromSlug,
-          }],
-        },
-        twitter: {
-          card: 'summary_large_image',
-          title: `${titleFromSlug} | IGIHE`,
-          description: `Read "${titleFromSlug}" on IGIHE`,
-          images: [`${process.env.NEXT_PUBLIC_APP_URL}/og?title=` + encodeURIComponent(titleFromSlug)],
-        },
+        title: `${fallbackTitle} | IGIHE`,
+        description: 'Latest news from IGIHE Rwanda'
       }
     }
     
-    // 3. Extract data SAFELY
-    const title = extractTitle(postData)
-    const description = extractDescription(postData)
-    const ogImage = extractOgImage(postData)
-    const author = extractAuthor(postData)
-    const date = postData.date || new Date().toISOString()
+    // Extract title safely
+    const title = stripHtml(
+      postData.yoast_head_json?.title || 
+      postData.title?.rendered || 
+      fallbackTitle
+    )
     
-    // 4. Build metadata
-    const metadata: Metadata = {
+    // Extract description safely
+    const description = stripHtml(
+      postData.yoast_head_json?.description || 
+      postData.excerpt?.rendered || 
+      'Latest news from IGIHE Rwanda'
+    ).substring(0, 160)
+    
+    // Extract image safely
+    const ogImage = 
+      postData.yoast_head_json?.og_image?.[0]?.url ||
+      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+      postData.jetpack_featured_media_url ||
+      'https://stage.igihe.com/default-og-image.jpg' // Add your default image
+    
+    // Extract author safely
+    const author = postData._embedded?.author?.[0]?.name
+    
+    // Build clean metadata
+    return {
       title: `${title} | IGIHE`,
       description,
-      keywords: extractKeywords(postData),
+      
+      ...(postData.tags && postData.tags.length > 0 && {
+        keywords: postData.tags.map((t: any) => t.name || '').join(', ')
+      }),
       
       alternates: {
-        canonical: postData.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`
+        canonical: postData.link
       },
       
       openGraph: {
         type: 'article',
-        title: `${title} | IGIHE`,
+        title,
         description,
-        url: postData.link || `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`,
+        url: postData.link,
         siteName: 'IGIHE',
         locale: 'en_US',
-        publishedTime: date,
-        modifiedTime: postData.modified || date,
-        authors: author ? [author] : undefined,
-        tags: extractTags(postData),
-        
-        // CRITICAL FOR WHATSAPP: Use dynamic OG image with fallback
         images: [{
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: title,
+          alt: title
         }],
+        ...(postData.date && { publishedTime: postData.date }),
+        ...(postData.modified && { modifiedTime: postData.modified }),
+        ...(author && {
+          article: {
+            authors: [author],
+            ...(postData.tags && postData.tags.length > 0 && {
+              tags: postData.tags.map((t: any) => t.name || '')
+            })
+          }
+        })
       },
       
       twitter: {
         card: 'summary_large_image',
-        title: `${title} | IGIHE`,
+        title,
         description,
-        images: [ogImage],
-        creator: '@igihe',
+        images: [ogImage]
       },
       
       robots: {
         index: true,
-        follow: true,
-      },
-      
-      // Additional for WhatsApp
-      other: {
-        'og:image:width': '1200',
-        'og:image:height': '630',
-        'og:image:type': 'image/jpeg',
-        'article:published_time': date,
-        'article:modified_time': postData.modified || date,
-        'article:section': extractCategory(postData) || 'News',
+        follow: true
       }
     }
-    
-    return metadata
     
   } catch (error) {
-    // CRITICAL: Don't return error metadata
-    console.error('Metadata generation error:', error)
-    
-    // Return basic but proper metadata
-    const titleFromSlug = slug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-    
+    console.error('❌ Metadata error:', error)
+    // Return basic metadata on error (NOT "Article Not Found")
     return {
-      title: `${titleFromSlug} | IGIHE`,
-      description: `Read "${titleFromSlug}" on IGIHE - Latest news from Rwanda`,
-      openGraph: {
-        type: 'article',
-        title: `${titleFromSlug} | IGIHE`,
-        description: `Read "${titleFromSlug}" on IGIHE`,
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/news/news/${slug}`,
-        siteName: 'IGIHE',
-        images: [{
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/api/og?title=` + encodeURIComponent(titleFromSlug),
-          width: 1200,
-          height: 630,
-          alt: titleFromSlug,
-        }],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: `${titleFromSlug} | IGIHE`,
-        description: `Read "${titleFromSlug}" on IGIHE`,
-        images: [`${process.env.NEXT_PUBLIC_APP_URL}/api/og?title=` + encodeURIComponent(titleFromSlug)],
-      },
+      title: `${fallbackTitle} | IGIHE`,
+      description: 'Latest news from IGIHE Rwanda'
     }
   }
 }
 
-/* ------------------------ HELPER FUNCTIONS ------------------------ */
-function extractTitle(postData: any): string {
-  try {
-    // Try yoast first
-    if (postData.yoast_head_json?.title) {
-      return stripHtml(postData.yoast_head_json.title)
-    }
-    // Then WP title
-    if (postData.title?.rendered) {
-      return stripHtml(postData.title.rendered)
-    }
-    if (postData.title) {
-      return String(postData.title)
-    }
-  } catch {}
-  
-  // Fallback to slug
-  return postData.slug
-    .split('-')
-    .map((word:string) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
-
-function extractDescription(postData: any): string {
-  try {
-    // Try yoast first
-    if (postData.yoast_head_json?.description) {
-      const desc = stripHtml(postData.yoast_head_json.description)
-      return desc.substring(0, 160)
-    }
-    // Try excerpt
-    if (postData.excerpt?.rendered) {
-      const desc = stripHtml(postData.excerpt.rendered)
-      return desc.substring(0, 160)
-    }
-  } catch {}
-  
-  // Fallback description
-  const title = extractTitle(postData)
-  return `Read "${title}" on IGIHE - Latest news, breaking stories, and in-depth coverage from Rwanda. Stay informed with IGIHE.`
-}
-
-function extractOgImage(postData: any): string {
-  try {
-    // Try multiple sources
-    const imageSources = [
-      postData.yoast_head_json?.og_image?.[0]?.url,
-      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url,
-      postData.featured_image,
-      postData.jetpack_featured_media_url,
-    ]
-    
-    for (const img of imageSources) {
-      if (img && isValidUrl(img)) {
-        return img
-      }
-    }
-  } catch {}
-  
-  // Fallback to dynamic OG image
-  const title = extractTitle(postData)
-  return `${process.env.NEXT_PUBLIC_APP_URL}/api/og?title=${encodeURIComponent(title)}`
-}
-
-function extractAuthor(postData: any): string | undefined {
-  try {
-    return postData._embedded?.author?.[0]?.name || 
-           postData.author_data?.display_name ||
-           undefined
-  } catch {
-    return undefined
-  }
-}
-
-function extractKeywords(postData: any): string | undefined {
-  try {
-    if (postData.tags?.length) {
-      return postData.tags.map((tag: any) => tag.name).join(', ')
-    }
-  } catch {}
-  return undefined
-}
-
-function extractTags(postData: any): string[] {
-  try {
-    return postData.tags?.map((tag: any) => tag.name) || []
-  } catch {
-    return []
-  }
-}
-
-function extractCategory(postData: any): string | undefined {
-  try {
-    return postData.categories?.[0]?.name || 
-           postData._embedded?.['wp:term']?.[0]?.[0]?.name ||
-           undefined
-  } catch {
-    return undefined
-  }
-}
-
-function isValidUrl(url: string): boolean {
-  try {
-    new URL(url)
-    return true
-  } catch {
-    return false
-  }
-}
-
-function stripHtml(html: string): string {
-  return String(html || '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/&[a-z]+;/g, '')
-    .trim()
-}
-
-/* ------------------------ PAGE COMPONENT ------------------------ */
+/* ------------------------ PAGE ------------------------ */
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post: slug } = await params
-  
-  try {
-    const postData = await getPostData(slug)
-    
-    if (!postData) {
-      notFound()
-    }
-    
   return <SingleNewsContent slug={slug} />
-    
-  } catch (error) {
-    console.error('Page error:', error)
-    notFound()
-  }
 }
