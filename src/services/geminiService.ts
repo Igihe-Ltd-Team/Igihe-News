@@ -235,7 +235,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NewsItem } from "@/types/fetchData";
 import { stripHtml } from "@/lib/utils";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GERMINI_API;
 
 if (!GEMINI_API_KEY) {
   console.warn("GEMINI_API_KEY is not set – Gemini will not work");
