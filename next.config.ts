@@ -31,10 +31,6 @@ const nextConfig: NextConfig = {
       source: '/(.*)',
       headers: [
         {
-            key: 'Content-Type',
-            value: 'image/png',
-          },
-        {
           key: 'Cache-Control',
           value: 's-maxage=3600, stale-while-revalidate=86400,public, immutable, no-transform, max-age=31536000',
         }
