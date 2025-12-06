@@ -30,7 +30,7 @@ export default function VideoCard({ thumbNail, slug, title, videoId }: videoCard
                 </Link>
             </div>
             <div className="videos-rt-details">
-                <Link href={`/single-video/${slug}`} className='text-decoration-none'>
+                <Link href={`/videos/${slug}`} className='text-decoration-none'>
                     <p className="video-title mb-1 text-dark">
                         {title}
                     </p>

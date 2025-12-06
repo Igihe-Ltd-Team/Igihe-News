@@ -4,7 +4,7 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, Cate
 // Configuration
 const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
-  baseURL: process.env.NODE_ENV === 'production'  ? '/api/proxy' : process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
+  baseURL: process.env.NODE_ENV === 'production' ? '/api/proxy' : process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
   timeout: 10000, // 10 seconds
   retryAttempts: 2,
   cacheTimeout: 5 * 60 * 1000, // 5 minutes
@@ -113,22 +113,22 @@ export class ApiService {
     }
     return null;
   }
-  
- 
+
+
 
   static cacheArticles(article: NewsItem): void {
-      if (article?.slug) {
-        const cacheKey = `post:${article.slug}`
-        if (pendingRequests.has(cacheKey)) {
-          return
-        }
-        try {
-        requestCache.set(cacheKey, {data:article,timestamp: Date.now()})
-        } catch (error) {
-          // sessionStorage might be full, that's ok
-          console.debug('Failed to store in sessionStorage:', error)
-        }
+    if (article?.slug) {
+      const cacheKey = `post:${article.slug}`
+      if (pendingRequests.has(cacheKey)) {
+        return
       }
+      try {
+        requestCache.set(cacheKey, { data: article, timestamp: Date.now() })
+      } catch (error) {
+        // sessionStorage might be full, that's ok
+        console.debug('Failed to store in sessionStorage:', error)
+      }
+    }
   }
 
 
@@ -500,30 +500,30 @@ export class ApiService {
 
 
   static async fetchCategories(params?: any): Promise<Category[]> {
-  const cacheKey = `categories:${JSON.stringify(params)}`
-  
-  return this.dedupedFetch(cacheKey, async () => {
-    // Your existing categories fetch logic
-    const queryParams: Record<string, any> = {
-      per_page: params?.per_page || 100,
-      _fields: 'id,name,slug,count,description',
-      orderby: params?.orderby || 'count',
-      order: 'desc',
-    }
+    const cacheKey = `categories:${JSON.stringify(params)}`
 
-    if (params?.exclude?.length) {
-      queryParams.exclude = params.exclude.join(',')
-    }
+    return this.dedupedFetch(cacheKey, async () => {
+      // Your existing categories fetch logic
+      const queryParams: Record<string, any> = {
+        per_page: params?.per_page || 100,
+        _fields: 'id,name,slug,count,description',
+        orderby: params?.orderby || 'count',
+        order: 'desc',
+      }
 
-    const queryString = this.buildQuery(queryParams)
-    const response = await this.fetchWithTimeout(
-      `${API_CONFIG.baseURL}/categories?${queryString}`
-    )
+      if (params?.exclude?.length) {
+        queryParams.exclude = params.exclude.join(',')
+      }
 
-    const data = await response.json()
-    return data.filter((category: Category) => category.count > 0)
-  }, 30 * 60 * 1000) // 30 minutes cache for categories
-}
+      const queryString = this.buildQuery(queryParams)
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/categories?${queryString}`
+      )
+
+      const data = await response.json()
+      return data.filter((category: Category) => category.count > 0)
+    }, 30 * 60 * 1000) // 30 minutes cache for categories
+  }
 
   // Articles/Posts API
 
@@ -1106,15 +1106,22 @@ export class ApiService {
 
 
 
-  static async fetchAdvertorals(): Promise<NewsItem[]> {
-    try {
-      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/advertorial?_embed`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
 
-      const ads = await response.json()
-      return ads || []
+
+  static async fetchAdvertorals(): Promise<NewsItem[]> {
+    const cacheKey = 'advertorial:all'
+
+    try {
+      return this.dedupedFetch(cacheKey, async () => {
+        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/advertorial?_embed&per_page=50`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const ads = await response.json()
+        return ads || []
+      }, 10 * 60 * 1000) // 10 minutes cache for ads
+
     } catch (error) {
       console.error('Error fetching advertisements:', error)
       return []
@@ -1127,20 +1134,24 @@ export class ApiService {
     orderby?: string
     order?: 'asc' | 'desc'
   }): Promise<NewsItem[]> {
+
+    const cacheKey = 'opinion:all'
+
     try {
+      return this.dedupedFetch(cacheKey, async () => {
+        const queryParams = new URLSearchParams()
+        if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+        if (params?.orderby) queryParams.append('orderby', params.orderby)
+        if (params?.order) queryParams.append('order', params.order)
 
-      const queryParams = new URLSearchParams()
-      if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
-      if (params?.orderby) queryParams.append('orderby', params.orderby)
-      if (params?.order) queryParams.append('order', params.order)
+        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?_embed&${queryParams}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
 
-      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?_embed&${queryParams}`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const ads = await response.json()
-      return ads || []
+        const ads = await response.json()
+        return ads || []
+      }, 10 * 60 * 1000) // 10 minutes cache for ads
     } catch (error) {
       console.error('Error fetching advertisements:', error)
       return []
@@ -1153,20 +1164,22 @@ export class ApiService {
     orderby?: string
     order?: 'asc' | 'desc'
   }): Promise<NewsItem[]> {
+    const cacheKey = 'fact-of-the-day:all'
     try {
+      return this.dedupedFetch(cacheKey, async () => {
+        const queryParams = new URLSearchParams()
+        if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+        if (params?.orderby) queryParams.append('orderby', params.orderby)
+        if (params?.order) queryParams.append('order', params.order)
 
-      const queryParams = new URLSearchParams()
-      if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
-      if (params?.orderby) queryParams.append('orderby', params.orderby)
-      if (params?.order) queryParams.append('order', params.order)
+        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&${queryParams}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
 
-      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&${queryParams}`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const ads = await response.json()
-      return ads || []
+        const ads = await response.json()
+        return ads || []
+      }, 10 * 60 * 1000) // 10 minutes cache for ads
     } catch (error) {
       console.error('Error fetching advertisements:', error)
       return []
@@ -1176,14 +1189,17 @@ export class ApiService {
 
 
   static async fetchAnnouncement(): Promise<NewsItem[]> {
+    const cacheKey = 'announcement:all'
     try {
-      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/announcement?_embed`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+      return this.dedupedFetch(cacheKey, async () => {
+        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/announcement?_embed&per_page=50`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
 
-      const ads = await response.json()
-      return ads || []
+        const ads = await response.json()
+        return ads || []
+      }, 10 * 60 * 1000) // 10 minutes cache for ads
     } catch (error) {
       console.error('Error fetching advertisements:', error)
       return []
@@ -1197,21 +1213,21 @@ export class ApiService {
 
 
   static async fetchAdvertisements(): Promise<Advertisement[]> {
-  const cacheKey = 'advertisements:all'
-  
-  return this.dedupedFetch(cacheKey, async () => {
-    const response = await this.fetchWithTimeout(
-      `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
-    )
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const ads = await response.json()
-    return ads || []
-  }, 10 * 60 * 1000) // 10 minutes cache for ads
-}
+    const cacheKey = 'advertisements:all'
+
+    return this.dedupedFetch(cacheKey, async () => {
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const ads = await response.json()
+      return ads || []
+    }, 10 * 60 * 1000) // 10 minutes cache for ads
+  }
 
   static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
     try {

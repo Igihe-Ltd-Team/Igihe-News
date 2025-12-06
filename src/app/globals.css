@@ -74,8 +74,8 @@ body {
   /* min-height: 301.4px */
 }
 
-.btn:first-child:active{
-  border: none!important;
+.btn:first-child:active {
+  border: none !important;
 }
 
 /* Menu section styles */
@@ -380,9 +380,10 @@ body {
 }
 
 
-.normal-text{
+.normal-text {
   font-size: 15px;
 }
+
 .small-txt {
   font-size: 14px;
   line-height: 18px;
@@ -699,8 +700,9 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.selectedArticleTitle{
-   display: -webkit-box!important;
+
+.selectedArticleTitle {
+  display: -webkit-box !important;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -1010,4 +1012,76 @@ body {
   font-size: 18px;
   line-height: 19px;
   letter-spacing: 0px;
+}
+
+
+
+
+
+
+/* search */
+.blur {
+    filter: blur(10px);
+    transition: all 0.6s ease;
+  }
+.slider-section {
+  z-index: 0;
+}
+
+.modal {
+  transition: opacity 0.15s linear;
+}
+
+.modal.show {
+  opacity: 1;
+  backdrop-filter: blur(4px);
+}
+
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translateY(-50px);
+}
+
+.modal.show .modal-dialog {
+  transform: translateY(0);
+}
+
+/* Custom scrollbar for modal body */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+kbd {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75em;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+/* Text truncation */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* List group item hover effect */
+.list-group-item-action:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+  transform: translateX(4px);
+  transition: all 0.2s ease;
 }

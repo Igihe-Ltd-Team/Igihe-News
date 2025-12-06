@@ -1,5 +1,6 @@
 // app/news/news/[post]/page.tsx
 import SingleNewsContent from '@/components/news/SingleNewsContent'
+import { stripHtml } from '@/lib/utils'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -8,24 +9,13 @@ interface PageProps {
 }
 
 /* ------------------------ STRIP HTML ------------------------ */
-function stripHtml(html: string): string {
-  if (!html) return ''
-  return String(html)
-    .replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .trim()
-}
+
 
 /* ------------------------ FETCH POST ------------------------ */
 async function getPostData(slug: string) {
   try {
     const response = await fetch(
-      `https://new.igihe.com/v_elementor/wp-json/wp/v2/posts?slug=${slug}&_embed`,
+      `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/posts?slug=${slug}&_embed`,
       { 
         next: { revalidate: 60 },
         cache: 'no-store' // Force fresh data

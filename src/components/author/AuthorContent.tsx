@@ -10,6 +10,7 @@ import SocialMedias from '@/components/ReUsable/SocialMedias'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useAuthorData } from '@/hooks/useAuthorData'
 import { Author, AuthorWithPosts, NewsItem } from '@/types/fetchData'
+import AdManager from '../ads/AdManager'
 
 interface AuthorPageProps {
     author: string
@@ -17,7 +18,7 @@ interface AuthorPageProps {
 
 
 // Separate component for the main content that can be suspended
-function AuthorContents({ author,articles }: { author:Author,articles:NewsItem[] }) {
+function AuthorContents({ author, articles }: { author: Author, articles: NewsItem[] }) {
     const totalPages = Math.ceil((articles.length || 0) / 12)
 
     return (
@@ -44,7 +45,7 @@ function AuthorContents({ author,articles }: { author:Author,articles:NewsItem[]
 
                             {/* Load More / Pagination */}
                             {totalPages > 1 && (
-                                <LoadMoreArticles 
+                                <LoadMoreArticles
                                     authorSlug={author.slug}
                                     currentPage={1}
                                     totalPages={totalPages}
@@ -61,7 +62,11 @@ function AuthorContents({ author,articles }: { author:Author,articles:NewsItem[]
                 </Col>
 
                 <Col lg={4}>
-                    <CardAdds size={290} />
+                    <AdManager
+                        position="home-section-1"
+                        priority={true}
+                        className="mb-2"
+                    />
                     <SocialMedias />
                     {/* <PopularNews /> */}
                 </Col>
@@ -73,16 +78,16 @@ function AuthorContents({ author,articles }: { author:Author,articles:NewsItem[]
 
 
 export default function AuthorContent({ author }: AuthorPageProps) {
-  const { useAuthorWithPosts } = useAuthorData()
-  const query = useAuthorWithPosts(author)
+    const { useAuthorWithPosts } = useAuthorData()
+    const query = useAuthorWithPosts(author)
 
-  if (query.isLoading) return <NewsSkeleton />
-  if (!query.data?.author) return "Author not found"
+    if (query.isLoading) return <NewsSkeleton />
+    if (!query.data?.author) return "Author not found"
 
-  return (
-    <AuthorContents 
-      author={query.data.author}
-      articles={query.data.data}
-    />
-  )
+    return (
+        <AuthorContents
+            author={query.data.author}
+            articles={query.data.data}
+        />
+    )
 }

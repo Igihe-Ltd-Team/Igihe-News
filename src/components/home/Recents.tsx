@@ -19,7 +19,6 @@ interface RecentProps {
     latests?: NewsItem[]
     popular?: NewsItem[]
     featured?: NewsItem[]
-    advertorials?: NewsItem[]
     africaArticles?: NewsItem[]
     entertainment?: NewsItem[]
     advertorial?: NewsItem[]

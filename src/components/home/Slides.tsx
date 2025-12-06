@@ -27,7 +27,7 @@ function Slides({
     smDisplay = 1
 }: SlidesProps) {
     return (
-        <div className="position-relative mb-2 border-bottom-custom pt-2 pb-2">
+        <div className="position-relative mb-2 border-bottom-custom pt-2 pb-2 slider-section">
             <Swiper
                 spaceBetween={20}
                 slidesPerView={3}

@@ -144,7 +144,6 @@ export function Home() {
           latests={latestArticles}
           popular={popularArticles}
           featured={otherFeaturedArticle}
-          advertorials={featuredArticles}
           africaArticles={africaArticles}
           entertainment={entertainmentArticles}
           advertorial={featuredAdvertorial}
