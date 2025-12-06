@@ -10,7 +10,8 @@ export default function SearchModal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<NewsItem[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const inputRef = useRef(null);
+  // const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
   const { 
@@ -36,7 +37,7 @@ export default function SearchModal() {
 
   // Keyboard shortcut
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e:KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setShow(true);
@@ -79,7 +80,7 @@ export default function SearchModal() {
     setSearchResults([]);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e:React.KeyboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       saveRecentSearch(searchQuery.trim());
@@ -152,7 +153,12 @@ export default function SearchModal() {
                 placeholder="Search articles, news, and more..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
+                // onKeyPress={(e:KeyboardEvent) => e.key === 'Enter' && handleSearch(e)}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    }
+  }}
                 className="ps-5 pe-5 border-0 bg-light"
               />
               {searchQuery && (
