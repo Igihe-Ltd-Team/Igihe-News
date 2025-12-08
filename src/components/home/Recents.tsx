@@ -11,9 +11,14 @@ import { Col, Row } from 'react-bootstrap'
 import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
 import PopularNews from '../news/PopularNews'
-import Videos from './Videos'
-import Opinios from './Opinion'
-import RandomCard from './RandomCard'
+// import Videos from './Videos'
+// import Opinios from './Opinion'
+// import RandomCard from './RandomCard'
+
+const Videos = React.lazy(() => import('./Videos'))
+const Opinios = React.lazy(() => import('./Opinion'))
+const RandomCard = React.lazy(() => import('./RandomCard'))
+
 
 interface RecentProps {
     latests?: NewsItem[]
@@ -38,7 +43,7 @@ const NewsSection = React.memo(({
     const { mainArticle, subArticles, listArticles } = useMemo(() => ({
         mainArticle: safeArticles?.[0],
         subArticles: safeArticles?.slice(1, 3) || [],
-        listArticles: safeArticles?.slice(0, 7) || []
+        listArticles: safeArticles?.slice(3, 7) || []
     }), [safeArticles])
 
 
@@ -104,19 +109,16 @@ export default function Recents({ latests, featured, popular, africaArticles, en
     const {
         mainLatest,
         latestsSidebar,
-        // featuredMain,
         featuredTimeline
     } = useMemo(() => ({
         mainLatest: safeLatests?.[0],
         latestsSidebar: safeLatests?.slice(1, 6) || [],
-        // featuredMain: featured?.[0],
         featuredTimeline: safeFeatured?.slice(0, 9) || [],
     }), [safeLatests, safeFeatured])
 
     // if (!latestsSidebar?.length) {
     //     return <NewsSkeleton />
     // }
-
 
     return (
         <div className="container p-2">

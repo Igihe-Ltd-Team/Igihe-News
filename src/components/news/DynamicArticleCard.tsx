@@ -196,4 +196,22 @@ function DynamicArticleCard({
   )
 }
 
-export default DynamicArticleCard
+// More optimized comparison function
+const areEqual = (prevProps: ArticleCardProps, nextProps: ArticleCardProps) => {
+  // Compare article by ID/slug and essential props
+  const isSameArticle = prevProps.article.id === nextProps.article.id && 
+                       prevProps.article.slug === nextProps.article.slug
+  
+  if (!isSameArticle) return false
+  
+  // Compare only props that affect rendering
+  const propKeys: (keyof ArticleCardProps)[] = [
+    'showImage', 'imgHeight', 'showHeader', 'bgColor', 
+    'bordered', 'showExpt', 'showCategorie', 'bottomBorder'
+  ]
+  
+  return propKeys.every(key => prevProps[key] === nextProps[key])
+}
+
+export default React.memo(DynamicArticleCard, areEqual)
+
