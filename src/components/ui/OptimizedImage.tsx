@@ -1,7 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
 
 interface OptimizedImageProps {
   src: string
@@ -14,6 +15,7 @@ interface OptimizedImageProps {
   sizes?: string
   onLoad?: () => void,
   imgClass?:string
+  placeholderType?: 'blur' | 'solid' | 'skeleton'
 }
 
 export function OptimizedImage({
@@ -25,10 +27,20 @@ export function OptimizedImage({
   className,
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
   onLoad,
-  imgClass
+  imgClass,
+    placeholderType = 'solid',
+  fill = false,
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    // Small delay to prevent flash of loading state for fast-loading images
+    const timer = setTimeout(() => setIsVisible(true), 50)
+    return () => clearTimeout(timer)
+  }, [])
+  
 
   const handleLoad = () => {
     setIsLoading(false)
@@ -41,44 +53,51 @@ export function OptimizedImage({
   }
 
   // Fallback image
-  const imageSrc = hasError ? '/assets/igiheIcon.png' : src
-
+  const imageSrc = hasError ? '/images/placeholder.jpg' : src
+const containerHeight = Math.max(Number(height), 100) + 'px'
   return (
     <div className={`position-relative w-100 igihe-img ${className}`} 
     style={{
       minHeight:height,
       maxHeight:'100%',
-      height: Math.max(Number(height), 100) + 'px'
+      height: containerHeight
     }}>
 
-      {
-        isLoading 
-        ? 
+
+      {isVisible && isLoading && (
         <div
-                className="placeholder-glow"
-                style={{
-                  height:  Math.max(Number(height), 100) + 'px',
-                  backgroundColor: '#e9ecef',
-                  borderRadius: '8px',
-                }}
-              />
-      :
-        <Image
+          className={`placeholder-glow ${placeholderType === 'skeleton' ? 'placeholder' : ''}`}
+          style={{
+            // position: 'absolute',
+            inset: 0,
+            height:height,
+            backgroundColor: placeholderType === 'solid' ? '#e9ecef' : 'transparent',
+            borderRadius: '8px',
+            zIndex: 1,
+          }}
+        />
+      )}
+
+
+      <Image
+      
         src={imageSrc}
         alt={alt}
         fill
         priority={priority}
         sizes={sizes}
-        className={`${isLoading ? 'blur object-fit-contain':''} ${imageSrc === '/assets/igiheIcon.png' ? 'blur object-fit-contain':imgClass}`}
+        className={`${imgClass}`}
         onLoad={handleLoad}
         loading={priority ? "eager" : "lazy"}
         onError={handleError}
         placeholder="blur"
-        // blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
-        blurDataURL="/assets/igiheIcon.png"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
+        style={{
+          opacity: isLoading ? 0 : 1,
+          transition: 'opacity 0.3s ease-in-out',
+        }}
       />
-      }
-      
+
     </div>
   )
 }
