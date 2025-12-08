@@ -1,3 +1,4 @@
+
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
 import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem } from '@/types/fetchData'
 
@@ -1230,9 +1231,12 @@ export class ApiService {
   }
 
   static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+    const cacheKey = `advertisements:${position}`
     try {
-      const ads = await this.fetchAdvertisements()
-      return getAdsByPosition(ads, position)
+      return this.dedupedFetch(cacheKey, async () => {
+        const ads = await this.fetchAdvertisements()
+        return getAdsByPosition(ads, position)
+      }, 10 * 60 * 1000)
     } catch (error) {
       console.error('Error fetching ads by position:', error)
       return []
@@ -1240,15 +1244,18 @@ export class ApiService {
   }
 
   static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
+    const cacheKey = `advertisements:${positions}`
     try {
-      const ads = await this.fetchAdvertisements()
-      const result: Record<AdPositionKey, Advertisement[]> = {} as any
+      return this.dedupedFetch(cacheKey, async () => {
+        const ads = await this.fetchAdvertisements()
+        const result: Record<AdPositionKey, Advertisement[]> = {} as any
 
-      positions.forEach(position => {
-        result[position] = getAdsByPosition(ads, position)
-      })
+        positions.forEach(position => {
+          result[position] = getAdsByPosition(ads, position)
+        })
 
-      return result
+        return result
+      }, 10 * 60 * 1000)
     } catch (error) {
       console.error('Error fetching ads by positions:', error)
       return {} as Record<AdPositionKey, Advertisement[]>

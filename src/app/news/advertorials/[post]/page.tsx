@@ -13,12 +13,12 @@ interface PageProps {
 
 /* ------------------------ FETCH POST ------------------------ */
 async function getPostData(slug: string) {
+  // console.log(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/advertorial?slug=${slug}&_embed`)
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/posts?slug=${slug}&_embed`,
+      `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/advertorial?slug=${slug}&_embed`,
       { 
-        next: { revalidate: 60 },
-        cache: 'no-store' // Force fresh data
+        next: { revalidate: 60 }
       }
     )
     
@@ -142,5 +142,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 /* ------------------------ PAGE ------------------------ */
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post: slug } = await params
-  return <SingleNewsContent slug={slug} />
+  const postData = await getPostData(slug)
+  
+  return <SingleNewsContent slug={slug}  initialArticle ={postData}/>
 }

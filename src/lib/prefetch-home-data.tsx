@@ -1,11 +1,12 @@
 import { ApiService } from '@/services/apiService'
-import { Category, NewsItem } from '@/types/fetchData'
+import { Advertisement, Category, NewsItem } from '@/types/fetchData'
 
 export interface HomePageData {
   // categories: Category[]
   featuredArticles: NewsItem[]
   popularArticles: NewsItem[]
   highlightTagArticles: NewsItem[]
+  prefetchedAdds:Advertisement[] 
   // latestArticles: NewsItem[]
   // africaArticles: NewsItem[]
   // EntertainmentArticles: NewsItem[]
@@ -20,6 +21,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       popularArticles,
       // latestResponse,
       highlightResponse,
+      addsResponse
       // africaResponse,
       // entertainmentResponse,
     ] = await Promise.allSettled([
@@ -42,7 +44,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       
       // Entertainment articles
       // ApiService.fetchArticles({ categories: [7], per_page: 11 }),
-
+      ApiService.fetchAdvertisements()
     ])
 
     return {
@@ -53,6 +55,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       // africaArticles: africaResponse.status === 'fulfilled' && africaResponse.value ? africaResponse.value.data : [],
       // EntertainmentArticles: entertainmentResponse.status === 'fulfilled' && entertainmentResponse.value ? entertainmentResponse.value.data : [],
       highlightTagArticles: highlightResponse.status === 'fulfilled' ? highlightResponse.value.data : [],
+      prefetchedAdds:addsResponse.status === 'fulfilled' ? addsResponse.value : []
     }
   } catch (error) {
     console.error('Error prefetching home data:', error)
@@ -63,6 +66,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       featuredArticles: [],
       popularArticles: [],
       highlightTagArticles: [],
+      prefetchedAdds:[]
       // latestArticles: [],
       // africaArticles: [],
       // EntertainmentArticles: [],

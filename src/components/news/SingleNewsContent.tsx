@@ -34,13 +34,13 @@ interface SingleNewsContentProps {
     initialArticle?: NewsItem
 }
 
-export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
+export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
 
 
     const { useArticleDetails } = useNewsData()
     const {
-        article,
+        article:post,
         relatedPosts,
         articleLoading,
         refetchArticle,
@@ -54,6 +54,8 @@ export default function SingleNewsContent({ slug }: SingleNewsContentProps) {
             </div>
         )
     }
+
+    const article = initialArticle || post
 
     if (!article) {
         return (
