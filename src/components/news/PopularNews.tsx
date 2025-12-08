@@ -43,7 +43,6 @@ function PopularNews({ articles, name = "Popular News" }: PopularProps) {
             <DynamicArticleCard
               key={article.id || `article-${index}`} // Use unique ID
               article={article}
-              priority={index < 2} // Only prioritize first 2
               imgHeight={246}
               leftNumber={`0${index + 2}`} // Fixed: added backtick
             />

@@ -86,7 +86,7 @@ const containerHeight = Math.max(Number(height), 100) + 'px'
         fill
         priority={priority}
         sizes={sizes}
-        className={`${imgClass}`}
+        className={`${imageSrc === '/assets/igiheIcon.png' ? 'blur object-fit-contain p-3' : imgClass}`}
         onLoad={handleLoad}
         loading={priority ? "eager" : "lazy"}
         onError={handleError}

@@ -178,14 +178,14 @@ export function Home() {
             <Col>
               <AdManager
                 position="header-landscape-ad-1"
-                priority={false}
+                priority={true}
                 className="mb-2"
               />
             </Col>
             <Col>
               <AdManager
                 position="header-landscape-ad-2"
-                priority={false}
+                priority={true}
                 className="mb-2"
               /></Col>
           </Row>
