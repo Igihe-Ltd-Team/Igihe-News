@@ -34,6 +34,11 @@ export function OptimizedImage({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     // Small delay to prevent flash of loading state for fast-loading images
@@ -55,12 +60,37 @@ export function OptimizedImage({
   // Fallback image
   const imageSrc = hasError ? '/images/placeholder.jpg' : src
 const containerHeight = Math.max(Number(height), 100) + 'px'
+
+
+
+if (!isMounted) {
+    return (
+      <div
+          className={`placeholder-glow ${placeholderType === 'skeleton' ? 'placeholder' : ''}`}
+          style={{
+            // position: 'absolute',
+            inset: 0,
+            height:height,
+            backgroundColor: placeholderType === 'solid' ? '#e9ecef' : 'transparent',
+            borderRadius: '8px',
+            zIndex: 1,
+          }}
+        />
+    )
+  }
+
+
+
   return (
     <div className={`position-relative w-100 igihe-img ${className}`} 
     style={{
-      minHeight:height,
-      maxHeight:'100%',
-      height: containerHeight
+      // minHeight:height,
+      // maxHeight:'100%',
+      // height: containerHeight
+
+        minHeight: height ? `${height}px` : 'auto',
+        height: height ? `${height}px` : 'auto',
+        overflow: 'hidden',
     }}>
 
 

@@ -55,8 +55,10 @@ export default function AdUnit({
     return adImage.url
   }
 
-  const imageUrl = getBestImageUrl()
+  // const imageUrl = getBestImageUrl()
 
+  const rawUrl = getBestImageUrl()
+  const imageUrl = rawUrl ? `${rawUrl}?v=${adImage.height || ad.id}` : rawUrl
 
   if (!isVisible || !adImage || imageError) {
     return (

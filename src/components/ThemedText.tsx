@@ -7,7 +7,7 @@ export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   lightColor?: string;
   darkColor?: string;
   type?: 'small' | 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'defaultItalic' | 'smallBold' | 'size20' | 'italic34' | 'italic18';
-  className?:string
+  className?: string
 };
 
 export function ThemedText({
@@ -31,7 +31,7 @@ export function ThemedText({
     title: 'fs-1 lh-1 fw-bold', // fs-1 ≈ 32px
     subtitle: 'fs-3 lh-sm fw-bold', // fs-3 ≈ 20px
     link: 'fs-5 lh-lg text-primary text-decoration-underline cursor-pointer fw-normal',
-    size20:'fs-4 lh-1 fw-semibold',
+    size20: 'fs-4 lh-1 fw-semibold',
     italic34: 'fs-1 fw-light lh-1 fst-italic',
     italic18: 'fs-4 fw-light lh-1 fst-italic'
   };
@@ -39,19 +39,16 @@ export function ThemedText({
   // Combine all classes
   const combinedClassName = `${baseClasses} ${typeClasses[type]} ${className}`;
 
-  
+
   const customStyles: React.CSSProperties = {
     ...style,
     color: theme === "dark" ? darkColor : lightColor
-    // ...(lightColor && { color: lightColor }),
-    // ...(darkColor && { color: darkColor})
   };
 
   return (
-    <span
-      className={combinedClassName}
+    <span className={combinedClassName}
       style={customStyles}
-      {...rest}
+      dangerouslySetInnerHTML={{ __html: rest.children as string || '' }}
     />
   );
 }

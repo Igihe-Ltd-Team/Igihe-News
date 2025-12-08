@@ -168,7 +168,6 @@ function DynamicArticleCard({
               <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle} className={isSlider ? 'line-clamp-2':''}>
                 {stripHtml(article.title.rendered)}
               </ThemedText>
-              
               {
                 numbers &&
                 <div className='border-start p-2 m-2' style={{ height: '45%' }}>
