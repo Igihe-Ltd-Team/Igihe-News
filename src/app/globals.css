@@ -677,7 +677,8 @@ body {
   z-index: 10;
 
   padding: 20px;
-  position: relative;
+  position: absolute;
+  bottom: 0;
 
 
 }

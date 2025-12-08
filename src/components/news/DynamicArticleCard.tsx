@@ -81,7 +81,7 @@ function DynamicArticleCard({
           onMouseEnter={() => mouseEnter(article)}
         >
           <OptimizedImage
-            src={featuredImage || '/images/placeholder.jpg'}
+            src={featuredImage || '/assets/igiheIcon.png'}
             alt={article.title.rendered}
             fill
             height={imgHeight}

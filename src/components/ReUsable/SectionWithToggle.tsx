@@ -162,7 +162,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                                 showImgs &&
                                 <div className="col-4">
                                     <OptimizedImage
-                                        src={chechedfile.img || '/images/placeholder.jpg'}
+                                        src={chechedfile.img || '/assets/igiheIcon.png'}
                                         alt={stripHtml(item.title.rendered)}
                                         fill
                                         height={100}

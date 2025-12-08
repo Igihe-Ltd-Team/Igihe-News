@@ -21,7 +21,7 @@ export default function OpionCard({article}:opinionProps) {
             </div>
             <div className="w-40">
                 {/* <OptimizedImage src={getFeaturedImage(article) ||'/images/placeholder.jpg' } height={75} className='option-card-img' alt={''}/> */}
-                <Image width={75} src={getFeaturedImage(article) ||'/images/placeholder.jpg' } height={75} className='option-card-img' style={{objectFit:'cover'}} alt={''} />
+                <Image width={75} src={getFeaturedImage(article) ||'/assets/igiheIcon.png' } height={75} className='option-card-img' style={{objectFit:'cover'}} alt={''} />
             </div>
         </div>
     )

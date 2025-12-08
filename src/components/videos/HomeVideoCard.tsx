@@ -6,16 +6,24 @@ import { getFeaturedImage, stripHtml } from '@/lib/utils'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ThemedText } from '../ThemedText'
 
-interface VideoProps{
-  article:NewsItem
+interface VideoProps {
+  article: NewsItem
 }
-export default function HomeVideoCard({article}:VideoProps) {
+export default function HomeVideoCard({ article }: VideoProps) {
   return (
     <div className="video-card-home">
-      <div className="video-thumbnail">
-        <Image src={getFeaturedImage(article) || '/images/placeholder.jpg' } alt="Video thumbnail 1" width="300" height="169" 
+      <div className="video-thumbnail" style={{flex:1}}>
+        <OptimizedImage
+          src={getFeaturedImage(article) || '/assets/igiheIcon.png'}
+          alt={article.title.rendered}
+          fill
+          height={200}
+          imgClass="object-fit-cover" />
+
+
+        {/* <Image src={getFeaturedImage(article) || '/assets/igiheIcon.png' } alt="Video thumbnail 1" width="300" height="169" 
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
-        />
+        /> */}
       </div>
       <div className="card-details">
         <Link href={`/videos/${article.slug}`} className="text-decoration-none">

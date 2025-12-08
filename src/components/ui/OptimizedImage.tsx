@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
 
 interface OptimizedImageProps {
   src: string
@@ -42,7 +41,7 @@ export function OptimizedImage({
   }
 
   // Fallback image
-  const imageSrc = hasError ? '/images/placeholder.jpg' : src
+  const imageSrc = hasError ? '/assets/igiheIcon.png' : src
 
   return (
     <div className={`position-relative w-100 igihe-img ${className}`} 
@@ -52,18 +51,18 @@ export function OptimizedImage({
       height: Math.max(Number(height), 100) + 'px'
     }}>
       <Image
-      
         src={imageSrc}
         alt={alt}
         fill
         priority={priority}
         sizes={sizes}
-        className={`${imgClass}`}
+        className={`${isLoading ? 'blur object-fit-contain':''} ${imageSrc === '/assets/igiheIcon.png' ? 'object-fit-contain':imgClass}`}
         onLoad={handleLoad}
         loading={priority ? "eager" : "lazy"}
         onError={handleError}
         placeholder="blur"
-        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
+        // blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
+        blurDataURL="/assets/igiheIcon.png"
       />
     </div>
   )

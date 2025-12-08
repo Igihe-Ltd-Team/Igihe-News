@@ -18,7 +18,7 @@ async function getPostData(slug: string) {
       `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/opinios?slug=${slug}&_embed`,
       { 
         next: { revalidate: 60 },
-        cache: 'no-store' // Force fresh data
+        // cache: 'no-store' // Force fresh data
       }
     )
     

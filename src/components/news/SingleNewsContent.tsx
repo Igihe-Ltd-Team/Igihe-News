@@ -112,7 +112,7 @@ export default function SingleNewsContent({ slug,initialArticle }: SingleNewsCon
                 <Row className='pt-4'>
                     <Col md="8">
                         <OptimizedImage
-                            src={featuredImage || '/images/placeholder.jpg'}
+                            src={featuredImage || '/assets/igiheIcon.png'}
                             alt={stripHtml(article.title.rendered)}
                             fill
                             height={isMobile ? 300 : isTablet ? 400 : 554}
