@@ -1022,7 +1022,7 @@ body {
 
 /* search */
 .blur {
-    filter: blur(10px);
+    filter: blur(3px);
     transition: all 0.6s ease;
   }
 .slider-section {

@@ -50,13 +50,26 @@ export function OptimizedImage({
       maxHeight:'100%',
       height: Math.max(Number(height), 100) + 'px'
     }}>
-      <Image
+
+      {
+        isLoading 
+        ? 
+        <div
+                className="placeholder-glow"
+                style={{
+                  height:  Math.max(Number(height), 100) + 'px',
+                  backgroundColor: '#e9ecef',
+                  borderRadius: '8px',
+                }}
+              />
+      :
+        <Image
         src={imageSrc}
         alt={alt}
         fill
         priority={priority}
         sizes={sizes}
-        className={`${isLoading ? 'blur object-fit-contain':''} ${imageSrc === '/assets/igiheIcon.png' ? 'object-fit-contain':imgClass}`}
+        className={`${isLoading ? 'blur object-fit-contain':''} ${imageSrc === '/assets/igiheIcon.png' ? 'blur object-fit-contain':imgClass}`}
         onLoad={handleLoad}
         loading={priority ? "eager" : "lazy"}
         onError={handleError}
@@ -64,6 +77,8 @@ export function OptimizedImage({
         // blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
         blurDataURL="/assets/igiheIcon.png"
       />
+      }
+      
     </div>
   )
 }
