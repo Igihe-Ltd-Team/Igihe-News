@@ -80,7 +80,6 @@ const containerHeight = Math.max(Number(height), 100) + 'px'
 
 
       <Image
-      
         src={imageSrc}
         alt={alt}
         fill

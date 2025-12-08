@@ -45,14 +45,14 @@ export default function AdRotator({
   const currentAd = ads[currentAdIndex]
 
   return (
-    <div className={`ad-rotator ad-${position} ${className}`}>
+    <div className={`slot-rotator slot-${position} ${className}`}>
       <AdUnit 
         ad={currentAd} 
         position={position} 
         priority={priority}
       />
       {ads.length > 1 && (
-        <div className="ad-rotator-indicator text-center mt-1">
+        <div className="slot-rotator-indicator text-center mt-1">
           <small className="text-muted">
             Ad {currentAdIndex + 1} of {ads.length}
           </small>

@@ -48,7 +48,7 @@ export default function AdUnit({
 
     if(adImage.url)
     {
-        setIsVisible(false)
+        setIsVisible(true)
         setImageError(false)
     }
     
@@ -61,7 +61,7 @@ export default function AdUnit({
   if (!isVisible || !adImage || imageError) {
     return (
       <div 
-        className={`ad-placeholder ${className}`} 
+        className={`slot-placeholder ${className}`} 
         style={{ 
           width: positionConfig.dimensions.width,
           height: positionConfig.dimensions.height 
@@ -74,7 +74,7 @@ export default function AdUnit({
 
 
   return (
-    <div className={`ad-unit ad-${position} ${className}`}>
+    <div className={`slot-unit slot-${position} ${className}`}>
       <a 
         href={ad.acf.igh_ad_url || ad.link} 
         target="_blank" 
