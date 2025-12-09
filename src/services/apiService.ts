@@ -176,215 +176,202 @@ export class ApiService {
   }
 
 
+private static async fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeout = API_CONFIG.timeout
+) {
+  let lastError: Error | null = null;
+  const maxRetries = API_CONFIG.retryAttempts || 2;
+  const isServer = typeof window === 'undefined';
 
-//   private static async fetchWithTimeout(
-//   url: string,
-//   options: RequestInit = {},
-//   timeout = API_CONFIG.timeout
-// ) {
-//   let lastError: Error | null = null;
-//   const maxRetries = API_CONFIG.retryAttempts || 2;
+  let finalUrl = url;
+  if (!options.method || options.method === 'GET') {
+    if (!isServer) {
+      finalUrl = url.includes('?') 
+        ? `${url}&_=${Date.now()}`
+        : `${url}?_=${Date.now()}`;
+    }
+  }
 
-//   // Check if we're on server or client
-//   const isServer = typeof window === 'undefined';
-  
-//   let finalUrl = url;
-//   if (!options.method || options.method === 'GET') {
-//     // Only add cache-busting on client side
-//     if (!isServer) {
-//       finalUrl = url.includes('?') 
-//         ? `${url}&_=${Date.now()}`
-//         : `${url}?_=${Date.now()}`;
-//     }
-//   }
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    // FIX: Create AbortController for server side too
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
 
-//   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-//     const controller = isServer ? undefined : new AbortController();
-//     const id = isServer ? undefined : setTimeout(() => controller?.abort(), timeout);
+    try {
+      const fetchOptions: RequestInit = {
+        ...options,
+        signal: controller.signal, // Always add signal
+      };
 
-//     try {
-//       const fetchOptions: RequestInit = {
-//         ...options,
-//       };
+      fetchOptions.headers = {
+        'Accept': 'application/json',
+        ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
+        ...options.headers,
+      };
 
-//       // Only add signal on client side
-//       if (!isServer && controller) {
-//         fetchOptions.signal = controller.signal;
-//       }
+      const response = await fetch(finalUrl, fetchOptions);
 
-//       // Add headers
-//       fetchOptions.headers = {
-//         'Accept': 'application/json',
-//         ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
-//         ...options.headers,
-//       };
+      clearTimeout(id); // Always clear timeout
 
-//       const response = await fetch(finalUrl, fetchOptions);
+      if (!response.ok) {
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        const status = response.status;
 
-//       if (!isServer) {
-//         clearTimeout(id);
-//       }
+        const shouldRetry =
+          attempt < maxRetries && (
+            status === 429 || 
+            status >= 500 ||  
+            status === 408 || 
+            status === 0     
+          );
 
-//       if (!response.ok) {
-//         const error = new Error(`HTTP error! status: ${response.status}`);
-//         const status = response.status;
-
-//         // Check if we should retry
-//         const shouldRetry =
-//           attempt < maxRetries && (
-//             status === 429 || 
-//             status >= 500 ||  
-//             status === 408 || 
-//             status === 0     
-//           );
-
-//         if (shouldRetry) {
-//           lastError = error;
-//           const backoffDelay = Math.pow(2, attempt) * 1000;
+        if (shouldRetry) {
+          lastError = error;
+          const backoffDelay = Math.pow(2, attempt) * 1000;
           
-//           if (!isServer && process.env.NODE_ENV === 'development') {
-//             console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
-//               url,
-//               status,
-//               error: error.message
-//             });
-//           }
-
-//           await new Promise(resolve => setTimeout(resolve, backoffDelay));
-//           continue;
-//         }
-
-//         throw error;
-//       }
-
-//       return response;
-//     } catch (error: any) {
-//       if (!isServer) {
-//         clearTimeout(id);
-//       }
-
-//       const isTimeout = !isServer && (controller?.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError');
-
-//       if (attempt < maxRetries) {
-//         lastError = error;
-//         const backoffDelay = Math.pow(2, attempt) * 1000;
-        
-//         if (!isServer && process.env.NODE_ENV === 'development') {
-//           console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
-//             url,
-//             error: error.message,
-//             isTimeout
-//           });
-//         }
-
-//         await new Promise(resolve => setTimeout(resolve, backoffDelay));
-//         continue;
-//       }
-
-//       if (isTimeout) {
-//         throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
-//       }
-//       throw error;
-//     }
-//   }
-
-//   throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
-// }
-
-  
-
-  private static async fetchWithTimeout(
-    url: string,
-    options: RequestInit = {},
-    timeout = API_CONFIG.timeout
-  ) {
-    let lastError: Error | null = null;
-    const maxRetries = API_CONFIG.retryAttempts || 2;
-
-    const finalUrl = url.includes('?') 
-    ? `${url}&_=${Date.now()}`
-    : `${url}?_=${Date.now()}`;
-
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
-
-      try {
-        const response = await fetch(finalUrl, {
-          ...options,
-          signal: controller.signal,
-          headers: {
-            'Accept': 'application/json',
-            ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
-            ...options.headers,
-          },
-        });
-
-        clearTimeout(id);
-
-        if (!response.ok) {
-          const error = new Error(`HTTP error! status: ${response.status}`);
-          const status = response.status;
-
-          // Check if we should retry
-          const shouldRetry =
-            attempt < maxRetries && (
-              status === 429 || // Too Many Requests - retry after backoff
-              status >= 500 ||  // Server errors - retry
-              status === 408 || // Request Timeout - retry
-              status === 0      // Network error - retry
-            );
-
-          if (shouldRetry) {
-            lastError = error;
-            // Calculate exponential backoff: 1s, 2s, 4s
-            const backoffDelay = Math.pow(2, attempt) * 1000;
+          if (!isServer && process.env.NODE_ENV === 'development') {
             console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
               url,
               status,
               error: error.message
             });
-
-            await new Promise(resolve => setTimeout(resolve, backoffDelay));
-            continue; // Try again
           }
 
-          throw error; // Don't retry for client errors (4xx except 429)
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          continue;
         }
 
-        return response;
-      } catch (error: any) {
-        clearTimeout(id);
+        throw error;
+      }
 
-        const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
+      return response;
+    } catch (error: any) {
+      clearTimeout(id);
 
-        if (attempt < maxRetries) {
-          lastError = error;
+      const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
 
-          // Calculate exponential backoff: 1s, 2s, 4s
-          const backoffDelay = Math.pow(2, attempt) * 1000;
+      if (attempt < maxRetries) {
+        lastError = error;
+        const backoffDelay = Math.pow(2, attempt) * 1000;
+        
+        if (!isServer && process.env.NODE_ENV === 'development') {
           console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
             url,
             error: error.message,
             isTimeout
           });
-
-          await new Promise(resolve => setTimeout(resolve, backoffDelay));
-          continue; // Try again
         }
 
-        // No more retries
-        if (isTimeout) {
-          throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
-        }
-        throw error;
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        continue;
       }
-    }
 
-    // This should never be reached, but just in case
-    throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+      if (isTimeout) {
+        throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
+      }
+      throw error;
+    }
   }
+
+  throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+}
+
+  
+
+  // private static async fetchWithTimeout(
+  //   url: string,
+  //   options: RequestInit = {},
+  //   timeout = API_CONFIG.timeout
+  // ) {
+  //   let lastError: Error | null = null;
+  //   const maxRetries = API_CONFIG.retryAttempts || 2;
+
+  //   const finalUrl = url.includes('?') 
+  //   ? `${url}&_=${Date.now()}`
+  //   : `${url}?_=${Date.now()}`;
+
+
+  //   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  //     const controller = new AbortController();
+  //     const id = setTimeout(() => controller.abort(), timeout);
+
+  //     try {
+  //       const response = await fetch(finalUrl, {
+  //         ...options,
+  //         signal: controller.signal,
+  //         headers: {
+  //           'Accept': 'application/json',
+  //           ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
+  //           ...options.headers,
+  //         },
+  //       });
+
+  //       clearTimeout(id);
+
+  //       if (!response.ok) {
+  //         const error = new Error(`HTTP error! status: ${response.status}`);
+  //         const status = response.status;
+
+  //         // Check if we should retry
+  //         const shouldRetry =
+  //           attempt < maxRetries && (
+  //             status === 429 || // Too Many Requests - retry after backoff
+  //             status >= 500 ||  // Server errors - retry
+  //             status === 408 || // Request Timeout - retry
+  //             status === 0      // Network error - retry
+  //           );
+
+  //         if (shouldRetry) {
+  //           lastError = error;
+  //           // Calculate exponential backoff: 1s, 2s, 4s
+  //           const backoffDelay = Math.pow(2, attempt) * 1000;
+  //           console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+  //             url,
+  //             status,
+  //             error: error.message
+  //           });
+
+  //           await new Promise(resolve => setTimeout(resolve, backoffDelay));
+  //           continue; // Try again
+  //         }
+
+  //         throw error; // Don't retry for client errors (4xx except 429)
+  //       }
+
+  //       return response;
+  //     } catch (error: any) {
+  //       clearTimeout(id);
+
+  //       const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
+
+  //       if (attempt < maxRetries) {
+  //         lastError = error;
+
+  //         // Calculate exponential backoff: 1s, 2s, 4s
+  //         const backoffDelay = Math.pow(2, attempt) * 1000;
+  //         console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+  //           url,
+  //           error: error.message,
+  //           isTimeout
+  //         });
+
+  //         await new Promise(resolve => setTimeout(resolve, backoffDelay));
+  //         continue; // Try again
+  //       }
+
+  //       // No more retries
+  //       if (isTimeout) {
+  //         throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
+  //       }
+  //       throw error;
+  //     }
+  //   }
+
+  //   // This should never be reached, but just in case
+  //   throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+  // }
 
 
 
