@@ -7,8 +7,6 @@ import Recents from '@/components/home/Recents'
 import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useNewsData } from '@/hooks/useNewsData'
-import { useUIStore } from '@/stores/uiStore'
-import { prefetchCategoryArticles } from '@/utils/prefetch'
 import React, { Suspense, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 
