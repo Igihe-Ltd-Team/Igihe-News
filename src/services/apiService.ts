@@ -1362,8 +1362,7 @@ static async fetchAdvertisements(): Promise<Advertisement[]> {
     try {
       const timestamp = Date.now();
       const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`,
-        
+        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`
       );
 
       if (!response.ok) {
