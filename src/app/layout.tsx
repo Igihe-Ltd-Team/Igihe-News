@@ -4,7 +4,6 @@ import { Providers } from './providers';
 import { raleway } from '@/lib/fonts';
 import Header from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ApiService } from '@/services/apiService';
 
 export const metadata = {
   title: 'IGIHE',
@@ -12,9 +11,9 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  if (typeof window !== 'undefined') {
-  ApiService.initialize();
-}
+//   if (typeof window !== 'undefined') {
+//   ApiService.initialize();
+// }
   return (
     <html lang="en">
       <body className={raleway.variable}>
