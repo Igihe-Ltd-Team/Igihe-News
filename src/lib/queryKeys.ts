@@ -74,7 +74,7 @@ export const queryKeys = {
     all: ['ads'] as const,
     lists: () => [...queryKeys.ads.all, 'list'] as const,
     byPosition: (position: string) => [...queryKeys.ads.all, 'position', position] as const,
-    byPositions: (positions: string[]) => [...queryKeys.ads.all, 'positions', ...positions] as const,
+    byPositions: (positions: string[]) => [...queryKeys.ads.all, 'positions', ...positions,'v2'] as const,
   },
 
   

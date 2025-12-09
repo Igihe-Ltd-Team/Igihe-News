@@ -1316,56 +1316,207 @@ export class ApiService {
 
 
 
+  // static async fetchAdvertisements(): Promise<Advertisement[]> {
+  //   const cacheKey = 'advertisements:all'
+  //   try {
+  //     return this.dedupedFetch(cacheKey, async () => {
+  //     const response = await this.fetchWithTimeout(
+  //       `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
+  //     )
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`)
+  //     }
+
+  //     const ads = await response.json()
+  //     return ads || []
+  //   }, 10 * 60 * 1000) // 10 minutes cache for ads
+  //   } catch (error) {
+      
+  //   }
+
+  //   return []
+  // }
+
+
+  private static adsCache: Advertisement[] | null = null;
+private static adsCacheTimestamp: number = 0;
+private static ADS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+private static adsFetchInProgress: Promise<Advertisement[]> | null = null;
+
 static async fetchAdvertisements(): Promise<Advertisement[]> {
-  const cacheKey = 'advertisements:all'
-  const tags = ['advertisements']
-
-  return this.cachedFetch(
-    cacheKey,
-    async () => {
+  const now = Date.now();
+  
+  // Return cached ads if not expired
+  if (this.adsCache && (now - this.adsCacheTimestamp) < this.ADS_CACHE_TTL) {
+    return this.adsCache;
+  }
+  
+  // If already fetching, return that promise
+  if (this.adsFetchInProgress) {
+    return this.adsFetchInProgress;
+  }
+  
+  // Create new fetch
+  this.adsFetchInProgress = (async () => {
+    try {
+      const timestamp = Date.now();
       const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`,
-        {
-          mode: 'cors',
-          credentials: 'same-origin',
-        }
-      )
-      const ads = await response.json()
-      return Array.isArray(ads) ? ads : []
-    },
-    10 * 60,
-  )
+        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`,
+        
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const ads = await response.json();
+      const validAds = ads || [];
+      
+      // Update cache
+      this.adsCache = validAds;
+      this.adsCacheTimestamp = now;
+      
+      return validAds;
+    } catch (error) {
+      console.error('Error fetching advertisements:', error);
+      // Return empty array on error
+      return [];
+    } finally {
+      // Clear the in-progress flag
+      this.adsFetchInProgress = null;
+    }
+  })();
+
+  return this.adsFetchInProgress;
 }
 
-static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+
+
+  
+  static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
   try {
-    const ads = await this.fetchAdvertisements()
-    return getAdsByPosition(ads, position)
+    const allAds = await this.fetchAdvertisements();
+    return getAdsByPosition(allAds, position);
   } catch (error) {
-    console.error('Error fetching ads by position:', error)
-    return []
+    console.error('Error fetching ads by position:', error);
+    return [];
   }
 }
 
-static async fetchAdsByPositions(
-  positions: AdPositionKey[]
-): Promise<Record<AdPositionKey, Advertisement[]>> {
-  try {
-    // Fetch all ads once (from cache)
-    const ads = await this.fetchAdvertisements()
-    const result: Record<AdPositionKey, Advertisement[]> = {} as any
+  static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
+    const cacheKey = `advertisements:${positions}`
+    try {
+      return this.dedupedFetch(cacheKey, async () => {
+        const ads = await this.fetchAdvertisements()
+        const result: Record<AdPositionKey, Advertisement[]> = {} as any
 
-    // Filter for each position
-    positions.forEach(position => {
-      result[position] = getAdsByPosition(ads, position)
-    })
+        positions.forEach(position => {
+          result[position] = getAdsByPosition(ads, position)
+        })
 
-    return result
-  } catch (error) {
-    console.error('Error fetching ads by positions:', error)
-    return {} as Record<AdPositionKey, Advertisement[]>
+        return result
+      }, 10 * 60 * 1000)
+    } catch (error) {
+      console.error('Error fetching ads by positions:', error)
+      return {} as Record<AdPositionKey, Advertisement[]>
+    }
   }
-}
+
+
+
+
+
+// Add these properties to your class
+// private static adsCache: Advertisement[] | null = null;
+// private static adsCacheTimestamp: number = 0;
+// private static ADS_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+// private static adsFetchPromise: Promise<Advertisement[]> | null = null;
+
+// static async fetchAdvertisements(): Promise<Advertisement[]> {
+//   const now = Date.now();
+  
+//   // Return cached ads if not expired
+//   if (this.adsCache && (now - this.adsCacheTimestamp) < this.ADS_CACHE_TTL) {
+//     console.log('Returning cached ads');
+//     return this.adsCache;
+//   }
+  
+//   // If already fetching, return that promise
+//   if (this.adsFetchPromise) {
+//     console.log('Returning existing ads fetch promise');
+//     return this.adsFetchPromise;
+//   }
+  
+//   // Create new fetch promise
+//   this.adsFetchPromise = (async () => {
+//     try {
+//       const response = await this.fetchWithTimeout(
+//         `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_t=${now}`,
+//         {
+//           cache: 'no-store',
+//           headers: {
+//             'Cache-Control': 'no-cache',
+//             'Pragma': 'no-cache'
+//           }
+//         }
+//       )
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`)
+//       }
+
+//       const ads = await response.json()
+//       const validAds = ads || []
+      
+//       // Update cache
+//       this.adsCache = validAds;
+//       this.adsCacheTimestamp = now;
+      
+//       console.log(`Fetched ${validAds.length} ads`);
+//       return validAds;
+//     } catch (error) {
+//       console.error('Error fetching advertisements:', error);
+//       // If we have stale cache, return it
+//       if (this.adsCache) {
+//         console.log('Using stale ads cache due to error');
+//         return this.adsCache;
+//       }
+//       throw error;
+//     } finally {
+//       // Clear the promise reference
+//       this.adsFetchPromise = null;
+//     }
+//   })();
+
+//   return this.adsFetchPromise;
+// }
+
+// static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+//   try {
+//     const allAds = await this.fetchAdvertisements();
+//     return getAdsByPosition(allAds, position);
+//   } catch (error) {
+//     console.error('Error fetching ads by position:', error);
+//     return [];
+//   }
+// }
+
+// static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
+//   try {
+//     const allAds = await this.fetchAdvertisements();
+//     const result: Record<AdPositionKey, Advertisement[]> = {} as any;
+    
+//     positions.forEach(position => {
+//       result[position] = getAdsByPosition(allAds, position);
+//     });
+    
+//     return result;
+//   } catch (error) {
+//     console.error('Error fetching ads by positions:', error);
+//     return {} as Record<AdPositionKey, Advertisement[]>;
+//   }
+// }
 
 
 

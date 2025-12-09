@@ -6,6 +6,7 @@ import AdUnit from './AdUnit'
 import { queryKeys } from '@/lib/queryKeys'
 import { AdPositionKey } from '@/lib/adPositions'
 import { Spinner } from 'react-bootstrap'
+import { useEffect } from 'react'
 
 interface AdManagerProps {
   position: AdPositionKey
@@ -15,6 +16,7 @@ interface AdManagerProps {
   showLabel?: boolean
   fallbackComponent?: React.ReactNode
   imgClass?:string
+  retryCount?:number
 }
 
 export default function AdManager({ 
@@ -24,13 +26,26 @@ export default function AdManager({
   maxAds = 1,
   showLabel = true,
   fallbackComponent,
-  imgClass
+  imgClass,
+  retryCount = 2
 }: AdManagerProps) {
-  const { data: ads, isLoading, error } = useQuery({
+  const { data: ads, isLoading, error,refetch } = useQuery({
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
+
+
+  useEffect(() => {
+    if (error && retryCount > 0) {
+      const timer = setTimeout(() => {
+        refetch();
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [error, refetch, retryCount]);
+  
 
   if (isLoading) {
     return (
