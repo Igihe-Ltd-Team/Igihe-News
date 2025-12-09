@@ -88,9 +88,10 @@ export function Home() {
   // const { selectedCategory, setSelectedCategory } = useUIStore()
 
   const safeFeaturedArticles = Array.isArray(featuredArticles) ? featuredArticles : [];
+  // console.log(safeFeaturedArticles)
   const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
     sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
-    otherFeaturedArticle: safeFeaturedArticles.slice(8, 20),
+    otherFeaturedArticle: safeFeaturedArticles.slice(9, 30),
   }), [safeFeaturedArticles]);
 
   // useEffect(() => {

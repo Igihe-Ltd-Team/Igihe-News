@@ -43,7 +43,7 @@ const NewsSection = React.memo(({
     const { mainArticle, subArticles, listArticles } = useMemo(() => ({
         mainArticle: safeArticles?.[0],
         subArticles: safeArticles?.slice(1, 3) || [],
-        listArticles: safeArticles?.slice(3, 7) || []
+        listArticles: safeArticles?.slice(3, 12) || []
     }), [safeArticles])
 
 
@@ -113,7 +113,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
     } = useMemo(() => ({
         mainLatest: safeLatests?.[0],
         latestsSidebar: safeLatests?.slice(1, 6) || [],
-        featuredTimeline: safeFeatured?.slice(0, 9) || [],
+        featuredTimeline: safeFeatured?.slice(7, 20) || [],
     }), [safeLatests, safeFeatured])
 
     // if (!latestsSidebar?.length) {
@@ -175,7 +175,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                                 className="mb-2"
                             /></Col>
                     </Row>
-                    <NewsSection title="Africa" articles={africaArticles} />
+                    <NewsSection title="Great Lakes Region" articles={africaArticles} />
 
                     <Suspense fallback={<NewsSkeleton count={3} />}>
                         <Videos />
@@ -197,7 +197,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                             className="mb-2"
                         />
                     </div>
-                    {/* <NewsSection title="Africa" articles={featured} /> */}
+                    <NewsSection title="Africa" articles={africaArticles} />
                 </div>
 
                 <div className="col-xl-4 col-lg-12">

@@ -26,7 +26,7 @@ export function useNewsData() {
 
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 20 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 26 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -70,7 +70,7 @@ export function useNewsData() {
   const africaArticlesQuery = useQuery({
     queryKey: queryKeys.articles.africa(),
     queryFn: () =>
-      ApiService.fetchArticles({ tags: [120], per_page: 11 }).then(
+      ApiService.fetchArticles({ tags: [120], per_page: 12 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
@@ -79,7 +79,7 @@ export function useNewsData() {
   const entertainmentArticlesQuery = useQuery({
     queryKey: queryKeys.articles.entertainment(),
     queryFn: () =>
-      ApiService.fetchArticles({ categories: [105,123], per_page: 11 }).then(
+      ApiService.fetchArticles({ categories: [105,123], per_page: 12 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,

@@ -143,7 +143,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                 style={{
                     // maxHeight: expanded ? "480px" : "auto",
                     // overflowY: expanded ? "scroll" : "hidden",
-                    maxHeight: "480px",
+                    maxHeight: "780px",
                     overflowY: "scroll",
                     transition: "max-height 0.4s ease",
                 }}

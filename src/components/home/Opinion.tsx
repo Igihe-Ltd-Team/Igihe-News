@@ -12,7 +12,7 @@ import OpionCard from '../opinion/OpionCard'
 export default function Opinios() {
   const { data: opinions, isLoading, error } = useQuery({
     queryKey: ['opinions'],
-    queryFn: () => ApiService.fetchOpinions({ per_page: 4 }),
+    queryFn: () => ApiService.fetchOpinions({ per_page: 6 }),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
@@ -29,7 +29,7 @@ export default function Opinios() {
     return (
       <>
         <HeaderDivider title="Opinions" />
-        <div className="text-red-500">Failed to load videos</div>
+        <div className="text-red-500">Failed to load Opinions</div>
       </>
     )
   }
