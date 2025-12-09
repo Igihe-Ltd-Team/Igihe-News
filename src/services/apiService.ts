@@ -219,16 +219,19 @@ export class ApiService {
     let lastError: Error | null = null;
     const maxRetries = API_CONFIG.retryAttempts || 2;
 
+    const finalUrl = url.includes('?') 
+    ? `${url}&_=${Date.now()}`
+    : `${url}?_=${Date.now()}`;
+
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeout);
 
       try {
-        const response = await fetch(url, {
+        const response = await fetch(finalUrl, {
           ...options,
           signal: controller.signal,
-          cache: 'no-cache',
-        referrerPolicy: 'no-referrer-when-downgrade',
           headers: {
             'Accept': 'application/json',
             ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
@@ -1313,54 +1316,58 @@ export class ApiService {
 
 
 
-  static async fetchAdvertisements(): Promise<Advertisement[]> {
-    const cacheKey = 'advertisements:all'
+static async fetchAdvertisements(): Promise<Advertisement[]> {
+  const cacheKey = 'advertisements:all'
+  const tags = ['advertisements']
 
-    return this.dedupedFetch(cacheKey, async () => {
+  return this.cachedFetch(
+    cacheKey,
+    async () => {
       const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
+        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`,
+        {
+          mode: 'cors',
+          credentials: 'same-origin',
+        }
       )
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
       const ads = await response.json()
-      return ads || []
-    }, 10 * 60 * 1000) // 10 minutes cache for ads
+      return Array.isArray(ads) ? ads : []
+    },
+    10 * 60,
+  )
+}
+
+static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+  try {
+    const ads = await this.fetchAdvertisements()
+    return getAdsByPosition(ads, position)
+  } catch (error) {
+    console.error('Error fetching ads by position:', error)
+    return []
   }
+}
 
-  static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
-    const cacheKey = `advertisements:${position}`
-    try {
-      return this.dedupedFetch(cacheKey, async () => {
-        const ads = await this.fetchAdvertisements()
-        return getAdsByPosition(ads, position)
-      }, 10 * 60 * 1000)
-    } catch (error) {
-      console.error('Error fetching ads by position:', error)
-      return []
-    }
+static async fetchAdsByPositions(
+  positions: AdPositionKey[]
+): Promise<Record<AdPositionKey, Advertisement[]>> {
+  try {
+    // Fetch all ads once (from cache)
+    const ads = await this.fetchAdvertisements()
+    const result: Record<AdPositionKey, Advertisement[]> = {} as any
+
+    // Filter for each position
+    positions.forEach(position => {
+      result[position] = getAdsByPosition(ads, position)
+    })
+
+    return result
+  } catch (error) {
+    console.error('Error fetching ads by positions:', error)
+    return {} as Record<AdPositionKey, Advertisement[]>
   }
+}
 
-  static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
-    const cacheKey = `advertisements:${positions}`
-    try {
-      return this.dedupedFetch(cacheKey, async () => {
-        const ads = await this.fetchAdvertisements()
-        const result: Record<AdPositionKey, Advertisement[]> = {} as any
 
-        positions.forEach(position => {
-          result[position] = getAdsByPosition(ads, position)
-        })
-
-        return result
-      }, 10 * 60 * 1000)
-    } catch (error) {
-      console.error('Error fetching ads by positions:', error)
-      return {} as Record<AdPositionKey, Advertisement[]>
-    }
-  }
 
 
 }
