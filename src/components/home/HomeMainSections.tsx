@@ -49,7 +49,7 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
                 <div className="col-xl-3 col-lg-6 col-md-6">
                     
                     <AdManager
-                        position="home-section-1"
+                        position="home-after-highlights"
                         priority={true}
                         className="mb-2"
                     />

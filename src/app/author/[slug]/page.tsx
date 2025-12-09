@@ -14,32 +14,30 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 3600
 
 
-async function getAuthor(slug:string) {
+async function getAuthor(slug: string) {
 
-  const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/users?slug=${slug}&_embed`;
-// console.log('apiUrl: ',apiUrl)
-  try {
+    const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/users?slug=${slug}&_embed`;
+    // console.log('apiUrl: ',apiUrl)
+    try {
 
-    const author = await ApiService.fetchAuthorBySlug(slug)
-    return author
-    // const response = await fetch(
-    //   apiUrl,
-    //   { 
-    //     next: { revalidate: 60 },
-    //     // cache: 'no-store' // Force fresh data
-    //   }
-    // )
-    
-    // if (!response.ok) return null
-    // const authors = await response.json()
-    //   return authors[0] || null
-    // const posts = await response.json()
-    // return posts && posts.length > 0 ? posts[0] : null
-    
-  } catch (error) {
-    console.error('❌ Fetch error:', error)
-    return null
-  }
+        // const author = await ApiService.fetchAuthorBySlug(slug)
+        // return author
+        const response = await fetch(
+            apiUrl,
+            {
+                next: { revalidate: 60 },
+                // cache: 'no-store' // Force fresh data
+            }
+        )
+
+        if (!response.ok) return null
+        const authors = await response.json()
+        return authors[0] || null
+
+    } catch (error) {
+        console.error('❌ Fetch error:', error)
+        return null
+    }
 }
 
 
@@ -62,10 +60,10 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
             `Read ${articleCount} articles written by ${author.name} on Igihe.com`
 
         // Safe avatar URL access
-        const avatarUrl = author.avatar_urls?.['512'] || 
-                         author.avatar_urls?.['96'] || 
-                         author.avatar_urls?.['48'] || 
-                         author.avatar_urls?.['24']
+        const avatarUrl = author.avatar_urls?.['512'] ||
+            author.avatar_urls?.['96'] ||
+            author.avatar_urls?.['48'] ||
+            author.avatar_urls?.['24']
 
         return {
             title: `${author.name} - Articles & News | Igihe.com`,
@@ -92,7 +90,7 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
     }
 }
 
-export default async function AuthorsPage({params}:AuthorPageProps) {
+export default async function AuthorsPage({ params }: AuthorPageProps) {
     const { slug } = await params
-  return <AuthorContent author={slug}/>
+    return <AuthorContent author={slug} />
 }

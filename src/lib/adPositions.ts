@@ -22,6 +22,25 @@ export const AD_POSITIONS = {
     dimensions: { width: 300, height: 250 },
     priority: 1
   },
+  'after-announcements': {
+    name: 'after announcements',
+    description: 'after-announcements',
+    dimensions: { width: 300, height: 250 },
+    priority: 1
+  },
+  'after-opinions': {
+    name: 'after-opinions',
+    description: 'after-opinions',
+    dimensions: { width: 300, height: 250 },
+    priority: 1
+  },
+'after-facts': {
+    name: 'after announcements',
+    description: 'after-announcements',
+    dimensions: { width: 300, height: 250 },
+    priority: 1
+  },
+  
   'home-after-highlights': {
     name: 'Home After Highlights',
     description: 'After highlights section',

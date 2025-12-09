@@ -219,7 +219,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                     <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
                         <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
                         <AdManager
-                            position="home-section-1"
+                            position="after-announcements"
                             priority={true}
                             className="mb-2"
                         />
@@ -230,7 +230,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                         </Suspense>
                     </div>
                     <AdManager
-                        position="home-section-1"
+                        position="after-opinions"
                         priority={true}
                         className="mb-2"
                     />
@@ -240,7 +240,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                         </Suspense>
                     </div>
                     <AdManager
-                        position="home-section-1"
+                        position="after-facts"
                         priority={true}
                         className="mb-2"
                     />
