@@ -52,7 +52,7 @@ if(isLoading)
                     {author.avatar_urls && (
                       <OptimizedImage
                         src={author.avatar_urls['96']}
-                        alt={author.name}
+                        alt={author.name || ''}
                         width={40}
                         height={40}
                         className="rounded-circle mb-3"
