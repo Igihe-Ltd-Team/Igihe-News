@@ -177,132 +177,217 @@ export class ApiService {
 
 
 
-  // private static async fetchWithTimeout(
-  //   url: string,
-  //   options: RequestInit = {},
-  //   timeout = API_CONFIG.timeout
-  // ) {
-  //   const controller = new AbortController();
-  //   const id = setTimeout(() => controller.abort(), timeout);
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       ...options,
-  //       signal: controller.signal,
-  //       headers: {
-  //         'Accept': 'application/json',
-  //         'Content-Type': 'application/json',
-  //         ...options.headers,
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     return response;
-  //   } catch (error) {
-  //     if (controller.signal.aborted) {
-  //       throw new Error("Request timed out");
-  //     }
-  //     throw error;
-  //   } finally {
-  //     clearTimeout(id); // ALWAYS clear
-  //   }
-  // }
-
   private static async fetchWithTimeout(
-    url: string,
-    options: RequestInit = {},
-    timeout = API_CONFIG.timeout
-  ) {
-    let lastError: Error | null = null;
-    const maxRetries = API_CONFIG.retryAttempts || 2;
+  url: string,
+  options: RequestInit = {},
+  timeout = API_CONFIG.timeout
+) {
+  let lastError: Error | null = null;
+  const maxRetries = API_CONFIG.retryAttempts || 2;
 
-    const finalUrl = url.includes('?') 
-    ? `${url}&_=${Date.now()}`
-    : `${url}?_=${Date.now()}`;
+  // Check if we're on server or client
+  const isServer = typeof window === 'undefined';
+  
+  let finalUrl = url;
+  if (!options.method || options.method === 'GET') {
+    // Only add cache-busting on client side
+    if (!isServer) {
+      finalUrl = url.includes('?') 
+        ? `${url}&_=${Date.now()}`
+        : `${url}?_=${Date.now()}`;
+    }
+  }
 
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = isServer ? undefined : new AbortController();
+    const id = isServer ? undefined : setTimeout(() => controller?.abort(), timeout);
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const fetchOptions: RequestInit = {
+        ...options,
+      };
 
-      try {
-        const response = await fetch(finalUrl, {
-          ...options,
-          signal: controller.signal,
-          headers: {
-            'Accept': 'application/json',
-            ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
-            ...options.headers,
-          },
-        });
+      // Only add signal on client side
+      if (!isServer && controller) {
+        fetchOptions.signal = controller.signal;
+      }
 
+      // Add headers
+      fetchOptions.headers = {
+        'Accept': 'application/json',
+        ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
+        ...options.headers,
+      };
+
+      const response = await fetch(finalUrl, fetchOptions);
+
+      if (!isServer) {
         clearTimeout(id);
+      }
 
-        if (!response.ok) {
-          const error = new Error(`HTTP error! status: ${response.status}`);
-          const status = response.status;
+      if (!response.ok) {
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        const status = response.status;
 
-          // Check if we should retry
-          const shouldRetry =
-            attempt < maxRetries && (
-              status === 429 || // Too Many Requests - retry after backoff
-              status >= 500 ||  // Server errors - retry
-              status === 408 || // Request Timeout - retry
-              status === 0      // Network error - retry
-            );
+        // Check if we should retry
+        const shouldRetry =
+          attempt < maxRetries && (
+            status === 429 || 
+            status >= 500 ||  
+            status === 408 || 
+            status === 0     
+          );
 
-          if (shouldRetry) {
-            lastError = error;
-            // Calculate exponential backoff: 1s, 2s, 4s
-            const backoffDelay = Math.pow(2, attempt) * 1000;
+        if (shouldRetry) {
+          lastError = error;
+          const backoffDelay = Math.pow(2, attempt) * 1000;
+          
+          if (!isServer && process.env.NODE_ENV === 'development') {
             console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
               url,
               status,
               error: error.message
             });
-
-            await new Promise(resolve => setTimeout(resolve, backoffDelay));
-            continue; // Try again
           }
 
-          throw error; // Don't retry for client errors (4xx except 429)
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          continue;
         }
 
-        return response;
-      } catch (error: any) {
+        throw error;
+      }
+
+      return response;
+    } catch (error: any) {
+      if (!isServer) {
         clearTimeout(id);
+      }
 
-        const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
+      const isTimeout = !isServer && (controller?.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError');
 
-        if (attempt < maxRetries) {
-          lastError = error;
-
-          // Calculate exponential backoff: 1s, 2s, 4s
-          const backoffDelay = Math.pow(2, attempt) * 1000;
+      if (attempt < maxRetries) {
+        lastError = error;
+        const backoffDelay = Math.pow(2, attempt) * 1000;
+        
+        if (!isServer && process.env.NODE_ENV === 'development') {
           console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
             url,
             error: error.message,
             isTimeout
           });
-
-          await new Promise(resolve => setTimeout(resolve, backoffDelay));
-          continue; // Try again
         }
 
-        // No more retries
-        if (isTimeout) {
-          throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
-        }
-        throw error;
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        continue;
       }
-    }
 
-    // This should never be reached, but just in case
-    throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+      if (isTimeout) {
+        throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
+      }
+      throw error;
+    }
   }
+
+  throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+}
+
+  
+
+  // private static async fetchWithTimeout(
+  //   url: string,
+  //   options: RequestInit = {},
+  //   timeout = API_CONFIG.timeout
+  // ) {
+  //   let lastError: Error | null = null;
+  //   const maxRetries = API_CONFIG.retryAttempts || 2;
+
+  //   const finalUrl = url.includes('?') 
+  //   ? `${url}&_=${Date.now()}`
+  //   : `${url}?_=${Date.now()}`;
+
+
+  //   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  //     const controller = new AbortController();
+  //     const id = setTimeout(() => controller.abort(), timeout);
+
+  //     try {
+  //       const response = await fetch(finalUrl, {
+  //         ...options,
+  //         signal: controller.signal,
+  //         headers: {
+  //           'Accept': 'application/json',
+  //           ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
+  //           ...options.headers,
+  //         },
+  //       });
+
+  //       clearTimeout(id);
+
+  //       if (!response.ok) {
+  //         const error = new Error(`HTTP error! status: ${response.status}`);
+  //         const status = response.status;
+
+  //         // Check if we should retry
+  //         const shouldRetry =
+  //           attempt < maxRetries && (
+  //             status === 429 || // Too Many Requests - retry after backoff
+  //             status >= 500 ||  // Server errors - retry
+  //             status === 408 || // Request Timeout - retry
+  //             status === 0      // Network error - retry
+  //           );
+
+  //         if (shouldRetry) {
+  //           lastError = error;
+  //           // Calculate exponential backoff: 1s, 2s, 4s
+  //           const backoffDelay = Math.pow(2, attempt) * 1000;
+  //           console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+  //             url,
+  //             status,
+  //             error: error.message
+  //           });
+
+  //           await new Promise(resolve => setTimeout(resolve, backoffDelay));
+  //           continue; // Try again
+  //         }
+
+  //         throw error; // Don't retry for client errors (4xx except 429)
+  //       }
+
+  //       return response;
+  //     } catch (error: any) {
+  //       clearTimeout(id);
+
+  //       const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
+
+  //       if (attempt < maxRetries) {
+  //         lastError = error;
+
+  //         // Calculate exponential backoff: 1s, 2s, 4s
+  //         const backoffDelay = Math.pow(2, attempt) * 1000;
+  //         console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+  //           url,
+  //           error: error.message,
+  //           isTimeout
+  //         });
+
+  //         await new Promise(resolve => setTimeout(resolve, backoffDelay));
+  //         continue; // Try again
+  //       }
+
+  //       // No more retries
+  //       if (isTimeout) {
+  //         throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
+  //       }
+  //       throw error;
+  //     }
+  //   }
+
+  //   // This should never be reached, but just in case
+  //   throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+  // }
+
+
+
 
   private static async cachedFetch<T>(
     cacheKey: string,
@@ -977,20 +1062,7 @@ export class ApiService {
     }
   }
 
-  // Get cache statistics (for monitoring)
-  // static getCacheStats() {
-  //   const now = Date.now()
-  //   const entries = Array.from(requestCache.entries())
-
-  //   return {
-  //     totalEntries: entries.length,
-  //     expiredEntries: entries.filter(([_, value]) => 
-  //       (now - value.timestamp) > API_CONFIG.cacheTimeout
-  //     ).length,
-  //     memoryUsage: JSON.stringify(entries).length,
-  //   }
-  // }
-
+  
 
   static async fetchPopularCategories(limit: number = 10): Promise<Category[]> {
     try {
@@ -1177,38 +1249,6 @@ export class ApiService {
     }
   }
 
-  // static async fetchAuthorsWithPosts(limit: number = 10): Promise<AuthorWithPosts[]> {
-  //   try {
-  //     const authors = await this.fetchAllAuthors({ per_page: limit })
-
-  //     const authorsWithPosts = await Promise.all(
-  //       authors.map(async (author) => {
-  //         try {
-  //           const posts = await this.fetchPostsByAuthorId(author.id, { per_page: 3 })
-  //           return {
-  //             ...author,
-  //             recent_posts: posts,
-  //             total_posts: author.post_count || 0
-  //           }
-  //         } catch (error) {
-  //           console.error(`Error fetching posts for author ${author.name}:`, error)
-  //           return {
-  //             ...author,
-  //             recent_posts: [],
-  //             total_posts: author.post_count || 0
-  //           }
-  //         }
-  //       })
-  //     )
-
-  //     return authorsWithPosts
-  //   } catch (error) {
-  //     console.error('Error fetching authors with posts:', error)
-  //     return []
-  //   }
-  // }
-
-
 
 
 
@@ -1311,32 +1351,9 @@ export class ApiService {
   }
 
 
+  
 
 
-
-
-
-  // static async fetchAdvertisements(): Promise<Advertisement[]> {
-  //   const cacheKey = 'advertisements:all'
-  //   try {
-  //     return this.dedupedFetch(cacheKey, async () => {
-  //     const response = await this.fetchWithTimeout(
-  //       `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
-  //     )
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`)
-  //     }
-
-  //     const ads = await response.json()
-  //     return ads || []
-  //   }, 10 * 60 * 1000) // 10 minutes cache for ads
-  //   } catch (error) {
-      
-  //   }
-
-  //   return []
-  // }
 
 
   private static adsCache: Advertisement[] | null = null;
@@ -1403,119 +1420,22 @@ static async fetchAdvertisements(): Promise<Advertisement[]> {
   }
 }
 
-  static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
-    const cacheKey = `advertisements:${positions}`
-    try {
-      return this.dedupedFetch(cacheKey, async () => {
-        const ads = await this.fetchAdvertisements()
-        const result: Record<AdPositionKey, Advertisement[]> = {} as any
 
-        positions.forEach(position => {
-          result[position] = getAdsByPosition(ads, position)
-        })
-
-        return result
-      }, 10 * 60 * 1000)
-    } catch (error) {
-      console.error('Error fetching ads by positions:', error)
-      return {} as Record<AdPositionKey, Advertisement[]>
-    }
+static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
+  try {
+    const allAds = await this.fetchAdvertisements();
+    const result: Record<AdPositionKey, Advertisement[]> = {} as any;
+    
+    positions.forEach(position => {
+      result[position] = getAdsByPosition(allAds, position);
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching ads by positions:', error);
+    return {} as Record<AdPositionKey, Advertisement[]>;
   }
-
-
-
-
-
-// Add these properties to your class
-// private static adsCache: Advertisement[] | null = null;
-// private static adsCacheTimestamp: number = 0;
-// private static ADS_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-// private static adsFetchPromise: Promise<Advertisement[]> | null = null;
-
-// static async fetchAdvertisements(): Promise<Advertisement[]> {
-//   const now = Date.now();
-  
-//   // Return cached ads if not expired
-//   if (this.adsCache && (now - this.adsCacheTimestamp) < this.ADS_CACHE_TTL) {
-//     console.log('Returning cached ads');
-//     return this.adsCache;
-//   }
-  
-//   // If already fetching, return that promise
-//   if (this.adsFetchPromise) {
-//     console.log('Returning existing ads fetch promise');
-//     return this.adsFetchPromise;
-//   }
-  
-//   // Create new fetch promise
-//   this.adsFetchPromise = (async () => {
-//     try {
-//       const response = await this.fetchWithTimeout(
-//         `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_t=${now}`,
-//         {
-//           cache: 'no-store',
-//           headers: {
-//             'Cache-Control': 'no-cache',
-//             'Pragma': 'no-cache'
-//           }
-//         }
-//       )
-
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! status: ${response.status}`)
-//       }
-
-//       const ads = await response.json()
-//       const validAds = ads || []
-      
-//       // Update cache
-//       this.adsCache = validAds;
-//       this.adsCacheTimestamp = now;
-      
-//       console.log(`Fetched ${validAds.length} ads`);
-//       return validAds;
-//     } catch (error) {
-//       console.error('Error fetching advertisements:', error);
-//       // If we have stale cache, return it
-//       if (this.adsCache) {
-//         console.log('Using stale ads cache due to error');
-//         return this.adsCache;
-//       }
-//       throw error;
-//     } finally {
-//       // Clear the promise reference
-//       this.adsFetchPromise = null;
-//     }
-//   })();
-
-//   return this.adsFetchPromise;
-// }
-
-// static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
-//   try {
-//     const allAds = await this.fetchAdvertisements();
-//     return getAdsByPosition(allAds, position);
-//   } catch (error) {
-//     console.error('Error fetching ads by position:', error);
-//     return [];
-//   }
-// }
-
-// static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
-//   try {
-//     const allAds = await this.fetchAdvertisements();
-//     const result: Record<AdPositionKey, Advertisement[]> = {} as any;
-    
-//     positions.forEach(position => {
-//       result[position] = getAdsByPosition(allAds, position);
-//     });
-    
-//     return result;
-//   } catch (error) {
-//     console.error('Error fetching ads by positions:', error);
-//     return {} as Record<AdPositionKey, Advertisement[]>;
-//   }
-// }
+}
 
 
 

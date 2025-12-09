@@ -20,19 +20,19 @@ async function getAuthor(slug: string) {
     // console.log('apiUrl: ',apiUrl)
     try {
 
-        // const author = await ApiService.fetchAuthorBySlug(slug)
-        // return author
-        const response = await fetch(
-            apiUrl,
-            {
-                next: { revalidate: 60 },
-                // cache: 'no-store' // Force fresh data
-            }
-        )
+        const author = await ApiService.fetchAuthorBySlug(slug)
+        return author
+        // const response = await fetch(
+        //     apiUrl,
+        //     {
+        //         next: { revalidate: 60 },
+        //         // cache: 'no-store' // Force fresh data
+        //     }
+        // )
 
-        if (!response.ok) return null
-        const authors = await response.json()
-        return authors[0] || null
+        // if (!response.ok) return null
+        // const authors = await response.json()
+        // return authors[0] || null
 
     } catch (error) {
         console.error('❌ Fetch error:', error)
