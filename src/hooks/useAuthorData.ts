@@ -38,6 +38,34 @@ export function useAuthorData() {
     })
   }
 
+
+  // const useCategorySlugArticles = (slug?: string) => {
+  //   return useInfiniteQuery({
+  //     queryKey: queryKeys.articles.infiniteBySlug({ categorySlug: slug }),
+  //     queryFn: async ({ pageParam = 1 }) => {
+  //       if (!slug) throw new Error('Category slug is required')
+  //       const response = await ApiService.fetchPostsByCategorySlug(slug, {
+  //         page: pageParam,
+  //         per_page: 8,
+  //       })
+  //       if (!response) throw new Error(`No posts found for category: ${slug}`)
+  //       return response
+  //     },
+  //     initialPageParam: 1,
+  //     getNextPageParam: lastPage =>
+  //       lastPage.posts.pagination.hasNextPage ? lastPage.posts.pagination.currentPage + 1 : undefined,
+  //     enabled: !!slug,
+  //     retry: (failureCount, error) => {
+  //       if (
+  //         error.message.includes('No posts found') ||
+  //         error.message.includes('Category slug is required')
+  //       )
+  //         return false
+  //       return failureCount < 3
+  //     },
+  //   })
+  // }
+
   // Fetch posts by author slug with infinite loading
   const usePostsByAuthorSlug = (
     slug: string, 
@@ -58,14 +86,11 @@ export function useAuthorData() {
           
           const postsData = result?.data || []
           const perPage = params?.per_page || 10
-          
+          console.log()
           return {
             data: postsData,
             author: result?.author || null,
-            pagination: {
-              currentPage: pageParam,
-              hasNextPage: postsData.length === perPage
-            }
+            pagination: result.pagination
           }
         } catch (error) {
           console.error('Error in usePostsByAuthorSlug:', error)
@@ -86,10 +111,47 @@ export function useAuthorData() {
           : undefined
       },
       enabled: !!slug,
+
+      retry: (failureCount, error) => {
+        if (
+          error.message.includes('No posts found') ||
+          error.message.includes('Category slug is required')
+        )
+          return false
+        return failureCount < 3
+      },
     })
   }
 
   
+
+  const useCategorySlugArticles = (slug?: string) => {
+    return useInfiniteQuery({
+      queryKey: queryKeys.articles.infiniteBySlug({ categorySlug: slug }),
+      queryFn: async ({ pageParam = 1 }) => {
+        if (!slug) throw new Error('Category slug is required')
+        const response = await ApiService.fetchPostsByCategorySlug(slug, {
+          page: pageParam,
+          per_page: 8,
+        })
+        if (!response) throw new Error(`No posts found for category: ${slug}`)
+        return response
+      },
+      initialPageParam: 1,
+      getNextPageParam: lastPage =>
+        lastPage.posts.pagination.hasNextPage ? lastPage.posts.pagination.currentPage + 1 : undefined,
+      enabled: !!slug,
+      retry: (failureCount, error) => {
+        if (
+          error.message.includes('No posts found') ||
+          error.message.includes('Category slug is required')
+        )
+          return false
+        return failureCount < 3
+      },
+    })
+  }
+
 
   // Fetch authors with recent posts
   const useAuthorsWithPosts = (limit: number = 10) => {

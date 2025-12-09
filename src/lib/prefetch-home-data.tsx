@@ -29,7 +29,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       // ApiService.fetchCategories({ per_page: 100 }),
       
       // Featured articles
-      ApiService.fetchArticles({ tags: [31], per_page: 20 }),
+      ApiService.fetchArticles({ tags: [64], per_page: 20 }),
       // Popular articles
       ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
       
@@ -37,7 +37,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       // ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
       
       // highlight
-      ApiService.fetchArticles({ tags: [39], per_page: 15, orderby: 'date' }),
+      ApiService.fetchArticles({ tags: [63], per_page: 15, orderby: 'date' }),
       
       // Africa category articles (adjust category slug as needed)
       // ApiService.fetchArticles({ categories: [25], per_page: 11 }),

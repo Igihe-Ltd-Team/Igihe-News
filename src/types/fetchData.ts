@@ -223,21 +223,21 @@ export interface NewsItemWithSEO extends NewsItem {
 
 
 export interface Author {
-  id: number
-  name: string
-  url: string
-  description: string
-  link: string
-  slug: string
+  id?: number
+  name?: string
+  url?: string
+  description?: string
+  link?: string
+  slug?: string
   avatar_urls?: {
     '24': string
     '48': string
     '96': string
     '512'?: string // Make 512 optional since it might not exist
   }
-  meta: any[]
+  meta?: any[]
   acf?: any[],
-  _links: {
+  _links?: {
     self: Array<{ href: string }>
     collection: Array<{ href: string }>
   }

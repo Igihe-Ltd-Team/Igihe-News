@@ -81,7 +81,7 @@ const SocialShare = ({ postUrl }: { postUrl: string }) => {
                 src={`/assets/${platform.img}`}
                 alt={platform.name}
                 fill
-                height={24}
+                height={45}
               />
             </a>
           </li>

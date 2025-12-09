@@ -2,20 +2,27 @@
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 interface PageProps {
-  params: Promise<{ post: string }>
+  params: Promise<{ post: string,category:string }>
 }
 
 /* ------------------------ STRIP HTML ------------------------ */
 
-
+const endpoints: Record<string, string> = {
+  opinions: "opinion",
+  advertorials: "advertorial",
+  facts: "facts",
+};
 /* ------------------------ FETCH POST ------------------------ */
-async function getPostData(slug: string) {
+async function getPostData(slug: string,section:string) {
+  const endpoint = endpoints[section] ?? "posts";
+  const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/${endpoint}?slug=${slug}&_embed`;
+// console.log('apiUrl: ',apiUrl)
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/posts?slug=${slug}&_embed`,
+      apiUrl,
       { 
         next: { revalidate: 60 },
         // cache: 'no-store' // Force fresh data
@@ -35,7 +42,7 @@ async function getPostData(slug: string) {
 
 /* ------------------------ METADATA ------------------------ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { post: slug } = await params
+  const { post: slug,category } = await params
   
   // Capitalize slug for fallback title
   const fallbackTitle = slug
@@ -44,7 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .join(' ')
   
   try {
-    const postData = await getPostData(slug)
+    const postData = await getPostData(slug,category)
     
     // If no post data, return simple metadata
     if (!postData) {
@@ -141,6 +148,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 /* ------------------------ PAGE ------------------------ */
 export default async function SingleNewsPage({ params }: PageProps) {
-  const { post: slug } = await params
-  return <SingleNewsContent slug={slug} />
+  const { post: slug,category } = await params
+  // console.log('category',category)
+
+  const postData = await getPostData(slug,category)
+  return <SingleNewsContent slug={slug} initialArticle={postData}/>
 }

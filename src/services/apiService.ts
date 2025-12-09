@@ -6,8 +6,8 @@ import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, Cate
 const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
   baseURL: process.env.NODE_ENV === 'production' ? '/api/proxy' : process.env.NEXT_PUBLIC_WORDPRESS_API_URL,
-  timeout: 10000, // 10 seconds
-  retryAttempts: 2,
+  timeout: 20000, // 10 seconds
+  retryAttempts: 3,
   cacheTimeout: 5 * 60 * 1000, // 5 minutes
   maxCacheSize: 100,
 }
@@ -177,11 +177,49 @@ export class ApiService {
 
 
 
+  // private static async fetchWithTimeout(
+  //   url: string,
+  //   options: RequestInit = {},
+  //   timeout = API_CONFIG.timeout
+  // ) {
+  //   const controller = new AbortController();
+  //   const id = setTimeout(() => controller.abort(), timeout);
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       ...options,
+  //       signal: controller.signal,
+  //       headers: {
+  //         'Accept': 'application/json',
+  //         'Content-Type': 'application/json',
+  //         ...options.headers,
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     return response;
+  //   } catch (error) {
+  //     if (controller.signal.aborted) {
+  //       throw new Error("Request timed out");
+  //     }
+  //     throw error;
+  //   } finally {
+  //     clearTimeout(id); // ALWAYS clear
+  //   }
+  // }
+
   private static async fetchWithTimeout(
-    url: string,
-    options: RequestInit = {},
-    timeout = API_CONFIG.timeout
-  ) {
+  url: string,
+  options: RequestInit = {},
+  timeout = API_CONFIG.timeout
+) {
+  let lastError: Error | null = null;
+  const maxRetries = API_CONFIG.retryAttempts || 2;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
 
@@ -196,20 +234,70 @@ export class ApiService {
         },
       });
 
+      clearTimeout(id);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        const status = response.status;
+        
+        // Check if we should retry
+        const shouldRetry = 
+          attempt < maxRetries && (
+            status === 429 || // Too Many Requests - retry after backoff
+            status >= 500 ||  // Server errors - retry
+            status === 408 || // Request Timeout - retry
+            status === 0      // Network error - retry
+          );
+        
+        if (shouldRetry) {
+          lastError = error;
+          // Calculate exponential backoff: 1s, 2s, 4s
+          const backoffDelay = Math.pow(2, attempt) * 1000;
+          console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+            url,
+            status,
+            error: error.message
+          });
+          
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          continue; // Try again
+        }
+        
+        throw error; // Don't retry for client errors (4xx except 429)
       }
 
       return response;
-    } catch (error) {
-      if (controller.signal.aborted) {
-        throw new Error("Request timed out");
+    } catch (error: any) {
+      clearTimeout(id);
+      
+      const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
+      
+      if (attempt < maxRetries) {
+        lastError = error;
+        
+        // Calculate exponential backoff: 1s, 2s, 4s
+        const backoffDelay = Math.pow(2, attempt) * 1000;
+        console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+          url,
+          error: error.message,
+          isTimeout
+        });
+        
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        continue; // Try again
+      }
+      
+      // No more retries
+      if (isTimeout) {
+        throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
       }
       throw error;
-    } finally {
-      clearTimeout(id); // ALWAYS clear
     }
   }
+  
+  // This should never be reached, but just in case
+  throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
+}
 
   private static async cachedFetch<T>(
     cacheKey: string,
@@ -981,45 +1069,55 @@ export class ApiService {
       throw error
     }
   }
+private static authorFetchPromises = new Map<string, Promise<Author | null>>();
 
 
 
-  static async fetchPostsByAuthorSlug(
-    slug: string,
-    params?: {
-      per_page?: number
-      page?: number
-      orderby?: string
-      order?: 'asc' | 'desc'
-    }
-  ): Promise<{ data: NewsItem[]; author: Author | null }> {
-    try {
-      // First get the author by slug
-      const author = await this.fetchAuthorBySlug(slug)
-
-      if (!author) {
-        console.warn(`Author with slug "${slug}" not found`)
-        return { data: [], author: null }
-      }
-
-      // Then fetch posts for this author
-      const postsResponse = await this.fetchArticles({
-        author: author.id
-      })
-
-      // Ensure we always return a valid data structure
-      return {
-        data: postsResponse?.data || [],
-        author
-      }
-    } catch (error) {
-      console.error('Error fetching posts by author slug:', error)
-      // Return empty data structure instead of throwing
-      return { data: [], author: null }
-    }
+static async fetchPostsByAuthorSlug(
+  slug: string,
+  params?: {
+    per_page?: number
+    page?: number
   }
+): Promise<{ data: NewsItem[]; author: Author | null; pagination?: any }> {
+  try {
+    // Use promise deduplication to prevent race conditions
+    let authorPromise = this.authorFetchPromises.get(slug);
+    
+    if (!authorPromise) {
+      authorPromise = this.fetchAuthorBySlug(slug).finally(() => {
+        // Clean up after completion
+        this.authorFetchPromises.delete(slug);
+      });
+      this.authorFetchPromises.set(slug, authorPromise);
+    }
+    
+    const author = await authorPromise;
+    
+    if (!author) {
+      console.warn(`Author with slug "${slug}" not found`);
+      return { data: [], author: null, pagination: null };
+    }
 
+    // Also deduplicate article fetches
+    const cacheKey = `author-posts:${slug}:${JSON.stringify(params || {})}`;
+    const postsResponse = await this.cachedFetch(cacheKey, async () => {
+      return await this.fetchArticles({
+        author: author.id,
+        ...params
+      });
+    }, 60 * 1000); // 1 minute cache for author posts
 
+    return {
+      data: postsResponse?.data || [],
+      author,
+      pagination: postsResponse?.pagination
+    };
+  } catch (error) {
+    console.error('Error fetching posts by author slug:', error);
+    return { data: [], author: null, pagination: null };
+  }
+}
 
   static async fetchPostsByAuthorId(
     authorId: number,

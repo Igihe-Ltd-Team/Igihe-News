@@ -86,7 +86,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
         // Highlight tag articles
         if (initialData.highlightTagArticles?.length > 0) {
           queryClient.setQueryData(
-            queryKeys.articles.highlightTagArticles(39),
+            queryKeys.articles.highlightTagArticles(63),
             { data: initialData.highlightTagArticles, pagination: {} }
           )
         }

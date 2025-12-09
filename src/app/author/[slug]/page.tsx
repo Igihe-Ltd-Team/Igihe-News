@@ -13,11 +13,42 @@ export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600
 
+
+async function getAuthor(slug:string) {
+
+  const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/users?slug=${slug}&_embed`;
+// console.log('apiUrl: ',apiUrl)
+  try {
+
+    const author = await ApiService.fetchAuthorBySlug(slug)
+    return author
+    // const response = await fetch(
+    //   apiUrl,
+    //   { 
+    //     next: { revalidate: 60 },
+    //     // cache: 'no-store' // Force fresh data
+    //   }
+    // )
+    
+    // if (!response.ok) return null
+    // const authors = await response.json()
+    //   return authors[0] || null
+    // const posts = await response.json()
+    // return posts && posts.length > 0 ? posts[0] : null
+    
+  } catch (error) {
+    console.error('❌ Fetch error:', error)
+    return null
+  }
+}
+
+
 export async function generateMetadata({ params }: AuthorPageProps): Promise<Metadata> {
     const { slug } = await params
 
     try {
-        const author = await ApiService.fetchAuthorBySlug(slug)
+        // const author = await ApiService.fetchAuthorBySlug(slug)
+        const author = await getAuthor(slug)
 
         if (!author) {
             return {

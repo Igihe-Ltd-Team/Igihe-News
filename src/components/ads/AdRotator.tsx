@@ -54,7 +54,7 @@ export default function AdRotator({
       {ads.length > 1 && (
         <div className="slot-rotator-indicator text-center mt-1">
           <small className="text-muted">
-            Ad {currentAdIndex + 1} of {ads.length}
+            Slot {currentAdIndex + 1} of {ads.length}
           </small>
         </div>
       )}

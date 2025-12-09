@@ -18,9 +18,10 @@ export default function AuthorBio({ author }: AuthorBioProps) {
                                     <OptimizedImage
                                         src={author.avatar_urls['96']}
                                         alt={author.name}
-                                        width={120}
-                                        height={120}
+                                        width={100}
+                                        height={150}
                                         className="rounded-circle img-thumbnail"
+                                        imgClass='object-fit-cover'
                                     />
                                 )}
                             </div>

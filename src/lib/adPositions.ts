@@ -28,6 +28,12 @@ export const AD_POSITIONS = {
     dimensions: { width: 728, height: 250 },
     priority: 2
   },
+  'beside-igihe-logo': {
+    name: 'Beside Igihe Logo',
+    description: 'Beside Igihe Logo',
+    dimensions: { width: 728, height: 90 },
+    priority: 2
+  },
   
   'home-bellow-hights': {
     name: 'Home bellow Highlights',

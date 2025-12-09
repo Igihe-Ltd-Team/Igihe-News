@@ -29,7 +29,6 @@ export default function AdUnit({
   const positionConfig = AD_POSITIONS[position]
   const adImage = ad.acf?.ads_image_source?.formatted_value
 
-  
 
   // Get the best image size based on position
   const getBestImageUrl = () => {
@@ -92,7 +91,7 @@ export default function AdUnit({
           alt={ad.title.rendered}
           width={positionConfig.dimensions.width}
           height={positionConfig.dimensions.height}
-          className="img-fluid rounded"
+          className="img-fluid"
           priority={priority}
           imgClass={`object-fit-contain ${imgClass}`}
         />

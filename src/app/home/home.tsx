@@ -15,44 +15,44 @@ import { Col, Container, Row } from 'react-bootstrap'
 
 const upperCats = [
   {
-    id: 84,
+    id: 87,
     name: 'Business',
     slug: 'business'
   },
   {
-    id: 66,
-    name: 'Technology',
-    slug: 'science-technology'
+    id: 157,
+    name: 'Science',
+    slug: 'science-news'
   },
   {
-    id: 4,
+    id: 116,
     name: 'Health',
     slug: 'health'
   },
   {
-    id: 8,
+    id: 115,
     name: 'Tourism',
     slug: 'tourism'
   }]
 
 const lowerCats = [
   {
-    id: 5,
+    id: 103,
     name: 'Sports',
     slug: 'sports'
   },
   {
-    id: 67,
+    id: 126,
     name: 'Arts & Culture',
     slug: 'arts-culture'
   },
   {
-    id: 12,
+    id: 124,
     name: 'Environment',
     slug: 'environment'
   },
   {
-    id: 69,
+    id: 155,
     name: 'Diaspora',
     slug: 'diaspora'
   }]

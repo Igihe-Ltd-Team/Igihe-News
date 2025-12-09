@@ -131,7 +131,7 @@ export default function Header() {
                         !isMobile &&
                         <Col md={7}>
                             <AdManager
-                                position="header-landscape-ad-2"
+                                position="beside-igihe-logo"
                                 priority={true}
                                 className="mb-2"
                                 imgClass="object-position-right"

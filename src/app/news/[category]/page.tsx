@@ -37,7 +37,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   } = useCategorySlugArticles(category);
 
   const { data: highlightArticles = [], isLoading: highLightLoading } =
-    useCategoryTagArticles(39, thisCategory?.id);
+    useCategoryTagArticles(63, thisCategory?.id);
   // console.log('featured',data?.pages?.[0]?.category?.id)
 
   const posts = data?.pages.flatMap((page) => page.posts.data) || [];
