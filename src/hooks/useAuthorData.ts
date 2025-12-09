@@ -154,13 +154,13 @@ export function useAuthorData() {
 
 
   // Fetch authors with recent posts
-  const useAuthorsWithPosts = (limit: number = 10) => {
-    return useQuery({
-      queryKey: queryKeys.authors.withPosts(limit),
-      queryFn: () => ApiService.fetchAuthorsWithPosts(limit),
-      staleTime: 5 * 60 * 1000,
-    })
-  }
+  // const useAuthorsWithPosts = (limit: number = 10) => {
+  //   return useQuery({
+  //     queryKey: queryKeys.authors.withPosts(limit),
+  //     queryFn: () => ApiService.fetchAuthorsWithPosts(limit),
+  //     staleTime: 5 * 60 * 1000,
+  //   })
+  // }
 
   // const useAuthorWithPosts = (limit: number = 10,slug) => {
   //   return useQuery({
@@ -187,7 +187,7 @@ export function useAuthorData() {
     useAuthorById,
     useAllAuthors,
     usePostsByAuthorSlug,
-    useAuthorsWithPosts,
+    // useAuthorsWithPosts,
     useAuthorWithPosts
   }
 }

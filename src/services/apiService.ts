@@ -1172,36 +1172,36 @@ static async fetchPostsByAuthorSlug(
     }
   }
 
-  static async fetchAuthorsWithPosts(limit: number = 10): Promise<AuthorWithPosts[]> {
-    try {
-      const authors = await this.fetchAllAuthors({ per_page: limit })
+  // static async fetchAuthorsWithPosts(limit: number = 10): Promise<AuthorWithPosts[]> {
+  //   try {
+  //     const authors = await this.fetchAllAuthors({ per_page: limit })
 
-      const authorsWithPosts = await Promise.all(
-        authors.map(async (author) => {
-          try {
-            const posts = await this.fetchPostsByAuthorId(author.id, { per_page: 3 })
-            return {
-              ...author,
-              recent_posts: posts,
-              total_posts: author.post_count || 0
-            }
-          } catch (error) {
-            console.error(`Error fetching posts for author ${author.name}:`, error)
-            return {
-              ...author,
-              recent_posts: [],
-              total_posts: author.post_count || 0
-            }
-          }
-        })
-      )
+  //     const authorsWithPosts = await Promise.all(
+  //       authors.map(async (author) => {
+  //         try {
+  //           const posts = await this.fetchPostsByAuthorId(author.id, { per_page: 3 })
+  //           return {
+  //             ...author,
+  //             recent_posts: posts,
+  //             total_posts: author.post_count || 0
+  //           }
+  //         } catch (error) {
+  //           console.error(`Error fetching posts for author ${author.name}:`, error)
+  //           return {
+  //             ...author,
+  //             recent_posts: [],
+  //             total_posts: author.post_count || 0
+  //           }
+  //         }
+  //       })
+  //     )
 
-      return authorsWithPosts
-    } catch (error) {
-      console.error('Error fetching authors with posts:', error)
-      return []
-    }
-  }
+  //     return authorsWithPosts
+  //   } catch (error) {
+  //     console.error('Error fetching authors with posts:', error)
+  //     return []
+  //   }
+  // }
 
 
 
