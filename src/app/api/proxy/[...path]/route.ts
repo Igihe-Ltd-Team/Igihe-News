@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://new.igihe.com/wp-json/wp/v2'
+const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://new.igihe.com/amirv2/wp-json/wp/v2'
 
 // Enhanced cache with LRU eviction
 class LRUCache {
@@ -45,7 +45,12 @@ class LRUCache {
 interface CacheEntry {
   data: any
   expiry: number
-  etag?: string
+  etag?: string,
+  _headers?:{
+    wpTotal?:number | string | null
+    wpTotalPages?:number | string | null
+    link?:string | null
+  }
 }
 
 const cache = new LRUCache(200) // Store up to 200 cached responses
@@ -73,12 +78,6 @@ function getCacheTTL(path: string[]): number {
   if (pathStr.includes('popular')) return CACHE_TTL.popular
   
   return CACHE_TTL.default
-}
-
-// Compression helper
-function shouldCompress(data: any): boolean {
-  const dataStr = JSON.stringify(data)
-  return dataStr.length > 1024 // Compress if larger than 1KB
 }
 
 // Mock data for development
@@ -143,6 +142,7 @@ export async function GET(
   const startTime = Date.now()
   
   try {
+    // AWAIT the params FIRST
     const { path } = await context.params
     const searchParams = request.nextUrl.searchParams
     
@@ -159,14 +159,31 @@ export async function GET(
     if (cached && Date.now() < cached.expiry) {
       const responseTime = Date.now() - startTime
       
-      return NextResponse.json(cached.data, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-          'X-Cache': 'HIT',
-          'X-Response-Time': `${responseTime}ms`,
-          'X-Proxy': 'NextJS-WordPress-Proxy',
-          ...(cached.etag && { 'ETag': cached.etag }),
-        },
+      // Build headers for cached response
+      const headers = new Headers()
+      headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+      headers.set('X-Cache', 'HIT')
+      headers.set('X-Response-Time', `${responseTime}ms`)
+      headers.set('X-Proxy', 'NextJS-WordPress-Proxy')
+      headers.set('Vary', 'Accept-Encoding')
+      
+      // Add WordPress headers from cache
+      if (cached._headers?.wpTotal) {
+        headers.set('X-WP-Total', cached._headers.wpTotal.toString())
+      }
+      if (cached._headers?.wpTotalPages) {
+        headers.set('X-WP-TotalPages', cached._headers.wpTotalPages.toString())
+      }
+      if (cached._headers?.link) {
+        headers.set('Link', cached._headers.link)
+      }
+      if (cached.etag) {
+        headers.set('ETag', cached.etag)
+      }
+      
+      return new NextResponse(JSON.stringify(cached.data), {
+        status: 200,
+        headers: headers
       })
     }
 
@@ -192,21 +209,36 @@ export async function GET(
       if (mockResponse !== undefined) {
         cache.set(cacheKey, {
           data: mockResponse,
-          expiry: Date.now() + 60000
+          expiry: Date.now() + 60000,
+          _headers: {
+            wpTotal: (mockResponse as any).pagination?.totalItems || '0',
+            wpTotalPages: (mockResponse as any).pagination?.totalPages || '0'
+          }
         })
         
-        return NextResponse.json(mockResponse, {
-          headers: {
-            'Cache-Control': 'public, s-maxage=60',
-            'X-Cache': 'MOCK',
-            'X-Response-Time': `${Date.now() - startTime}ms`,
-          },
+        const headers = new Headers()
+        headers.set('Cache-Control', 'public, s-maxage=60')
+        headers.set('X-Cache', 'MOCK')
+        headers.set('X-Response-Time', `${Date.now() - startTime}ms`)
+        headers.set('X-WP-Total', (mockResponse as any).pagination?.totalItems || '0')
+        headers.set('X-WP-TotalPages', (mockResponse as any).pagination?.totalPages || '0')
+        
+        return new NextResponse(JSON.stringify(mockResponse), {
+          status: 200,
+          headers: headers
         })
       }
     }
 
-    // Build WordPress API URL
-    const wordpressUrl = `${WORDPRESS_API_URL}/${path.join('/')}${sortedParams ? `?${sortedParams}` : ''}`
+    // Build WordPress API URL - FIXED: Check if it's the full URL or needs /wp/v2
+    let wordpressUrl: string
+    if (WORDPRESS_API_URL.includes('/wp/v2')) {
+      // Already has /wp/v2 in the URL
+      wordpressUrl = `${WORDPRESS_API_URL}/${path.join('/')}${sortedParams ? `?${sortedParams}` : ''}`
+    } else {
+      // Add /wp/v2 if not present
+      wordpressUrl = `${WORDPRESS_API_URL}/wp/v2/${path.join('/')}${sortedParams ? `?${sortedParams}` : ''}`
+    }
     
     // Fetch with timeout and optimized headers
     const controller = new AbortController()
@@ -216,10 +248,10 @@ export async function GET(
       headers: {
         'User-Agent': 'Igihe-NextJS-Proxy/2.0',
         'Accept': 'application/json',
-        'Accept-Encoding': 'gzip, deflate, br',
       },
       signal: controller.signal,
-      next: { revalidate: 300 } // Next.js fetch cache for 5 minutes
+      // Remove next.revalidate for build compatibility
+      cache: 'no-store' // Use this instead for build time
     })
     
     clearTimeout(timeoutId)
@@ -230,11 +262,13 @@ export async function GET(
         const pathKey = path.join('/')
         const mockResponse = mockData[pathKey as keyof typeof mockData]
         if (mockResponse !== undefined) {
-          return NextResponse.json(mockResponse, {
-            headers: {
-              'X-Cache': 'MOCK-FALLBACK',
-              'X-Response-Time': `${Date.now() - startTime}ms`,
-            },
+          const headers = new Headers()
+          headers.set('X-Cache', 'MOCK-FALLBACK')
+          headers.set('X-Response-Time', `${Date.now() - startTime}ms`)
+          
+          return new NextResponse(JSON.stringify(mockResponse), {
+            status: 200,
+            headers: headers
           })
         }
       }
@@ -247,6 +281,9 @@ export async function GET(
 
     const data = await response.json()
     const etag = response.headers.get('etag') || undefined
+    const wpTotal = response.headers.get('X-WP-Total')
+    const wpTotalPages = response.headers.get('X-WP-TotalPages')
+    const linkHeader = response.headers.get('Link')
     
     // Determine cache TTL
     const cacheTtl = getCacheTTL(path)
@@ -255,37 +292,53 @@ export async function GET(
     cache.set(cacheKey, {
       data,
       expiry: Date.now() + cacheTtl,
-      etag
+      etag, 
+      _headers: {
+        wpTotal,
+        wpTotalPages,
+        link: linkHeader
+      }
     })
 
     const responseTime = Date.now() - startTime
     const cacheControlValue = `public, s-maxage=${Math.floor(cacheTtl / 1000)}, stale-while-revalidate=${Math.floor(cacheTtl / 500)}`
 
-    return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': cacheControlValue,
-        'X-Cache': 'MISS',
-        'X-Response-Time': `${responseTime}ms`,
-        'X-Proxy': 'NextJS-WordPress-Proxy',
-        ...(etag && { 'ETag': etag }),
-        'Vary': 'Accept-Encoding',
-      },
+    // Build response headers
+    const headers = new Headers()
+    headers.set('Cache-Control', cacheControlValue)
+    headers.set('X-Cache', 'MISS')
+    headers.set('X-Response-Time', `${responseTime}ms`)
+    headers.set('X-Proxy', 'NextJS-WordPress-Proxy')
+    headers.set('Vary', 'Accept-Encoding')
+    
+    if (wpTotal) headers.set('X-WP-Total', wpTotal)
+    if (wpTotalPages) headers.set('X-WP-TotalPages', wpTotalPages)
+    if (linkHeader) headers.set('Link', linkHeader)
+    if (etag) headers.set('ETag', etag)
+
+    return new NextResponse(JSON.stringify(data), {
+      status: 200,
+      headers: headers
     })
-  } catch (error) {
+
+  } catch (error: any) {
     const isTimeout = error instanceof Error && error.name === 'AbortError'
     
-    // Fallback to mock data on error
+    // Fallback to mock data on error - WITHOUT accessing context.params again
     if (process.env.NODE_ENV === 'development') {
-      const { path } = await context.params
-      const pathKey = path.join('/')
+      // Try to get the path from the request URL instead
+      const requestPath = request.nextUrl.pathname.replace('/api/proxy/', '')
+      const pathKey = requestPath
       const mockResponse = mockData[pathKey as keyof typeof mockData]
       
       if (mockResponse !== undefined) {
-        return NextResponse.json(mockResponse, {
-          headers: {
-            'X-Cache': 'MOCK-ERROR',
-            'X-Error': isTimeout ? 'timeout' : 'unknown',
-          },
+        const headers = new Headers()
+        headers.set('X-Cache', 'MOCK-ERROR')
+        headers.set('X-Error', isTimeout ? 'timeout' : 'unknown')
+        
+        return new NextResponse(JSON.stringify(mockResponse), {
+          status: 200,
+          headers: headers
         })
       }
     }
@@ -295,32 +348,11 @@ export async function GET(
     return NextResponse.json(
       { 
         error: isTimeout ? 'Request timeout' : 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error?.message || 'Unknown error'
       },
       { status: isTimeout ? 504 : 500 }
     )
   }
 }
 
-// Optional: Add a cache warming endpoint for critical routes
-export async function POST(request: NextRequest) {
-  try {
-    const { warmUrls } = await request.json()
-    
-    if (!Array.isArray(warmUrls)) {
-      return NextResponse.json({ error: 'warmUrls must be an array' }, { status: 400 })
-    }
-    
-    // Warm cache for specified URLs
-    const results = await Promise.allSettled(
-      warmUrls.map(url => fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/proxy/${url}`))
-    )
-    
-    return NextResponse.json({
-      warmed: results.filter(r => r.status === 'fulfilled').length,
-      failed: results.filter(r => r.status === 'rejected').length
-    })
-  } catch (error) {
-    return NextResponse.json({ error: 'Cache warming failed' }, { status: 500 })
-  }
-}
+export const dynamic = 'force-dynamic' // Ensure dynamic rendering
