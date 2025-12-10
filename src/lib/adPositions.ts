@@ -19,32 +19,32 @@ export const AD_POSITIONS = {
   'home-featured': {
     name: 'Home Featured',
     description: 'Featured section on homepage',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 300, height: 300 },
     priority: 1
   },
   'after-announcements': {
     name: 'after announcements',
     description: 'after-announcements',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 300, height: 300 },
     priority: 1
   },
   'after-opinions': {
     name: 'after-opinions',
     description: 'after-opinions',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 300, height: 300 },
     priority: 1
   },
 'after-facts': {
     name: 'after announcements',
     description: 'after-announcements',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 300, height: 300 },
     priority: 1
   },
   
   'home-after-highlights': {
     name: 'Home After Highlights',
     description: 'After highlights section',
-    dimensions: { width: 728, height: 250 },
+    dimensions: { width: 728, height: 300 },
     priority: 2
   },
   'beside-igihe-logo': {
@@ -78,7 +78,7 @@ export const AD_POSITIONS = {
   'home-section-1': {
     name: 'Home Section 1',
     description: 'First content section',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 300, height: 300 },
     priority: 3
   },
   
@@ -86,7 +86,7 @@ export const AD_POSITIONS = {
   'no-positioned': {
     name: 'No Position',
     description: 'Ads without specific position',
-    dimensions: { width: 300, height: 250 },
+    dimensions: { width: 300, height: 300 },
     priority: 99
   }
 } as const

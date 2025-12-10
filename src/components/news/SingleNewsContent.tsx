@@ -34,13 +34,13 @@ interface SingleNewsContentProps {
     initialArticle?: NewsItem
 }
 
-export default function SingleNewsContent({ slug,initialArticle }: SingleNewsContentProps) {
+export default function SingleNewsContent({ slug, initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
 
 
     const { useArticleDetails } = useNewsData()
     const {
-        article:post,
+        article: post,
         relatedPosts,
         articleLoading,
         refetchArticle,
@@ -203,7 +203,7 @@ export default function SingleNewsContent({ slug,initialArticle }: SingleNewsCon
                     </Col>
                     <Col md="4" className='sticky-sidebar'>
                         <AdManager
-                            position="home-section-1"
+                            position="home-after-highlights"
                             priority={true}
                             className="mb-2"
                         />

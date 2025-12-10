@@ -165,7 +165,7 @@ function DynamicArticleCard({
             onMouseEnter={() => mouseEnter(article)}
           >
             <div className='d-flex'>
-              <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle} className={isSlider ? 'line-clamp-2':''}>
+              <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle} className={isSlider ? 'line-clamp-2':'line-clamp-3'}>
                 {stripHtml(article.title.rendered)}
               </ThemedText>
               {

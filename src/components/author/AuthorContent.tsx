@@ -125,7 +125,7 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
 
                 <Col lg={4}>
                     <AdManager
-                        position="home-section-1"
+                        position="home-after-highlights"
                         priority={true}
                         className="mb-2"
                     />
