@@ -10,6 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 
+ecosystem.config.js
 
 server.js
 app.js
