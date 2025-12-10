@@ -38,7 +38,7 @@ export default function Opinios() {
     <div className='mb-4 mt-2'>
       <HeaderDivider title="Opinions" />
       <div className='g-2'>
-        {
+        { 
             opinions?.map(opinion => <OpionCard key={opinion.id} article={opinion}/>)
         }
         </div>
