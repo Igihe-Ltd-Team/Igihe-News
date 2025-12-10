@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { HTMLAttributes } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 
 export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   lightColor?: string;
@@ -45,10 +46,13 @@ export function ThemedText({
     color: theme === "dark" ? darkColor : lightColor
   };
 
+
+const clean = DOMPurify.sanitize(rest.children as string);
+
   return (
     <span className={combinedClassName}
       style={customStyles}
-      dangerouslySetInnerHTML={{ __html: rest.children as string || '' }}
+      dangerouslySetInnerHTML={{ __html: clean || '' }}
     />
   );
 }

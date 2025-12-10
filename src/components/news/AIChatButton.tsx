@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useGemini } from '@/hooks/useGemini'
 import { NewsItem } from '@/types/fetchData'
+import DOMPurify from 'isomorphic-dompurify';
 
 interface Message {
   id: string
@@ -99,7 +100,7 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
     setInput(cmd)
     setTimeout(sendMessage, 100)
   }
-
+  
   return (
     <>
       {/* Floating Button */}
@@ -205,7 +206,7 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
                                 overflow: 'hidden',
                                 width: '100%'
                             }}
-                            dangerouslySetInnerHTML={{ __html: msg.text || '' }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.text || '') }}
                         />
                     //   <small className="d-block whitespace-pre-wrap">{msg.text}</small>
                     )}

@@ -80,12 +80,6 @@ function getCacheTTL(path: string[]): number {
   return CACHE_TTL.default
 }
 
-// Compression helper
-function shouldCompress(data: any): boolean {
-  const dataStr = JSON.stringify(data)
-  return dataStr.length > 1024 // Compress if larger than 1KB
-}
-
 // Mock data for development
 const mockData = {
   'posts': {
@@ -148,6 +142,7 @@ export async function GET(
   const startTime = Date.now()
   
   try {
+    // AWAIT the params FIRST
     const { path } = await context.params
     const searchParams = request.nextUrl.searchParams
     
@@ -235,8 +230,15 @@ export async function GET(
       }
     }
 
-    // Build WordPress API URL
-    const wordpressUrl = `${WORDPRESS_API_URL}/${path.join('/')}${sortedParams ? `?${sortedParams}` : ''}`
+    // Build WordPress API URL - FIXED: Check if it's the full URL or needs /wp/v2
+    let wordpressUrl: string
+    if (WORDPRESS_API_URL.includes('/wp/v2')) {
+      // Already has /wp/v2 in the URL
+      wordpressUrl = `${WORDPRESS_API_URL}/${path.join('/')}${sortedParams ? `?${sortedParams}` : ''}`
+    } else {
+      // Add /wp/v2 if not present
+      wordpressUrl = `${WORDPRESS_API_URL}/wp/v2/${path.join('/')}${sortedParams ? `?${sortedParams}` : ''}`
+    }
     
     // Fetch with timeout and optimized headers
     const controller = new AbortController()
@@ -246,10 +248,10 @@ export async function GET(
       headers: {
         'User-Agent': 'Igihe-NextJS-Proxy/2.0',
         'Accept': 'application/json',
-        'Accept-Encoding': 'gzip, deflate, br',
       },
       signal: controller.signal,
-      next: { revalidate: 300 } // Next.js fetch cache for 5 minutes
+      // Remove next.revalidate for build compatibility
+      cache: 'no-store' // Use this instead for build time
     })
     
     clearTimeout(timeoutId)
@@ -319,13 +321,14 @@ export async function GET(
       headers: headers
     })
 
-  } catch (error) {
+  } catch (error: any) {
     const isTimeout = error instanceof Error && error.name === 'AbortError'
     
-    // Fallback to mock data on error
+    // Fallback to mock data on error - WITHOUT accessing context.params again
     if (process.env.NODE_ENV === 'development') {
-      const { path } = await context.params
-      const pathKey = path.join('/')
+      // Try to get the path from the request URL instead
+      const requestPath = request.nextUrl.pathname.replace('/api/proxy/', '')
+      const pathKey = requestPath
       const mockResponse = mockData[pathKey as keyof typeof mockData]
       
       if (mockResponse !== undefined) {
@@ -345,32 +348,11 @@ export async function GET(
     return NextResponse.json(
       { 
         error: isTimeout ? 'Request timeout' : 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error?.message || 'Unknown error'
       },
       { status: isTimeout ? 504 : 500 }
     )
   }
 }
 
-// Optional: Add a cache warming endpoint for critical routes
-export async function POST(request: NextRequest) {
-  try {
-    const { warmUrls } = await request.json()
-    
-    if (!Array.isArray(warmUrls)) {
-      return NextResponse.json({ error: 'warmUrls must be an array' }, { status: 400 })
-    }
-    
-    // Warm cache for specified URLs
-    const results = await Promise.allSettled(
-      warmUrls.map(url => fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/proxy/${url}`))
-    )
-    
-    return NextResponse.json({
-      warmed: results.filter(r => r.status === 'fulfilled').length,
-      failed: results.filter(r => r.status === 'rejected').length
-    })
-  } catch (error) {
-    return NextResponse.json({ error: 'Cache warming failed' }, { status: 500 })
-  }
-}
+export const dynamic = 'force-dynamic' // Ensure dynamic rendering

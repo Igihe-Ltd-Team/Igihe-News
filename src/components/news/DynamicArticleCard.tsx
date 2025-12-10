@@ -78,7 +78,7 @@ function DynamicArticleCard({
           }
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
           // prefetch={true}
-          onMouseEnter={() => mouseEnter(article)}
+          // onMouseEnter={() => mouseEnter(article)}
         >
           <OptimizedImage
             src={featuredImage || '/assets/igiheIcon.png'}
@@ -162,7 +162,7 @@ function DynamicArticleCard({
             href={`/news/${getCategorySlug(article)}/${article.slug}`}
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
-            onMouseEnter={() => mouseEnter(article)}
+            // onMouseEnter={() => mouseEnter(article)}
           >
             <div className='d-flex'>
               <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle} className={isSlider ? 'line-clamp-2':'line-clamp-3'}>
