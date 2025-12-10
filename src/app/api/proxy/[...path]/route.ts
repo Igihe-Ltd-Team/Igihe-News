@@ -45,7 +45,12 @@ class LRUCache {
 interface CacheEntry {
   data: any
   expiry: number
-  etag?: string
+  etag?: string,
+  _headers?:{
+    wpTotal?:number | string | null
+    wpTotalPages?:number | string | null
+    link?:string | null
+  }
 }
 
 const cache = new LRUCache(200) // Store up to 200 cached responses
@@ -249,7 +254,9 @@ export async function GET(
 
     const data = await response.json()
     const etag = response.headers.get('etag') || undefined
-    
+    const wpTotal = response.headers.get('X-WP-Total')
+    const wpTotalPages = response.headers.get('X-WP-TotalPages')
+    const linkHeader = response.headers.get('Link')
     // Determine cache TTL
     const cacheTtl = getCacheTTL(path)
     
@@ -257,22 +264,35 @@ export async function GET(
     cache.set(cacheKey, {
       data,
       expiry: Date.now() + cacheTtl,
-      etag
+      etag, 
+      _headers: {
+          wpTotal,
+          wpTotalPages,
+          link: linkHeader
+        }
     })
 
     const responseTime = Date.now() - startTime
     const cacheControlValue = `public, s-maxage=${Math.floor(cacheTtl / 1000)}, stale-while-revalidate=${Math.floor(cacheTtl / 500)}`
 
-    return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': cacheControlValue,
-        'X-Cache': 'MISS',
-        'X-Response-Time': `${responseTime}ms`,
-        'X-Proxy': 'NextJS-WordPress-Proxy',
-        ...(etag && { 'ETag': etag }),
-        'Vary': 'Accept-Encoding',
-      },
+
+    const responseHeaders = new Headers({
+      'Cache-Control': cacheControlValue,
+      'X-Cache': 'MISS',
+      'X-Response-Time': `${responseTime}ms`,
+      'X-Proxy': 'NextJS-WordPress-Proxy',
+      'Vary': 'Accept-Encoding',
     })
+    if (wpTotal) responseHeaders.set('X-WP-Total', wpTotal)
+    if (wpTotalPages) responseHeaders.set('X-WP-TotalPages', wpTotalPages)
+    if (linkHeader) responseHeaders.set('Link', linkHeader)
+    if (etag) responseHeaders.set('ETag', etag)
+
+    return NextResponse.json(data, {
+      headers: responseHeaders,
+    })
+
+
   } catch (error) {
     const isTimeout = error instanceof Error && error.name === 'AbortError'
     

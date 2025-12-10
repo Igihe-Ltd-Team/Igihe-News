@@ -432,9 +432,9 @@ private static async fetchWithTimeout(
     const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1')
     const totalItems = parseInt(response.headers.get('X-WP-Total') || '0')
 
-    console.log('X-WP-TotalPages',totalPages)
-    console.log('X-WP-Total',totalItems)
-    console.log('headers',response.headers)
+    // console.log('X-WP-TotalPages',totalPages)
+    // console.log('X-WP-Total',totalItems)
+    // console.log('headers',response.headers)
 
     const currentPage = params.page || 1
     const perPage = params.per_page || 10
