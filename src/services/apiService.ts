@@ -431,6 +431,11 @@ private static async fetchWithTimeout(
   ): articleResponse<T> {
     const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1')
     const totalItems = parseInt(response.headers.get('X-WP-Total') || '0')
+
+    console.log('X-WP-TotalPages',totalPages)
+    console.log('X-WP-Total',totalItems)
+    console.log('headers',response.headers)
+
     const currentPage = params.page || 1
     const perPage = params.per_page || 10
 
@@ -789,9 +794,8 @@ private static async fetchWithTimeout(
     return this.cachedFetch(cacheKey, async () => {
       const queryString = this.buildQuery(queryParams)
       const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/igh-yt-videos?${queryString}`
+        `${API_CONFIG.baseURL}/igh-yt-videos?${queryString}&_embed`
       )
-
       return await response.json()
     }, 5 * 60 * 1000) // 5 minutes cache for videos
   }
@@ -815,9 +819,7 @@ private static async fetchWithTimeout(
 
     return this.cachedFetch(cacheKey, async () => {
       const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/igh-yt-videos/${id}?_embed=1&_fields=${[
-          'id', 'date', 'slug', 'title', 'acf', 'featured_media', '_embedded'
-        ].join(',')}`
+        `${API_CONFIG.baseURL}/igh-yt-videos/${id}?_embed=1`
       )
 
       return await response.json()

@@ -194,12 +194,14 @@ export async function GET(
           data: mockResponse,
           expiry: Date.now() + 60000
         })
-        
+        const cached = cache.get(cacheKey)
         return NextResponse.json(mockResponse, {
           headers: {
             'Cache-Control': 'public, s-maxage=60',
             'X-Cache': 'MOCK',
             'X-Response-Time': `${Date.now() - startTime}ms`,
+            'X-WP-Total': cached?.data.headers?.total || cached?.data.total || '0',
+            'X-WP-TotalPages': cached?.data.headers?.totalPages || cached?.data.totalPages || '0',
           },
         })
       }

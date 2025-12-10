@@ -187,7 +187,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                                         </small>
                                     </div>
                                 }
-                                <ThemedText darkColor='#fff' lightColor='#282F2F'>
+                                <ThemedText type='small' darkColor='#fff' lightColor='#282F2F'>
                                     {stripHtml(item.title.rendered)}
                                 </ThemedText>
                             </div>
