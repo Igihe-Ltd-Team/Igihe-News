@@ -6,9 +6,11 @@ import HomeMainSections from '@/components/home/HomeMainSections'
 import Recents from '@/components/home/Recents'
 import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
+import TimeLine from '@/components/ReUsable/TimeLine'
 import { useNewsData } from '@/hooks/useNewsData'
 import React, { Suspense, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
+import { useFeaturedArticles,useTopSliderArticles } from '@/hooks/useMainNewsData'
 
 
 const upperCats = [
@@ -57,13 +59,15 @@ const lowerCats = [
   
 
 export function Home() {
+  const { data: articles = [], isLoading:articlesLoading, error } = useFeaturedArticles()
+  const { data: topSlider = [],isLoading:topSliderLoading } = useTopSliderArticles()
   const {
     liveEvent,
     liveEventLoading,
+    mainArticle,
+    mainArticleLoading,
     featuredArticles,
     featuredArticlesLoading,
-    topSlider,
-    topSliderLoading,
     // prefetchCategory,
     popularArticles,
     popularArticlesLoading,
@@ -102,15 +106,19 @@ export function Home() {
       <Container>
         <Suspense fallback={<NewsSkeleton count={3} />}>
         {
-          topSlider.length > 0 &&
+          liveEvent?.length > 0 ? 
+          // <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+          <TimeLine articles={liveEvent}/>
+          :
+          topSlider?.length > 0 &&
            <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
         }
+        
         </Suspense>
       </Container>
 
       <Suspense fallback={<NewsSkeleton count={3} />}>
-        <HomeMainSections
-          articles={safeFeaturedArticles} />
+        <HomeMainSections/>
       </Suspense>
 
 
@@ -133,15 +141,7 @@ export function Home() {
       </Suspense>
 
       <Suspense fallback={<NewsSkeleton count={3} />}>
-        <Recents
-          latests={latestArticles}
-          popular={popularArticles}
-          featured={featuredNews}
-          africaArticles={africaArticles}
-          entertainment={entertainmentArticles}
-          advertorial={featuredAdvertorial}
-          announcement={featuredAnnouncement}
-        />
+        <Recents/>
       </Suspense>
       <Suspense fallback={null}>
         <Container>

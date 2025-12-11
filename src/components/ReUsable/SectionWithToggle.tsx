@@ -111,6 +111,10 @@ interface SectionProps {
     showImgs?: boolean,
     showDate?: boolean,
     articles?: NewsItem[]
+    // data?:{
+    //     data:NewsItem[]
+    //     pagination:any
+    // }
 }
 
 

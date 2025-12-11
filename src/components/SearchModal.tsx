@@ -4,6 +4,7 @@ import { useNewsData } from '@/hooks/useNewsData';
 import { useRouter } from 'next/navigation';
 import { NewsItem } from '@/types/fetchData';
 import { stripHtml } from '@/lib/utils';
+import { ThemedText } from './ThemedText';
 
 export default function SearchModal() {
   const [show, setShow] = useState(false);
@@ -154,11 +155,11 @@ export default function SearchModal() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 // onKeyPress={(e:KeyboardEvent) => e.key === 'Enter' && handleSearch(e)}
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch(e);
-    }
-  }}
+  //               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     handleSearch(e);
+  //   }
+  // }}
                 className="ps-5 pe-5 border-0 bg-light"
               />
               {searchQuery && (
@@ -173,7 +174,7 @@ export default function SearchModal() {
             </div>
             <div className="d-flex align-items-center gap-2 mt-2 text-muted small">
               <i className="bi bi-stars text-warning"></i>
-              <span>Press Enter to search or ESC to close</span>
+              <span>ESC to close</span>
             </div>
           </div>
         </Modal.Header>
@@ -195,13 +196,13 @@ export default function SearchModal() {
                     onClick={() => handleResultClick(article)}
                     className="rounded-3 mb-2 border cursor-pointer"
                   >
-                    <div className="fw-medium text-truncate">
+                    <ThemedText className="fw-medium text-truncate">
                       {stripHtml(article.title.rendered)}
-                    </div>
+                    </ThemedText>
                     {article.excerpt?.rendered && (
-                      <small className="text-muted text-truncate d-block mt-1">
+                      <ThemedText className="text-muted text-truncate d-block mt-1">
                         {stripHtml(article.excerpt.rendered)}
-                      </small>
+                      </ThemedText>
                     )}
                   </ListGroup.Item>
                 ))}
@@ -235,7 +236,7 @@ export default function SearchModal() {
                         onClick={() => handleRecentSearchClick(search)}
                         className="rounded-3 mb-2 d-flex justify-content-between align-items-center"
                       >
-                        <span className="text-truncate">{search}</span>
+                        <ThemedText className="text-truncate">{search}</ThemedText>
                         <i className="bi bi-arrow-right text-muted"></i>
                       </ListGroup.Item>
                     ))}
@@ -259,7 +260,7 @@ export default function SearchModal() {
                         onClick={() => handleTrendingClick(article)}
                         className="rounded-3 mb-2 d-flex justify-content-between align-items-center"
                       >
-                        <span className="text-truncate">{stripHtml(article.title.rendered)}</span>
+                        <ThemedText className="text-truncate">{stripHtml(article.title.rendered)}</ThemedText>
                       </ListGroup.Item>
 
                     ))}
@@ -273,7 +274,7 @@ export default function SearchModal() {
         <Modal.Footer className="border-top">
           <div className="d-flex justify-content-between align-items-center w-100">
             <div className="d-flex gap-3 text-muted small">
-              <span className="d-flex align-items-center gap-1">
+              {/* <span className="d-flex align-items-center gap-1">
                 <kbd className="bg-light border px-2 py-1 rounded">
                   <i className="bi bi-arrow-return-left"></i>
                 </kbd>
@@ -282,7 +283,7 @@ export default function SearchModal() {
               <span className="d-flex align-items-center gap-1">
                 <kbd className="bg-light border px-2 py-1 rounded">ESC</kbd>
                 <span>to close</span>
-              </span>
+              </span> */}
             </div>
             <button
               onClick={handleClose}

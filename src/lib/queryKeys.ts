@@ -42,7 +42,9 @@ export const queryKeys = {
   },
   announcement:{
     all:['announcement'] as const,
-    lists:() => [...queryKeys.announcement.all, 'list'] as const
+    lists:() => [...queryKeys.announcement.all, 'list'] as const,
+        infinite: (filters: Record<string, any>) => [...queryKeys.announcement.all, 'infinite', filters] as const,
+
   },
 
   videos: {

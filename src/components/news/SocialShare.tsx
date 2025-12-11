@@ -25,11 +25,11 @@ const socialMediaLinks = [
     url: "https://api.whatsapp.com/send?text=",
     img: "Whatsapp.svg"
   },
-  {
-    name: "Email",
-    url: "mailto:?subject=Check this out!&body=",
-    img: "Mail.svg"
-  }
+  // {
+  //   name: "Email",
+  //   url: "mailto:?subject=Check this out!&body=",
+  //   img: "Mail.svg"
+  // }
 ];
 
 const SocialShare = ({ postUrl }: { postUrl: string }) => {

@@ -2,9 +2,8 @@
 /* @import url('owl.carousel/dist/assets/owl.carousel.css');
 @import url('owl.carousel/dist/assets/owl.theme.default.css'); */
 /* @import './owl-custom.css'; */
-html {
-  scroll-behavior: smooth;
-}
+
+
 html,
 body {
   overflow-x: hidden;

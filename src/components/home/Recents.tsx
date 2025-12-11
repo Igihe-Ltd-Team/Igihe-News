@@ -11,9 +11,17 @@ import { Col, Row } from 'react-bootstrap'
 import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
 import PopularNews from '../news/PopularNews'
-// import Videos from './Videos'
-// import Opinios from './Opinion'
-// import RandomCard from './RandomCard'
+
+import {
+  useLatestArticles,
+  usePopularArticles,
+  useHighlightArticles,
+  useAfricaArticles,
+  useEntertainmentArticles,
+  useFeaturedAdvertorial,
+  useFeaturedAnnouncement
+} from '@/hooks/useMainNewsData'
+
 
 const Videos = React.lazy(() => import('./Videos'))
 const Opinios = React.lazy(() => import('./Opinion'))
@@ -101,7 +109,17 @@ const NewsSection = React.memo(({
 
 NewsSection.displayName = 'NewsSection'
 
-export default function Recents({ latests, featured, popular, africaArticles, entertainment, advertorial, announcement }: RecentProps) {
+export default function Recents() {
+
+
+    const { data: latests = [] } = useLatestArticles()
+    const { data: popular = [] } = usePopularArticles()
+    const { data: featured = [] } = useHighlightArticles()
+    const { data: africaArticles = [] } = useAfricaArticles()
+    const { data: entertainment = [] } = useEntertainmentArticles()
+    const { data: advertorial = [] } = useFeaturedAdvertorial()
+    const { data: announcement = [] } = useFeaturedAnnouncement()
+
 
     const safeLatests = Array.isArray(latests) ? latests : [];
     const safeFeatured = Array.isArray(featured) ? featured : [];

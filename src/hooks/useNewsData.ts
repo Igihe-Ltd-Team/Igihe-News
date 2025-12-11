@@ -47,6 +47,11 @@ const liveEventArticlesQuery = useQuery({
     queryFn: () => ApiService.fetchArticles({ tags: [199], per_page: 1 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
+  const mainArticleQuery = useQuery({
+    queryKey: queryKeys.articles.highlightTagArticles(197),
+    queryFn: () => ApiService.fetchArticles({ tags: [197], per_page: 1 }).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+  })
 
   const topSliderArticlesQuery = useQuery({
     queryKey: queryKeys.articles.highlightTagArticles(198),
@@ -276,6 +281,7 @@ const liveEventArticlesQuery = useQuery({
   return {
     /* ---------- data ---------- */
     liveEvent:liveEventArticlesQuery.data || [],
+    mainArticle:mainArticleQuery.data || [],
     topSlider:topSliderArticlesQuery.data || [],
 
     categories: categoriesQuery.data || [],
@@ -292,6 +298,7 @@ const liveEventArticlesQuery = useQuery({
 
     /* ---------- loading states ---------- */
     liveEventLoading:liveEventArticlesQuery.isLoading,
+    mainArticleLoading:mainArticleQuery.isLoading,
     topSliderLoading:topSliderArticlesQuery.isLoading,
     categoriesLoading: categoriesQuery.isLoading,
     featuredArticlesLoading: featuredArticlesQuery.isLoading,

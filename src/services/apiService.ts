@@ -1328,8 +1328,8 @@ private static async fetchWithTimeout(
           throw new Error(`HTTP error! status: ${response.status}`)
         }
 
-        const ads = await response.json()
-        return ads || []
+        const announcements = await response.json()
+        return announcements || []
       }, 10 * 60 * 1000) // 10 minutes cache for ads
     } catch (error) {
       console.error('Error fetching advertisements:', error)

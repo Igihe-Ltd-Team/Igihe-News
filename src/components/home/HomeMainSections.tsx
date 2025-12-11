@@ -6,20 +6,22 @@ import NewsSkeleton from '../NewsSkeleton'
 import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
 import SingleSkeleton from '../Loading/SingleSkeleton'
+import { useFeaturedArticles } from '@/hooks/useMainNewsData'
 
 interface ArticlesProps {
     articles: NewsItem[]
 }
 
-export default function HomeMainSections({ articles }: ArticlesProps) {
+export default function HomeMainSections() {
     const { isMobile } = useResponsive()
+    const { data: articles = [], isLoading:articlesLoading, error } = useFeaturedArticles()
+    const { data: mainArticle = [], isLoading:mainNewsLoading } = useFeaturedArticles()
 
     const safeArticles = Array.isArray(articles) ? articles : [];
 
-    const { mainArticle, timeLineNews, asideNews } = useMemo(() => ({
-        mainArticle: safeArticles?.[0],
-        timeLineNews: safeArticles.slice(1, 6),
-        asideNews: safeArticles.slice(6, 8)
+    const {  timeLineNews, asideNews } = useMemo(() => ({
+        timeLineNews: safeArticles.slice(0, 5),
+        asideNews: safeArticles.slice(5, 7)
     }), [safeArticles])
 
     if (!articles?.length) {
@@ -32,7 +34,7 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
                 <div className="col-xl-6 col-lg-12">
                     {mainArticle && (
                         <DynamicArticleCard 
-                            article={mainArticle} 
+                            article={mainArticle[0]} 
                             showImage 
                             showHeader 
                             priority
