@@ -110,7 +110,7 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
         style={{
           width: '60px',
           height: '60px',
-          background: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)',
+          background: 'linear-gradient(135deg, #1176BB 0%, #1176BB 100%)',
           border: 'none',
           zIndex: 1050,
         }}
@@ -131,7 +131,7 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
       >
         <div
           className="modal-dialog modal-dialog-scrollable modal-lg position-fixed bottom-0 end-0 m-4"
-          style={{ maxWidth: '380px' }}
+          style={{ maxWidth: '480px' }}
           onClick={e => e.stopPropagation()}
         >
           <div
@@ -141,13 +141,14 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
+              height:'80vh'
             }}
           >
             {/* Header */}
             <div
               className="modal-header border-0 text-white"
               style={{
-                background: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)',
+                background: 'linear-gradient(135deg, #1176BB 0%, #1176BB 100%)',
                 borderRadius: '12px 12px 0 0',
               }}
             >
@@ -161,7 +162,7 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
                 </div>
                 <div>
                   <h5 className="mb-0">Ask IGIHE</h5>
-                  <small>Gemini Powered</small>
+                  {/* <small>Gemini Powered</small> */}
                 </div>
               </div>
               <button
@@ -172,7 +173,7 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
             </div>
 
             {/* Messages */}
-            <div className="modal-body p-3" style={{ maxHeight: '400px' }}>
+            <div className="modal-body p-3" style={{ maxHeight: '80%' }}>
               {messages.map(msg => (
                 <div
                   key={msg.id}

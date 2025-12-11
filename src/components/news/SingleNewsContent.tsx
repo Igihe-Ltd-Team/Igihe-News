@@ -4,7 +4,7 @@
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
-import { formatDateTime, getCategoryName, getFeaturedImage, stripHtml } from '@/lib/utils'
+import { formatDateTime, getCategoryName, getFeaturedImage, getTags, stripHtml } from '@/lib/utils'
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
@@ -79,6 +79,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const authorsName = article._embedded?.author?.[0]?.name || '';
     const authorImage = article._embedded?.author?.[0]?.avatar_urls?.['96'];
     const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/news/${articleCategory?.toLowerCase()}/${article.slug}` : '';
+    const tags = getTags(article)
 
     return (
         <Container>
@@ -111,107 +112,129 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                     publishDate={publishDate}
                     category={articleCategory} />
                 <Row className='pt-4'>
-                    <Col md="8">
-                        <OptimizedImage
-                            src={featuredImage || '/assets/igiheIcon.png'}
-                            alt={stripHtml(article.title.rendered)}
-                            fill
-                            height={isMobile ? 300 : isTablet ? 400 : 554}
-                            className="object-cover"
-                            imgClass='object-fit-cover'
-                        />
 
-
-
-                        {
-                            article?.excerpt?.rendered &&
-                            <div className='excerpt-section'>
-                                <ThemedText type='defaultItalic'>
-                                    {stripHtml(article?.excerpt?.rendered)}
-                                </ThemedText>
-                            </div>
-                        }
-                        <div
-                            className="post-content"
-                            style={{
-                                overflow: 'hidden',
-                                width: '100%'
-                            }}
-                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article?.content?.rendered) || '' }}
-                        />
-                        <AIChatButton article={article} />
-
-                        {
-                            relatedPosts.length > 0 &&
-
-                            <div className='pt-4 g-3'>
-                                <HeaderDivider title="Related Articles" />
-                                <div className="position-relative">
-                                    <Swiper
-                                        spaceBetween={30}
-                                        slidesPerView={3}
-                                        navigation={{
-                                            nextEl: '.swiper-button-next',
-                                            prevEl: '.swiper-button-prev',
-                                        }}
-                                        pagination={{
-                                            clickable: true,
-                                            el: '.swiper-pagination',
-                                        }}
-                                        autoplay={{
-                                            delay: 5000,
-                                            disableOnInteraction: false,
-                                        }}
-                                        modules={[Navigation, Pagination, Autoplay]}
-                                        breakpoints={{
-                                            320: {
-                                                slidesPerView: 2,
-                                                spaceBetween: 10,
-                                            },
-                                            640: {
-                                                slidesPerView: 2,
-                                                spaceBetween: 20,
-                                            },
-                                            1024: {
-                                                slidesPerView: 3,
-                                                spaceBetween: 30,
-                                            },
-                                        }}
-                                    >
-                                        {
-                                            relatedPostsLoading &&
-                                            <NewsSkeleton count={3} />
-                                        }
-                                        {relatedPosts.map(article => (
-                                            <SwiperSlide key={article.id || article.slug}>
-                                                <DynamicArticleCard
-                                                    article={article}
-                                                    showImage
-                                                    priority={false}
-                                                    imgHeight={143}
-                                                    bgColor="#1176BB08"
-                                                    bordered
-                                                />
-                                            </SwiperSlide>
-                                        ))}
-                                    </Swiper>
-                                    <div className="swiper-button-prev !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
-                                    <div className="swiper-button-next !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
-
-                                    {/* Custom Pagination */}
-                                    <div className="swiper-pagination !bottom-0 mt-4"></div>
+                    <Col md="9">
+                        <div className='d-flex'>
+                            <Col md="1">
+                                <SocialShare postUrl={postUrls} />
+                            </Col>
+                            <Col md="11">
+                                <OptimizedImage
+                                    src={featuredImage || '/assets/igiheIcon.png'}
+                                    alt={stripHtml(article.title.rendered)}
+                                    fill
+                                    height={isMobile ? 300 : isTablet ? 400 : 554}
+                                    className="object-cover"
+                                    imgClass='object-fit-cover'
+                                />
+                                {
+                                    article?.excerpt?.rendered &&
+                                    <div className='excerpt-section'>
+                                        <ThemedText type='defaultItalic'>
+                                            {stripHtml(article?.excerpt?.rendered)}
+                                        </ThemedText>
+                                    </div>
+                                }
+                                <div
+                                    className="post-content"
+                                    style={{
+                                        overflow: 'hidden',
+                                        width: '100%'
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article?.content?.rendered || '') }}
+                                />
+                                <div className='d-flex gap-2'>
+                                    {
+                                        tags.map(tag =>
+                                            <div style={{ backgroundColor: '#F7F7F7', borderRadius: 2, padding: 10 }} key={tag.id}>
+                                                <ThemedText lightColor='#999999' type='small' darkColor='#999999' style={{ fontSize: 13 }}>
+                                                    {
+                                                        tag.name
+                                                    }
+                                                </ThemedText>
+                                            </div>
+                                        )
+                                    }
                                 </div>
-                            </div>
-                        }
-                        <SocialShare postUrl={postUrls} />
+                                <AIChatButton article={article} />
+
+                                {
+                                    relatedPosts.length > 0 &&
+
+                                    <div className='pt-4 pb-4 g-3'>
+                                        <HeaderDivider title="Related Articles" />
+                                        <div className="position-relative">
+                                            <Swiper
+                                                spaceBetween={30}
+                                                slidesPerView={3}
+                                                navigation={{
+                                                    nextEl: '.swiper-button-next',
+                                                    prevEl: '.swiper-button-prev',
+                                                }}
+                                                pagination={{
+                                                    clickable: true,
+                                                    el: '.swiper-pagination',
+                                                }}
+                                                autoplay={{
+                                                    delay: 5000,
+                                                    disableOnInteraction: false,
+                                                }}
+                                                modules={[Navigation, Pagination, Autoplay]}
+                                                breakpoints={{
+                                                    320: {
+                                                        slidesPerView: 2,
+                                                        spaceBetween: 10,
+                                                    },
+                                                    640: {
+                                                        slidesPerView: 2,
+                                                        spaceBetween: 20,
+                                                    },
+                                                    1024: {
+                                                        slidesPerView: 3,
+                                                        spaceBetween: 30,
+                                                    },
+                                                }}
+                                            >
+                                                {
+                                                    relatedPostsLoading &&
+                                                    <NewsSkeleton count={3} />
+                                                }
+                                                {relatedPosts.map(article => (
+                                                    <SwiperSlide key={article.id || article.slug}>
+                                                        <DynamicArticleCard
+                                                            article={article}
+                                                            showImage
+                                                            priority={false}
+                                                            imgHeight={143}
+                                                            bgColor="#1176BB08"
+                                                            bordered
+                                                            isSlider
+                                                        />
+                                                    </SwiperSlide>
+                                                ))}
+                                            </Swiper>
+                                            <div className="swiper-button-prev !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
+                                            <div className="swiper-button-next !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
+
+                                            {/* Custom Pagination */}
+                                        </div>
+                                    </div>
+                                }</Col>
+
+                        </div>
+
+
                     </Col>
-                    <Col md="4" className='sticky-sidebar'>
-                        <AdManager
-                            position="home-after-highlights"
-                            priority={true}
-                            className="mb-2"
-                        />
-                        <SocialMedias />
+                    <Col md="3" className='position-relative'>
+                        <div className='sticky-parent'>
+                            <div className='sticky-sidebar'>
+                                <AdManager
+                                    position="home-after-highlights"
+                                    priority={true}
+                                    className="mb-2"
+                                />
+                                <SocialMedias />
+                            </div></div>
                     </Col>
                 </Row>
 

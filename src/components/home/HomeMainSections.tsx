@@ -18,8 +18,8 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
 
     const { mainArticle, timeLineNews, asideNews } = useMemo(() => ({
         mainArticle: safeArticles?.[0],
-        timeLineNews: safeArticles.slice(1, 5),
-        asideNews: safeArticles.slice(5, 7)
+        timeLineNews: safeArticles.slice(1, 6),
+        asideNews: safeArticles.slice(6, 8)
     }), [safeArticles])
 
     if (!articles?.length) {
@@ -59,7 +59,7 @@ export default function HomeMainSections({ articles }: ArticlesProps) {
                             key={article.id || article.slug}
                             article={article}
                             bottomBorder 
-
+                            isSlider
                             showImage={isMobile}
                             imgHeight={40}
                             className='d-flex flex-row gap-3'

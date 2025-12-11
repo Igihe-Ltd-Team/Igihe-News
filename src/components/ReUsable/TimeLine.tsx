@@ -16,6 +16,7 @@ export default function TimeLine({ articles }: TimeLineProps) {
                     isTimeLine
                     article={item}
                     bottomBorder
+                    isSlider
                 />
             ))}
         </div>

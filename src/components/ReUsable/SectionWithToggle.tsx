@@ -166,7 +166,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                                         alt={stripHtml(item.title.rendered)}
                                         fill
                                         height={100}
-                                        className="object-cover"
+                                        imgClass="object-fit-contain"
                                     />
                                 </div>
                             }

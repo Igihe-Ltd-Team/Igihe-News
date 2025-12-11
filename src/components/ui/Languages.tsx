@@ -171,7 +171,7 @@ function Languages() {
                         </defs>
                     </svg>
                     {
-                    !isMobile && <ThemedText type='small'> Franch</ThemedText>
+                    !isMobile && <ThemedText type='small'> French</ThemedText>
                 }
                 </Link>
             </li>

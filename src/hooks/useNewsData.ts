@@ -26,7 +26,7 @@ export function useNewsData() {
 
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 26 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [63], per_page: 8 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -42,9 +42,22 @@ export function useNewsData() {
     staleTime: 5 * 60 * 1000,
   })
 
+const liveEventArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.highlightTagArticles(199),
+    queryFn: () => ApiService.fetchArticles({ tags: [199], per_page: 1 }).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const topSliderArticlesQuery = useQuery({
+    queryKey: queryKeys.articles.highlightTagArticles(198),
+    queryFn: () => ApiService.fetchArticles({ tags: [198], per_page: 9 }).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+  })
+
+
   const highlightTagArticlesQuery = useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(63),
-    queryFn: () => ApiService.fetchArticles({ tags: [63], per_page: 7 }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(64),
+    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 11,orderby: 'date' }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -262,6 +275,9 @@ export function useNewsData() {
    * --------------------------------------------------------------------- */
   return {
     /* ---------- data ---------- */
+    liveEvent:liveEventArticlesQuery.data || [],
+    topSlider:topSliderArticlesQuery.data || [],
+
     categories: categoriesQuery.data || [],
     featuredArticles: featuredArticlesQuery.data || [],
     popularArticles: popularArticlesQuery.data || [],
@@ -275,6 +291,8 @@ export function useNewsData() {
     featuredAnnouncement: featuredAnnouncementQuery.data || [],
 
     /* ---------- loading states ---------- */
+    liveEventLoading:liveEventArticlesQuery.isLoading,
+    topSliderLoading:topSliderArticlesQuery.isLoading,
     categoriesLoading: categoriesQuery.isLoading,
     featuredArticlesLoading: featuredArticlesQuery.isLoading,
     popularArticlesLoading: popularArticlesQuery.isLoading,
@@ -299,9 +317,6 @@ export function useNewsData() {
     prefetchArticle,
     prefetchCategory,
     queryClient,
-
-
-
     useCategoryTagArticles
   }
 }

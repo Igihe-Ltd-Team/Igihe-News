@@ -108,12 +108,10 @@ export default function Recents({ latests, featured, popular, africaArticles, en
 
     const {
         mainLatest,
-        latestsSidebar,
-        featuredTimeline
+        latestsSidebar
     } = useMemo(() => ({
         mainLatest: safeLatests?.[0],
-        latestsSidebar: safeLatests?.slice(1, 6) || [],
-        featuredTimeline: safeFeatured?.slice(7, 20) || [],
+        latestsSidebar: safeLatests?.slice(1, 6) || []
     }), [safeLatests, safeFeatured])
 
     // if (!latestsSidebar?.length) {
@@ -122,7 +120,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
 
     return (
         <div className="container p-2">
-            <div className="row g-3">
+            <div className="row g-4">
                 <div className="col-xl-8 col-lg-12">
                     <HeaderDivider title="Latest news" />
                     <div className="row g-3">
@@ -161,7 +159,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                             <div className="py-2">
                                 <HeaderDivider title="Featured News" />
                                 <div>
-                                    <TimeLine articles={featuredTimeline} />
+                                    <TimeLine articles={featured || []} />
                                 </div>
                             </div>
                         </div>
@@ -200,7 +198,7 @@ export default function Recents({ latests, featured, popular, africaArticles, en
                     <NewsSection title="Africa" articles={africaArticles} />
                 </div>
 
-                <div className="col-xl-4 col-lg-12">
+                <div className="col-xl-4 col-lg-4">
                     <Suspense fallback={<NewsSkeleton count={1}/>}>
                         <PopularNews articles={popular || []} name='Popular News' />
                     </Suspense>

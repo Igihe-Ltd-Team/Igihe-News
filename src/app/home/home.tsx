@@ -58,15 +58,17 @@ const lowerCats = [
 
 export function Home() {
   const {
-    categories,
-    categoriesLoading,
+    liveEvent,
+    liveEventLoading,
     featuredArticles,
     featuredArticlesLoading,
+    topSlider,
+    topSliderLoading,
     // prefetchCategory,
     popularArticles,
     popularArticlesLoading,
 
-    highlightArticles,
+    highlightArticles:featuredNews,
     highlightArticlesLoading,
 
     latestArticles,
@@ -85,38 +87,30 @@ export function Home() {
     featuredAnnouncementLoading
 
   } = useNewsData()
-  // const { selectedCategory, setSelectedCategory } = useUIStore()
 
   const safeFeaturedArticles = Array.isArray(featuredArticles) ? featuredArticles : [];
   // console.log(safeFeaturedArticles)
-  const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
-    sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
-    otherFeaturedArticle: safeFeaturedArticles.slice(9, 30),
-  }), [safeFeaturedArticles]);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     console.log('prefetchCategory', await prefetchCategoryArticles(31))
-  //   })
-  // }, [])
+  // const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
+  //   sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
+  //   otherFeaturedArticle: safeFeaturedArticles.slice(9, 30),
+  // }), [safeFeaturedArticles]);
 
 
-
-  // if (categoriesLoading && featuredArticlesLoading) {
-  //   return <NewsSkeleton />
-  // }
-  // console.log()
+  
   return (
     <>
       <Container>
         <Suspense fallback={<NewsSkeleton count={3} />}>
-          <Slides articles={sliderFeaturedArticles} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+        {
+          topSlider.length > 0 &&
+           <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+        }
         </Suspense>
       </Container>
 
       <Suspense fallback={<NewsSkeleton count={3} />}>
         <HomeMainSections
-          articles={highlightArticles} />
+          articles={safeFeaturedArticles} />
       </Suspense>
 
 
@@ -142,7 +136,7 @@ export function Home() {
         <Recents
           latests={latestArticles}
           popular={popularArticles}
-          featured={otherFeaturedArticle}
+          featured={featuredNews}
           africaArticles={africaArticles}
           entertainment={entertainmentArticles}
           advertorial={featuredAdvertorial}

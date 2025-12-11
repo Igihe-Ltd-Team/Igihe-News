@@ -13,7 +13,7 @@ export async function prefetchCategories() {
 export async function prefetchFeaturedArticles() {
   await queryClient.prefetchQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 26 }),
+    queryFn: () => ApiService.fetchArticles({ tags: [63], per_page: 8 }),
   })
 }
 

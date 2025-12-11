@@ -47,23 +47,22 @@ if(isLoading)
           {
             authors?.map((author) => {
               return (
-                <Link href={`/author/${author.slug}`} className='feature col-md-4 text-decoration-none text-dark' key={author.id}>
-                  <div className="feature-icon">
+                <Link href={`/author/${author.slug}`} className='feature col-md-3 text-decoration-none text-dark' key={author.id}>
+                  
                     {author.avatar_urls && (
                       <OptimizedImage
                         src={author.avatar_urls['96']}
                         alt={author.name || ''}
-                        width={40}
-                        height={40}
-                        className="rounded-circle mb-3"
+                        width={250}
+                        height={250}
+                        className=" mb-3"
                         imgClass="feature-icon"
                       />
                     )}
-                  </div>
                   <div>
                     <ThemedText type='defaultSemiBold'>{author.name}</ThemedText>
                   </div>
-                  <p className='line-clamp-3'>{author.description}</p>
+                  {/* <p className='line-clamp-3'>{author.description}</p> */}
                 </Link>
               )
             }

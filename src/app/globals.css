@@ -262,13 +262,13 @@ body {
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  padding: 20px;
+  padding: 15px;
   transition: all 0.3s ease;
   cursor: pointer;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
 }
 
 .social-card:hover {
@@ -277,13 +277,13 @@ body {
 }
 
 .social-icon {
-  font-size: 24px;
-  width: 24px;
+  font-size: 15px;
+  width: 17px;
   text-align: center;
 }
 
 .social-name {
-  font-size: 1.1rem;
+  font-size: 14px;
   font-weight: 500;
   color: #333;
   margin: 0;
@@ -972,9 +972,9 @@ body {
 }
 
 .social-share-container {
-  position: fixed;
-  top: 40%;
-  left: 5%;
+  /* position: fixed; */
+  /* top: 40%;
+  left: 5%; */
   display: flex;
   flex-direction: column;
   gap: 15px;

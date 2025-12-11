@@ -55,7 +55,7 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
         <div className="container mx-auto px-4 py-8">
             <AuthorBio author={author} />
             <Row className="g-4">
-                <Col lg={8}>
+                <Col lg={9}>
                     <HeaderDivider title={`Latest from ${author.name}`} />
 
                     {articles.length > 0 ? (
@@ -123,7 +123,7 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
                     )}
                 </Col>
 
-                <Col lg={4}>
+                <Col lg={3}>
                     <AdManager
                         position="home-after-highlights"
                         priority={true}
