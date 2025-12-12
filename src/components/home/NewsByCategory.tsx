@@ -59,7 +59,7 @@ export default function NewsByCategory({ categoryId,categoryName,categorySlug }:
                     priority
                     bottomBorder
                     showImage={isMobile}
-                    imgHeight={40}
+                    imgHeight={80}
                     className='d-flex flex-row gap-3'
 
                 />

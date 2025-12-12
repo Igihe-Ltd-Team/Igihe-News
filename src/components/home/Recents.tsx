@@ -81,6 +81,7 @@ const NewsSection = React.memo(({
                                     article={article}
                                     showImage
                                     priority={false}
+                                
                                     imgHeight={140}
                                     showCategorie={false}
                                 />
@@ -97,7 +98,7 @@ const NewsSection = React.memo(({
                             priority={false}
 
                             showImage={isMobile}
-                            imgHeight={40}
+                            imgHeight={80}
                             className='d-flex flex-row gap-3'
                         />
                     ))}

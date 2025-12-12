@@ -8,6 +8,7 @@ import { ThemedText } from '../ThemedText'
 import Link from 'next/link'
 import { useNewsData } from '@/hooks/useNewsData'
 import { ApiService } from '@/services/apiService'
+import { useResponsive } from '@/hooks/useResponsive'
 
 interface ArticleCardProps {
   article: NewsItem
@@ -49,10 +50,10 @@ function DynamicArticleCard({
   numbers,
   leftNumber,
   showCategorie = true,
-  isSlider = false
-
+  isSlider = false,
+  mobileImgHeight
 }: ArticleCardProps) {
-
+const { isMobile } = useResponsive()
   const featuredImage = getFeaturedImage(article);
 
   const mouseEnter = (articles:NewsItem)=>{
@@ -84,7 +85,7 @@ function DynamicArticleCard({
             src={featuredImage || '/assets/igiheIcon.png'}
             alt={article.title.rendered}
             fill
-            height={imgHeight}
+            height={isMobile ? imgHeight: mobileImgHeight ? mobileImgHeight:imgHeight}
             imgClass="object-fit-cover"
             className={bordered ? "":'mb-2'}
           />

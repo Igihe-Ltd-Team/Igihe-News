@@ -63,7 +63,7 @@ export default function HomeMainSections() {
                             bottomBorder 
                             isSlider
                             showImage={isMobile}
-                            imgHeight={40}
+                            imgHeight={80}
                             className='d-flex flex-row gap-3'
                         />
                     ))}

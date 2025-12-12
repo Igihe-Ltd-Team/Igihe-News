@@ -21,7 +21,7 @@ const menus = [
     { name: "Sports" },
     { name: "Entertainment" },
     { name: "Technology" },
-    { name: "Culture" },
+    { name: "Arts &amp; Culture" },
     { name: "Economy" },
     { name: "People" },
     { name: "Tourism" },
