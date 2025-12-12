@@ -443,7 +443,7 @@ body {
   font-size: 15px;
 }
 
-.small-txt {
+.small-txt,.service-item {
   font-size: 14px;
   line-height: 18px;
 }

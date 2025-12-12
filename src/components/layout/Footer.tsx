@@ -10,11 +10,10 @@ export function Footer() {
             <div className="col-md-8">
               <ThemedText type="smallBold">THE MOST IMPORTANT WORLD NEWS AND EVENTS OF THE DAY</ThemedText>
             </div>
-            <div className="col-md-10 py-3">
-              <ThemedText>
-                Subscribe to our mailing list to receives daily
-                updates direct to your inbox!
-              </ThemedText>
+            <div className="col-md-10 pb-3 pt-1">
+              <p style={{fontSize:13,lineHeight:'16px'}}>
+                Subscribe to our mailing list to receives daily updates direct to your inbox!
+              </p>
             </div>
 
             <div className="newsletter-form">
