@@ -59,7 +59,7 @@ body {
 
 
 .container {
-  max-width: min(100%, 1240px) !important;
+  max-width: min(100%, calc(1440px - 32px)) !important;
   /* or any value you want */
 }
 
@@ -448,7 +448,9 @@ body {
   line-height: 18px;
 }
 
-
+.lh-sm{
+  line-height: 1.25!important;
+}
 
 
 /* Footer styles */

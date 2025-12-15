@@ -97,7 +97,7 @@ export default function Header() {
                 </div>
 
                 {/* Logo and banner */}
-                <div className="row flex align-items-center py-3 justify-content-between">
+                <div className="row flex align-items-center py-2 justify-content-between">
                     <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
                         <Link href="/">
                             <span className='site-logo'>
@@ -133,7 +133,7 @@ export default function Header() {
                             <AdManager
                                 position="beside-igihe-logo"
                                 priority={true}
-                                className="mb-2"
+                                // className="mb-2"
                                 imgClass="object-position-right"
                             />
                         </Col>

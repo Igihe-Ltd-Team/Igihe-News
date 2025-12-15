@@ -140,7 +140,7 @@ export default function Recents() {
     return (
         <div className="container p-2">
             <div className="row g-4">
-                <div className="col-xl-8 col-lg-12">
+                <div className="col-xl-8 col-lg-12 mt-0">
                     <HeaderDivider title="Latest news" />
                     <div className="row g-3">
                         <div className="col-xl-4 col-lg-6 col-md-6">
@@ -217,7 +217,7 @@ export default function Recents() {
                     <NewsSection title="Africa" articles={africaArticles} />
                 </div>
 
-                <div className="col-xl-4 col-lg-4">
+                <div className="col-xl-4 col-lg-4 mt-0">
                     <Suspense fallback={<NewsSkeleton count={1}/>}>
                         <PopularNews articles={popular || []} name='Popular News' />
                     </Suspense>

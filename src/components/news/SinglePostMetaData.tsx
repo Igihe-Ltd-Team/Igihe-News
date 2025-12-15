@@ -78,7 +78,8 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
 
                 </div>
             </div>
-            <div className="meta-right">
+
+            {/* <div className="meta-right">
                 <ul className="social-medias list-unstyled d-flex gap-3">
                     <li>
                         <svg width="10" height="18" viewBox="0 0 10 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -106,7 +107,8 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
 
                     </li>
                 </ul>
-            </div>
+            </div> */}
+
         </div>
     )
 }

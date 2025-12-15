@@ -101,7 +101,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
             </div>
 
             <article>
-                <Col xl="8" md="12">
+                <Col xl="12" md="12">
                     <ThemedText type='title'>{stripHtml(article.title.rendered)}</ThemedText>
                 </Col>
                 {/* Render article/post meta data */}

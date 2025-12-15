@@ -103,7 +103,7 @@ export function Footer() {
         </div>
 
         <div className="d-flex justify-content-between bottom-section pt-4">
-          <p className="bottom-info-1"><span className="min-gray">© 2009 - 2025 </span>IGIHE LTD</p>
+          <p className="bottom-info-1"><span className="min-gray">© 2008 - 2025 </span>IGIHE LTD</p>
           <p className="bottom-info-1"><span>IGIHE.org <span className="min-gray">/</span> </span>Wikirwanda <span className="min-gray">/</span></p>
           <p className="bottom-info-1">Who we are <span className="min-gray">/</span> FAQs <span className="min-gray">/</span> Contact Us </p>
 

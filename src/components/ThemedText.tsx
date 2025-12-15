@@ -28,7 +28,7 @@ export function ThemedText({
     smallBold: 'small-txt lh-1 fw-bold',
     default: 'normal-text lh-sm fw-medium', // fs-5 ≈ 16px
     defaultItalic: 'normal-text lh-sm fw-normal fst-italic',
-    defaultSemiBold: 'normal-text lh-base fw-semibold',
+    defaultSemiBold: 'normal-text lh-sm fw-semibold',
     title: 'fs-1 lh-1 fw-bold', // fs-1 ≈ 32px
     subtitle: 'fs-3 lh-sm fw-bold', // fs-3 ≈ 20px
     link: 'fs-5 lh-lg text-primary text-decoration-underline cursor-pointer fw-normal',
