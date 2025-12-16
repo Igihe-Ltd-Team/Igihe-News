@@ -111,6 +111,7 @@ const NewsSection = React.memo(({
 NewsSection.displayName = 'NewsSection'
 
 export default function Recents() {
+    const { isMobile } = useResponsive()
 
 
     const { data: latests = [] } = useLatestArticles()
@@ -154,6 +155,7 @@ export default function Recents() {
                                             imgHeight={143}
                                             bgColor="#1176BB08"
                                             bordered
+                                            showCategorie={!isMobile}
                                         />
                                     </div>
                                 ))}

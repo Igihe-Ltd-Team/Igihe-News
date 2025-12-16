@@ -72,7 +72,7 @@ const { isMobile } = useResponsive()
       {
         showImage &&
         <Link
-          href={`/news/${getCategorySlug(article)}/${article.slug}`}
+          href={`/${getCategorySlug(article)}/article/${article.slug}`}
           className="text-decoration-none text-reset"
           style={
             isSlider ? { width:'20%' }:{ flex: 1 }
@@ -122,7 +122,7 @@ const { isMobile } = useResponsive()
                 </ThemedText>
                 {
                   showCategorie &&
-                  <Link href={`/news/${getCategorySlug(article)}`}
+                  <Link href={`/${getCategorySlug(article)}`}
                   className="text-decoration-none text-reset d-flex gap-1"
                   aria-label={`Read full article: ${getCategoryName(article)}`}
                   style={{flex:1}}
@@ -160,7 +160,7 @@ const { isMobile } = useResponsive()
           }}>
 
           <Link
-            href={`/news/${getCategorySlug(article)}/${article.slug}`}
+            href={`/${getCategorySlug(article)}/article/${article.slug}`}
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
             // onMouseEnter={() => mouseEnter(article)}

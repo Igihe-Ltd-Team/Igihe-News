@@ -5,13 +5,13 @@ export const AD_POSITIONS = {
   'header-landscape-ad-1': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 90 },
+    dimensions: { width: 728, height: 96 },
     priority: 1
   },
   'header-landscape-ad-2': {
     name: 'Header Landscape Ad 2',
     description: 'Secondary header banner',
-    dimensions: { width: 728, height: 90 },
+    dimensions: { width: 728, height: 96 },
     priority: 2
   },
   
@@ -50,20 +50,20 @@ export const AD_POSITIONS = {
   'beside-igihe-logo': {
     name: 'Beside Igihe Logo',
     description: 'Beside Igihe Logo',
-    dimensions: { width: 728, height: 90 },
+    dimensions: { width: 728, height: 96 },
     priority: 2
   },
   
   'home-bellow-hights': {
     name: 'Home bellow Highlights',
     description: 'bellow highlights section',
-    dimensions: { width: 728, height: 90 },
+    dimensions: { width: 728, height: 96 },
     priority: 2
   },
   'home-bellow-hights-2': {
     name: 'Home bellow Highlights',
     description: 'bellow highlights section',
-    dimensions: { width: 728, height: 90 },
+    dimensions: { width: 728, height: 96 },
     priority: 2
   },
   'bellow-featured-news': {

@@ -59,7 +59,7 @@ body {
 
 
 .container {
-  max-width: min(100%, calc(1440px - 32px)) !important;
+  max-width: min(100%, calc(1440px - 32px -32px)) !important;
   /* or any value you want */
 }
 
@@ -77,6 +77,25 @@ body {
 
 .btn:first-child:active {
   border: none !important;
+}
+
+.post-content,.wp-block-image{
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.post-content p:not(:has(img)){
+          max-width: min(100%, 620px)
+}
+.excerpt-section,.lead,.descriptif {
+  display: flex;
+  justify-content: center;
+}
+
+.excerpt-section .excerpt-text,.wp-block-image figcaption{
+  display: block;
+  width: min(100%, 620px);
+  text-align: center;
 }
 
 /* Menu section styles */

@@ -27,6 +27,7 @@ import NewsSkeleton from '../NewsSkeleton'
 import AIChatButton from './AIChatButton'
 import SinglePostMetaData from './SinglePostMetaData'
 import SocialShare from './SocialShare'
+import CustomSlider from '../home/CustomSlider'
 
 
 
@@ -83,21 +84,23 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
 
     return (
         <Container>
-            <div className='pb-4'>
-                <Row>
-                    <Col>
-                        <AdManager
-                            position="header-landscape-ad-1"
-                            priority={true}
-                            className="mb-2"
-                        /></Col>
-                    <Col>
-                        <AdManager
-                            position="header-landscape-ad-2"
-                            priority={true}
-                            className="mb-2"
-                        /></Col>
-                </Row>
+            <div className='pb-md-4'>
+                <CustomSlider
+                    lgDisplay={2}
+                    mdDisplay={2}
+                    smDisplay={1}
+                >
+                    <AdManager
+                        position="header-landscape-ad-1"
+                        priority={true}
+                    //   className="mb-2"
+                    />
+                    <AdManager
+                        position="header-landscape-ad-2"
+                        priority={true}
+                    //   className="mb-2"
+                    />
+                </CustomSlider>
             </div>
 
             <article>
@@ -114,7 +117,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                 <Row className='pt-4'>
 
                     <Col md="9">
-                        <div className='d-flex'>
+                        <div className='d-flex flex-column-reverse flex-md-row'>
                             <Col md="1">
                                 <SocialShare postUrl={postUrls} />
                             </Col>
@@ -126,11 +129,12 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     height={isMobile ? 300 : isTablet ? 400 : 554}
                                     className="object-cover"
                                     imgClass='object-fit-cover'
+
                                 />
                                 {
                                     article?.excerpt?.rendered &&
                                     <div className='excerpt-section'>
-                                        <ThemedText type='defaultItalic'>
+                                        <ThemedText type='defaultItalic' className='excerpt-text'>
                                             {stripHtml(article?.excerpt?.rendered)}
                                         </ThemedText>
                                     </div>
@@ -209,6 +213,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                                             bgColor="#1176BB08"
                                                             bordered
                                                             isSlider
+                                                            showCategorie={!isMobile}
                                                         />
                                                     </SwiperSlide>
                                                 ))}

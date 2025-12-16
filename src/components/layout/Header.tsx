@@ -14,6 +14,7 @@ import { useTheme } from 'next-themes';
 import { ThemedText } from '../ThemedText';
 import { usePathname } from 'next/navigation'
 import SearchModal from '../SearchModal';
+import Image from 'next/image'
 
 const menus = [
     { name: "Politics" },
@@ -101,7 +102,14 @@ export default function Header() {
                     <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
                         <Link href="/">
                             <span className='site-logo'>
-                                <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <Image
+                                    width={240}
+                                    src={'/assets/newlogo.png'}
+                                    height={100}
+                                    className='object-fit-contain'
+                                    alt={'IGEHE Logo'}
+                                />
+                                {/* <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clipPath="url(#clip0_2928_1291)">
                                         <path d="M123.532 18.5566C123.532 13.8136 123.532 9.0673 123.532 4.32431C123.532 3.6701 123.555 3.6434 124.198 3.6434C127.981 3.6434 131.768 3.6434 135.551 3.6434C136.208 3.6434 136.234 3.6701 136.234 4.30762C136.234 7.38506 136.234 10.4658 136.234 13.5433C136.234 14.0673 136.271 14.1074 136.804 14.1074C139.324 14.1074 141.841 14.1074 144.361 14.1074C144.941 14.1074 144.967 14.0773 144.967 13.4965C144.967 10.4058 144.967 7.31163 144.967 4.22084C144.967 3.68679 145.004 3.6434 145.527 3.6434C149.244 3.6434 152.964 3.6434 156.68 3.6434C157.27 3.6434 157.303 3.68012 157.303 4.28426C157.303 13.8136 157.303 23.343 157.303 32.8724C157.303 33.4098 157.283 33.4298 156.74 33.4298C152.997 33.4298 149.25 33.4298 145.507 33.4298C145.004 33.4298 144.971 33.3964 144.971 32.8791C144.971 29.1074 144.971 25.3357 144.971 21.564C144.971 20.9398 144.961 20.9298 144.351 20.9298C141.844 20.9298 139.341 20.9298 136.834 20.9298C136.278 20.9298 136.238 20.9665 136.238 21.5106C136.238 25.2823 136.238 29.054 136.238 32.8256C136.238 33.4031 136.214 33.4264 135.624 33.4264C131.801 33.4264 127.975 33.4264 124.151 33.4264C123.548 33.4264 123.535 33.4131 123.535 32.7889C123.535 28.0459 123.535 23.2996 123.535 18.5566H123.532Z" fill="#1176BB" />
                                         <path d="M48.6046 12.8757C48.5713 13.323 48.4213 13.6801 48.2947 14.0373C46.8747 18.0259 44.6148 21.4905 41.7283 24.5613C39.8317 26.5806 37.7351 28.3563 35.2819 29.6814C32.3953 31.2402 29.3021 32.1714 26.0722 32.6688C24.0323 32.9825 21.9791 33.2228 19.9092 33.1828C15.3794 33.0993 11.0529 32.1648 7.13304 29.8083C3.53652 27.6487 1.11329 24.5646 0.259988 20.3924C-0.546645 16.4405 0.529976 13.0726 3.57318 10.3824C4.8698 9.23418 6.41973 8.63338 8.13299 8.45982C10.7096 8.19947 13.2061 8.49653 15.5627 9.63805C16.9426 10.3056 18.1492 11.2135 19.2392 12.2883C20.4258 13.4565 21.5458 14.6915 22.8424 15.7429C25.109 17.5853 27.7488 18.59 30.5621 19.1975C33.7653 19.8884 36.9585 19.9184 40.105 18.8971C43.4115 17.8223 46.1314 15.8931 48.2713 13.1461C48.3213 13.0826 48.368 13.0192 48.4246 12.9625C48.448 12.9358 48.4913 12.9291 48.6046 12.8724V12.8757Z" fill="#1176BB" />
@@ -116,7 +124,7 @@ export default function Header() {
                                             <rect width="240" height="30" fill="white" transform="translate(0 3.60001)" />
                                         </clipPath>
                                     </defs>
-                                </svg>
+                                </svg> */}
 
                             </span>
                         </Link>
@@ -178,7 +186,7 @@ export default function Header() {
                                                     </svg>
 
                                                 </span>
-                                                <ThemedText type={pathname === `/` ? 'defaultSemiBold':'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB':'#282F2F'}>
+                                                <ThemedText type={pathname === `/` ? 'defaultSemiBold' : 'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB' : '#282F2F'}>
                                                     Home
                                                 </ThemedText>
                                             </Link>
@@ -187,7 +195,7 @@ export default function Header() {
                                         {categories && categories.length > 0 ? (
                                             orderedCategories.map((NavItem: any, index: number) => (
                                                 <li className="nav-item" key={index}>
-                                                    <Link href={`/news/${NavItem.slug}`} className="nav-link active d-flex align-items-center">
+                                                    <Link href={`/${NavItem.slug}`} className="nav-link active d-flex align-items-center">
                                                         <span className="nav-hover-effect d-flex">
                                                             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                 <g clipPath="url(#clip0_1277_4757)">
@@ -206,11 +214,11 @@ export default function Header() {
                                                                 </defs>
                                                             </svg>
                                                         </span>
-                                                        <ThemedText 
-                                                            style={{ textTransform: 'capitalize' }} 
-                                                            type={pathname === `/news/${NavItem.slug}` ? 'defaultSemiBold':'default'} 
-                                                            darkColor='#fff' 
-                                                            lightColor={pathname === `/news/${NavItem.slug}` ? '#1176BB':'#282F2F'}>
+                                                        <ThemedText
+                                                            style={{ textTransform: 'capitalize' }}
+                                                            type={pathname === `/${NavItem.slug}` ? 'defaultSemiBold' : 'default'}
+                                                            darkColor='#fff'
+                                                            lightColor={pathname === `/${NavItem.slug}` ? '#1176BB' : '#282F2F'}>
                                                             {NavItem?.name || 'Home'}
                                                         </ThemedText>
                                                     </Link>

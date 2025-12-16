@@ -10,7 +10,8 @@ import TimeLine from '@/components/ReUsable/TimeLine'
 import { useNewsData } from '@/hooks/useNewsData'
 import React, { Suspense, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
-import { useFeaturedArticles,useTopSliderArticles } from '@/hooks/useMainNewsData'
+import { useFeaturedArticles, useTopSliderArticles } from '@/hooks/useMainNewsData'
+import CustomSlider from '@/components/home/CustomSlider'
 
 
 const upperCats = [
@@ -56,11 +57,11 @@ const lowerCats = [
     name: 'Diaspora',
     slug: 'diaspora'
   }]
-  
+
 
 export function Home() {
-  const { data: articles = [], isLoading:articlesLoading, error } = useFeaturedArticles()
-  const { data: topSlider = [],isLoading:topSliderLoading } = useTopSliderArticles()
+  const { data: articles = [], isLoading: articlesLoading, error } = useFeaturedArticles()
+  const { data: topSlider = [], isLoading: topSliderLoading } = useTopSliderArticles()
   const {
     liveEvent,
     liveEventLoading,
@@ -72,7 +73,7 @@ export function Home() {
     popularArticles,
     popularArticlesLoading,
 
-    highlightArticles:featuredNews,
+    highlightArticles: featuredNews,
     highlightArticlesLoading,
 
     latestArticles,
@@ -100,66 +101,68 @@ export function Home() {
   // }), [safeFeaturedArticles]);
 
 
-  
+
   return (
     <>
       <Container>
         <Suspense fallback={<NewsSkeleton count={3} />}>
-        {
-          liveEvent?.length > 0 ? 
-          // <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
-          <TimeLine articles={liveEvent}/>
-          :
-          topSlider?.length > 0 &&
-           <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
-        }
-        
+          {
+            liveEvent?.length > 0 ?
+              // <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+              <TimeLine articles={liveEvent} />
+              :
+              topSlider?.length > 0 &&
+              <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
+          }
+
         </Suspense>
       </Container>
 
       <Suspense fallback={<NewsSkeleton count={3} />}>
-        <HomeMainSections/>
+        <HomeMainSections />
       </Suspense>
 
 
-       <Suspense fallback={null}>
+      <Suspense fallback={null}>
         <Container>
-          <Row>
-            <Col>
-              <AdManager
-                position="home-bellow-hights"
-                priority={true}
-              /></Col>
-            <Col>
-              <AdManager
-                position="home-bellow-hights-2"
-                priority={true}
-              />
-            </Col>
-          </Row>
+          <CustomSlider
+            lgDisplay={2}
+            mdDisplay={2}
+            smDisplay={1}
+          >
+            <AdManager
+              position="home-bellow-hights"
+              priority={true}
+            />
+            <AdManager
+              position="home-bellow-hights-2"
+              priority={true}
+            />
+          </CustomSlider>
         </Container>
       </Suspense>
 
       <Suspense fallback={<NewsSkeleton count={3} />}>
-        <Recents/>
+        <Recents />
       </Suspense>
       <Suspense fallback={null}>
         <Container>
-          <Row>
-            <Col>
-              <AdManager
-                position="header-landscape-ad-1"
-                priority={true}
-                className="mb-2"
-              /></Col>
-            <Col>
-              <AdManager
-                position="header-landscape-ad-2"
-                priority={true}
-                className="mb-2"
-              />
-            </Col>
-          </Row>
+          <CustomSlider
+            lgDisplay={2}
+            mdDisplay={2}
+            smDisplay={1}
+          >
+            <AdManager
+              position="header-landscape-ad-1"
+              priority={true}
+              className="mb-2"
+            />
+            <AdManager
+              position="header-landscape-ad-2"
+              priority={true}
+              className="mb-2"
+            />
+          </CustomSlider>
         </Container>
       </Suspense>
       <Suspense fallback={<NewsSkeleton count={1} />}>
@@ -167,7 +170,23 @@ export function Home() {
       </Suspense>
       <Suspense fallback={null}>
         <Container>
-          <Row>
+          <CustomSlider
+            lgDisplay={2}
+            mdDisplay={2}
+            smDisplay={1}
+          >
+            <AdManager
+              position="header-landscape-ad-1"
+              priority={true}
+              className="mb-2"
+            />
+            <AdManager
+              position="header-landscape-ad-2"
+              priority={true}
+              className="mb-2"
+            />
+          </CustomSlider>
+          {/* <Row>
             <Col>
               <AdManager
                 position="header-landscape-ad-1"
@@ -181,7 +200,7 @@ export function Home() {
                 priority={true}
                 className="mb-2"
               /></Col>
-          </Row>
+          </Row> */}
         </Container>
       </Suspense>
       <Suspense fallback={<NewsSkeleton count={1} />}>

@@ -10,7 +10,7 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
     return (
         <div className="article-meta-data has-gray-border d-flex align-items-center justify-content-between mt-4 pt-4">
             <div className="meta-left d-flex align-items-center gap-5 w-75">
-                <Link href={`/category/${category}`} className='text-decoration-none'>
+                <Link href={`/${category}`} className='text-decoration-none'>
                     <ThemedText type='small' className='hasBorder'>{category}</ThemedText>
                 </Link>
 
