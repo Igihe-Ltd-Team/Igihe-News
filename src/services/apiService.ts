@@ -640,7 +640,7 @@ export class ApiService {
 
 
   static async fetchCategories(params?: any): Promise<Category[]> {
-    const cacheKey = `categories:${JSON.stringify(params)}`
+    const cacheKey = `categories:${params?.per_page ?? 100}:${params?.orderby ?? 'count'}:${params?.exclude?.join(',') ?? ''}`
 
     return this.dedupedFetch(cacheKey, async () => {
       // Your existing categories fetch logic
@@ -662,7 +662,7 @@ export class ApiService {
 
       const data = await response.json()
       return data.filter((category: Category) => category.count > 0)
-    }, 30 * 60 * 1000) // 30 minutes cache for categories
+    }, 120 * 60 * 1000) // 60 minutes cache for categories
   }
 
   // Articles/Posts API
@@ -1331,13 +1331,16 @@ export class ApiService {
 
 
 
+  
+
+
 
 
 
 
   private static adsCache: Advertisement[] | null = null;
   private static adsCacheTimestamp: number = 0;
-  private static ADS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private static ADS_CACHE_TTL = 60 * 60 * 1000; // 5 minutes
   private static adsFetchInProgress: Promise<Advertisement[]> | null = null;
 
   static async fetchAdvertisements(): Promise<Advertisement[]> {
@@ -1352,11 +1355,15 @@ export class ApiService {
     if (this.adsFetchInProgress) {
       return this.adsFetchInProgress;
     }
-
+    const cacheKey = 'slots:all'
     // Create new fetch
     this.adsFetchInProgress = (async () => {
       try {
+
+        return this.cachedFetch(cacheKey, async () => {
+
         const timestamp = Date.now();
+        
         const response = await this.fetchWithTimeout(
           `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`
         );
@@ -1371,8 +1378,9 @@ export class ApiService {
         // Update cache
         this.adsCache = validAds;
         this.adsCacheTimestamp = now;
-
         return validAds;
+        }, ApiService.ADS_CACHE_TTL)
+        
       } catch (error) {
         console.error('Error fetching advertisements:', error);
         // Return empty array on error

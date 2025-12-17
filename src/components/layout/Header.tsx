@@ -49,10 +49,10 @@ export default function Header() {
         
         if (result.success) {
             // Refresh to show updated data
-            router.refresh()
+            // router.refresh()
             
             // Optional: Force full reload if router.refresh() doesn't work
-            // window.location.reload()
+            window.location.reload()
         }
     } catch (error) {
         console.error('Failed to refresh:', error)

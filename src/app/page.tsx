@@ -59,9 +59,12 @@ export async function generateMetadata() {
 
 export default async function HomePage() {
   // Choose your strategy based on needs
-  const initialData = STRATEGY === 'full' 
-    ? await prefetchAllHomeData()
-    : await prefetchHomeData() 
+  // const initialData = STRATEGY === 'full' 
+  //   ? await prefetchAllHomeData()
+  //   : await prefetchHomeData() 
+
+  const initialData = await prefetchAllHomeData()
+
 
   return (
     <PrefetchHomeData initialData={initialData}>

@@ -21,7 +21,7 @@ export function useNewsData() {
   const categoriesQuery = useQuery({
     queryKey: queryKeys.categories.lists(),
     queryFn: () => ApiService.fetchCategories({ per_page: 100 }),
-    staleTime: 30 * 60 * 1000,
+    staleTime: 120 * 60 * 1000,
   })
 
   const featuredArticlesQuery = useQuery({

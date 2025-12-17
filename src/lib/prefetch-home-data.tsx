@@ -104,9 +104,10 @@
 
 
 import { ApiService } from '@/services/apiService'
-import { Advertisement, NewsItem } from '@/types/fetchData'
+import { Advertisement, Category, NewsItem } from '@/types/fetchData'
 
 export interface HomePageData {
+  categories: Category[]
   liveEvent: NewsItem[]
   mainArticle: NewsItem[]
   topSliders: NewsItem[]
@@ -136,6 +137,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
   try {
     // Only fetch CRITICAL above-the-fold content
     const [
+      categoriesResponse,
       liveEventResponse,
       mainArticleResponse,
       topSlidersResponse,
@@ -144,6 +146,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       highlightResponse,
       addsResponse
     ] = await Promise.allSettled([
+      ApiService.fetchCategories({ per_page: 100 }),
       ApiService.fetchArticles({ tags: [199], per_page: 1 }),
       ApiService.fetchArticles({ tags: [197], per_page: 1 }),
       ApiService.fetchArticles({ tags: [198], per_page: 9 }),
@@ -154,6 +157,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
     ])
 
     return {
+      categories: categoriesResponse.status === 'fulfilled' ? categoriesResponse.value : [],
       liveEvent: liveEventResponse.status === 'fulfilled' ? liveEventResponse.value.data : [],
       mainArticle: mainArticleResponse.status === 'fulfilled' ? mainArticleResponse.value.data : [],
       topSliders: topSlidersResponse.status === 'fulfilled' ? topSlidersResponse.value.data : [],
@@ -165,6 +169,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
   } catch (error) {
     console.error('Error prefetching home data:', error)
     return {
+      categories:[],
       liveEvent: [],
       mainArticle: [],
       topSliders: [],
