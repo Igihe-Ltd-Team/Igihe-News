@@ -56,9 +56,9 @@ export default function CategoryPageClient({
       const lastPage = data.pages[data.pages.length - 1];
       if (lastPage?.posts) {
         setPageInfo({
-          currentPage: lastPage.posts.current_page,
-          lastPage: lastPage.posts.last_page,
-          total: lastPage.posts.total
+          currentPage: lastPage.posts.pagination.currentPage,
+          lastPage: lastPage.posts.pagination.totalPages,
+          total: lastPage.posts.pagination.totalPages
         });
       }
     }
