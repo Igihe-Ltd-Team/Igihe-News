@@ -67,7 +67,7 @@ const NewsSection = React.memo(({
                             key={mainArticle.id || mainArticle.slug}
                             article={mainArticle}
                             showImage
-                            priority={false}
+                            priority={true}
                             imgHeight={300}
                         />
                     )}

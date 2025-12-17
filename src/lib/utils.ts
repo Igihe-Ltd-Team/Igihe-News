@@ -101,7 +101,7 @@ export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
   return null;
 }
 
-export function isImageMedia(featuredMedia: NewsItem): {
+export function isImageMedia(featuredMedia: NewsItem, priority?: boolean): {
   isImage: boolean,
   filePath: string,
   slug: string,
@@ -116,12 +116,27 @@ export function isImageMedia(featuredMedia: NewsItem): {
   const media2 = featuredMedia._embedded?.['wp:featuredmedia']?.[0];
   const media = featuredMedia.acf?.file_source;
 
-  return {
+  if (!priority) {
+    if (media2?.source_url) {
+      return {
+    isImage: media?.type !== 'file' || false,
+    filePath: media?.formatted_value?.url || '',
+    slug: featuredMedia?.slug || '',
+    img:media2?.media_details?.sizes?.medium?.source_url || ''
+  };
+    }
+  }
+      
+    
+  
+return {
     isImage: media?.type !== 'file' || false,
     filePath: media?.formatted_value?.url || '',
     slug: featuredMedia?.slug || '',
     img: media2?.source_url || ''
   };
+
+  
 }
 
 

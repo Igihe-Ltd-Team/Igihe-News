@@ -73,7 +73,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
             </div>
         )
     }
-    const featuredImage = getFeaturedImage(article);
+    const featuredImage = getFeaturedImage(article,true);
 
     const articleCategory = article ? getCategoryName(article) : undefined;
     const publishDate = article ? formatDateTime(article.date) : '';

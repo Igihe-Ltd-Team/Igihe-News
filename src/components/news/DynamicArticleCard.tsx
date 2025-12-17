@@ -51,10 +51,11 @@ function DynamicArticleCard({
   leftNumber,
   showCategorie = true,
   isSlider = false,
-  mobileImgHeight
+  mobileImgHeight,
+  priority = false
 }: ArticleCardProps) {
 const { isMobile } = useResponsive()
-  const featuredImage = getFeaturedImage(article);
+  const featuredImage = getFeaturedImage(article,priority);
 
   const mouseEnter = (articles:NewsItem)=>{
     if (article?.slug) {
