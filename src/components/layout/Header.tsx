@@ -15,6 +15,7 @@ import { ThemedText } from '../ThemedText';
 import { usePathname, useRouter } from 'next/navigation'
 import SearchModal from '../SearchModal';
 import Image from 'next/image'
+import { revalidateHomePage } from '@/actions/revalidate';
 
 const menus = [
     { name: "Politics" },
@@ -43,19 +44,16 @@ export default function Header() {
 
    const refreshHomePage = async () => {
     try {
-        // Add timestamp to bust cache
-        const timestamp = Date.now()
+        // Call server action
+        const result = await revalidateHomePage()
         
-        // Trigger manual revalidation
-        await fetch(`/api/revalidate?path=/&t=${timestamp}`)
-        
-        // Navigate with cache busting
-        router.push(`/?t=${timestamp}`)
-        
-        // Wait a bit then refresh
-        setTimeout(() => {
+        if (result.success) {
+            // Refresh to show updated data
             router.refresh()
-        }, 100)
+            
+            // Optional: Force full reload if router.refresh() doesn't work
+            // window.location.reload()
+        }
     } catch (error) {
         console.error('Failed to refresh:', error)
         window.location.reload()
