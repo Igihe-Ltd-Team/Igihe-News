@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Offcanvas, Button, Container, Row, Col } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
+import { useRouter } from 'next/navigation'
 
 interface menuItemProps {
     categories?: (Category | undefined)[]
@@ -19,6 +20,22 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
 
     const handleClose = () => setShow(false)
     const handleShow = () => setShow(true)
+
+    const router = useRouter()
+    
+        const refreshHomePage = async () => {
+            try {
+                // Trigger manual revalidation
+                await fetch('/api/revalidate?path=/')
+    
+                // Refresh the page to show updated data
+                router.refresh()
+            } catch (error) {
+                console.error('Failed to refresh:', error)
+                // Fallback to simple refresh
+                router.refresh()
+            }
+        }
 
     return (
         <div className="justify-content-center">
@@ -64,7 +81,12 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                             {
                                 showHome &&
                                 <li className="nav-item">
-                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/">
+                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/"
+                                    onClick={(e) => {
+                                                        e.preventDefault()
+                                                        refreshHomePage()
+                                                    }}
+                                                    >
                                     <span className="nav-hover-effect d-flex">
                                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <g clipPath="url(#clip0_1277_4757)">
@@ -118,7 +140,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                     .filter((category): category is Category => category !== undefined)
                                     .map((category: Category, index: number) => (
                                         <li className="nav-item" key={category.id}>
-                                            <Link href={`/news/${category.slug}`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
+                                            <Link href={`/${category.slug}`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
                                                 <span className="nav-hover-effect d-flex">
                                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <g clipPath="url(#clip0_1277_4757)">

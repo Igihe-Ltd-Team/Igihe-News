@@ -92,7 +92,7 @@ export default function SearchModal() {
 
   const handleResultClick = (article: NewsItem) => {
     saveRecentSearch(stripHtml(article.title.rendered));
-    router.push(`/news/news/${article.slug}`);
+    router.push(`/news/${article.slug}`);
     handleClose();
   };
 
@@ -101,7 +101,7 @@ export default function SearchModal() {
   };
 
   const handleTrendingClick = (article: NewsItem) => {
-    router.push(`/news/news/${article.slug}`);
+    router.push(`/news/${article.slug}`);
     handleClose();
   };
 

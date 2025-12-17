@@ -80,7 +80,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const author = article._embedded?.author?.[0];
     const authorsName = article._embedded?.author?.[0]?.name || '';
     const authorImage = article._embedded?.author?.[0]?.avatar_urls?.['96'];
-    const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/news/${articleCategory?.toLowerCase()}/${article.slug}` : '';
+    const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/${articleCategory?.toLowerCase()}/${article.slug}` : '';
     const tags = getTags(article)
 
     return (

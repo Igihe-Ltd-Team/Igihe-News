@@ -31,7 +31,7 @@ export default function OurNewsCategories() {
                                     <ThemedText type='subtitle'>{category.name}</ThemedText>
                                 </div>
                                 <p>{category.description}</p>
-                                <Link href={`/news/${category.slug}`} className='text-reset text-decoration-none'>
+                                <Link href={`/services/${category.slug}`} className='text-reset text-decoration-none'>
                                     Read News
                                 </Link>
                             </Col>

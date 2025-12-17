@@ -12,7 +12,7 @@ import { useResponsive } from '@/hooks/useResponsive';
 import IgiheCanvas from './IgiheCanvas';
 import { useTheme } from 'next-themes';
 import { ThemedText } from '../ThemedText';
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import SearchModal from '../SearchModal';
 import Image from 'next/image'
 
@@ -39,6 +39,22 @@ export default function Header() {
     const {
         categories
     } = useNewsData()
+    const router = useRouter()
+
+    const refreshHomePage = async () => {
+        try {
+            // Trigger manual revalidation
+            await fetch('/api/revalidate?path=/')
+
+            // Refresh the page to show updated data
+            router.refresh()
+        } catch (error) {
+            console.error('Failed to refresh:', error)
+            // Fallback to simple refresh
+            router.refresh()
+        }
+    }
+
 
     const normalizedCategories = categories.map((cat) => ({
         ...cat,
@@ -100,7 +116,10 @@ export default function Header() {
                 {/* Logo and banner */}
                 <div className="row flex align-items-center py-2 justify-content-between">
                     <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
-                        <Link href="/">
+                        <Link href="/" onClick={(e) => {
+                            e.preventDefault()
+                            refreshHomePage()
+                        }}>
                             <span className='site-logo'>
                                 <Image
                                     width={240}
@@ -186,7 +205,12 @@ export default function Header() {
                                                     </svg>
 
                                                 </span>
-                                                <ThemedText type={pathname === `/` ? 'defaultSemiBold' : 'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB' : '#282F2F'}>
+                                                <ThemedText type={pathname === `/` ? 'defaultSemiBold' : 'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB' : '#282F2F'}
+                                                    onClick={(e) => {
+                                                        e.preventDefault()
+                                                        refreshHomePage()
+                                                    }}
+                                                >
                                                     Home
                                                 </ThemedText>
                                             </Link>

@@ -9,7 +9,7 @@ interface DividerProps{
 }
 export default function HeaderDivider({title,titleStyle='subtitle',slug}:DividerProps) {
     return (
-        <Link href={slug ? `/news/${slug}` : '#'} className="divider-container text-reset text-decoration-none">
+        <Link href={slug ? `/${slug}` : '#'} className="divider-container text-reset text-decoration-none">
             <div className="divider py-3">
                 <span className="divider-separator">
                     <ThemedText type={titleStyle} lightColor='#282F2F' darkColor='#fff' className="divider__text" >{title}</ThemedText>

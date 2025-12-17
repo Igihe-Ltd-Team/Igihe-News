@@ -11,7 +11,7 @@ interface opinionProps{
 }
 export default function OpionCard({article}:opinionProps) {
     return (
-        <Link href={`/news/opinions/${article.slug}`} className='text-decoration-none text-reset opion-card d-flex justify-content-between align-items-center mt-2'>
+        <Link href={`/services/opinions/${article.slug}`} className='text-decoration-none text-reset opion-card d-flex justify-content-between align-items-center mt-2'>
             <div className="w-60 d-flex flex-column gap-2">
                 <ThemedText type='defaultSemiBold'>{stripHtml(article.title.rendered)}</ThemedText>
                 <ThemedText type='small' className='line-clamp-3'>
