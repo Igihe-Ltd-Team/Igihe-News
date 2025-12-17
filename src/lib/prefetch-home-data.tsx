@@ -187,12 +187,14 @@ export async function prefetchBelowFoldData() {
       africaResponse,
       entertainmentResponse,
       advertorialResponse,
+      opinionsResponse,
       announcementResponse
     ] = await Promise.allSettled([
       ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
       ApiService.fetchArticles({ tags: [120], per_page: 12 }),
       ApiService.fetchArticles({ categories: [105, 123], per_page: 12 }),
       ApiService.fetchAdvertorals(),
+      ApiService.fetchOpinions(),
       ApiService.fetchAnnouncement()
     ])
 
@@ -201,6 +203,7 @@ export async function prefetchBelowFoldData() {
       africaArticles: africaResponse.status === 'fulfilled' ? africaResponse.value.data : [],
       entertainmentArticles: entertainmentResponse.status === 'fulfilled' ? entertainmentResponse.value.data : [],
       featuredAdvertorial: advertorialResponse.status === 'fulfilled' ? advertorialResponse.value : [],
+      featuredOpinions: opinionsResponse.status === 'fulfilled' ? opinionsResponse.value : [],
       featuredAnnouncement: announcementResponse.status === 'fulfilled' ? announcementResponse.value : []
     }
   } catch (error) {
@@ -210,6 +213,7 @@ export async function prefetchBelowFoldData() {
       africaArticles: [],
       entertainmentArticles: [],
       featuredAdvertorial: [],
+      featuredOpinions: [],
       featuredAnnouncement: []
     }
   }

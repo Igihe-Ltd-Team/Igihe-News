@@ -36,6 +36,10 @@ export const queryKeys = {
       ['articles', 'category-tag', tagId, ...(categoryId ? [categoryId] : [])] as const,
     
   },
+  opinion:{
+    all:['opinion'] as const,
+    lists:() => [...queryKeys.opinion.all, 'list'] as const
+  },
   advertorial:{
     all:['advertorial'] as const,
     lists:() => [...queryKeys.advertorial.all, 'list'] as const
@@ -44,7 +48,6 @@ export const queryKeys = {
     all:['announcement'] as const,
     lists:() => [...queryKeys.announcement.all, 'list'] as const,
         infinite: (filters: Record<string, any>) => [...queryKeys.announcement.all, 'infinite', filters] as const,
-
   },
 
   videos: {

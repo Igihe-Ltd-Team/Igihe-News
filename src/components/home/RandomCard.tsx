@@ -10,7 +10,7 @@ export default function RandomCard() {
 
     const { data, isLoading, error } = useQuery({
     queryKey: ['facts'],
-    queryFn: () => ApiService.fetchFacts({ per_page: 1 }),
+    queryFn: () => ApiService.fetchFacts(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 

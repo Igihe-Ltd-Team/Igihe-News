@@ -74,16 +74,24 @@ export const stripHtml = (html: string) => {
 
 
 // Alternative: More robust version with fallbacks
-export const getFeaturedImage = (articleData: NewsItem) => {
+export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
   // console.log(articleData)
   if (!articleData) return null;
 
   // Check if _embedded data exists and has featured media
   const featuredMedia = articleData._embedded?.['wp:featuredmedia']?.[0];
 
-  if (featuredMedia?.source_url) {
-    return featuredMedia.source_url;
+  if (priority) {
+    if (featuredMedia?.source_url) {
+      return featuredMedia.source_url;
+    }
   }
+  else {
+    if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
+      return featuredMedia?.media_details?.sizes?.medium?.source_url;
+    }
+  }
+
 
   // Fallback: Check if there's a featured_media ID but no embedded data
   if (articleData.featured_media && !featuredMedia) {
@@ -147,7 +155,7 @@ export function injectGalleryImages(article: any) {
   // Regex now handles <doc12345> or <doc12345|center>
   const regex = /<doc(\d+)(?:\|(\w+))?>/g;
 
-  return content.replace(regex, (match:any, docId:any, align:any) => {
+  return content.replace(regex, (match: any, docId: any, align: any) => {
     const imageItem = gallery.find((g: any) => g.id_document == docId);
 
     if (!imageItem) {

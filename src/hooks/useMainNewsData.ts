@@ -88,6 +88,14 @@ export function useFeaturedAdvertorial() {
   })
 }
 
+export function useOpinion() {
+  return useQuery({
+    queryKey: queryKeys.opinion.lists(),
+    queryFn: () => ApiService.fetchOpinions().then(r => r || []),
+    staleTime: 10 * 60 * 1000,
+  })
+}
+
 export function useFeaturedAnnouncement() {
   return useQuery({
     queryKey: queryKeys.announcement.lists(),

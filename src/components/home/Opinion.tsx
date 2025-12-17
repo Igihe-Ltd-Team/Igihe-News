@@ -8,13 +8,12 @@ import HomeVideoCard from '../videos/HomeVideoCard'
 import CustomSlider from './CustomSlider'
 import NewsSkeleton from '../NewsSkeleton'
 import OpionCard from '../opinion/OpionCard'
+import { useOpinion } from '@/hooks/useMainNewsData'
 
 export default function Opinios() {
-  const { data: opinions, isLoading, error } = useQuery({
-    queryKey: ['opinions'],
-    queryFn: () => ApiService.fetchOpinions({ per_page: 6 }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+
+  const { data: opinions = [],isLoading,error } = useOpinion()
+
 
   if (isLoading) {
     return (

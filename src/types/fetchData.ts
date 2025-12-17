@@ -92,32 +92,32 @@ export interface NewsItem {
       type: string;
       formatted_value: string;
     };
-    file_source?:{
-        label: string,
+    file_source?: {
+      label: string,
+      type: string,
+      formatted_value: {
+        ID: number,
+        id: number,
+        title: string,
+        filename: string,
+        filesize: number,
+        url: string,
+        link: string,
+        author: string,
+        description: string,
+        caption: string,
+        name: string,
+        status: string,
+        uploaded_to: number,
+        menu_order: number,
+        mime_type: string,
         type: string,
-        formatted_value: {
-          ID: number,
-          id: number,
-          title: string,
-          filename: string,
-          filesize: number,
-          url: string,
-          link: string,
-          author: string,
-          description: string,
-          caption: string,
-          name: string,
-          status: string,
-          uploaded_to: number,
-          menu_order: number,
-          mime_type: string,
-          type: string,
-          subtype: string,
-          icon: string,
-          date: string,
-          modified: string
-        }
+        subtype: string,
+        icon: string,
+        date: string,
+        modified: string
       }
+    }
   }
   _links: {
     self: Array<{ href: string }>
@@ -163,6 +163,40 @@ export interface NewsItem {
             mime_type: string
             source_url: string
           }
+
+
+          medium: {
+            file: string,
+            width: number,
+            height: number,
+            filesize: 16108,
+            mime_type: string,
+            source_url: string
+          },
+          thumbnail: {
+            file: string,
+            width: number,
+            height: number,
+            filesize: 7386,
+            mime_type: string,
+            source_url: string
+          },
+          medium_large: {
+            file: string,
+            width: number,
+            height: number,
+            filesize: 65294,
+            mime_type: string,
+            source_url: string
+          },
+          full: {
+            file: string,
+            width: number,
+            height: number,
+            mime_type: string,
+            source_url: string
+          }
+
         }
       }
       source_url: string
@@ -177,7 +211,7 @@ export interface NewsItem {
       _links: any
     }>>
   }
-  
+
   // SEO fields (might not exist in all posts)
   seo_title?: string
   meta_description?: string
@@ -187,7 +221,7 @@ export interface NewsItem {
     canonical?: string
     og_title?: string
     og_description?: string
-    og_locale?:string
+    og_locale?: string
     og_image?: Array<{
       url: string
       width: number

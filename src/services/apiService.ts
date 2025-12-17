@@ -1,8 +1,7 @@
 import { fileCache } from '@/lib/cache/fileCache'
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
 import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem } from '@/types/fetchData'
-// import path from 'path';
-// import fs from 'fs';
+
 
 // Configuration
 const API_CONFIG = {
@@ -174,7 +173,11 @@ export class ApiService {
       // Cache the successful response
       requestCache.set(cacheKey, { data, timestamp: now })
       if (isServer) {
+        console.log(cacheKey,'is from server')
         await fileCache.set(cacheKey, data, ttl)
+      }
+      else{
+        console.log(cacheKey,'is from client')
       }
       return data
     } catch (error) {
@@ -188,7 +191,7 @@ export class ApiService {
 
         const fs = await import('fs/promises')
         const path = await import('path')
-        
+
         try {
           const filePath = path.join(process.cwd(), '.cache', `${cacheKey.replace(/[^a-z0-9-_:]/gi, '_').substring(0, 200)}.json`)
           const fileContent = await fs.readFile(filePath, 'utf-8')
@@ -209,66 +212,91 @@ export class ApiService {
   }
 
 
-private static async fetchWithTimeout(
-  url: string,
-  options: RequestInit = {},
-  timeout = API_CONFIG.timeout
-) {
-  let lastError: Error | null = null;
-  const maxRetries = API_CONFIG.retryAttempts || 2;
-  const isServer = typeof window === 'undefined';
+  private static async fetchWithTimeout(
+    url: string,
+    options: RequestInit = {},
+    timeout = API_CONFIG.timeout
+  ) {
+    let lastError: Error | null = null;
+    const maxRetries = API_CONFIG.retryAttempts || 2;
+    const isServer = typeof window === 'undefined';
 
-  let finalUrl = url;
-  if (!options.method || options.method === 'GET') {
-    if (!isServer) {
-      finalUrl = url.includes('?') 
-        ? `${url}&_=${Date.now()}`
-        : `${url}?_=${Date.now()}`;
+    let finalUrl = url;
+    if (!options.method || options.method === 'GET') {
+      if (!isServer) {
+        finalUrl = url.includes('?')
+          ? `${url}&_=${Date.now()}`
+          : `${url}?_=${Date.now()}`;
+      }
     }
-  }
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    // FIX: Create AbortController for server side too
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      // FIX: Create AbortController for server side too
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
 
-    try {
-      const fetchOptions: RequestInit = {
-        ...options,
-        signal: controller.signal, // Always add signal
-      };
+      try {
+        const fetchOptions: RequestInit = {
+          ...options,
+          signal: controller.signal, // Always add signal
+        };
 
-      fetchOptions.headers = {
-        'Accept': 'application/json',
-        ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
-        ...options.headers,
-      };
+        fetchOptions.headers = {
+          'Accept': 'application/json',
+          ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
+          ...options.headers,
+        };
 
-      const response = await fetch(finalUrl, fetchOptions);
+        const response = await fetch(finalUrl, fetchOptions);
 
-      clearTimeout(id); // Always clear timeout
+        clearTimeout(id); // Always clear timeout
 
-      if (!response.ok) {
-        const error = new Error(`HTTP error! status: ${response.status}`);
-        const status = response.status;
+        if (!response.ok) {
+          const error = new Error(`HTTP error! status: ${response.status}`);
+          const status = response.status;
 
-        const shouldRetry =
-          attempt < maxRetries && (
-            status === 429 || 
-            status >= 500 ||  
-            status === 408 || 
-            status === 0     
-          );
+          const shouldRetry =
+            attempt < maxRetries && (
+              status === 429 ||
+              status >= 500 ||
+              status === 408 ||
+              status === 0
+            );
 
-        if (shouldRetry) {
+          if (shouldRetry) {
+            lastError = error;
+            const backoffDelay = Math.pow(2, attempt) * 1000;
+
+            if (!isServer && process.env.NODE_ENV === 'development') {
+              console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
+                url,
+                status,
+                error: error.message
+              });
+            }
+
+            await new Promise(resolve => setTimeout(resolve, backoffDelay));
+            continue;
+          }
+
+          throw error;
+        }
+
+        return response;
+      } catch (error: any) {
+        clearTimeout(id);
+
+        const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
+
+        if (attempt < maxRetries) {
           lastError = error;
           const backoffDelay = Math.pow(2, attempt) * 1000;
-          
+
           if (!isServer && process.env.NODE_ENV === 'development') {
             console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
               url,
-              status,
-              error: error.message
+              error: error.message,
+              isTimeout
             });
           }
 
@@ -276,135 +304,15 @@ private static async fetchWithTimeout(
           continue;
         }
 
+        if (isTimeout) {
+          throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
+        }
         throw error;
       }
-
-      return response;
-    } catch (error: any) {
-      clearTimeout(id);
-
-      const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
-
-      if (attempt < maxRetries) {
-        lastError = error;
-        const backoffDelay = Math.pow(2, attempt) * 1000;
-        
-        if (!isServer && process.env.NODE_ENV === 'development') {
-          console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
-            url,
-            error: error.message,
-            isTimeout
-          });
-        }
-
-        await new Promise(resolve => setTimeout(resolve, backoffDelay));
-        continue;
-      }
-
-      if (isTimeout) {
-        throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
-      }
-      throw error;
     }
+
+    throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
   }
-
-  throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
-}
-
-  
-
-  // private static async fetchWithTimeout(
-  //   url: string,
-  //   options: RequestInit = {},
-  //   timeout = API_CONFIG.timeout
-  // ) {
-  //   let lastError: Error | null = null;
-  //   const maxRetries = API_CONFIG.retryAttempts || 2;
-
-  //   const finalUrl = url.includes('?') 
-  //   ? `${url}&_=${Date.now()}`
-  //   : `${url}?_=${Date.now()}`;
-
-
-  //   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-  //     const controller = new AbortController();
-  //     const id = setTimeout(() => controller.abort(), timeout);
-
-  //     try {
-  //       const response = await fetch(finalUrl, {
-  //         ...options,
-  //         signal: controller.signal,
-  //         headers: {
-  //           'Accept': 'application/json',
-  //           ...(options.method !== "GET" && { 'Content-Type': 'application/json' }),
-  //           ...options.headers,
-  //         },
-  //       });
-
-  //       clearTimeout(id);
-
-  //       if (!response.ok) {
-  //         const error = new Error(`HTTP error! status: ${response.status}`);
-  //         const status = response.status;
-
-  //         // Check if we should retry
-  //         const shouldRetry =
-  //           attempt < maxRetries && (
-  //             status === 429 || // Too Many Requests - retry after backoff
-  //             status >= 500 ||  // Server errors - retry
-  //             status === 408 || // Request Timeout - retry
-  //             status === 0      // Network error - retry
-  //           );
-
-  //         if (shouldRetry) {
-  //           lastError = error;
-  //           // Calculate exponential backoff: 1s, 2s, 4s
-  //           const backoffDelay = Math.pow(2, attempt) * 1000;
-  //           console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
-  //             url,
-  //             status,
-  //             error: error.message
-  //           });
-
-  //           await new Promise(resolve => setTimeout(resolve, backoffDelay));
-  //           continue; // Try again
-  //         }
-
-  //         throw error; // Don't retry for client errors (4xx except 429)
-  //       }
-
-  //       return response;
-  //     } catch (error: any) {
-  //       clearTimeout(id);
-
-  //       const isTimeout = controller.signal.aborted || error.message === "Request timed out" || error.name === 'AbortError';
-
-  //       if (attempt < maxRetries) {
-  //         lastError = error;
-
-  //         // Calculate exponential backoff: 1s, 2s, 4s
-  //         const backoffDelay = Math.pow(2, attempt) * 1000;
-  //         console.warn(`Request failed (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${backoffDelay}ms...`, {
-  //           url,
-  //           error: error.message,
-  //           isTimeout
-  //         });
-
-  //         await new Promise(resolve => setTimeout(resolve, backoffDelay));
-  //         continue; // Try again
-  //       }
-
-  //       // No more retries
-  //       if (isTimeout) {
-  //         throw new Error(`Request timed out after ${maxRetries + 1} attempts`);
-  //       }
-  //       throw error;
-  //     }
-  //   }
-
-  //   // This should never be reached, but just in case
-  //   throw lastError || new Error(`Request failed after ${maxRetries + 1} attempts`);
-  // }
 
 
 
@@ -443,6 +351,8 @@ private static async fetchWithTimeout(
       requestCache.set(cacheKey, { data, timestamp: now })
 
       if (isServer) {
+
+        console.log(cacheKey,'is from server')
         await fileCache.set(cacheKey, data, ttl)
       }
       return data
@@ -464,8 +374,8 @@ private static async fetchWithTimeout(
           const cacheEntry = JSON.parse(fileContent)
           console.warn('⚠️  Using stale file cache due to API error:', error)
           return cacheEntry.data
-        } catch {
-          // No stale cache available
+        } catch (fallbackError) {
+          console.error('❌ No fallback cache available:', fallbackError)
         }
       }
       throw error
@@ -1131,7 +1041,7 @@ private static async fetchWithTimeout(
     return { count: 0, size: 0 }
   }
 
-  
+
 
   static async fetchPopularCategories(limit: number = 10): Promise<Category[]> {
     try {
@@ -1342,50 +1252,49 @@ private static async fetchWithTimeout(
   }
 
 
+
+
   static async fetchOpinions(params?: {
     per_page?: number
     orderby?: string
     order?: 'asc' | 'desc'
   }): Promise<NewsItem[]> {
 
-    const cacheKey = 'opinion:all'
-
-    try {
-      return this.dedupedFetch(cacheKey, async () => {
-        const queryParams = new URLSearchParams()
-        if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
-        if (params?.orderby) queryParams.append('orderby', params.orderby)
-        if (params?.order) queryParams.append('order', params.order)
-
-        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?_embed&${queryParams}`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const ads = await response.json()
-        return ads || []
-      }, 10 * 60 * 1000) // 10 minutes cache for ads
-    } catch (error) {
-      console.error('Error fetching advertisements:', error)
-      return []
+    const queryParams: Record<string, any> = {
+      per_page: params?.per_page || 6,
+      _embed: '1',
+      orderby: params?.orderby || 'date',
+      order: params?.order || 'desc',
     }
+
+
+    if (params?.per_page) {
+      queryParams.per_page = params.per_page
+    }
+    if (params?.orderby) {
+      queryParams.orderby = params.orderby
+    }
+    if (params?.order) {
+      queryParams.order = params.order
+    }
+
+    const cacheKey = `opinion:${JSON.stringify(queryParams)}`
+
+    return this.cachedFetch(cacheKey, async () => {
+      const queryString = this.buildQuery(queryParams)
+      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?${queryString}`)
+      return await response.json()
+    }, 60 * 60 * 1000) // 1 hour cache for media
   }
 
 
-  static async fetchFacts(params?: {
-    per_page?: number
-    orderby?: string
-    order?: 'asc' | 'desc'
-  }): Promise<NewsItem[]> {
+
+  static async fetchFacts(): Promise<NewsItem[]> {
     const cacheKey = 'fact-of-the-day:all'
+
     try {
       return this.dedupedFetch(cacheKey, async () => {
-        const queryParams = new URLSearchParams()
-        if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
-        if (params?.orderby) queryParams.append('orderby', params.orderby)
-        if (params?.order) queryParams.append('order', params.order)
-
-        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&${queryParams}`)
+        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&per_page=1`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -1393,6 +1302,7 @@ private static async fetchWithTimeout(
         const ads = await response.json()
         return ads || []
       }, 10 * 60 * 1000) // 10 minutes cache for ads
+
     } catch (error) {
       console.error('Error fetching advertisements:', error)
       return []
@@ -1420,91 +1330,91 @@ private static async fetchWithTimeout(
   }
 
 
-  
+
 
 
 
 
   private static adsCache: Advertisement[] | null = null;
-private static adsCacheTimestamp: number = 0;
-private static ADS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-private static adsFetchInProgress: Promise<Advertisement[]> | null = null;
+  private static adsCacheTimestamp: number = 0;
+  private static ADS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private static adsFetchInProgress: Promise<Advertisement[]> | null = null;
 
-static async fetchAdvertisements(): Promise<Advertisement[]> {
-  const now = Date.now();
-  
-  // Return cached ads if not expired
-  if (this.adsCache && (now - this.adsCacheTimestamp) < this.ADS_CACHE_TTL) {
-    return this.adsCache;
-  }
-  
-  // If already fetching, return that promise
-  if (this.adsFetchInProgress) {
+  static async fetchAdvertisements(): Promise<Advertisement[]> {
+    const now = Date.now();
+
+    // Return cached ads if not expired
+    if (this.adsCache && (now - this.adsCacheTimestamp) < this.ADS_CACHE_TTL) {
+      return this.adsCache;
+    }
+
+    // If already fetching, return that promise
+    if (this.adsFetchInProgress) {
+      return this.adsFetchInProgress;
+    }
+
+    // Create new fetch
+    this.adsFetchInProgress = (async () => {
+      try {
+        const timestamp = Date.now();
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const ads = await response.json();
+        const validAds = ads || [];
+
+        // Update cache
+        this.adsCache = validAds;
+        this.adsCacheTimestamp = now;
+
+        return validAds;
+      } catch (error) {
+        console.error('Error fetching advertisements:', error);
+        // Return empty array on error
+        return [];
+      } finally {
+        // Clear the in-progress flag
+        this.adsFetchInProgress = null;
+      }
+    })();
+
     return this.adsFetchInProgress;
   }
-  
-  // Create new fetch
-  this.adsFetchInProgress = (async () => {
-    try {
-      const timestamp = Date.now();
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const ads = await response.json();
-      const validAds = ads || [];
-      
-      // Update cache
-      this.adsCache = validAds;
-      this.adsCacheTimestamp = now;
-      
-      return validAds;
-    } catch (error) {
-      console.error('Error fetching advertisements:', error);
-      // Return empty array on error
-      return [];
-    } finally {
-      // Clear the in-progress flag
-      this.adsFetchInProgress = null;
-    }
-  })();
-
-  return this.adsFetchInProgress;
-}
 
 
 
-  
+
   static async fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
-  try {
-    const allAds = await this.fetchAdvertisements();
-    return getAdsByPosition(allAds, position);
-  } catch (error) {
-    console.error('Error fetching ads by position:', error);
-    return [];
+    try {
+      const allAds = await this.fetchAdvertisements();
+      return getAdsByPosition(allAds, position);
+    } catch (error) {
+      console.error('Error fetching ads by position:', error);
+      return [];
+    }
   }
-}
 
 
-static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
-  try {
-    const allAds = await this.fetchAdvertisements();
-    const result: Record<AdPositionKey, Advertisement[]> = {} as any;
-    
-    positions.forEach(position => {
-      result[position] = getAdsByPosition(allAds, position);
-    });
-    
-    return result;
-  } catch (error) {
-    console.error('Error fetching ads by positions:', error);
-    return {} as Record<AdPositionKey, Advertisement[]>;
+  static async fetchAdsByPositions(positions: AdPositionKey[]): Promise<Record<AdPositionKey, Advertisement[]>> {
+    try {
+      const allAds = await this.fetchAdvertisements();
+      const result: Record<AdPositionKey, Advertisement[]> = {} as any;
+
+      positions.forEach(position => {
+        result[position] = getAdsByPosition(allAds, position);
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Error fetching ads by positions:', error);
+      return {} as Record<AdPositionKey, Advertisement[]>;
+    }
   }
-}
 
 
 

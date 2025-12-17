@@ -310,6 +310,7 @@ interface PrefetchHomeDataProps {
     africaArticles?: NewsItem[]
     entertainmentArticles?: NewsItem[]
     featuredAdvertorial?: any[]
+    featuredOpinions?: any[]
     featuredAnnouncement?: any[]
   }
 }
@@ -418,6 +419,15 @@ function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialDa
       initialData.featuredAdvertorial
     )
   }
+
+  if (initialData.featuredOpinions) {
+    client.setQueryData(
+      queryKeys.opinion.lists(),
+      initialData.featuredOpinions
+    )
+  }
+
+  
 
   if (initialData.featuredAnnouncement) {
     client.setQueryData(
