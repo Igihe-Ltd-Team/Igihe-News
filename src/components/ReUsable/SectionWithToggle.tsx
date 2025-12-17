@@ -153,7 +153,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                 }}
             >
                 {visiblePosts.map((item, index) => {
-                    const chechedfile = isImageMedia(item)
+                    const chechedfile = isImageMedia(item,true)
                     return(
                     <Link 
                         href={chechedfile.isImage? `/services/advertorials/${item.slug}` : chechedfile.filePath} 

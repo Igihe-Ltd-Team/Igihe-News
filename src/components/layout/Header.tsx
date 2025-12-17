@@ -41,19 +41,17 @@ export default function Header() {
     } = useNewsData()
     const router = useRouter()
 
-    const refreshHomePage = async () => {
-        try {
-            // Trigger manual revalidation
-            await fetch('/api/revalidate?path=/')
-
-            // Refresh the page to show updated data
-            router.refresh()
-        } catch (error) {
-            console.error('Failed to refresh:', error)
-            // Fallback to simple refresh
-            router.refresh()
-        }
+   const refreshHomePage = async () => {
+    try {
+        // Trigger manual revalidation
+        await fetch('/api/revalidate?path=/')
+        // Force full page reload
+        window.location.reload()
+    } catch (error) {
+        console.error('Failed to refresh:', error)
+        window.location.reload()
     }
+}
 
 
     const normalizedCategories = categories.map((cat) => ({
