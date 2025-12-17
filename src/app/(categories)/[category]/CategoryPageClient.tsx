@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Col, Row, Button } from "react-bootstrap";
-import { Category } from "@/types/fetchData";
+import { Category, NewsItem } from "@/types/fetchData";
 import DynamicArticleCard from "@/components/news/DynamicArticleCard";
 import CategoryMainSection from "@/components/news/CategoryMainSection";
 import PopularNews from "@/components/news/PopularNews";
@@ -12,8 +12,8 @@ import CustomSlider from "@/components/home/CustomSlider";
 import { useNewsData } from "@/hooks/useNewsData";
 
 interface CategoryPageClientProps {
-  initialPosts: any[];
-  highlightArticles: any[];
+  initialPosts: NewsItem[];
+  highlightArticles: NewsItem[];
   categoryInfo?: Category;
   initialPageInfo: {
     currentPage: number;
