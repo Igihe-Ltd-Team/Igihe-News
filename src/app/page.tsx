@@ -46,24 +46,8 @@ import { prefetchAllHomeData, prefetchHomeData } from '@/lib/prefetch-home-data'
 import { Home } from './home/home'
 import { PrefetchHomeData } from './prefetch-home-data'
 
-// ============================================
-// PERFORMANCE CONFIGURATION
-// ============================================
-
-// Enable ISR with 5-minute revalidation
 export const revalidate = 300
 
-// Optional: For high-traffic sites, consider shorter revalidation
-// export const revalidate = 60 // 1 minute for breaking news sites
-
-// Optional: Force dynamic rendering (no caching)
-// export const dynamic = 'force-dynamic'
-
-// Optional: Enable static generation
-// export const dynamic = 'force-static'
-
-// RECOMMENDED STRATEGY FOR NEWS SITES:
-// Use ISR with 5-minute revalidation for best performance + freshness balance
 const STRATEGY = 'full' // Options: 'fast' | 'full'
 
 export async function generateMetadata() {
@@ -76,8 +60,8 @@ export async function generateMetadata() {
 export default async function HomePage() {
   // Choose your strategy based on needs
   const initialData = STRATEGY === 'full' 
-    ? await prefetchAllHomeData()  // All data on server (best SEO)
-    : await prefetchHomeData()     // Only critical data (fastest)
+    ? await prefetchAllHomeData()
+    : await prefetchHomeData() 
 
   return (
     <PrefetchHomeData initialData={initialData}>

@@ -60,47 +60,10 @@ const lowerCats = [
 
 
 export function Home() {
-  const { data: articles = [], isLoading: articlesLoading, error } = useFeaturedArticles()
   const { data: topSlider = [], isLoading: topSliderLoading } = useTopSliderArticles()
   const {
-    liveEvent,
-    liveEventLoading,
-    mainArticle,
-    mainArticleLoading,
-    featuredArticles,
-    featuredArticlesLoading,
-    // prefetchCategory,
-    popularArticles,
-    popularArticlesLoading,
-
-    highlightArticles: featuredNews,
-    highlightArticlesLoading,
-
-    latestArticles,
-    latestArticlesLoading,
-
-    africaArticles,
-    africaArticlesLoading,
-
-    entertainmentArticles,
-    entertainmentArticlesLoading,
-
-    featuredAdvertorial,
-    featuredAdvertorialLoading,
-
-    featuredAnnouncement,
-    featuredAnnouncementLoading
-
+    liveEvent
   } = useNewsData()
-
-  const safeFeaturedArticles = Array.isArray(featuredArticles) ? featuredArticles : [];
-  // console.log(safeFeaturedArticles)
-  // const { sliderFeaturedArticles, otherFeaturedArticle } = useMemo(() => ({
-  //   sliderFeaturedArticles: safeFeaturedArticles.slice(0, 8),
-  //   otherFeaturedArticle: safeFeaturedArticles.slice(9, 30),
-  // }), [safeFeaturedArticles]);
-
-
 
   return (
     <>

@@ -1,6 +1,8 @@
-
+import { fileCache } from '@/lib/cache/fileCache'
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
 import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem } from '@/types/fetchData'
+// import path from 'path';
+// import fs from 'fs';
 
 // Configuration
 const API_CONFIG = {
@@ -139,12 +141,23 @@ export class ApiService {
     ttl: number = API_CONFIG.cacheTimeout
   ): Promise<T> {
     const now = Date.now()
-    const cached = requestCache.get(cacheKey)
+    const isServer = typeof window === 'undefined'
 
+    const cached = requestCache.get(cacheKey)
     // Return cached data if not expired
     if (cached && (now - cached.timestamp) < ttl) {
       return cached.data
     }
+
+    if (isServer) {
+      const fileCached = await fileCache.get<T>(cacheKey)
+      if (fileCached !== null) {
+        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+        return fileCached
+      }
+    }
+
+
 
     // Check if same request is already in flight
     if (pendingRequests.has(cacheKey)) {
@@ -160,7 +173,9 @@ export class ApiService {
       const data = await requestPromise
       // Cache the successful response
       requestCache.set(cacheKey, { data, timestamp: now })
-
+      if (isServer) {
+        await fileCache.set(cacheKey, data, ttl)
+      }
       return data
     } catch (error) {
       // On error, return cached data even if expired (stale-while-revalidate)
@@ -168,6 +183,24 @@ export class ApiService {
         console.warn('Using stale cache due to API error:', error)
         return cached.data
       }
+
+      if (isServer) {
+
+        const fs = await import('fs/promises')
+        const path = await import('path')
+        
+        try {
+          const filePath = path.join(process.cwd(), '.cache', `${cacheKey.replace(/[^a-z0-9-_:]/gi, '_').substring(0, 200)}.json`)
+          const fileContent = await fs.readFile(filePath, 'utf-8')
+          const cacheEntry = JSON.parse(fileContent)
+          console.warn('⚠️  Using stale file cache due to API error:', error)
+          return cacheEntry.data
+        } catch {
+          // No stale cache available
+        }
+      }
+
+
       throw error
     } finally {
       // Always remove from pending requests
@@ -383,26 +416,57 @@ private static async fetchWithTimeout(
   ): Promise<T> {
     const now = Date.now()
     const cached = requestCache.get(cacheKey)
+    const isServer = typeof window === 'undefined'
 
-    // Return cached data if not expired
-    if (cached && (now - cached.timestamp) < ttl) {
-      return cached.data
+
+    const memoryCached = requestCache.get(cacheKey)
+    if (memoryCached && (now - memoryCached.timestamp) < ttl) {
+      return memoryCached.data
     }
 
-    // Rate limiting check
+    // 2. Check file cache (server-side only)
+    if (isServer) {
+      const fileCached = await fileCache.get<T>(cacheKey)
+      if (fileCached !== null) {
+        // Store in memory cache for faster subsequent access
+        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+        return fileCached
+      }
+    }
+
     rateLimit.check('api_requests', 100, 60000)
+
     try {
       const data = await fetchFn()
 
       // Cache the successful response
       requestCache.set(cacheKey, { data, timestamp: now })
 
+      if (isServer) {
+        await fileCache.set(cacheKey, data, ttl)
+      }
       return data
     } catch (error) {
       // On error, return cached data even if expired (stale-while-revalidate)
       if (cached) {
         console.warn('Using stale cache due to API error:', error)
         return cached.data
+      }
+
+      if (isServer) {
+
+        const fs = await import('fs/promises')
+        const path = await import('path')
+
+        try {
+          const filePath = path.join(process.cwd(), '.cache', `${cacheKey.replace(/[^a-z0-9-_:]/gi, '_').substring(0, 200)}.json`)
+          const fileContent = await fs.readFile(filePath, 'utf-8')
+          const cacheEntry = JSON.parse(fileContent)
+          console.warn('⚠️  Using stale file cache due to API error:', error)
+          return cacheEntry.data
+        } catch {
+          // No stale cache available
+        }
       }
       throw error
     }
@@ -1040,13 +1104,31 @@ private static async fetchWithTimeout(
   }
 
   // Clear cache (useful for development)
-  static clearCache(pattern?: string) {
+  static async clearCache(pattern?: string) {
     if (pattern) {
       const keys = Array.from(requestCache.keys()).filter(key => key.includes(pattern))
       keys.forEach(key => requestCache.delete(key))
     } else {
       requestCache.clear()
     }
+
+    if (typeof window === 'undefined') {
+      await fileCache.clear(pattern)
+    }
+  }
+
+
+  static async cleanExpiredCache() {
+    if (typeof window === 'undefined') {
+      await fileCache.cleanExpired()
+    }
+  }
+
+  static async getCacheStats() {
+    if (typeof window === 'undefined') {
+      return await fileCache.getStats()
+    }
+    return { count: 0, size: 0 }
   }
 
   

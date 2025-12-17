@@ -52,18 +52,22 @@ html.light .bg-white-black {
 
 /* Ensure proper font rendering */
 body {
-  font-family: var(--font-raleway);
+  /* font-family: var(--font-raleway); */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+.font-visby{
+  font-family: var(--font-visby);
+}
 
 .container {
   max-width: min(100%, calc(1440px - 32px -32px)) !important;
   /* or any value you want */
 }
 
-
+.post-content p,.post-content figcaption{
+  font-weight: 200;
+}
 /* Site Header styles */
 .site-header {
   background-image: url('/assets/headerBG.webp');
@@ -79,24 +83,7 @@ body {
   border: none !important;
 }
 
-.post-content,.wp-block-image{
-  display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.post-content p:not(:has(img)){
-          max-width: min(100%, 620px)
-}
-.excerpt-section,.lead,.descriptif {
-  display: flex;
-  justify-content: center;
-}
 
-.excerpt-section .excerpt-text,.wp-block-image figcaption{
-  display: block;
-  width: min(100%, 620px);
-  text-align: center;
-}
 
 /* Menu section styles */
 .igihe-nav-menu {

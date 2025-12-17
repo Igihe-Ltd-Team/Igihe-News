@@ -4,11 +4,17 @@ import { Providers } from './providers';
 import { raleway } from '@/lib/fonts';
 import Header from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { initCacheCleanup } from '@/lib/cache/cleanup'
+
 
 export const metadata = {
   title: 'IGIHE',
   description: 'Latest breaking news',
 };
+
+if (typeof window === 'undefined') {
+  initCacheCleanup()
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 //   if (typeof window !== 'undefined') {

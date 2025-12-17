@@ -1,6 +1,7 @@
 'use client'
 
 
+
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
@@ -28,7 +29,7 @@ import AIChatButton from './AIChatButton'
 import SinglePostMetaData from './SinglePostMetaData'
 import SocialShare from './SocialShare'
 import CustomSlider from '../home/CustomSlider'
-
+import { visby } from '@/lib/fonts';
 
 
 interface SingleNewsContentProps {
@@ -140,7 +141,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     </div>
                                 }
                                 <div
-                                    className="post-content"
+                                    className={`post-content font-visby`}
                                     style={{
                                         overflow: 'hidden',
                                         width: '100%'

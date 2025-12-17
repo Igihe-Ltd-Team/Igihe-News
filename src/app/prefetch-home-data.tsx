@@ -123,11 +123,176 @@
 
 
 
-'use client'
+// 'use client'
 
+// import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query'
+// import { queryKeys } from '@/lib/queryKeys'
+// import { ReactNode, useMemo } from 'react'
+// import { NewsItem, Advertisement } from '@/types/fetchData'
+
+// interface PrefetchHomeDataProps {
+//   children: ReactNode
+//   initialData: {
+//     liveEvent: NewsItem[]
+//     mainArticle: NewsItem[]
+//     topSliders: NewsItem[]
+//     featuredArticles: NewsItem[]
+//     popularArticles: NewsItem[]
+//     highlightTagArticles: NewsItem[]
+//     prefetchedAdds: Advertisement[]
+//     // Optional below-fold data
+//     latestArticles?: NewsItem[]
+//     africaArticles?: NewsItem[]
+//     entertainmentArticles?: NewsItem[]
+//     featuredAdvertorial?: any[]
+//     featuredAnnouncement?: any[]
+//   }
+// }
+
+// export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProps) {
+//   // Create QueryClient once using useMemo
+//   // This happens BEFORE render, not in useEffect
+//   const queryClient = useMemo(() => {
+//     const client = new QueryClient({
+//       defaultOptions: {
+//         queries: {
+//           staleTime: 5 * 60 * 1000, // 5 minutes
+//           refetchOnWindowFocus: false,
+//           refetchOnMount: false,
+//           refetchOnReconnect: false,
+//         },
+//       },
+//     })
+
+//     // ============================================
+//     // CRITICAL: Hydrate data IMMEDIATELY
+//     // This makes data available to hooks instantly
+//     // ============================================
+
+//     // Live Event Articles (tag 199)
+//     if (initialData.liveEvent) {
+//       client.setQueryData(
+//         queryKeys.articles.highlightTagArticles(199),
+//         initialData.liveEvent
+//       )
+//     }
+
+//     // Main Article (tag 197)
+//     if (initialData.mainArticle) {
+//       client.setQueryData(
+//         queryKeys.articles.highlightTagArticles(197),
+//         initialData.mainArticle
+//       )
+//     }
+
+//     // Top Sliders (tag 198)
+//     if (initialData.topSliders) {
+//       client.setQueryData(
+//         queryKeys.articles.highlightTagArticles(198),
+//         initialData.topSliders
+//       )
+//     }
+
+//     // Featured Articles (tag 63)
+//     if (initialData.featuredArticles) {
+//       client.setQueryData(
+//         queryKeys.articles.list({ featured: true }),
+//         initialData.featuredArticles
+//       )
+//     }
+
+//     // Popular Articles
+//     if (initialData.popularArticles) {
+//       client.setQueryData(
+//         queryKeys.articles.popular({ period: 'all' }),
+//         initialData.popularArticles
+//       )
+//     }
+
+//     // Highlight Articles (tag 64)
+//     if (initialData.highlightTagArticles) {
+//       client.setQueryData(
+//         queryKeys.articles.highlightTagArticles(64),
+//         initialData.highlightTagArticles
+//       )
+//     }
+
+//     // Advertisements
+//     if (initialData.prefetchedAdds) {
+//       client.setQueryData(
+//         ['advertisements'],
+//         initialData.prefetchedAdds
+//       )
+//     }
+
+//     // ============================================
+//     // OPTIONAL: Below-fold data (if prefetched)
+//     // ============================================
+
+//     if (initialData.latestArticles) {
+//       client.setQueryData(
+//         queryKeys.articles.latest(),
+//         initialData.latestArticles
+//       )
+//     }
+
+//     if (initialData.africaArticles) {
+//       client.setQueryData(
+//         queryKeys.articles.africa(),
+//         initialData.africaArticles
+//       )
+//     }
+
+//     if (initialData.entertainmentArticles) {
+//       client.setQueryData(
+//         queryKeys.articles.entertainment(),
+//         initialData.entertainmentArticles
+//       )
+//     }
+
+//     if (initialData.featuredAdvertorial) {
+//       client.setQueryData(
+//         queryKeys.advertorial.lists(),
+//         initialData.featuredAdvertorial
+//       )
+//     }
+
+//     if (initialData.featuredAnnouncement) {
+//       client.setQueryData(
+//         queryKeys.announcement.lists(),
+//         initialData.featuredAnnouncement
+//       )
+//     }
+
+//     return client
+//   }, []) // Empty deps - only create once
+
+//   return (
+//     <HydrationBoundary state={dehydrate(queryClient)}>
+//       {children}
+//     </HydrationBoundary>
+//   )
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'use client'
 import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
-import { ReactNode, useMemo } from 'react'
+import { ReactNode } from 'react'
 import { NewsItem, Advertisement } from '@/types/fetchData'
 
 interface PrefetchHomeDataProps {
@@ -149,123 +314,123 @@ interface PrefetchHomeDataProps {
   }
 }
 
-export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProps) {
-  // Create QueryClient once using useMemo
-  // This happens BEFORE render, not in useEffect
-  const queryClient = useMemo(() => {
-    const client = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 60 * 1000, // 5 minutes
-          refetchOnWindowFocus: false,
-          refetchOnMount: false,
-          refetchOnReconnect: false,
-        },
+function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialData']) {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
       },
-    })
+    },
+  })
 
-    // ============================================
-    // CRITICAL: Hydrate data IMMEDIATELY
-    // This makes data available to hooks instantly
-    // ============================================
+  // ============================================
+  // CRITICAL: Hydrate data IMMEDIATELY
+  // This makes data available to hooks instantly
+  // ============================================
+  
+  // Live Event Articles (tag 199)
+  if (initialData.liveEvent) {
+    client.setQueryData(
+      queryKeys.articles.highlightTagArticles(199),
+      initialData.liveEvent
+    )
+  }
 
-    // Live Event Articles (tag 199)
-    if (initialData.liveEvent) {
-      client.setQueryData(
-        queryKeys.articles.highlightTagArticles(199),
-        initialData.liveEvent
-      )
-    }
+  // Main Article (tag 197)
+  if (initialData.mainArticle) {
+    client.setQueryData(
+      queryKeys.articles.highlightTagArticles(197),
+      initialData.mainArticle
+    )
+  }
 
-    // Main Article (tag 197)
-    if (initialData.mainArticle) {
-      client.setQueryData(
-        queryKeys.articles.highlightTagArticles(197),
-        initialData.mainArticle
-      )
-    }
+  // Top Sliders (tag 198)
+  if (initialData.topSliders) {
+    client.setQueryData(
+      queryKeys.articles.highlightTagArticles(198),
+      initialData.topSliders
+    )
+  }
 
-    // Top Sliders (tag 198)
-    if (initialData.topSliders) {
-      client.setQueryData(
-        queryKeys.articles.highlightTagArticles(198),
-        initialData.topSliders
-      )
-    }
+  // Featured Articles (tag 63)
+  if (initialData.featuredArticles) {
+    client.setQueryData(
+      queryKeys.articles.list({ featured: true }),
+      initialData.featuredArticles
+    )
+  }
 
-    // Featured Articles (tag 63)
-    if (initialData.featuredArticles) {
-      client.setQueryData(
-        queryKeys.articles.list({ featured: true }),
-        initialData.featuredArticles
-      )
-    }
+  // Popular Articles
+  if (initialData.popularArticles) {
+    client.setQueryData(
+      queryKeys.articles.popular({ period: 'all' }),
+      initialData.popularArticles
+    )
+  }
 
-    // Popular Articles
-    if (initialData.popularArticles) {
-      client.setQueryData(
-        queryKeys.articles.popular({ period: 'all' }),
-        initialData.popularArticles
-      )
-    }
+  // Highlight Articles (tag 64)
+  if (initialData.highlightTagArticles) {
+    client.setQueryData(
+      queryKeys.articles.highlightTagArticles(64),
+      initialData.highlightTagArticles
+    )
+  }
 
-    // Highlight Articles (tag 64)
-    if (initialData.highlightTagArticles) {
-      client.setQueryData(
-        queryKeys.articles.highlightTagArticles(64),
-        initialData.highlightTagArticles
-      )
-    }
+  // Advertisements
+  if (initialData.prefetchedAdds) {
+    client.setQueryData(
+      ['advertisements'],
+      initialData.prefetchedAdds
+    )
+  }
 
-    // Advertisements
-    if (initialData.prefetchedAdds) {
-      client.setQueryData(
-        ['advertisements'],
-        initialData.prefetchedAdds
-      )
-    }
+  // ============================================
+  // OPTIONAL: Below-fold data (if prefetched)
+  // ============================================
+  
+  if (initialData.latestArticles) {
+    client.setQueryData(
+      queryKeys.articles.latest(),
+      initialData.latestArticles
+    )
+  }
 
-    // ============================================
-    // OPTIONAL: Below-fold data (if prefetched)
-    // ============================================
+  if (initialData.africaArticles) {
+    client.setQueryData(
+      queryKeys.articles.africa(),
+      initialData.africaArticles
+    )
+  }
 
-    if (initialData.latestArticles) {
-      client.setQueryData(
-        queryKeys.articles.latest(),
-        initialData.latestArticles
-      )
-    }
+  if (initialData.entertainmentArticles) {
+    client.setQueryData(
+      queryKeys.articles.entertainment(),
+      initialData.entertainmentArticles
+    )
+  }
 
-    if (initialData.africaArticles) {
-      client.setQueryData(
-        queryKeys.articles.africa(),
-        initialData.africaArticles
-      )
-    }
+  if (initialData.featuredAdvertorial) {
+    client.setQueryData(
+      queryKeys.advertorial.lists(),
+      initialData.featuredAdvertorial
+    )
+  }
 
-    if (initialData.entertainmentArticles) {
-      client.setQueryData(
-        queryKeys.articles.entertainment(),
-        initialData.entertainmentArticles
-      )
-    }
+  if (initialData.featuredAnnouncement) {
+    client.setQueryData(
+      queryKeys.announcement.lists(),
+      initialData.featuredAnnouncement
+    )
+  }
 
-    if (initialData.featuredAdvertorial) {
-      client.setQueryData(
-        queryKeys.advertorial.lists(),
-        initialData.featuredAdvertorial
-      )
-    }
+  return client
+}
 
-    if (initialData.featuredAnnouncement) {
-      client.setQueryData(
-        queryKeys.announcement.lists(),
-        initialData.featuredAnnouncement
-      )
-    }
-
-    return client
-  }, []) // Empty deps - only create once
+export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProps) {
+  const queryClient = createQueryClientWithData(initialData)
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
