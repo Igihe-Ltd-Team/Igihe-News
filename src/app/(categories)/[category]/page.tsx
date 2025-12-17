@@ -263,35 +263,51 @@
 
 
 
-
 import { Category } from "@/types/fetchData";
 import CategoryPageClient from "./CategoryPageClient";
 import { ApiService } from "@/services/apiService";
 import { prefetchAllHomeData } from "@/lib/prefetch-home-data";
+import { notFound } from "next/navigation";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { category } = await params;
-  const initialData = await prefetchAllHomeData();
-  const categories = initialData.categories;
-
-  const thisCategory = categories?.find(
-    (single: Category) => single.slug === category
-  );
-  
-  if (!thisCategory) {
-    throw new Error("Category not found");
-  }
-  
-  const categoryId = thisCategory?.id;
-
   try {
+    const { category } = await params;
+    
+    // Validate category slug exists
+    if (!category) {
+      notFound();
+    }
+
+    const initialData = await prefetchAllHomeData();
+    const categories = initialData.categories;
+
+    // Validate categories data exists
+    if (!categories || !Array.isArray(categories)) {
+      throw new Error("Categories data is unavailable");
+    }
+
+    const thisCategory = categories.find(
+      (single: Category) => single.slug === category
+    );
+    
+    if (!thisCategory) {
+      notFound(); // Use Next.js notFound() instead of throwing
+    }
+    
+    const categoryId = thisCategory.id;
+
+    // Add validation for categoryId
+    if (!categoryId) {
+      throw new Error("Category ID is missing");
+    }
+
     // Fetch initial data server-side
     const [initialArticles, highlightArticlesResponse] = await Promise.all([
-      ApiService.fetchArticles({categories: [categoryId]}),
+      ApiService.fetchArticles({ categories: [categoryId] }),
       ApiService.fetchArticles({ 
         tags: [63], 
         categories: [categoryId],
@@ -299,10 +315,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       })
     ]);
 
-    // Explicitly type highlightArticles
-    const highlightArticles: any[] = highlightArticlesResponse.data || [];
-
-    // Transform data for client component
+    // Add null checks
+    const highlightArticles = highlightArticlesResponse?.data || [];
     const posts = initialArticles?.data || [];
     const pageInfo = {
       currentPage: initialArticles?.pagination?.currentPage || 1,
@@ -320,12 +334,25 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       />
     );
   } catch (error) {
-    console.error("Server-side error:", error);
+    // Log the actual error for debugging
+    console.error("Server-side error in CategoryPage:", error);
+    
+    // Check if it's a not-found error
+    if (error instanceof Error && error.message === "NEXT_NOT_FOUND") {
+      notFound();
+    }
+    
+    // Return error UI for other errors
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h2>Error loading content</h2>
-          <p>Please try again later.</p>
+          <h2 className="text-2xl font-bold mb-4">Error loading content</h2>
+          <p className="text-gray-600">Please try again later.</p>
+          {process.env.NODE_ENV === "development" && (
+            <pre className="mt-4 text-left text-sm bg-gray-100 p-4 rounded">
+              {error instanceof Error ? error.message : "Unknown error"}
+            </pre>
+          )}
         </div>
       </div>
     );
