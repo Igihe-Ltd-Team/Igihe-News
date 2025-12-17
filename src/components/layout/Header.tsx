@@ -43,10 +43,19 @@ export default function Header() {
 
    const refreshHomePage = async () => {
     try {
+        // Add timestamp to bust cache
+        const timestamp = Date.now()
+        
         // Trigger manual revalidation
-        await fetch('/api/revalidate?path=/')
-        // Force full page reload
-        window.location.reload()
+        await fetch(`/api/revalidate?path=/&t=${timestamp}`)
+        
+        // Navigate with cache busting
+        router.push(`/?t=${timestamp}`)
+        
+        // Wait a bit then refresh
+        setTimeout(() => {
+            router.refresh()
+        }, 100)
     } catch (error) {
         console.error('Failed to refresh:', error)
         window.location.reload()
