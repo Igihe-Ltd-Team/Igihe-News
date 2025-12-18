@@ -46,6 +46,7 @@ import { prefetchAllHomeData, prefetchHomeData } from '@/lib/prefetch-home-data'
 import { Home } from './home/home'
 import { PrefetchHomeData } from './prefetch-home-data'
 
+
 export const revalidate = 300
 
 const STRATEGY = 'full' // Options: 'fast' | 'full'
@@ -65,6 +66,9 @@ export default async function HomePage() {
 
   const initialData = await prefetchAllHomeData()
 
+
+  
+  
 
   return (
     <PrefetchHomeData initialData={initialData}>

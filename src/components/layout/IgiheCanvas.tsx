@@ -81,7 +81,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                             {
                                 showHome &&
                                 <li className="nav-item">
-                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/"
+                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/?fromNav=1" 
                                     // onClick={(e) => {
                                     //                     e.preventDefault()
                                     //                     refreshHomePage()

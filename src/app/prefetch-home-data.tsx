@@ -292,8 +292,9 @@
 'use client'
 import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { NewsItem, Advertisement } from '@/types/fetchData'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface PrefetchHomeDataProps {
   children: ReactNode
@@ -441,6 +442,20 @@ function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialDa
 
 export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProps) {
   const queryClient = createQueryClientWithData(initialData)
+
+
+  const search = useSearchParams()
+    const router = useRouter()
+  
+    useEffect(() => {
+      if (search.get("fromNav") === "1") {
+        router.refresh()
+  
+        // optional: clean URL
+        router.replace("/", { scroll: false })
+      }
+    }, [])
+    
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
