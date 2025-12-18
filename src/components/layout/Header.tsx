@@ -78,10 +78,10 @@ export default function Header() {
         
         if (result.success) {
             // Refresh to show updated data
-            // router.refresh()
+            router.refresh()
             
             // Optional: Force full reload if router.refresh() doesn't work
-            window.location.reload()
+            // window.location.reload()
         }
     } catch (error) {
         console.error('Failed to refresh:', error)
@@ -222,10 +222,10 @@ export default function Header() {
                                     <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style={{ ['--bs-scroll-height' as any]: '100px;' }}>
                                         <li className="nav-item">
                                             <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/"
-                                            //  onClick={(e) => {
-                                            //             e.preventDefault()
-                                            //             refreshHomePage()
-                                            //         }}
+                                             onClick={(e) => {
+                                                        e.preventDefault()
+                                                        refreshHomePage()
+                                                    }}
                                                      >
                                                 <span className="nav-hover-effect d-flex">
                                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
