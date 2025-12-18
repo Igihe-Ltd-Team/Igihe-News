@@ -255,101 +255,101 @@
 
 
 
-import { Category } from "@/types/fetchData";
-import CategoryPageClient from "./CategoryPageClient";
-import { ApiService } from "@/services/apiService";
-import { prefetchAllHomeData } from "@/lib/prefetch-home-data";
-import { notFound } from "next/navigation";
+// import { Category } from "@/types/fetchData";
+// import CategoryPageClient from "./CategoryPageClient";
+// import { ApiService } from "@/services/apiService";
+// import { prefetchAllHomeData } from "@/lib/prefetch-home-data";
+// import { notFound } from "next/navigation";
 
-interface CategoryPageProps {
-  params: Promise<{ category: string }>;
-}
+// interface CategoryPageProps {
+//   params: Promise<{ category: string }>;
+// }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-  try {
-    const { category } = await params;
+// export default async function CategoryPage({ params }: CategoryPageProps) {
+//   try {
+//     const { category } = await params;
     
-    // Validate category slug exists
-    if (!category) {
-      notFound();
-    }
+//     // Validate category slug exists
+//     if (!category) {
+//       notFound();
+//     }
 
-    const initialData = await prefetchAllHomeData();
-    const categories = initialData.categories;
+//     const initialData = await prefetchAllHomeData();
+//     const categories = initialData.categories;
 
-    // Validate categories data exists
-    if (!categories || !Array.isArray(categories)) {
-      throw new Error("Categories data is unavailable");
-    }
+//     // Validate categories data exists
+//     if (!categories || !Array.isArray(categories)) {
+//       throw new Error("Categories data is unavailable");
+//     }
 
-    const thisCategory = categories.find(
-      (single: Category) => single.slug === category
-    );
+//     const thisCategory = categories.find(
+//       (single: Category) => single.slug === category
+//     );
     
-    if (!thisCategory) {
-      notFound(); // Use Next.js notFound() instead of throwing
-    }
+//     if (!thisCategory) {
+//       notFound(); // Use Next.js notFound() instead of throwing
+//     }
     
-    const categoryId = thisCategory.id;
+//     const categoryId = thisCategory.id;
 
-    // Add validation for categoryId
-    if (!categoryId) {
-      throw new Error("Category ID is missing");
-    }
+//     // Add validation for categoryId
+//     if (!categoryId) {
+//       throw new Error("Category ID is missing");
+//     }
 
-    // Fetch initial data server-side
-    const [initialArticles, highlightArticlesResponse] = await Promise.all([
-      ApiService.fetchArticles({ categories: [categoryId] }),
-      ApiService.fetchArticles({ 
-        tags: [63], 
-        categories: [categoryId],
-        per_page: 7 
-      })
-    ]);
+//     // Fetch initial data server-side
+//     const [initialArticles, highlightArticlesResponse] = await Promise.all([
+//       ApiService.fetchArticles({ categories: [categoryId] }),
+//       ApiService.fetchArticles({ 
+//         tags: [63], 
+//         categories: [categoryId],
+//         per_page: 7 
+//       })
+//     ]);
 
-    // Add null checks
-    const highlightArticles = highlightArticlesResponse?.data || [];
-    const posts = initialArticles?.data || [];
-    const pageInfo = {
-      currentPage: initialArticles?.pagination?.currentPage || 1,
-      lastPage: initialArticles?.pagination?.totalPages || 1,
-      total: initialArticles?.pagination?.totalPosts || 0
-    };
+//     // Add null checks
+//     const highlightArticles = highlightArticlesResponse?.data || [];
+//     const posts = initialArticles?.data || [];
+//     const pageInfo = {
+//       currentPage: initialArticles?.pagination?.currentPage || 1,
+//       lastPage: initialArticles?.pagination?.totalPages || 1,
+//       total: initialArticles?.pagination?.totalPosts || 0
+//     };
 
-    return (
-      <CategoryPageClient
-        initialPosts={posts}
-        highlightArticles={highlightArticles}
-        categoryInfo={thisCategory}
-        initialPageInfo={pageInfo}
-        slug={category}
-      />
-    );
-  } catch (error) {
-    // Log the actual error for debugging
-    console.error("Server-side error in CategoryPage:", error);
+//     return (
+//       <CategoryPageClient
+//         initialPosts={posts}
+//         highlightArticles={highlightArticles}
+//         categoryInfo={thisCategory}
+//         initialPageInfo={pageInfo}
+//         slug={category}
+//       />
+//     );
+//   } catch (error) {
+//     // Log the actual error for debugging
+//     console.error("Server-side error in CategoryPage:", error);
     
-    // Check if it's a not-found error
-    if (error instanceof Error && error.message === "NEXT_NOT_FOUND") {
-      notFound();
-    }
+//     // Check if it's a not-found error
+//     if (error instanceof Error && error.message === "NEXT_NOT_FOUND") {
+//       notFound();
+//     }
     
-    // Return error UI for other errors
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Error loading content</h2>
-          <p className="text-gray-600">Please try again later.</p>
-          {process.env.NODE_ENV === "development" && (
-            <pre className="mt-4 text-left text-sm bg-gray-100 p-4 rounded">
-              {error instanceof Error ? error.message : "Unknown error"}
-            </pre>
-          )}
-        </div>
-      </div>
-    );
-  }
-}
+//     // Return error UI for other errors
+//     return (
+//       <div className="container mx-auto px-4 py-8">
+//         <div className="text-center">
+//           <h2 className="text-2xl font-bold mb-4">Error loading content</h2>
+//           <p className="text-gray-600">Please try again later.</p>
+//           {process.env.NODE_ENV === "development" && (
+//             <pre className="mt-4 text-left text-sm bg-gray-100 p-4 rounded">
+//               {error instanceof Error ? error.message : "Unknown error"}
+//             </pre>
+//           )}
+//         </div>
+//       </div>
+//     );
+//   }
+// }
 
 
 
@@ -452,55 +452,55 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
 
 
-// import { Category } from "@/types/fetchData";
-// import CategoryPageClient from "./CategoryPageClient";
-// import { notFound } from "next/navigation";
+import { Category } from "@/types/fetchData";
+import CategoryPageClient from "./CategoryPageClient";
+import { notFound } from "next/navigation";
 
-// interface CategoryPageProps {
-//   params: Promise<{ category: string }>;
-// }
+interface CategoryPageProps {
+  params: Promise<{ category: string }>;
+}
 
-// export async function generateStaticParams() {
-//   const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
-//   const data = await prefetchAllHomeData().catch(() => ({ categories: [] }));
+export async function generateStaticParams() {
+  const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+  const data = await prefetchAllHomeData().catch(() => ({ categories: [] }));
   
-//   return data.categories.map((cat: Category) => ({
-//     category: cat.slug,
-//   }));
-// }
+  return data.categories.map((cat: Category) => ({
+    category: cat.slug,
+  }));
+}
 
-// export default async function CategoryPage({ params }: CategoryPageProps) {
-//   const { category: categorySlug } = await params;
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { category: categorySlug } = await params;
 
-//   // 1. Get Category List (This should be cached/memoized by Next.js)
-//   const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
-//   const { ApiService } = await import("@/services/apiService");
+  // 1. Get Category List (This should be cached/memoized by Next.js)
+  const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+  const { ApiService } = await import("@/services/apiService");
   
-//   const initialData = await prefetchAllHomeData().catch(() => ({ categories: [] }));
-//   const thisCategory = initialData.categories?.find(
-//     (single: Category) => single.slug === categorySlug
-//   );
+  const initialData = await prefetchAllHomeData().catch(() => ({ categories: [] }));
+  const thisCategory = initialData.categories?.find(
+    (single: Category) => single.slug === categorySlug
+  );
 
-//   if (!thisCategory) notFound();
+  if (!thisCategory) notFound();
 
-//   // 2. Parallel Fetch (Crucial for speed)
-//   // We fetch only the first page here. The Client component handles the rest.
-//   const [initialArticles, highlightArticles] = await Promise.all([
-//     ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
-//     ApiService.fetchArticles({ tags: [63], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
-//   ]);
+  // 2. Parallel Fetch (Crucial for speed)
+  // We fetch only the first page here. The Client component handles the rest.
+  const [initialArticles, highlightArticles] = await Promise.all([
+    ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
+    ApiService.fetchArticles({ tags: [63], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
+  ]);
 
-//   return (
-//     <CategoryPageClient
-//       initialPosts={initialArticles?.data || []}
-//       highlightArticles={highlightArticles?.data || []}
-//       categoryInfo={thisCategory}
-//       initialPageInfo={{
-//         currentPage: initialArticles?.pagination?.currentPage || 1,
-//         lastPage: initialArticles?.pagination?.totalPages || 1,
-//         total: initialArticles?.pagination?.totalPosts || 0
-//       }}
-//       slug={categorySlug}
-//     />
-//   );
-// }
+  return (
+    <CategoryPageClient
+      initialPosts={initialArticles?.data || []}
+      highlightArticles={highlightArticles?.data || []}
+      categoryInfo={thisCategory}
+      initialPageInfo={{
+        currentPage: initialArticles?.pagination?.currentPage || 1,
+        lastPage: initialArticles?.pagination?.totalPages || 1,
+        total: initialArticles?.pagination?.totalPosts || 0
+      }}
+      slug={categorySlug}
+    />
+  );
+}
