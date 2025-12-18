@@ -9,7 +9,7 @@ interface AuthorPageProps {
     searchParams: Promise<{ page?: string }>
 }
 
-export const runtime = 'edge'
+// export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600
 
