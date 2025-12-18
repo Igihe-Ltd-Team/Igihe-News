@@ -47,7 +47,7 @@ export default function CategoryPageClient({
 
   const displayHighlights = clientHighlights || highlightArticles;
 
-console.log('highlightsQuery',highlightsQuery)
+// console.log('highlightsQuery',highlightsQuery)
 
 
 

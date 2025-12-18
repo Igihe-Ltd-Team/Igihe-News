@@ -825,6 +825,8 @@ export class ApiService {
       _embed: '1',
     }
 
+
+
     // Prioritize same category posts, then tag-based
     if (categories.length > 0) {
       queryParams.categories = categories.join(',')
@@ -834,7 +836,7 @@ export class ApiService {
 
     const cacheKey = `related:${postId}:${JSON.stringify(queryParams)}`
 
-    return this.cachedFetch(cacheKey, async () => {
+    // return this.cachedFetch(cacheKey, async () => {
       const queryString = this.buildQuery(queryParams)
       const response = await this.fetchWithTimeout(
         `${API_CONFIG.baseURL}/posts?${queryString}`
@@ -848,7 +850,7 @@ export class ApiService {
       }
 
       return data || []
-    })
+    // })
   }
 
   // Popular Posts (based on comment count)

@@ -193,6 +193,7 @@ const liveEventArticlesQuery = useQuery({
       ),
       queryFn: async () => {
         if (!articleQuery.data) return []
+        
         return ApiService.fetchRelatedPosts(articleQuery.data.id.toString(), [
           articleQuery.data.categories[0].id,
         ])
