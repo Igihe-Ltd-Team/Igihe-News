@@ -450,7 +450,6 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
     useEffect(() => {
       if (search.get("fromNav") === "1") {
         router.refresh()
-  
         // optional: clean URL
         router.replace("/", { scroll: false })
       }
