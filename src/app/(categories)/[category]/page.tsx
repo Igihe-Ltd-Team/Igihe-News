@@ -352,6 +352,102 @@
 // }
 
 
+// import { Category } from "@/types/fetchData";
+// import CategoryPageClient from "./CategoryPageClient";
+// import { notFound } from "next/navigation";
+
+// interface CategoryPageProps {
+//   params: Promise<{ category: string }>;
+// }
+
+
+// export async function generateStaticParams() {
+//   const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+//   const data = await prefetchAllHomeData().catch(() => ({ categories: [] }));
+  
+//   return data.categories.map((cat: Category) => ({
+//     category: cat.slug,
+//   }));
+// }
+
+// export default async function CategoryPage({ params }: CategoryPageProps) {
+//   // During build, return a minimal version
+  
+//   try {
+//     const { category: categorySlug } = await params;
+    
+//     if (!categorySlug) {
+//       notFound();
+//     }
+
+//     // Dynamically import to avoid build-time issues
+//     const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+//     const { ApiService } = await import("@/services/apiService");
+
+//     // First, get the categories to find the ID
+//     const initialData = await prefetchAllHomeData().catch(() => ({ categories: [] }));
+//     const categories = initialData.categories || [];
+    
+//     // Find the category by slug
+//     const thisCategory = categories.find(
+//       (single: Category) => single.slug === categorySlug
+//     );
+    
+//     if (!thisCategory) {
+//       notFound();
+//     }
+
+//     const categoryId = thisCategory.id;
+
+//     // Now fetch articles using the category ID
+//     const [initialArticles, highlightArticlesResponse] = await Promise.all([
+//       ApiService.fetchArticles({ 
+//         categories: [categoryId] // Fixed: Use categoryId, not categorySlug
+//       }).catch(() => ({ 
+//         data: [], 
+//         pagination: { currentPage: 1, totalPages: 1, totalPosts: 0 }
+//       })),
+//       ApiService.fetchArticles({ 
+//         tags: [63], 
+//         categories: [categoryId], // Fixed: Use categoryId
+//         per_page: 7 
+//       }).catch(() => ({ data: [] }))
+//     ]);
+
+//     const posts = initialArticles.data || [];
+//     const highlightArticles = highlightArticlesResponse.data || [];
+//     const pageInfo = {
+//       currentPage: initialArticles.pagination?.currentPage || 1,
+//       lastPage: initialArticles.pagination?.totalPages || 1,
+//       total: initialArticles.pagination?.totalPosts || 0
+//     };
+
+//     return (
+//       <CategoryPageClient
+//         initialPosts={posts}
+//         highlightArticles={highlightArticles}
+//         categoryInfo={thisCategory}
+//         initialPageInfo={pageInfo}
+//         slug={categorySlug}
+//       />
+//     );
+//   } catch (error) {
+//     console.error("CategoryPage error:", error);
+    
+//     // Don't throw during build - return a fallback
+    
+    
+//     notFound();
+//   }
+// }
+
+
+
+
+
+
+
+
 import { Category } from "@/types/fetchData";
 import CategoryPageClient from "./CategoryPageClient";
 import { notFound } from "next/navigation";
@@ -360,107 +456,47 @@ interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
-// Add a flag to track if we're building
-const isBuildTime = process.env.NODE_ENV === 'production' && typeof window === 'undefined';
+export async function generateStaticParams() {
+  const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+  const data = await prefetchAllHomeData().catch(() => ({ categories: [] }));
+  
+  return data.categories.map((cat: Category) => ({
+    category: cat.slug,
+  }));
+}
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  // During build, return a minimal version
-  if (isBuildTime) {
-    console.log("Building static page for category");
-    const { category } = await params;
-    
-    return (
-      <CategoryPageClient
-        initialPosts={[]}
-        highlightArticles={[]}
-        initialPageInfo={{
-          currentPage: 1,
-          lastPage: 1,
-          total: 0
-        }}
-        slug={category}
-      />
-    );
-  }
+  const { category: categorySlug } = await params;
 
-  try {
-    const { category: categorySlug } = await params;
-    
-    if (!categorySlug) {
-      notFound();
-    }
+  // 1. Get Category List (This should be cached/memoized by Next.js)
+  const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+  const { ApiService } = await import("@/services/apiService");
+  
+  const initialData = await prefetchAllHomeData().catch(() => ({ categories: [] }));
+  const thisCategory = initialData.categories?.find(
+    (single: Category) => single.slug === categorySlug
+  );
 
-    // Dynamically import to avoid build-time issues
-    const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
-    const { ApiService } = await import("@/services/apiService");
+  if (!thisCategory) notFound();
 
-    // First, get the categories to find the ID
-    const initialData = await prefetchAllHomeData().catch(() => ({ categories: [] }));
-    const categories = initialData.categories || [];
-    
-    // Find the category by slug
-    const thisCategory = categories.find(
-      (single: Category) => single.slug === categorySlug
-    );
-    
-    if (!thisCategory) {
-      notFound();
-    }
+  // 2. Parallel Fetch (Crucial for speed)
+  // We fetch only the first page here. The Client component handles the rest.
+  const [initialArticles, highlightArticles] = await Promise.all([
+    ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
+    ApiService.fetchArticles({ tags: [63], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
+  ]);
 
-    const categoryId = thisCategory.id;
-
-    // Now fetch articles using the category ID
-    const [initialArticles, highlightArticlesResponse] = await Promise.all([
-      ApiService.fetchArticles({ 
-        categories: [categoryId] // Fixed: Use categoryId, not categorySlug
-      }).catch(() => ({ 
-        data: [], 
-        pagination: { currentPage: 1, totalPages: 1, totalPosts: 0 }
-      })),
-      ApiService.fetchArticles({ 
-        tags: [63], 
-        categories: [categoryId], // Fixed: Use categoryId
-        per_page: 7 
-      }).catch(() => ({ data: [] }))
-    ]);
-
-    const posts = initialArticles.data || [];
-    const highlightArticles = highlightArticlesResponse.data || [];
-    const pageInfo = {
-      currentPage: initialArticles.pagination?.currentPage || 1,
-      lastPage: initialArticles.pagination?.totalPages || 1,
-      total: initialArticles.pagination?.totalPosts || 0
-    };
-
-    return (
-      <CategoryPageClient
-        initialPosts={posts}
-        highlightArticles={highlightArticles}
-        categoryInfo={thisCategory}
-        initialPageInfo={pageInfo}
-        slug={categorySlug}
-      />
-    );
-  } catch (error) {
-    console.error("CategoryPage error:", error);
-    
-    // Don't throw during build - return a fallback
-    if (isBuildTime) {
-      const { category } = await params;
-      return (
-        <CategoryPageClient
-          initialPosts={[]}
-          highlightArticles={[]}
-          initialPageInfo={{
-            currentPage: 1,
-            lastPage: 1,
-            total: 0
-          }}
-          slug={category}
-        />
-      );
-    }
-    
-    notFound();
-  }
+  return (
+    <CategoryPageClient
+      initialPosts={initialArticles?.data || []}
+      highlightArticles={highlightArticles?.data || []}
+      categoryInfo={thisCategory}
+      initialPageInfo={{
+        currentPage: initialArticles?.pagination?.currentPage || 1,
+        lastPage: initialArticles?.pagination?.totalPages || 1,
+        total: initialArticles?.pagination?.totalPosts || 0
+      }}
+      slug={categorySlug}
+    />
+  );
 }

@@ -10,6 +10,17 @@ interface CacheEntry<T> {
   expiresAt: number
 }
 
+// Helper to safely get process.cwd() - isolates the call from bundler
+const getCwd = (): string => {
+  try {
+    // Use globalThis to access process dynamically
+    const proc = (globalThis as any).process
+    return proc && typeof proc.cwd === 'function' ? proc.cwd() : ''
+  } catch {
+    return ''
+  }
+}
+
 export class FileCache {
   private fs: typeof fsPromises | null = null
   private path: { join: typeof pathJoin } | null = null
@@ -17,8 +28,12 @@ export class FileCache {
   constructor() {
     // Only import fs/path on server-side
     if (typeof window === 'undefined') {
-      this.fs = require('fs').promises
-      this.path = require('path')
+      try {
+        this.fs = require('fs').promises
+        this.path = require('path')
+      } catch {
+        // Module not available
+      }
     }
   }
 
@@ -26,7 +41,10 @@ export class FileCache {
     if (!this.fs || !this.path) return
     
     try {
-      const cacheDir = this.path.join(process.cwd(), CACHE_DIR)
+      const cwd = getCwd()
+      if (!cwd) return
+      
+      const cacheDir = this.path.join(cwd, CACHE_DIR)
       await this.fs.mkdir(cacheDir, { recursive: true })
     } catch (error) {
       console.error('Failed to create cache directory:', error)
@@ -34,21 +52,28 @@ export class FileCache {
   }
 
   private getCacheFilePath(key: string): string {
-    if (!this.path) return ''
+    // Return empty string if not on server
+    if (!this.path || typeof window !== 'undefined') return ''
+    
+    const cwd = getCwd()
+    if (!cwd) return ''
     
     // Sanitize key to make it filesystem-safe
     const sanitizedKey = key
       .replace(/[^a-z0-9-_:]/gi, '_')
       .substring(0, 200)
-    return this.path.join(process.cwd(), CACHE_DIR, `${sanitizedKey}.json`)
+    
+    return this.path.join(cwd, CACHE_DIR, `${sanitizedKey}.json`)
   }
 
   async get<T>(key: string): Promise<T | null> {
     // Only run on server
-    if (!this.fs) return null
+    if (!this.fs || typeof window !== 'undefined') return null
 
     try {
       const filePath = this.getCacheFilePath(key)
+      if (!filePath) return null
+      
       const fileContent = await this.fs.readFile(filePath, 'utf-8')
       const cacheEntry: CacheEntry<T> = JSON.parse(fileContent)
 
@@ -70,11 +95,13 @@ export class FileCache {
 
   async set<T>(key: string, data: T, ttl: number): Promise<void> {
     // Only run on server
-    if (!this.fs) return
+    if (!this.fs || typeof window !== 'undefined') return
 
     try {
       await this.ensureCacheDir()
       const filePath = this.getCacheFilePath(key)
+      if (!filePath) return
+      
       const now = Date.now()
       
       const cacheEntry: CacheEntry<T> = {
@@ -91,10 +118,12 @@ export class FileCache {
   }
 
   async delete(key: string): Promise<void> {
-    if (!this.fs) return
+    if (!this.fs || typeof window !== 'undefined') return
 
     try {
       const filePath = this.getCacheFilePath(key)
+      if (!filePath) return
+      
       await this.fs.unlink(filePath)
       console.log(`🗑️  File cache DELETE: ${key}`)
     } catch {
@@ -103,10 +132,13 @@ export class FileCache {
   }
 
   async clear(pattern?: string): Promise<void> {
-    if (!this.fs || !this.path) return
+    if (!this.fs || !this.path || typeof window !== 'undefined') return
 
     try {
-      const cacheDir = this.path.join(process.cwd(), CACHE_DIR)
+      const cwd = getCwd()
+      if (!cwd) return
+      
+      const cacheDir = this.path.join(cwd, CACHE_DIR)
       const files = await this.fs.readdir(cacheDir)
       
       if (pattern) {
@@ -127,10 +159,13 @@ export class FileCache {
   }
 
   async cleanExpired(): Promise<void> {
-    if (!this.fs || !this.path) return
+    if (!this.fs || !this.path || typeof window !== 'undefined') return
 
     try {
-      const cacheDir = this.path.join(process.cwd(), CACHE_DIR)
+      const cwd = getCwd()
+      if (!cwd) return
+      
+      const cacheDir = this.path.join(cwd, CACHE_DIR)
       const files = await this.fs.readdir(cacheDir)
       const now = Date.now()
       let cleaned = 0
@@ -159,10 +194,13 @@ export class FileCache {
   }
 
   async getStats(): Promise<{ count: number; size: number }> {
-    if (!this.fs || !this.path) return { count: 0, size: 0 }
+    if (!this.fs || !this.path || typeof window !== 'undefined') return { count: 0, size: 0 }
 
     try {
-      const cacheDir = this.path.join(process.cwd(), CACHE_DIR)
+      const cwd = getCwd()
+      if (!cwd) return { count: 0, size: 0 }
+      
+      const cacheDir = this.path.join(cwd, CACHE_DIR)
       const files = await this.fs.readdir(cacheDir)
       let totalSize = 0
 

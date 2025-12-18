@@ -1,6 +1,6 @@
 "use client"
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { styled } from '@mui/material/styles';
 import Switch, { SwitchProps } from '@mui/material/Switch';
 import Languages from '../ui/Languages';
@@ -37,10 +37,39 @@ const menus = [
 export default function Header() {
     const pathname = usePathname()
     const { isMobile } = useResponsive()
+    const [loading, setLoading] = useState(true)
     const {
         categories
     } = useNewsData()
     const router = useRouter()
+
+
+
+
+//   useEffect(() => {
+//     const controller = new AbortController()
+
+//     const load = async () => {
+//       try {
+//         const res = await fetch("/api/data", {
+//           signal: controller.signal,
+//         })
+//         const data = await res.json()
+//         setLoading(false)
+//       } catch (err: any) {
+//         if (err.name !== "AbortError") {
+//           console.error(err)
+//         }
+//       }
+//     }
+
+//     load()
+
+//     // ✅ THIS runs when you click a <Link>
+//     return () => {
+//       controller.abort()
+//     }
+//   }, [])
 
    const refreshHomePage = async () => {
     try {
@@ -121,10 +150,12 @@ export default function Header() {
                 {/* Logo and banner */}
                 <div className="row flex align-items-center py-2 justify-content-between">
                     <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
-                        <Link href="/" onClick={(e) => {
-                            e.preventDefault()
-                            refreshHomePage()
-                        }}>
+                        <Link href="/" 
+                        // onClick={(e) => {
+                        //     e.preventDefault()
+                        //     refreshHomePage()
+                        // }}
+                        >
                             <span className='site-logo'>
                                 <Image
                                     width={240}
@@ -190,7 +221,12 @@ export default function Header() {
 
                                     <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style={{ ['--bs-scroll-height' as any]: '100px;' }}>
                                         <li className="nav-item">
-                                            <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/">
+                                            <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/"
+                                            //  onClick={(e) => {
+                                            //             e.preventDefault()
+                                            //             refreshHomePage()
+                                            //         }}
+                                                     >
                                                 <span className="nav-hover-effect d-flex">
                                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <g clipPath="url(#clip0_1277_4757)">
@@ -211,10 +247,7 @@ export default function Header() {
 
                                                 </span>
                                                 <ThemedText type={pathname === `/` ? 'defaultSemiBold' : 'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB' : '#282F2F'}
-                                                    onClick={(e) => {
-                                                        e.preventDefault()
-                                                        refreshHomePage()
-                                                    }}
+                                                    
                                                 >
                                                     Home
                                                 </ThemedText>
@@ -224,7 +257,7 @@ export default function Header() {
                                         {categories && categories.length > 0 ? (
                                             orderedCategories.map((NavItem: any, index: number) => (
                                                 <li className="nav-item" key={index}>
-                                                    <Link href={`/${NavItem.slug}`} className="nav-link active d-flex align-items-center">
+                                                    <Link href={`/${NavItem.slug}`} prefetch={true} className="nav-link active d-flex align-items-center">
                                                         <span className="nav-hover-effect d-flex">
                                                             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                 <g clipPath="url(#clip0_1277_4757)">

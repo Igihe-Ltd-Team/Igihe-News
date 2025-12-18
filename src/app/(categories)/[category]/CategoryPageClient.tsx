@@ -30,12 +30,28 @@ export default function CategoryPageClient({
   initialPageInfo,
   slug
 }: CategoryPageClientProps) {
-  const { useCategorySlugArticles, useCategoryTagArticles } = useNewsData();
+  const { useCategorySlugArticles, useCategoryTagArticles, categories } = useNewsData();
   const [posts, setPosts] = useState(initialPosts);
   const [pageInfo, setPageInfo] = useState(initialPageInfo);
 
-  // Infinite query for pagination
+  // Find the category from categories list
+  const thisCategory = categories?.find(
+    (single: Category) => single.slug === slug
+  );
 
+  // ALWAYS call hooks unconditionally at the top level
+  // Use the categoryInfo if available, otherwise use thisCategory?.id
+  const categoryId = categoryInfo?.id || thisCategory?.id;
+  const highlightsQuery = useCategoryTagArticles(63, categoryId);
+  const { data: clientHighlights,isLoading:lodingHighlight } = useCategoryTagArticles(63, categoryId);
+
+  const displayHighlights = clientHighlights || highlightArticles;
+
+console.log('highlightsQuery',highlightsQuery)
+
+
+
+  // Infinite query for pagination
   const {
     data,
     fetchNextPage,
@@ -45,7 +61,6 @@ export default function CategoryPageClient({
     isError,
     error,
   } = useCategorySlugArticles(slug);
-
 
   // Update posts when data changes
   useEffect(() => {
@@ -89,7 +104,7 @@ export default function CategoryPageClient({
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Highlight Section */}
-      <CategoryMainSection articles={highlightArticles} />
+      <CategoryMainSection articles={displayHighlights} />
 
       {/* Ads Section */}
       <div className="pt-2 pb-4">
@@ -116,7 +131,7 @@ export default function CategoryPageClient({
         <Row>
           {/* Articles Column */}
           <Col md={8}>
-            <HeaderDivider title={`Latest ${categoryInfo?.name || "Category"} News`} />
+            <HeaderDivider title={`Latest ${categoryInfo?.name || slug} News`} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {posts.map((article) => (
@@ -179,7 +194,7 @@ export default function CategoryPageClient({
           <Col md={4} className="sticky-sidebar">
             <PopularNews
               articles={posts}
-              name={`Popular In ${categoryInfo?.name || "Category"}`}
+              name={`Popular In ${categoryInfo?.name || slug}`}
             />
           </Col>
         </Row>
