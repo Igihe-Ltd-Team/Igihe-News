@@ -461,12 +461,22 @@ interface CategoryPageProps {
 }
 
 export async function generateStaticParams() {
-  const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
-  const data = await prefetchAllHomeData().catch(() => ({ categories: [] }));
-  
-  return data.categories.map((cat: Category) => ({
-    category: cat.slug,
-  }));
+  try {
+    const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
+    const data = await prefetchAllHomeData();
+    
+    if (!data.categories || data.categories.length === 0) {
+      console.warn("⚠️ No categories found during generateStaticParams");
+      return [];
+    }
+
+    return data.categories.map((cat: Category) => ({
+      category: cat.slug,
+    }));
+  } catch (error) {
+    console.error("❌ Failed to fetch params for categories:", error);
+    return [];
+  }
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
