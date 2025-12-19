@@ -84,9 +84,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Extract image safely
     const ogImage =
       postData.yoast_head_json?.og_image?.[0]?.url ||
-      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
-      postData.jetpack_featured_media_url ||
-      'https://stage.igihe.com/default-og-image.jpg' // Add your default image
+      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url 
 
     // Extract author safely
     const author = postData._embedded?.author?.[0]?.name
