@@ -12,7 +12,7 @@ import { useOpinion } from '@/hooks/useMainNewsData'
 
 export default function Opinios() {
 
-  const { data: opinions = [],isLoading,error } = useOpinion()
+  const { data,isLoading,error } = useOpinion()
 
 
   if (isLoading) {
@@ -38,7 +38,7 @@ export default function Opinios() {
       <HeaderDivider title="Opinions" />
       <div className='g-2'>
         { 
-            opinions?.map(opinion => <OpionCard key={opinion.id} article={opinion}/>)
+            data?.data?.map(opinion => <OpionCard key={opinion.id} article={opinion}/>)
         }
         </div>
       {/* <Slides articles={videos || []} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll /> */}

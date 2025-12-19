@@ -10,6 +10,7 @@ import HeaderDivider from "@/components/HeaderDivider";
 import AdManager from "@/components/ads/AdManager";
 import CustomSlider from "@/components/home/CustomSlider";
 import { useNewsData } from "@/hooks/useNewsData";
+import SideBar from "@/components/ReUsable/SideBar";
 
 interface CategoryPageClientProps {
   initialPosts: NewsItem[];
@@ -192,10 +193,16 @@ export default function CategoryPageClient({
 
           {/* Sidebar */}
           <Col md={4} className="sticky-sidebar">
-            <PopularNews
+          <SideBar
+          posts={posts}
+          categoryInfo={categoryInfo}
+          slug={slug}
+          showSocials
+          />
+            {/* <PopularNews
               articles={posts}
               name={`Popular In ${categoryInfo?.name || slug}`}
-            />
+            /> */}
           </Col>
         </Row>
       </div>

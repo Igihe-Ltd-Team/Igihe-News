@@ -167,6 +167,35 @@ const liveEventArticlesQuery = useQuery({
     })
   }
 
+
+
+  const useOpinionArticles = () => {
+    return useInfiniteQuery({
+      queryKey: queryKeys.opinion.lists(),
+      queryFn: async ({ pageParam = 1 }) => {
+        const response = await ApiService.fetchOpinions({
+          page: pageParam,
+          per_page: 8,
+        })
+        if (!response) throw new Error(`No posts found for Opinions`)
+        return response
+      },
+      initialPageParam: 1,
+      getNextPageParam: lastPage =>
+        lastPage.pagination.hasNextPage ? lastPage.pagination.currentPage + 1 : undefined,
+      enabled: true,
+      retry: (failureCount, error) => {
+        if (
+          error.message.includes('No posts found') ||
+          error.message.includes('Category slug is required')
+        )
+          return false
+        return failureCount < 3
+      },
+    })
+  }
+
+
   const useCategoryInfo = (slug?: string) => {
     return useQuery({
       queryKey: ['category', slug],
@@ -316,6 +345,7 @@ const liveEventArticlesQuery = useQuery({
     /* ---------- helpers ---------- */
     useCategoryArticles,
     useCategorySlugArticles,
+    useOpinionArticles,
     useCategoryInfo,
     useArticleDetails,
     usePopularByCategory,

@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { ThemedText } from '../ThemedText'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { Author } from '@/types/fetchData'
-export default function SinglePostMetaData({ author, authorName, authorImage, publishDate, category }:
-    { author?: Author, authorName: string, authorImage: string, publishDate?: string, category: string | undefined }) {
+export default function SinglePostMetaData({ author, authorName, authorImage, publishDate, category,categorySlug }:
+    { author?: Author, authorName: string, authorImage: string, publishDate?: string, category: string | undefined,categorySlug?:string }) {
 
     return (
         <div className="article-meta-data has-gray-border d-flex align-items-center justify-content-between mt-4 pt-4">
             <div className="meta-left d-flex align-items-center gap-5 w-75">
-                <Link href={`/${category}`} className='text-decoration-none'>
+                <Link href={`/${categorySlug}`} className='text-decoration-none'>
                     <ThemedText type='small' className='hasBorder'>{category}</ThemedText>
                 </Link>
 

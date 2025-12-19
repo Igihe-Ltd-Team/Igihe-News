@@ -5,7 +5,7 @@
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
-import { formatDateTime, getCategoryName, getFeaturedImage, getTags, stripHtml } from '@/lib/utils'
+import { formatDateTime, getCategoryName, getCategorySlug, getFeaturedImage, getTags, stripHtml } from '@/lib/utils'
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
@@ -30,6 +30,7 @@ import SinglePostMetaData from './SinglePostMetaData'
 import SocialShare from './SocialShare'
 import CustomSlider from '../home/CustomSlider'
 import { visby } from '@/lib/fonts';
+import SideBar from '../ReUsable/SideBar'
 
 
 interface SingleNewsContentProps {
@@ -73,9 +74,10 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
             </div>
         )
     }
-    const featuredImage = getFeaturedImage(article,true);
+    const featuredImage = getFeaturedImage(article, true);
 
     const articleCategory = article ? getCategoryName(article) : undefined;
+    const articleCategorySlug = article ? getCategorySlug(article) : undefined;
     const publishDate = article ? formatDateTime(article.date) : '';
     const author = article._embedded?.author?.[0];
     const authorsName = article._embedded?.author?.[0]?.name || '';
@@ -114,13 +116,19 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                     authorName={authorsName}
                     authorImage={authorImage || '/assets/user-avatar.png'}
                     publishDate={publishDate}
-                    category={articleCategory} />
+                    category={articleCategory}
+                    categorySlug={articleCategorySlug}
+                />
                 <Row className='pt-4'>
 
                     <Col md="9">
                         <div className='d-flex flex-column-reverse flex-md-row'>
                             <Col md="1">
-                                <SocialShare postUrl={postUrls} />
+                                <div className='sticky-parent'>
+                                    <div className='sticky-sidebar'>
+                                        <SocialShare postUrl={postUrls} />
+                                    </div>
+                                </div>
                             </Col>
                             <Col md="11">
                                 <OptimizedImage
@@ -130,7 +138,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     height={isMobile ? 300 : isTablet ? 400 : 554}
                                     className="object-cover"
                                     imgClass='object-fit-cover'
-
+                                    priority
                                 />
                                 {
                                     article?.excerpt?.rendered &&
@@ -232,15 +240,10 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
 
                     </Col>
                     <Col md="3" className='position-relative'>
-                        <div className='sticky-parent'>
-                            <div className='sticky-sidebar'>
-                                <AdManager
-                                    position="home-after-highlights"
-                                    priority={true}
-                                    className="mb-2"
-                                />
-                                <SocialMedias />
-                            </div></div>
+                        <SideBar
+                            hasBanner
+                            showSocials
+                        />
                     </Col>
                 </Row>
 

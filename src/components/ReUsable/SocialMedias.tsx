@@ -18,14 +18,14 @@ function SocialMedias() {
                 </div>
 
                 <div className="col-md-6">
-                    <a target='_blank' href="#" className="social-card">
+                    <a target='_blank' href="https://www.youtube.com/@IGIHE_Official" className="social-card">
                         <i className="bi bi-youtube youtube social-icon"></i>
                         <span className="social-name">Youtube</span>
                     </a>
                 </div>
 
                 <div className="col-md-6">
-                    <a target='_blank' href="#" className="social-card">
+                    <a target='_blank' href="https://www.tiktok.com/@igihe?lang=en" className="social-card">
                         <i className="bi bi-tiktok tiktok social-icon"></i>
                         <span className="social-name">TikTok</span>
                     </a>

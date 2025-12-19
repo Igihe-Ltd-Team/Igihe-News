@@ -13,6 +13,8 @@ interface PageProps {
 
 const endpoints: Record<string, string> = {
   opinions: "opinion",
+  'rubrique-19': "opinion",
+  
   advertorials: "advertorial",
   facts: "facts",
 };

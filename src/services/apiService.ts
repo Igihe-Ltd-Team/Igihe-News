@@ -174,11 +174,11 @@ export class ApiService {
       // Cache the successful response
       requestCache.set(cacheKey, { data, timestamp: now })
       if (isServer) {
-        console.log(cacheKey,'is from server')
+        console.log(cacheKey, 'is from server')
         await fileCache.set(cacheKey, data, ttl)
       }
-      else{
-        console.log(cacheKey,'is from client')
+      else {
+        console.log(cacheKey, 'is from client')
       }
       return data
     } catch (error) {
@@ -196,7 +196,7 @@ export class ApiService {
           console.warn('⚠️  Using stale file cache due to API error:', error)
           return staleCacheData
         }
-        else{
+        else {
           console.log('cache file cant be used')
         }
 
@@ -361,7 +361,7 @@ export class ApiService {
 
       if (isServer) {
 
-        console.log(cacheKey,'is from server')
+        console.log(cacheKey, 'is from server')
         await fileCache.set(cacheKey, data, ttl)
       }
       return data
@@ -380,7 +380,7 @@ export class ApiService {
           console.warn('⚠️  Using stale file cache due to API error:', error)
           return staleCacheData
         }
-        else{
+        else {
           console.log('cache file cant be used')
         }
 
@@ -837,19 +837,19 @@ export class ApiService {
     const cacheKey = `related:${postId}:${JSON.stringify(queryParams)}`
 
     // return this.cachedFetch(cacheKey, async () => {
-      const queryString = this.buildQuery(queryParams)
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts?${queryString}`
-      )
+    const queryString = this.buildQuery(queryParams)
+    const response = await this.fetchWithTimeout(
+      `${API_CONFIG.baseURL}/posts?${queryString}`
+    )
 
-      const data = await response.json()
+    const data = await response.json()
 
-      // If no results, fall back to latest posts
-      if (data.length === 0) {
-        return this.fetchArticles({ per_page: 6 }).then(res => res.data)
-      }
+    // If no results, fall back to latest posts
+    if (data.length === 0) {
+      return this.fetchArticles({ per_page: 6 }).then(res => res.data)
+    }
 
-      return data || []
+    return data || []
     // })
   }
 
@@ -1276,19 +1276,23 @@ export class ApiService {
 
 
   static async fetchOpinions(params?: {
+    page?: number,
     per_page?: number
     orderby?: string
     order?: 'asc' | 'desc'
-  }): Promise<NewsItem[]> {
+  }): Promise<articleResponse<NewsItem>> {
 
     const queryParams: Record<string, any> = {
+      page: params?.page || 1,
       per_page: params?.per_page || 6,
       _embed: '1',
       orderby: params?.orderby || 'date',
       order: params?.order || 'desc',
     }
 
-
+    if (params?.page) {
+      queryParams.page = params.page
+    }
     if (params?.per_page) {
       queryParams.per_page = params.per_page
     }
@@ -1304,7 +1308,13 @@ export class ApiService {
     return this.cachedFetch(cacheKey, async () => {
       const queryString = this.buildQuery(queryParams)
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?${queryString}`)
-      return await response.json()
+
+      const data = await response.json()
+      return this.buildPaginationResponse(data, response, {
+        page: params?.page,
+        per_page: params?.per_page,
+      })
+
     }, 60 * 60 * 1000) // 1 hour cache for media
   }
 
@@ -1352,7 +1362,7 @@ export class ApiService {
 
 
 
-  
+
 
 
 
@@ -1383,25 +1393,25 @@ export class ApiService {
 
         return this.cachedFetch(cacheKey, async () => {
 
-        const timestamp = Date.now();
-        
-        const response = await this.fetchWithTimeout(
-          `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`
-        );
+          const timestamp = Date.now();
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+          const response = await this.fetchWithTimeout(
+            `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${timestamp}`
+          );
 
-        const ads = await response.json();
-        const validAds = ads || [];
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-        // Update cache
-        this.adsCache = validAds;
-        this.adsCacheTimestamp = now;
-        return validAds;
+          const ads = await response.json();
+          const validAds = ads || [];
+
+          // Update cache
+          this.adsCache = validAds;
+          this.adsCacheTimestamp = now;
+          return validAds;
         }, ApiService.ADS_CACHE_TTL)
-        
+
       } catch (error) {
         console.error('Error fetching advertisements:', error);
         // Return empty array on error

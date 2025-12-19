@@ -64,7 +64,7 @@ const { isMobile } = useResponsive()
   }
       
   return (
-    <div className={`my-2 position-relative ${className}`} style={{
+    <div className={`my-2 position-relative ${className} dynamic-card-item`} style={{
       backgroundColor: bgColor ? bgColor : 'transparent',
       borderWidth: bordered ? '1px' : '0',
       borderStyle: 'solid',
