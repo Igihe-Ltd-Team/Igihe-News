@@ -91,7 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Extract image safely
     const ogImage =
       postData.yoast_head_json?.og_image?.[0]?.url ||
-      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url
+      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url || ''
 
     // Extract author safely
     const author = postData._embedded?.author?.[0]?.name
@@ -163,5 +163,5 @@ export default async function SingleNewsPage({ params }: PageProps) {
   // console.log('category',category)
 
   const postData = await getPostData(slug, category)
-  return <SingleNewsContent slug={slug} initialArticle={postData} />
+  return <SingleNewsContent slug={slug} initialArticle={postData || undefined} />
 }
