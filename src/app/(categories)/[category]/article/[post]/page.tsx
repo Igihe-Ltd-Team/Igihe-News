@@ -1,5 +1,6 @@
 // app/news/news/[post]/page.tsx
 import SingleNewsContent from '@/components/news/SingleNewsContent'
+import { ViewTrackerComponent } from '@/components/ViewTracker'
 import { stripHtml } from '@/lib/utils'
 import { ApiService } from '@/services/apiService'
 import { Metadata } from 'next'
@@ -163,5 +164,11 @@ export default async function SingleNewsPage({ params }: PageProps) {
   // console.log('category',category)
 
   const postData = await getPostData(slug, category)
-  return <SingleNewsContent slug={slug} initialArticle={postData || undefined} />
+  return(
+  <>
+  {
+    postData && <ViewTrackerComponent postId={postData}/>
+}
+  
+  <SingleNewsContent slug={slug} initialArticle={postData || undefined} /></>)
 }
