@@ -12,7 +12,7 @@ interface PageProps {
 /* ------------------------ STRIP HTML ------------------------ */
 
 const endpoints: Record<string, string> = {
-  opinions: "opinion",
+  opinion: "opinion",
   'rubrique-19': "opinion",
   
   advertorials: "advertorial",
@@ -22,25 +22,30 @@ const endpoints: Record<string, string> = {
 async function getPostData(slug: string, section: string) {
   const endpoint = endpoints[section] ?? "posts";
   const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/${endpoint}?slug=${slug}&_embed`;
+  const api = `${endpoint}?slug=${slug}&_embed`;
 
   try {
 
     if (section === 'posts') {
       return await ApiService.fetchPostBySlug(slug)
     }
+    else
+    {
+     return await ApiService.customPostFetch(api)
+    }
 
-    const response = await fetch(
-      apiUrl,
-      {
-        next: { revalidate: 60 },
-        // cache: 'no-store' // Force fresh data
-      }
-    )
+    // const response = await fetch(
+    //   apiUrl,
+    //   {
+    //     next: { revalidate: 60 },
+    //     // cache: 'no-store' // Force fresh data
+    //   }
+    // )
 
-    if (!response.ok) return null
+    // if (!response.ok) return null
 
-    const posts = await response.json()
-    return posts && posts.length > 0 ? posts[0] : null
+    // const posts = await response.json()
+    // return posts && posts.length > 0 ? posts[0] : null
 
   } catch (error) {
     console.error('❌ Fetch error:', error)

@@ -459,7 +459,25 @@ export class ApiService {
     }, 10 * 60 * 1000)
   }
 
+static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
+    const cacheKey = `post:${apiUrl}`
+    
+    return this.cachedFetch(cacheKey, async () => {
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/${apiUrl}`
+      )
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const posts = await response.json()
+      if (!Array.isArray(posts) || posts.length === 0) {
+        return null
+      }
+      return posts[0]
+    }, 10 * 60 * 1000)
+  }
 
   static async fetchMostPopularArticlesFallback(params?: {
     period?: 'day' | 'week' | 'month' | 'all'
