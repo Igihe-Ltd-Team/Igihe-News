@@ -167,7 +167,7 @@ export default async function SingleNewsPage({ params }: PageProps) {
   return(
   <>
   {
-    postData && <ViewTrackerComponent postId={postData}/>
+    postData && <ViewTrackerComponent postId={postData.id}/>
 }
   
   <SingleNewsContent slug={slug} initialArticle={postData || undefined} /></>)
