@@ -156,7 +156,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     }}
                                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article?.content?.rendered || '') }}
                                 />
-                                <div className='d-flex gap-2'>
+                                {/* <div className='d-flex gap-2'>
                                     {
                                         tags.map(tag =>
                                             <div style={{ backgroundColor: '#F7F7F7', borderRadius: 2, padding: 10 }} key={tag.id}>
@@ -168,7 +168,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                             </div>
                                         )
                                     }
-                                </div>
+                                </div> */}
                                 <AIChatButton article={article} />
 
                                 {

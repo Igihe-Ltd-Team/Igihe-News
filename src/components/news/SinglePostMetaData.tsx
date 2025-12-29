@@ -59,7 +59,7 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
                             </svg>
 
                         </span>
-                        <ThemedText type='small' className='gray-color'>5 min read</ThemedText>
+                        {/* <ThemedText type='small' className='gray-color'>5 min read</ThemedText> */}
                     </div>
 
                     <div className="comments-count d-flex align-items-center gap-1">

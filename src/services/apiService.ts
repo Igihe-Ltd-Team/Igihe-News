@@ -383,19 +383,6 @@ export class ApiService {
         else {
           console.log('cache file cant be used')
         }
-
-        // const fs = await import('fs/promises')
-        // const path = await import('path')
-
-        // try {
-        //   const filePath = path.join(process.cwd(), '.cache', `${cacheKey.replace(/[^a-z0-9-_:]/gi, '_').substring(0, 200)}.json`)
-        //   const fileContent = await fs.readFile(filePath, 'utf-8')
-        //   const cacheEntry = JSON.parse(fileContent)
-        //   console.warn('⚠️  Using stale file cache due to API error:', error)
-        //   return cacheEntry.data
-        // } catch (fallbackError) {
-        //   console.error('❌ No fallback cache available:', fallbackError)
-        // }
       }
       throw error
     }

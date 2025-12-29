@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         username,
         appPassword
       );
-
+// console.log('res:',results)
       // Archive the file after successful sync
       if (results.success > 0 || results.failed === 0) {
         const archiveDir = path.join(dataDir, 'archive');
