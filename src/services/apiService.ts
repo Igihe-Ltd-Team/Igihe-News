@@ -1,4 +1,6 @@
 import { fileCache } from '@/lib/cache/fileCache'
+import { calculateArticleCacheTTL, calculateListCacheTTL, shouldRevalidateCache } from '@/lib/cache/dynamicCache'
+
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
 import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem } from '@/types/fetchData'
 
@@ -221,6 +223,103 @@ export class ApiService {
   }
 
 
+
+  private static async cachedFetchWithDynamicTTL<T>(
+    cacheKey: string,
+    fetchFn: () => Promise<T>,
+    getContentDate?: (data: T) => string | Date | null,
+    baseTTL: number = API_CONFIG.cacheTimeout
+  ): Promise<T> {
+    const now = Date.now()
+    const isServer = typeof window === 'undefined'
+
+    // 1. Check memory cache
+    const memoryCached = requestCache.get(cacheKey)
+    if (memoryCached) {
+      const data = memoryCached.data;
+
+      // If we have a date extractor, check if we should revalidate
+      if (getContentDate) {
+        const contentDate = getContentDate(data);
+        if (contentDate) {
+          const dynamicTTL = calculateArticleCacheTTL(contentDate);
+          const cacheAge = now - memoryCached.timestamp;
+
+          if (cacheAge < dynamicTTL) {
+            console.log(`✅ Memory cache HIT (age: ${(cacheAge / 1000).toFixed(0)}s, TTL: ${(dynamicTTL / 1000).toFixed(0)}s)`);
+            return data;
+          }
+        }
+      } else if ((now - memoryCached.timestamp) < baseTTL) {
+        return data;
+      }
+    }
+
+    // 2. Check file cache (server-side only)
+    if (isServer) {
+      const fileCached = await fileCache.get<T>(cacheKey)
+      if (fileCached !== null) {
+        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+        console.log(`✅ File cache HIT: ${cacheKey}`);
+        return fileCached
+      }
+    }
+
+    // 3. Check for in-flight requests
+    if (pendingRequests.has(cacheKey)) {
+      return pendingRequests.get(cacheKey)!
+    }
+
+    // 4. Rate limiting check
+    rateLimit.check('api_requests', 100, 60000)
+
+    try {
+      const requestPromise = fetchFn()
+      pendingRequests.set(cacheKey, requestPromise)
+      const data = await requestPromise
+
+      // Calculate dynamic TTL based on content
+      let finalTTL = baseTTL;
+      if (getContentDate) {
+        const contentDate = getContentDate(data);
+        if (contentDate) {
+          finalTTL = calculateArticleCacheTTL(contentDate);
+          console.log(`📊 Dynamic TTL: ${(finalTTL / 1000 / 60).toFixed(1)} minutes for content from ${contentDate}`);
+        }
+      }
+
+      // Cache the successful response
+      requestCache.set(cacheKey, { data, timestamp: now })
+
+      if (isServer) {
+        console.log(`💾 File cache SET: ${cacheKey} (TTL: ${(finalTTL / 1000 / 60).toFixed(1)} min)`)
+        await fileCache.set(cacheKey, data, finalTTL)
+      }
+
+      return data
+    } catch (error) {
+      // On error, return cached data even if expired
+      if (memoryCached) {
+        console.warn('⚠️ Using stale memory cache due to API error:', error)
+        return memoryCached.data
+      }
+
+      if (isServer) {
+        const staleCacheData = await fileCache.get<T>(cacheKey)
+        if (staleCacheData !== null) {
+          console.warn('⚠️ Using stale file cache due to API error:', error)
+          return staleCacheData
+        }
+      }
+
+      throw error
+    } finally {
+      pendingRequests.delete(cacheKey)
+    }
+  }
+
+
+
   private static async fetchWithTimeout(
     url: string,
     options: RequestInit = {},
@@ -429,41 +528,87 @@ export class ApiService {
   static async fetchPostBySlug(slug: string): Promise<NewsItem | null> {
     const cacheKey = `post:${slug}`
 
-    return this.cachedFetch(cacheKey, async () => {
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
-      )
+    // return this.cachedFetch(cacheKey, async () => {
+    //   const response = await this.fetchWithTimeout(
+    //     `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
+    //   )
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`)
+    //   }
 
-      const posts = await response.json()
-      if (!Array.isArray(posts) || posts.length === 0) {
-        return null
-      }
-      return posts[0]
-    }, 10 * 60 * 1000)
+    //   const posts = await response.json()
+    //   if (!Array.isArray(posts) || posts.length === 0) {
+    //     return null
+    //   }
+    //   return posts[0]
+    // }, 10 * 60 * 1000)
+
+
+    return this.cachedFetchWithDynamicTTL(
+      cacheKey,
+      async () => {
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
+        )
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const posts = await response.json()
+        if (!Array.isArray(posts) || posts.length === 0) {
+          return null
+        }
+        return posts[0]
+      },
+      // Date extractor function
+      (data) => data?.date || null
+    )
+
+
   }
 
-static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
+  static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
     const cacheKey = `post:${apiUrl}`
-    
-    return this.cachedFetch(cacheKey, async () => {
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/${apiUrl}`
-      )
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+    // return this.cachedFetch(cacheKey, async () => {
+    //   const response = await this.fetchWithTimeout(
+    //     `${API_CONFIG.baseURL}/${apiUrl}`
+    //   )
 
-      const posts = await response.json()
-      if (!Array.isArray(posts) || posts.length === 0) {
-        return null
-      }
-      return posts[0]
-    }, 10 * 60 * 1000)
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`)
+    //   }
+
+    //   const posts = await response.json()
+    //   if (!Array.isArray(posts) || posts.length === 0) {
+    //     return null
+    //   }
+    //   return posts[0]
+    // }, 10 * 60 * 1000)
+
+
+    return this.cachedFetchWithDynamicTTL(
+      cacheKey,
+      async () => {
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/${apiUrl}`
+        )
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const posts = await response.json()
+        if (!Array.isArray(posts) || posts.length === 0) {
+          return null
+        }
+        return posts[0]
+      },
+      // Date extractor function
+      (data) => data?.date || null
+    )
+
   }
 
   static async fetchMostPopularArticlesFallback(params?: {
@@ -491,18 +636,36 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
 
     const cacheKey = `popular:fallback:${query}`
 
-    return this.cachedFetch(cacheKey, async () => {
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
-      )
+    // return this.cachedFetch(cacheKey, async () => {
+    //   const response = await this.fetchWithTimeout(
+    //     `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
+    //   )
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`)
+    //   }
 
-      const posts = await response.json()
-      return Array.isArray(posts) ? posts : []
-    }, 10 * 60 * 1000)
+    //   const posts = await response.json()
+    //   return Array.isArray(posts) ? posts : []
+    // }, 10 * 60 * 1000)
+
+    return this.cachedFetchWithDynamicTTL(
+      cacheKey,
+      async () => {
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
+        )
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const posts = await response.json()
+        return Array.isArray(posts) ? posts : []
+      },
+      // Use newest article for TTL
+      (posts) => posts.length > 0 ? posts[0].date : null
+    )
   }
 
 
@@ -633,6 +796,36 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
 
 
 
+  // static async fetchPostsByCategorySlug(
+  //   slug: string,
+  //   params?: {
+  //     per_page?: number
+  //     page?: number
+  //     orderby?: 'date' | 'modified' | 'title' | 'comment_count'
+  //     order?: 'asc' | 'desc'
+  //   }
+  // ): Promise<CategoryPostsResponse | null> {
+  //   try {
+  //     const category = await this.fetchCategoryBySlug(slug)
+  //     if (!category) {
+  //       console.log('Category not found for slug:', slug)
+  //       return null
+  //     }
+  //     const postsResponse = await this.fetchArticles({
+  //       categories: [category.id],
+  //       ...params
+  //     })
+  //     return {
+  //       posts: postsResponse,
+  //       category: category
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching posts by category slug:', error)
+  //     return null
+  //   }
+  // }
+
+
   static async fetchPostsByCategorySlug(
     slug: string,
     params?: {
@@ -648,10 +841,12 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
         console.log('Category not found for slug:', slug)
         return null
       }
+
       const postsResponse = await this.fetchArticles({
         categories: [category.id],
         ...params
       })
+
       return {
         posts: postsResponse,
         category: category
@@ -701,8 +896,8 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
     orderby?: 'date' | 'modified' | 'title' | 'comment_count' | 'relevance' | 'slug' | 'include' | 'id'
     order?: 'asc' | 'desc'
     after?: string
-    before?: string,
-    author?: number,
+    before?: string
+    author?: number
     tags?: number[]
   }): Promise<articleResponse<NewsItem>> {
     const queryParams: Record<string, any> = {
@@ -719,42 +914,50 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
     if (params?.tags?.length) {
       queryParams.tags = params.tags.join(',')
     }
-
     if (params?.search) {
       queryParams.search = params.search
     }
-
     if (params?.exclude?.length) {
       queryParams.exclude = params.exclude.join(',')
     }
-
     if (params?.include?.length) {
       queryParams.include = params.include.join(',')
     }
-
     if (params?.after) {
       queryParams.after = params.after
     }
-
     if (params?.before) {
       queryParams.before = params.before
+    }
+    if (params?.author) {
+      queryParams.author = params.author
     }
 
     const cacheKey = `articles:${JSON.stringify(queryParams)}`
 
-    return this.cachedFetch(cacheKey, async () => {
-      const queryString = this.buildQuery(queryParams)
-
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts?${queryString}`
-      )
-      const data = await response.json()
-      return this.buildPaginationResponse(data, response, {
-        page: params?.page,
-        per_page: params?.per_page,
-      })
-    }, 2 * 60 * 1000) // 2 minutes cache for articles
+    return this.cachedFetchWithDynamicTTL(
+      cacheKey,
+      async () => {
+        const queryString = this.buildQuery(queryParams)
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/posts?${queryString}`
+        )
+        const data = await response.json()
+        return this.buildPaginationResponse(data, response, {
+          page: params?.page,
+          per_page: params?.per_page,
+        })
+      },
+      // Use the newest article's date for TTL calculation
+      (response) => {
+        if (response?.data?.length > 0) {
+          return response.data[0].date
+        }
+        return null
+      }
+    )
   }
+
 
   // Videos API
   static async fetchVideos(params?: {
@@ -798,13 +1001,28 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
   static async fetchSinglePost(id: string): Promise<NewsItem> {
     const cacheKey = `post:${id}`
 
-    return this.cachedFetch(cacheKey, async () => {
-      const response = await this.fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts/${id}?_embed=1`
-      )
+    // return this.cachedFetch(cacheKey, async () => {
+    //   const response = await this.fetchWithTimeout(
+    //     `${API_CONFIG.baseURL}/posts/${id}?_embed=1`
+    //   )
 
-      return await response.json()
-    }, 10 * 60 * 1000) // 10 minutes cache for single posts
+    //   return await response.json()
+    // }, 10 * 60 * 1000) // 10 minutes cache for single posts
+
+
+    // const cacheKey = `post:${id}`
+
+    return this.cachedFetchWithDynamicTTL(
+      cacheKey,
+      async () => {
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/posts/${id}?_embed=1`
+        )
+        return await response.json()
+      },
+      (data) => data?.date || null
+    )
+
   }
 
   // Single Video
@@ -1310,6 +1528,9 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
 
     const cacheKey = `opinion:${JSON.stringify(queryParams)}`
 
+
+    
+
     return this.cachedFetch(cacheKey, async () => {
       const queryString = this.buildQuery(queryParams)
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?${queryString}`)
@@ -1329,15 +1550,33 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
     const cacheKey = 'fact-of-the-day:all'
 
     try {
-      return this.dedupedFetch(cacheKey, async () => {
-        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&per_page=1`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
 
-        const ads = await response.json()
-        return ads || []
-      }, 10 * 60 * 1000) // 10 minutes cache for ads
+      return this.cachedFetchWithDynamicTTL(
+        cacheKey,
+        async () => {
+          const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&per_page=1`)
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+
+          const ads = await response.json()
+
+          return ads || []
+        },
+        (data) => data?.date || null
+      )
+
+
+      // return this.dedupedFetch(cacheKey, async () => {
+      //   const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/fact-of-the-day?_embed&per_page=1`)
+      //   if (!response.ok) {
+      //     throw new Error(`HTTP error! status: ${response.status}`)
+      //   }
+
+      //   const ads = await response.json()
+      //   return ads || []
+      // }, 10 * 60 * 1000) // 10 minutes cache for ads
 
     } catch (error) {
       console.error('Error fetching advertisements:', error)
@@ -1350,15 +1589,34 @@ static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
   static async fetchAnnouncement(): Promise<NewsItem[]> {
     const cacheKey = 'announcement:all'
     try {
-      return this.dedupedFetch(cacheKey, async () => {
-        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/announcement?_embed&per_page=50`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
 
-        const announcements = await response.json()
-        return announcements || []
-      }, 10 * 60 * 1000) // 10 minutes cache for ads
+
+      return this.cachedFetchWithDynamicTTL(
+        cacheKey,
+        async () => {
+          const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/announcement?_embed&per_page=50`)
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+
+          const announcements = await response.json()
+
+          return announcements || []
+        },
+        (data) => data?.date || null
+      )
+
+
+      // return this.dedupedFetch(cacheKey, async () => {
+      //   const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/announcement?_embed&per_page=50`)
+      //   if (!response.ok) {
+      //     throw new Error(`HTTP error! status: ${response.status}`)
+      //   }
+
+      //   const announcements = await response.json()
+      //   return announcements || []
+      // }, 10 * 60 * 1000) // 10 minutes cache for ads
     } catch (error) {
       console.error('Error fetching advertisements:', error)
       return []
