@@ -57,11 +57,11 @@ function DynamicArticleCard({
 const { isMobile } = useResponsive()
   const featuredImage = getFeaturedImage(article,priority);
 
-  const mouseEnter = (articles:NewsItem)=>{
-    if (article?.slug) {
-      ApiService.cacheArticles(articles)
-    }
-  }
+  // const mouseEnter = (articles:NewsItem)=>{
+  //   if (article?.slug) {
+  //     ApiService.cacheArticles(articles)
+  //   }
+  // }
       
   return (
     <div className={`my-2 position-relative ${className} dynamic-card-item`} style={{

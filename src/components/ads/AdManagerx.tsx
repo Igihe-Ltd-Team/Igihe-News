@@ -168,11 +168,11 @@ export default function AdManager({
   }, [error, refetch, retryCount]);
   
 
-  // if (isLoading) {
-  //   return (
-  //     <></>
-  //   )
-  // }
+  if (isLoading) {
+    return (
+      <></>
+    )
+  }
 
   if (error || !ads || ads.length === 0) {
     if (fallbackComponent) {

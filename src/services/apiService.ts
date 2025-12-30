@@ -110,6 +110,7 @@ export class ApiService {
 
   static getCachedArticle(cacheKey: string): NewsItem | null {
     const cached = requestCache.get(cacheKey);
+    // const fileCached = await fileCache.get<T>(cacheKey)
     // console.log('cacheKey',cacheKey)
     // console.log('cached',cached)
     if (cached) {
@@ -121,20 +122,7 @@ export class ApiService {
 
 
 
-  static cacheArticles(article: NewsItem): void {
-    if (article?.slug) {
-      const cacheKey = `post:${article.slug}`
-      if (pendingRequests.has(cacheKey)) {
-        return
-      }
-      try {
-        requestCache.set(cacheKey, { data: article, timestamp: Date.now() })
-      } catch (error) {
-        // sessionStorage might be full, that's ok
-        console.debug('Failed to store in sessionStorage:', error)
-      }
-    }
-  }
+
 
 
   private static async dedupedFetch<T>(
@@ -233,8 +221,22 @@ export class ApiService {
     const now = Date.now()
     const isServer = typeof window === 'undefined'
 
+    // 2. Check file cache (server-side only)
+    if (isServer) {
+      const fileCached = await fileCache.get<T>(cacheKey)
+      if (fileCached !== null) {
+        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+        console.log(`✅ File cache HIT: ${cacheKey}`);
+        return fileCached
+      }
+      else{
+         console.log(`✅ File cache MISS: ${cacheKey}`);
+      }
+    }
+
     // 1. Check memory cache
     const memoryCached = requestCache.get(cacheKey)
+    // const fileCached = await fileCache.get<T>(cacheKey)
     if (memoryCached) {
       const data = memoryCached.data;
 
@@ -255,15 +257,8 @@ export class ApiService {
       }
     }
 
-    // 2. Check file cache (server-side only)
-    if (isServer) {
-      const fileCached = await fileCache.get<T>(cacheKey)
-      if (fileCached !== null) {
-        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
-        console.log(`✅ File cache HIT: ${cacheKey}`);
-        return fileCached
-      }
-    }
+    
+    
 
     // 3. Check for in-flight requests
     if (pendingRequests.has(cacheKey)) {
@@ -528,6 +523,11 @@ export class ApiService {
   static async fetchPostBySlug(slug: string): Promise<NewsItem | null> {
     const cacheKey = `post:${slug}`
 
+    // const cachedArticle = this.getCachedArticle(cacheKey);
+    // if (cachedArticle) {
+    //   return cachedArticle;
+    // }
+
     // return this.cachedFetch(cacheKey, async () => {
     //   const response = await this.fetchWithTimeout(
     //     `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
@@ -564,29 +564,10 @@ export class ApiService {
       // Date extractor function
       (data) => data?.date || null
     )
-
-
   }
 
-  static async customPostFetch(apiUrl: string): Promise<NewsItem | null> {
-    const cacheKey = `post:${apiUrl}`
-
-    // return this.cachedFetch(cacheKey, async () => {
-    //   const response = await this.fetchWithTimeout(
-    //     `${API_CONFIG.baseURL}/${apiUrl}`
-    //   )
-
-    //   if (!response.ok) {
-    //     throw new Error(`HTTP error! status: ${response.status}`)
-    //   }
-
-    //   const posts = await response.json()
-    //   if (!Array.isArray(posts) || posts.length === 0) {
-    //     return null
-    //   }
-    //   return posts[0]
-    // }, 10 * 60 * 1000)
-
+  static async customPostFetch(apiUrl: string,slug:string): Promise<NewsItem | null> {
+    const cacheKey = `post:${slug}`
 
     return this.cachedFetchWithDynamicTTL(
       cacheKey,
@@ -886,6 +867,80 @@ export class ApiService {
 
   // Articles/Posts API
 
+
+  private static async cacheArticlesFromList(articles: NewsItem[]): Promise<void> {
+    if (!articles || !Array.isArray(articles)) return;
+
+    const isServer = typeof window === 'undefined';
+    const now = Date.now();
+
+    // Process articles in parallel but limit concurrency
+    const batchSize = 5;
+    for (let i = 0; i < articles.length; i += batchSize) {
+      const batch = articles.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(async (article) => {
+          if (article?.slug) {
+            const cacheKey = `post:${article.slug}`;
+
+            // Skip if already being fetched
+            if (pendingRequests.has(cacheKey)) {
+              return;
+            }
+
+            try {
+              // Calculate TTL based on article age
+              const articleDate = article.date;
+              let ttl = API_CONFIG.cacheTimeout;
+
+              if (articleDate) {
+                ttl = calculateArticleCacheTTL(articleDate);
+              }
+
+              // Cache in memory
+              requestCache.set(cacheKey, { data: article, timestamp: now });
+
+              // Cache in file system (server side)
+              if (isServer) {
+                try {
+                  await fileCache.set(
+                    cacheKey,
+                    article,
+                    ttl,
+                    { contentDate: articleDate }
+                  );
+                  console.log(`  💾 Cached article: ${article.slug} (${(ttl / 1000 / 60).toFixed(1)} min)`);
+                } catch (fileError) {
+                  console.debug('Failed to store in file cache:', fileError);
+                }
+              }
+
+            } catch (error) {
+              console.debug('Failed to cache article:', error);
+            }
+          }
+        })
+      );
+    }
+  }
+
+
+
+  static cacheArticles(article: NewsItem): void {
+    if (article?.slug) {
+      const cacheKey = `post:${article.slug}`
+      if (pendingRequests.has(cacheKey)) {
+        return
+      }
+      try {
+        requestCache.set(cacheKey, { data: article, timestamp: Date.now() })
+      } catch (error) {
+        // sessionStorage might be full, that's ok
+        console.debug('Failed to store in sessionStorage:', error)
+      }
+    }
+  }
+
   static async fetchArticles(params?: {
     page?: number
     per_page?: number
@@ -943,6 +998,15 @@ export class ApiService {
           `${API_CONFIG.baseURL}/posts?${queryString}`
         )
         const data = await response.json()
+
+        if (Array.isArray(data) && data.length > 0) {
+          // Don't await - let it happen in background
+          this.cacheArticlesFromList(data).catch(error => {
+            console.debug('Background caching failed:', error);
+          });
+        }
+
+
         return this.buildPaginationResponse(data, response, {
           page: params?.page,
           per_page: params?.per_page,
@@ -1465,6 +1529,7 @@ export class ApiService {
       }
 
       const authors = await response.json()
+
       return authors || []
     } catch (error) {
       console.error('Error fetching all authors:', error)
@@ -1486,6 +1551,15 @@ export class ApiService {
         }
 
         const ads = await response.json()
+
+
+        if (Array.isArray(ads) && ads.length > 0) {
+          // Don't await - let it happen in background
+          this.cacheArticlesFromList(ads).catch(error => {
+            console.debug('Background caching failed:', error);
+          });
+        }
+
         return ads || []
       }, 10 * 60 * 1000) // 10 minutes cache for ads
 
@@ -1529,13 +1603,21 @@ export class ApiService {
     const cacheKey = `opinion:${JSON.stringify(queryParams)}`
 
 
-    
+
 
     return this.cachedFetch(cacheKey, async () => {
       const queryString = this.buildQuery(queryParams)
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?${queryString}`)
 
       const data = await response.json()
+
+      if (Array.isArray(data) && data.length > 0) {
+        // Don't await - let it happen in background
+        this.cacheArticlesFromList(data).catch(error => {
+          console.debug('Background caching failed:', error);
+        });
+      }
+
       return this.buildPaginationResponse(data, response, {
         page: params?.page,
         per_page: params?.per_page,
@@ -1601,7 +1683,12 @@ export class ApiService {
           }
 
           const announcements = await response.json()
-
+          if (Array.isArray(announcements) && announcements.length > 0) {
+            // Don't await - let it happen in background
+            this.cacheArticlesFromList(announcements).catch(error => {
+              console.debug('Background caching failed:', error);
+            });
+          }
           return announcements || []
         },
         (data) => data?.date || null

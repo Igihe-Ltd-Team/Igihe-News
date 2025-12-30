@@ -1,314 +1,106 @@
-"use client"
+// app/components/Header.tsx (Server Component)
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-import { styled } from '@mui/material/styles';
-import Switch, { SwitchProps } from '@mui/material/Switch';
-import Languages from '../ui/Languages';
-import ThemeSwitcher from '../ui/ThemeSwitcher';
-import { Col, Row } from 'react-bootstrap';
-import { useNewsData } from '@/hooks/useNewsData';
-import AdManager from '../ads/AdManager';
-import { useResponsive } from '@/hooks/useResponsive';
-import IgiheCanvas from './IgiheCanvas';
-import { useTheme } from 'next-themes';
-import { ThemedText } from '../ThemedText';
-import { usePathname, useRouter } from 'next/navigation'
-import SearchModal from '../SearchModal';
+import { Col, Row } from 'react-bootstrap'
+import AdManager from '../ads/AdManager'
 import Image from 'next/image'
-import { revalidateHomePage } from '@/actions/revalidate';
+import HeaderClient from './HeaderClient'
+import { ApiService } from '@/services/apiService'
+
+// Fetch categories on the server
+async function getCategories() {
+  try {
+    // Replace with your actual API endpoint
+    const res = await ApiService.fetchCategories()
+
+
+    return res
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
+}
 
 const menus = [
-    { name: "Politics" },
-    { name: "Health" },
-    { name: "Sports" },
-    { name: "Entertainment" },
-    { name: "Technology" },
-    { name: "Arts &amp; Culture" },
-    { name: "Economy" },
-    { name: "People" },
-    { name: "Tourism" },
-    { name: "Environment" },
-    { name: "Religion" },
-    { name: "News" },
+  { name: "Politics" },
+  { name: "Health" },
+  { name: "Sports" },
+  { name: "Entertainment" },
+  { name: "Technology" },
+  { name: "Arts &amp; Culture" },
+  { name: "Economy" },
+  { name: "People" },
+  { name: "Tourism" },
+  { name: "Environment" },
+  { name: "Religion" },
+  { name: "News" },
 ]
 
-const sideMenus = [
-    { name: "Features" },
-    { name: "Money" },
-    { name: "Opinion" },
-    { name: "Europe" },
-]
+export default async function Header() {
+  const categories = await getCategories()
 
-export default function Header() {
-    const pathname = usePathname()
-    const { isMobile } = useResponsive()
-    const [loading, setLoading] = useState(true)
-    const [hoveredSlug, setHoveredSlug] = useState<string | null>(null)
+  // Normalize and order categories
+  const normalizedCategories = categories.map((cat: any) => ({
+    ...cat,
+    name: cat.name?.trim().toLowerCase(),
+  }))
 
-    const {
-        categories
-    } = useNewsData()
-    const router = useRouter()
+  const normalizedMenus = menus.map((m) => m.name.toLowerCase())
 
-
-
-
-    //   useEffect(() => {
-    //     const controller = new AbortController()
-
-    //     const load = async () => {
-    //       try {
-    //         const res = await fetch("/api/data", {
-    //           signal: controller.signal,
-    //         })
-    //         const data = await res.json()
-    //         setLoading(false)
-    //       } catch (err: any) {
-    //         if (err.name !== "AbortError") {
-    //           console.error(err)
-    //         }
-    //       }
-    //     }
-
-    //     load()
-
-    //     // ✅ THIS runs when you click a <Link>
-    //     return () => {
-    //       controller.abort()
-    //     }
-    //   }, [])
-
-    const refreshHomePage = async () => {
-        try {
-            // Call server action
-            const result = await revalidateHomePage()
-
-            if (result.success) {
-                // Refresh to show updated data
-                // router.refresh()
-
-                // Optional: Force full reload if router.refresh() doesn't work
-                window.location.reload()
-            }
-        } catch (error) {
-            console.error('Failed to refresh:', error)
-            window.location.reload()
-        }
-    }
-
-
-    const normalizedCategories = categories.map((cat) => ({
-        ...cat,
-        name: cat.name?.trim().toLowerCase(),
-    }))
-
-    const normalizedMenus = menus.map((m) => m.name.toLowerCase())
-
-    const orderedCategories = normalizedMenus
-        .map((menuName) =>
-            normalizedCategories.find((cat) => cat.name === menuName)
-        )
-        .filter(Boolean)
-
-    const otherCategories = normalizedCategories.filter(
-        (cat) => !normalizedMenus.includes(cat.name)
+  const orderedCategories = normalizedMenus
+    .map((menuName) =>
+      normalizedCategories.find((cat: any) => cat.name === menuName)
     )
+    .filter(Boolean)
 
-
-    return (
-        <div className='site-header'>
-            <div className="overlay"></div>
-            <div className="container z-1 position-relative">
-                {/* Top section with adds */}
-                {
-                    !isMobile &&
-                    <Row>
-                        <Col>
-                            <AdManager
-                                position="header-landscape-ad-1"
-                                priority={true}
-                            /></Col>
-                        <Col>
-                            <AdManager
-                                position="header-landscape-ad-2"
-                                priority={true}
-                            /></Col>
-                    </Row>
-                }
-
-
-                {/* Langauge switch section */}
-                <div className={`d-flex align-items-center justify-content-between bg-white-black px-4`}>
-                    <div className="col-md-8 lang-switcher d-flex align-items-center">
-                        <Languages />
-                    </div>
-                    <div className="col-md-4 theme-switcher align-items-end d-flex justify-content-end py-2">
-                        <ThemeSwitcher />
-                        {/* <FormGroup>
-                     <FormControlLabel
-                        control={<MaterialUISwitch sx={{ m: 1 }} defaultChecked />}
-                        label=""
-                    />
-                    </FormGroup> */}
-
-                    </div>
-                </div>
-
-                {/* Logo and banner */}
-                <div className="row flex align-items-center py-2 justify-content-between">
-                    <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
-                        <Link href="/?fromNav=1"
-                        // onClick={(e) => {
-                        //     e.preventDefault()
-                        //     refreshHomePage()
-                        // }}
-                        >
-                            <span className='site-logo'>
-                                <Image
-                                    width={240}
-                                    src={'/assets/newlogo.png'}
-                                    height={100}
-                                    className='object-fit-contain'
-                                    alt={'IGEHE Logo'}
-                                />
-                                {/* <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <g clipPath="url(#clip0_2928_1291)">
-                                        <path d="M123.532 18.5566C123.532 13.8136 123.532 9.0673 123.532 4.32431C123.532 3.6701 123.555 3.6434 124.198 3.6434C127.981 3.6434 131.768 3.6434 135.551 3.6434C136.208 3.6434 136.234 3.6701 136.234 4.30762C136.234 7.38506 136.234 10.4658 136.234 13.5433C136.234 14.0673 136.271 14.1074 136.804 14.1074C139.324 14.1074 141.841 14.1074 144.361 14.1074C144.941 14.1074 144.967 14.0773 144.967 13.4965C144.967 10.4058 144.967 7.31163 144.967 4.22084C144.967 3.68679 145.004 3.6434 145.527 3.6434C149.244 3.6434 152.964 3.6434 156.68 3.6434C157.27 3.6434 157.303 3.68012 157.303 4.28426C157.303 13.8136 157.303 23.343 157.303 32.8724C157.303 33.4098 157.283 33.4298 156.74 33.4298C152.997 33.4298 149.25 33.4298 145.507 33.4298C145.004 33.4298 144.971 33.3964 144.971 32.8791C144.971 29.1074 144.971 25.3357 144.971 21.564C144.971 20.9398 144.961 20.9298 144.351 20.9298C141.844 20.9298 139.341 20.9298 136.834 20.9298C136.278 20.9298 136.238 20.9665 136.238 21.5106C136.238 25.2823 136.238 29.054 136.238 32.8256C136.238 33.4031 136.214 33.4264 135.624 33.4264C131.801 33.4264 127.975 33.4264 124.151 33.4264C123.548 33.4264 123.535 33.4131 123.535 32.7889C123.535 28.0459 123.535 23.2996 123.535 18.5566H123.532Z" fill="#1176BB" />
-                                        <path d="M48.6046 12.8757C48.5713 13.323 48.4213 13.6801 48.2947 14.0373C46.8747 18.0259 44.6148 21.4905 41.7283 24.5613C39.8317 26.5806 37.7351 28.3563 35.2819 29.6814C32.3953 31.2402 29.3021 32.1714 26.0722 32.6688C24.0323 32.9825 21.9791 33.2228 19.9092 33.1828C15.3794 33.0993 11.0529 32.1648 7.13304 29.8083C3.53652 27.6487 1.11329 24.5646 0.259988 20.3924C-0.546645 16.4405 0.529976 13.0726 3.57318 10.3824C4.8698 9.23418 6.41973 8.63338 8.13299 8.45982C10.7096 8.19947 13.2061 8.49653 15.5627 9.63805C16.9426 10.3056 18.1492 11.2135 19.2392 12.2883C20.4258 13.4565 21.5458 14.6915 22.8424 15.7429C25.109 17.5853 27.7488 18.59 30.5621 19.1975C33.7653 19.8884 36.9585 19.9184 40.105 18.8971C43.4115 17.8223 46.1314 15.8931 48.2713 13.1461C48.3213 13.0826 48.368 13.0192 48.4246 12.9625C48.448 12.9358 48.4913 12.9291 48.6046 12.8724V12.8757Z" fill="#1176BB" />
-                                        <path d="M230.184 33.1828C226.587 33.076 223.431 31.9344 220.847 29.331C219.554 28.0292 218.308 26.6708 216.841 25.5493C214.501 23.7636 211.811 22.8023 208.965 22.2449C205.858 21.634 202.765 21.6674 199.738 22.6888C196.538 23.7669 193.895 25.6461 191.802 28.2996C191.722 28.3997 191.645 28.5766 191.505 28.5065C191.322 28.4164 191.462 28.2429 191.499 28.1194C192.372 25.339 193.729 22.7989 195.419 20.4391C197.768 17.1581 200.558 14.3243 204.041 12.2382C206.848 10.5559 209.918 9.56796 213.121 9.00721C215.654 8.56328 218.211 8.25287 220.787 8.36969C225.241 8.56996 229.49 9.56128 233.287 11.9979C236.817 14.2609 239.053 17.4451 239.83 21.6107C240.617 25.823 238.567 30.2622 234.904 32.1814C233.43 32.9525 231.834 33.1895 230.18 33.1861L230.184 33.1828Z" fill="#1176BB" />
-                                        <path d="M162.94 18.5466C162.94 13.7869 162.94 9.03059 162.94 4.27091C162.94 3.67344 162.967 3.6434 163.573 3.6434C171.703 3.6434 179.829 3.6434 187.959 3.6434C188.455 3.6434 188.512 3.69681 188.515 4.1908C188.522 5.74954 188.522 7.30829 188.515 8.87037C188.515 9.40442 188.475 9.43446 187.942 9.43446C184.079 9.43446 180.212 9.43446 176.349 9.43446C176.283 9.43446 176.216 9.43446 176.149 9.43446C175.707 9.43668 175.486 9.65586 175.486 10.092C175.486 11.2502 175.486 12.4118 175.486 13.57C175.486 13.9438 175.668 14.1307 176.033 14.1307C179.113 14.1307 182.189 14.1307 185.269 14.1307C186.026 14.1307 186.046 14.1507 186.042 14.9184C186.036 16.7175 186.019 18.5166 186.026 20.3156C186.026 20.6961 185.862 20.7762 185.516 20.7762C182.386 20.7662 179.253 20.7696 176.119 20.7696C175.697 20.7696 175.486 20.9743 175.486 21.3837C175.486 23.3029 175.486 25.2222 175.486 27.1414C175.486 27.533 175.687 27.7289 176.089 27.7289C180.019 27.7289 183.952 27.7289 187.882 27.7289C188.485 27.7289 188.475 27.7289 188.489 28.3163C188.525 29.9018 188.535 31.4839 188.495 33.0693C188.485 33.4231 188.332 33.4932 188.032 33.4865C187.432 33.4732 186.832 33.4865 186.232 33.4865C178.769 33.4865 171.306 33.4865 163.847 33.4865C163.74 33.4865 163.633 33.4865 163.527 33.4865C162.957 33.4765 162.943 33.4665 162.943 32.8991C162.943 28.116 162.943 23.3297 162.943 18.5466H162.94Z" fill="#1176BB" />
-                                        <path d="M93.9527 18.5633C95.686 18.5633 97.4159 18.5633 99.1492 18.5633C99.7025 18.5633 99.7125 18.58 99.7225 19.1107C99.7925 22.6154 99.7392 26.12 99.7525 29.6247C99.7558 30.7295 99.7258 31.8343 99.7292 32.9425C99.7292 33.2429 99.6358 33.373 99.3258 33.3964C96.776 33.5833 94.2261 33.6768 91.6695 33.5166C89.1429 33.3563 86.633 33.0793 84.1598 32.5119C80.49 31.6741 76.9901 30.4091 73.8669 28.2529C71.7537 26.7943 69.9971 24.9919 69.1371 22.5252C67.6205 18.1728 68.3605 14.2275 71.5703 10.853C73.8602 8.44647 76.7401 6.95448 79.8167 5.82964C83.0232 4.65808 86.3464 4.01723 89.7496 3.79026C90.6529 3.73018 91.5562 3.67344 92.4561 3.60334C92.8395 3.5733 92.9661 3.71683 92.9628 4.10401C92.9428 5.5693 92.9428 7.03792 92.9628 8.50321C92.9694 8.92043 92.8161 9.05061 92.4195 9.094C89.1096 9.45448 86.0264 10.4558 83.3265 12.4618C81.7099 13.6634 80.4966 15.1588 80.0967 17.1948C79.6533 19.4545 80.3333 21.3737 81.9099 23.0025C83.1665 24.3009 84.7065 25.2055 86.2897 26.0366C86.7597 26.2836 87.243 26.5106 87.723 26.7342C88.113 26.9178 88.1863 26.8677 88.183 26.4405C88.183 25.5459 88.173 24.6547 88.173 23.7602C88.173 22.2415 88.173 20.7228 88.173 19.2008C88.173 18.5867 88.1963 18.5666 88.7963 18.5666C90.5162 18.5666 92.2328 18.5666 93.9527 18.5666V18.5633Z" fill="#1176BB" />
-                                        <path d="M50.9879 18.4732C50.9879 13.7035 50.9879 8.93379 50.9879 4.1641C50.9879 3.61002 50.9879 3.61002 51.5412 3.61002C55.6177 3.61002 59.6942 3.61336 63.7707 3.60335C64.144 3.60335 64.2806 3.69681 64.2806 4.094C64.2706 13.7135 64.2706 23.3363 64.2806 32.9558C64.2806 33.323 64.1673 33.4398 63.804 33.4398C59.6875 33.4298 55.571 33.4298 51.4545 33.4398C51.0879 33.4398 50.9812 33.313 50.9812 32.9491C50.9912 28.126 50.9879 23.3029 50.9879 18.4799V18.4732Z" fill="#1176BB" />
-                                        <path d="M105.059 18.5266C105.059 13.7669 105.059 9.01056 105.059 4.25088C105.059 3.68012 105.092 3.6434 105.669 3.6434C109.665 3.6434 113.665 3.6434 117.662 3.6434C118.198 3.6434 118.238 3.68012 118.238 4.20415C118.238 13.7602 118.238 23.3163 118.238 32.8724C118.238 33.4064 118.215 33.4264 117.668 33.4264C113.645 33.4264 109.619 33.4264 105.596 33.4264C105.089 33.4264 105.059 33.3964 105.059 32.8791C105.059 28.096 105.059 23.3096 105.059 18.5266Z" fill="#1176BB" />
-                                    </g>
-                                    <defs>
-                                        <clipPath id="clip0_2928_1291">
-                                            <rect width="240" height="30" fill="white" transform="translate(0 3.60001)" />
-                                        </clipPath>
-                                    </defs>
-                                </svg> */}
-
-                            </span>
-                        </Link>
-
-                        {
-                            isMobile &&
-                            <IgiheCanvas categories={orderedCategories.filter(Boolean)} showHome btnVariant='light' />
-                        }
-
-                    </div>
-                    {
-                        !isMobile &&
-                        <Col md={7}>
-                            <AdManager
-                                position="beside-igihe-logo"
-                                priority={true}
-                                // className="mb-2"
-                                imgClass="object-position-right"
-                            />
-                        </Col>
-                    }
-                </div>
-
-                {/* Menus section */}
-                {!isMobile &&
-                    <div className={`igihe-nav-menu bg-white-black`}>
-                        <nav className="navbar navbar-expand-lg">
-                            <div style={{ flex: 1 }}>
-                                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
-                                    <span className="navbar-toggler-icon">
-                                        <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
-                                            <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
-                                            <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
-                                        </svg>
-                                    </span>
-                                </button>
-                                <div className="collapse navbar-collapse gap-3" id="navbarScroll d-flex justify-content-between">
-
-                                    <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style={{ ['--bs-scroll-height' as any]: '100px;' }}>
-                                        <li className="nav-item">
-                                            <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/?fromNav=1">
-                                                <span className="nav-hover-effect d-flex">
-                                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <g clipPath="url(#clip0_1277_4757)">
-                                                            <path d="M-7.82013e-05 4.08562C0.00609398 4.00223 0.0369568 3.93028 0.0630178 3.85832C0.355179 3.05469 0.820168 2.35664 1.41409 1.73794C1.80433 1.33108 2.23571 0.973315 2.74047 0.706335C3.3344 0.39228 3.97084 0.204653 4.63541 0.104451C5.05513 0.0412364 5.4776 -0.0071826 5.90349 0.000887394C6.83553 0.0176997 7.72573 0.205998 8.53226 0.680779C9.27226 1.11588 9.77086 1.73727 9.94643 2.57856C10.1131 3.37479 9.89088 4.05334 9.26472 4.59537C8.99793 4.82671 8.67902 4.94776 8.32651 4.98273C7.79637 5.03518 7.28269 4.97533 6.79781 4.74534C6.51388 4.61084 6.26561 4.42792 6.04135 4.21138C5.79719 3.976 5.56676 3.72718 5.29997 3.51535C4.83361 3.14413 4.29044 2.94171 3.7116 2.81931C3.05252 2.68011 2.3955 2.67405 1.74809 2.87984C1.06775 3.09638 0.507431 3.48508 0.0678177 4.03855C0.0534153 4.0567 0.043128 4.08091 -0.000764847 4.08629L-7.82013e-05 4.08562Z" fill="#1176BB" />
-                                                        </g>
-                                                        <g clipPath="url(#clip1_1277_4757)">
-                                                            <path d="M10.0001 5.91438C9.99391 5.99777 9.96304 6.06972 9.93698 6.14168C9.64482 6.94531 9.17983 7.64336 8.58591 8.26206C8.19567 8.66892 7.76429 9.02668 7.25953 9.29367C6.6656 9.60772 6.02916 9.79535 5.36459 9.89555C4.94487 9.95876 4.5224 10.0072 4.09651 9.99911C3.16447 9.9823 2.27427 9.794 1.46774 9.31922C0.727738 8.88412 0.229144 8.26273 0.0535728 7.42144C-0.113082 6.62521 0.109125 5.94666 0.735282 5.40463C1.00207 5.17329 1.32098 5.05224 1.67349 5.01727C2.20363 4.96482 2.71731 5.02467 3.20219 5.25466C3.48612 5.38916 3.73439 5.57208 3.95865 5.78862C4.20281 6.024 4.43324 6.27282 4.70003 6.48465C5.16639 6.85587 5.70956 7.05829 6.2884 7.18069C6.94748 7.31989 7.6045 7.32595 8.25191 7.12016C8.93225 6.90362 9.49257 6.51492 9.93218 5.96145C9.94658 5.9433 9.95687 5.91909 10.0008 5.91371L10.0001 5.91438Z" fill="#1176BB" />
-                                                        </g>
-                                                        <defs>
-                                                            <clipPath id="clip0_1277_4757">
-                                                                <rect width="10" height="5" fill="white" transform="matrix(-1 0 0 -1 10 5)" />
-                                                            </clipPath>
-                                                            <clipPath id="clip1_1277_4757">
-                                                                <rect width="10" height="5" fill="white" transform="translate(0 5)" />
-                                                            </clipPath>
-                                                        </defs>
-                                                    </svg>
-
-                                                </span>
-                                                <ThemedText type={pathname === `/` ? 'defaultSemiBold' : 'default'} darkColor='#fff' lightColor={pathname === `/` ? '#1176BB' : '#282F2F'}
-                                                >
-                                                    Home
-                                                </ThemedText>
-                                            </Link>
-                                        </li>
-
-                                        {categories && categories.length > 0 ? (
-                                            orderedCategories.map((NavItem: any, index: number) => {
-                                                const isHovered = hoveredSlug === NavItem.slug
-                                                return (
-                                                    <li className="nav-item" key={index}>
-                                                        <Link href={`/${NavItem.slug}`} prefetch={true} className="nav-link active d-flex align-items-center"
-                                                            onMouseEnter={() => setHoveredSlug(NavItem.slug)}
-                                                            onMouseLeave={() => setHoveredSlug(null)}
-                                                        >
-                                                            <span className="nav-hover-effect d-flex">
-                                                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                    <g clipPath="url(#clip0_1277_4757)">
-                                                                        <path d="M-7.82013e-05 4.08562C0.00609398 4.00223 0.0369568 3.93028 0.0630178 3.85832C0.355179 3.05469 0.820168 2.35664 1.41409 1.73794C1.80433 1.33108 2.23571 0.973315 2.74047 0.706335C3.3344 0.39228 3.97084 0.204653 4.63541 0.104451C5.05513 0.0412364 5.4776 -0.0071826 5.90349 0.000887394C6.83553 0.0176997 7.72573 0.205998 8.53226 0.680779C9.27226 1.11588 9.77086 1.73727 9.94643 2.57856C10.1131 3.37479 9.89088 4.05334 9.26472 4.59537C8.99793 4.82671 8.67902 4.94776 8.32651 4.98273C7.79637 5.03518 7.28269 4.97533 6.79781 4.74534C6.51388 4.61084 6.26561 4.42792 6.04135 4.21138C5.79719 3.976 5.56676 3.72718 5.29997 3.51535C4.83361 3.14413 4.29044 2.94171 3.7116 2.81931C3.05252 2.68011 2.3955 2.67405 1.74809 2.87984C1.06775 3.09638 0.507431 3.48508 0.0678177 4.03855C0.0534153 4.0567 0.043128 4.08091 -0.000764847 4.08629L-7.82013e-05 4.08562Z" fill="#1176BB" />
-                                                                    </g>
-                                                                    <g clipPath="url(#clip1_1277_4757)">
-                                                                        <path d="M10.0001 5.91438C9.99391 5.99777 9.96304 6.06972 9.93698 6.14168C9.64482 6.94531 9.17983 7.64336 8.58591 8.26206C8.19567 8.66892 7.76429 9.02668 7.25953 9.29367C6.6656 9.60772 6.02916 9.79535 5.36459 9.89555C4.94487 9.95876 4.5224 10.0072 4.09651 9.99911C3.16447 9.9823 2.27427 9.794 1.46774 9.31922C0.727738 8.88412 0.229144 8.26273 0.0535728 7.42144C-0.113082 6.62521 0.109125 5.94666 0.735282 5.40463C1.00207 5.17329 1.32098 5.05224 1.67349 5.01727C2.20363 4.96482 2.71731 5.02467 3.20219 5.25466C3.48612 5.38916 3.73439 5.57208 3.95865 5.78862C4.20281 6.024 4.43324 6.27282 4.70003 6.48465C5.16639 6.85587 5.70956 7.05829 6.2884 7.18069C6.94748 7.31989 7.6045 7.32595 8.25191 7.12016C8.93225 6.90362 9.49257 6.51492 9.93218 5.96145C9.94658 5.9433 9.95687 5.91909 10.0008 5.91371L10.0001 5.91438Z" fill="#1176BB" />
-                                                                    </g>
-                                                                    <defs>
-                                                                        <clipPath id="clip0_1277_4757">
-                                                                            <rect width="10" height="5" fill="white" transform="matrix(-1 0 0 -1 10 5)" />
-                                                                        </clipPath>
-                                                                        <clipPath id="clip1_1277_4757">
-                                                                            <rect width="10" height="5" fill="white" transform="translate(0 5)" />
-                                                                        </clipPath>
-                                                                    </defs>
-                                                                </svg>
-                                                            </span>
-                                                            <ThemedText
-                                                                style={{ textTransform: 'capitalize' }}
-                                                                type={pathname === `/${NavItem.slug}` ? 'defaultSemiBold' : 'default'}
-                                                                darkColor='#fff'
-                                                                lightColor={pathname === `/${NavItem.slug}` ? '#1176BB' : isHovered ? '#1176BB': '#282F2F'}>
-                                                                {NavItem?.name || 'Home'}
-                                                            </ThemedText>
-                                                        </Link>
-                                                    </li>
-                                                )
-                                            })
-                                        ) : (
-                                            <li className="nav-item text-muted"></li>
-                                        )}
-
-                                    </ul>
-
-                                    <div className="right-options d-flex align-items-center">
-                                        <SearchModal />
-                                        <IgiheCanvas btnVariant='' categories={[]} />
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                }
-            </div>
+  return (
+    <div className='site-header'>
+      <div className="overlay"></div>
+      <div className="container z-1 position-relative">
+        {/* Desktop Ads - Server Side */}
+        <div className="d-none d-md-block">
+          <Row>
+            <Col>
+              <AdManager
+                position="header-landscape-ad-1"
+                priority={true}
+              />
+            </Col>
+            <Col>
+              <AdManager
+                position="header-landscape-ad-2"
+                priority={true}
+              />
+            </Col>
+          </Row>
         </div>
-    )
+
+        {/* Client-side interactive header */}
+        <HeaderClient 
+          categories={orderedCategories} 
+          logoSection={
+            <Link href="/?fromNav=1">
+              <span className='site-logo'>
+                <Image
+                  width={240}
+                  src={'/assets/newlogo.png'}
+                  height={100}
+                  className='object-fit-contain'
+                  alt={'IGEHE Logo'}
+                />
+              </span>
+            </Link>
+          }
+          desktopAdSection={
+            <Col md={7}>
+              <AdManager
+                position="beside-igihe-logo"
+                priority={true}
+                imgClass="object-position-right"
+              />
+            </Col>
+          }
+        />
+      </div>
+    </div>
+  )
 }

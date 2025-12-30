@@ -26,13 +26,12 @@ async function getPostData(slug: string, section: string) {
   const api = `${endpoint}?slug=${slug}&_embed`;
 
   try {
-
     if (section === 'posts') {
       return await ApiService.fetchPostBySlug(slug)
     }
     else
     {
-     return await ApiService.customPostFetch(api)
+     return await ApiService.customPostFetch(api,slug)
     }
 
     // const response = await fetch(
