@@ -1,10 +1,10 @@
-// app/news/news/[post]/page.tsx
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { ViewTrackerComponent } from '@/components/ViewTracker'
 import { stripHtml } from '@/lib/utils'
 import { ApiService } from '@/services/apiService'
 import { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
+import HydrateArticle from './HydrateArticle'
 
 interface PageProps {
   params: Promise<{ post: string, category: string }>
@@ -15,7 +15,6 @@ interface PageProps {
 const endpoints: Record<string, string> = {
   opinion: "opinion",
   'rubrique-19': "opinion",
-  
   advertorials: "advertorial",
   facts: "facts",
 };
@@ -163,11 +162,8 @@ export default async function SingleNewsPage({ params }: PageProps) {
   // console.log('category',category)
 
   const postData = await getPostData(slug, category)
-  return(
-  <>
-  {
-    postData && <ViewTrackerComponent postId={postData.id}/>
-}
-  
-  <SingleNewsContent slug={slug} initialArticle={postData || undefined} /></>)
+  return(<HydrateArticle article={postData} slug={slug}>
+      {postData && <ViewTrackerComponent postId={postData.id} />}
+      <SingleNewsContent slug={slug} initialArticle={postData || undefined} />
+    </HydrateArticle>)
 }

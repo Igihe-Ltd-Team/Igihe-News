@@ -1,6 +1,5 @@
 'use client'
 
-import AdManager from '@/components/ads/AdManager'
 import Categories from '@/components/home/Categories'
 import HomeMainSections from '@/components/home/HomeMainSections'
 import Recents from '@/components/home/Recents'
@@ -12,6 +11,7 @@ import React, { Suspense, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { useFeaturedArticles, useTopSliderArticles } from '@/hooks/useMainNewsData'
 import CustomSlider from '@/components/home/CustomSlider'
+import AdManager from '@/components/ads/AdManager'
 
 
 const upperCats = [
@@ -60,7 +60,7 @@ const lowerCats = [
 
 
 export function Home() {
-  const { data: topSlider = [], isLoading: topSliderLoading } = useTopSliderArticles()
+  const { data: topSlider = []} = useTopSliderArticles()
   const {
     liveEvent
   } = useNewsData()
@@ -77,7 +77,6 @@ export function Home() {
               topSlider?.length > 0 &&
               <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
           }
-
         </Suspense>
       </Container>
 
@@ -93,14 +92,18 @@ export function Home() {
             mdDisplay={2}
             smDisplay={1}
           >
+            <Suspense fallback={null}>
             <AdManager
               position="home-bellow-hights"
               priority={true}
             />
+            </Suspense>
+            <Suspense fallback={null}>
             <AdManager
               position="home-bellow-hights-2"
               priority={true}
             />
+            </Suspense>
           </CustomSlider>
         </Container>
       </Suspense>
@@ -115,16 +118,20 @@ export function Home() {
             mdDisplay={2}
             smDisplay={1}
           >
+            <Suspense fallback={null}>
             <AdManager
               position="header-landscape-ad-1"
               priority={true}
               className="mb-2"
             />
+            </Suspense>
+            <Suspense fallback={null}>
             <AdManager
               position="header-landscape-ad-2"
               priority={true}
               className="mb-2"
             />
+            </Suspense>
           </CustomSlider>
         </Container>
       </Suspense>
@@ -137,38 +144,36 @@ export function Home() {
             lgDisplay={2}
             mdDisplay={2}
             smDisplay={1}
-          >
+          ><Suspense fallback={null}>
             <AdManager
               position="header-landscape-ad-1"
               priority={true}
               className="mb-2"
             />
+            </Suspense>
+            <Suspense fallback={null}>
             <AdManager
               position="header-landscape-ad-2"
               priority={true}
               className="mb-2"
             />
+            </Suspense>
           </CustomSlider>
-          {/* <Row>
-            <Col>
-              <AdManager
-                position="header-landscape-ad-1"
-                priority={true}
-                className="mb-2"
-              />
-            </Col>
-            <Col>
-              <AdManager
-                position="header-landscape-ad-2"
-                priority={true}
-                className="mb-2"
-              /></Col>
-          </Row> */}
         </Container>
       </Suspense>
       <Suspense fallback={<NewsSkeleton count={1} />}>
         <Categories categories={lowerCats} />
       </Suspense>
     </>
+  )
+}
+
+
+
+function AdPlaceholder() {
+  return (
+    <div className="slot-position">
+      <div className="animate-pulse bg-gray-200 h-32 w-full rounded"></div>
+    </div>
   )
 }

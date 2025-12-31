@@ -221,22 +221,11 @@ export class ApiService {
     const now = Date.now()
     const isServer = typeof window === 'undefined'
 
-    // 2. Check file cache (server-side only)
-    if (isServer) {
-      const fileCached = await fileCache.get<T>(cacheKey)
-      if (fileCached !== null) {
-        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
-        console.log(`✅ File cache HIT: ${cacheKey}`);
-        return fileCached
-      }
-      else{
-         console.log(`✅ File cache MISS: ${cacheKey}`);
-      }
-    }
+    
 
     // 1. Check memory cache
     const memoryCached = requestCache.get(cacheKey)
-    // const fileCached = await fileCache.get<T>(cacheKey)
+    
     if (memoryCached) {
       const data = memoryCached.data;
 
@@ -258,7 +247,18 @@ export class ApiService {
     }
 
     
-    
+    // 2. Check file cache (server-side only)
+    if (isServer) {
+      const fileCached = await fileCache.get<T>(cacheKey)
+      if (fileCached !== null) {
+        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+        console.log(`✅ File cache HIT: ${cacheKey}`);
+        return fileCached
+      }
+      else{
+         console.log(`✅ File cache MISS: ${cacheKey}`);
+      }
+    }
 
     // 3. Check for in-flight requests
     if (pendingRequests.has(cacheKey)) {

@@ -49,7 +49,12 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
         articleLoading,
         refetchArticle,
         relatedPostsLoading
-    } = useArticleDetails(slug)
+    } = useArticleDetails(slug, 
+        {
+            initialData: initialArticle,
+            enabled: true
+        }
+    )
 
     if (articleLoading) {
         return (

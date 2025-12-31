@@ -1,5 +1,6 @@
 // app/news/news/[post]/page.tsx
 import SingleNewsContent from '@/components/news/SingleNewsContent'
+import { ViewTrackerComponent } from '@/components/ViewTracker'
 import { stripHtml } from '@/lib/utils'
 import { ApiService } from '@/services/apiService'
 import { Metadata } from 'next'
@@ -12,7 +13,9 @@ interface PageProps {
 /* ------------------------ STRIP HTML ------------------------ */
 
 const endpoints: Record<string, string> = {
-  opinions: "opinion",
+  opinion: "opinion",
+  'rubrique-19': "opinion",
+  
   advertorials: "advertorial",
   facts: "facts",
 };
@@ -20,25 +23,29 @@ const endpoints: Record<string, string> = {
 async function getPostData(slug: string, section: string) {
   const endpoint = endpoints[section] ?? "posts";
   const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/${endpoint}?slug=${slug}&_embed`;
+  const api = `${endpoint}?slug=${slug}&_embed`;
 
   try {
-
     if (section === 'posts') {
       return await ApiService.fetchPostBySlug(slug)
     }
+    else
+    {
+     return await ApiService.customPostFetch(api,slug)
+    }
 
-    const response = await fetch(
-      apiUrl,
-      {
-        next: { revalidate: 60 },
-        // cache: 'no-store' // Force fresh data
-      }
-    )
+    // const response = await fetch(
+    //   apiUrl,
+    //   {
+    //     next: { revalidate: 60 },
+    //     // cache: 'no-store' // Force fresh data
+    //   }
+    // )
 
-    if (!response.ok) return null
+    // if (!response.ok) return null
 
-    const posts = await response.json()
-    return posts && posts.length > 0 ? posts[0] : null
+    // const posts = await response.json()
+    // return posts && posts.length > 0 ? posts[0] : null
 
   } catch (error) {
     console.error('❌ Fetch error:', error)
@@ -84,7 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Extract image safely
     const ogImage =
       postData.yoast_head_json?.og_image?.[0]?.url ||
-      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url  || ''
+      postData._embedded?.['wp:featuredmedia']?.[0]?.source_url || ''
 
     // Extract author safely
     const author = postData._embedded?.author?.[0]?.name
@@ -156,5 +163,11 @@ export default async function SingleNewsPage({ params }: PageProps) {
   // console.log('category',category)
 
   const postData = await getPostData(slug, category)
-  return <SingleNewsContent slug={slug} initialArticle={postData} />
+  return(
+  <>
+  {
+    postData && <ViewTrackerComponent postId={postData.id}/>
+}
+  
+  <SingleNewsContent slug={slug} initialArticle={postData || undefined} /></>)
 }

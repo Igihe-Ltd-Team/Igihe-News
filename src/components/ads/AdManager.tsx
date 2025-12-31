@@ -1,9 +1,6 @@
-// 'use client'
-
-// import { useAdsByPosition, useAdsFromCache } from '@/hooks/useMainNewsData'
-// import AdUnit from './AdUnit'
-// import { AdPositionKey } from '@/lib/adPositions'
-// import { useEffect, useState, useMemo } from 'react'
+// import { AdPositionKey } from "@/lib/adPositions"
+// import { ApiService } from "@/services/apiService"
+// import AdUnit from "./AdUnit"
 
 // interface AdManagerProps {
 //   position: AdPositionKey
@@ -12,96 +9,35 @@
 //   maxAds?: number
 //   showLabel?: boolean
 //   fallbackComponent?: React.ReactNode
-//   imgClass?: string
-//   enableLazyLoad?: boolean
+//   imgClass?:string
+//   retryCount?:number
 // }
 
-// export default function AdManager({
-//   position,
-//   className = '',
+// async function getSlot(position:AdPositionKey) {
+//   try {
+//     const res = await ApiService.fetchAdsByPosition(position)
+//     return res
+//   } catch (error) {
+//     console.error('Error fetching categories:', error)
+//     return []
+//   }
+// }
+
+// export default async function AdManager({ 
+//   position, 
+//   className = '', 
 //   priority = false,
 //   maxAds = 1,
 //   showLabel = true,
 //   fallbackComponent,
 //   imgClass,
-//   enableLazyLoad = false
+//   retryCount = 2
 // }: AdManagerProps) {
-//   const [isInView, setIsInView] = useState(!enableLazyLoad)
-
-//   // Try to get ads from prefetched cache first
-//   const cachedAds = useAdsFromCache(position)
-
-//   // Query for ads (will use cache if available)
-//   const {
-//     data: queryAds,
-//     isLoading,
-//     error
-//   } = useAdsByPosition(position, isInView)
-
-//   // Use cached ads if available, otherwise use query data
-//   const ads = cachedAds || queryAds
-
-//   // Intersection Observer for lazy loading
-//   useEffect(() => {
-//     if (!enableLazyLoad) return
-
-//     const observer = new IntersectionObserver(
-//       (entries) => {
-//         entries.forEach((entry) => {
-//           if (entry.isIntersecting) {
-//             setIsInView(true)
-//           }
-//         })
-//       },
-//       { rootMargin: '200px' }
-//     )
-
-//     const element = document.querySelector(`[data-ad-position="${position}"]`)
-//     if (element) {
-//       observer.observe(element)
-//     }
-
-//     return () => observer.disconnect()
-//   }, [enableLazyLoad, position])
-
-//   // Memoize ads to show
-//   const adsToShow = useMemo(() => {
-//     return ads?.slice(0, maxAds) || []
-//   }, [ads, maxAds])
-
-//   // Placeholder for lazy-loaded ads
-//   if (enableLazyLoad && !isInView) {
-//     return (
-//       <div
-//         className={`slot-position slot-${position} ${className}`}
-//         data-ad-position={position}
-//         style={{ minHeight: '100px' }}
-//       />
-//     )
-//   }
-
-//   // Loading state - only if no cached data
-//   if (isLoading && !ads) {
-//     return (
-//       <div
-//         className={`slot-position slot-${position} ${className}`}
-//         data-ad-position={position}
-//         style={{ minHeight: '100px' }}
-//       />
-//     )
-//   }
-
-//   // Error or no ads
-//   if ((error && !ads) || !ads || ads.length === 0) {
-//     return fallbackComponent ? <>{fallbackComponent}</> : null
-//   }
-
-//   return (
-//     <div
-//       className={`slot-position slot-${position} ${className}`}
-//       data-ad-position={position}
-//     >
-//       {adsToShow.map((ad, index) => (
+//   const slots = await getSlot(position)
+// const slotsToShow = slots.slice(0, maxAds)
+// return(
+// <div className={`slot-position slot-${position} ${className}`}>
+//       {slotsToShow.map((ad, index) => (
 //         <AdUnit
 //           key={ad.id}
 //           ad={ad}
@@ -113,9 +49,8 @@
 //         />
 //       ))}
 //     </div>
-//   )
+// )
 // }
-
 
 
 
@@ -168,11 +103,11 @@ export default function AdManager({
   }, [error, refetch, retryCount]);
   
 
-  // if (isLoading) {
-  //   return (
-  //     <></>
-  //   )
-  // }
+  if (isLoading) {
+    return (
+      <></>
+    )
+  }
 
   if (error || !ads || ads.length === 0) {
     if (fallbackComponent) {

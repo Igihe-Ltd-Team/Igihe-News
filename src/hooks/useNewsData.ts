@@ -12,6 +12,13 @@ import {
 } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
+
+interface UseArticleDetailsOptions {
+  initialData?: NewsItem | null
+  enabled?: boolean
+}
+
+
 export function useNewsData() {
   const queryClient = useQueryClient()
 
@@ -206,55 +213,79 @@ const liveEventArticlesQuery = useQuery({
     })
   }
 
-  const useArticleDetails = (slug: string) => {
-    const articleQuery = useQuery({
-      queryKey: queryKeys.articles.detail(slug),
-      queryFn: () => ApiService.fetchPostBySlug(slug),
-      enabled: !!slug && typeof slug === 'string',
-      staleTime: 5 * 60 * 1000,
-      retry: 2,
-    })
 
-    const relatedPostsQuery = useQuery<NewsItem[], Error>({
-      queryKey: queryKeys.articles.related(
-        articleQuery.data?.id?.toString() || '',
-        articleQuery.data?.categories?.[0]?.id
-      ),
-      queryFn: async () => {
-        if (!articleQuery.data) return []
-        
-        return ApiService.fetchRelatedPosts(articleQuery.data.id.toString(), [
-          articleQuery.data.categories[0].id,
-        ])
-      },
-      enabled: !!articleQuery.data && !!articleQuery.data.id,
-      staleTime: 5 * 60 * 1000,
-      retry: 2,
-    })
+  const useArticleDetails = (
+  slug: string, 
+  options?: UseArticleDetailsOptions
+) => {
+  const queryClient = useQueryClient()
+  
+  // ⚡ KEY FIX: Use initialData to skip initial fetch
+  const articleQuery = useQuery({
+    queryKey: queryKeys.articles.detail(slug),
+    queryFn: () => ApiService.fetchPostBySlug(slug),
+    enabled: !!slug && typeof slug === 'string' && (options?.enabled !== false),
+    
+    // 🚀 Use server data as initial data
+    initialData: options?.initialData || undefined,
+    
+    // Set initialDataUpdatedAt to prevent immediate refetch
+    initialDataUpdatedAt: options?.initialData ? Date.now() : undefined,
+    
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
+    retry: 2,
+    
+    // Only refetch if data is actually stale
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  })
 
-    useEffect(() => {
-      if (articleQuery.data?.categories?.[0]?.id) {
-        queryClient.prefetchQuery({
-          queryKey: queryKeys.categories.detail(articleQuery.data.categories[0].id),
-          queryFn: () => ApiService.fetchCategoryBySlug(articleQuery.data!.categories![0].slug),
-        })
-      }
-    }, [articleQuery.data, queryClient])
+  const relatedPostsQuery = useQuery<NewsItem[], Error>({
+    queryKey: queryKeys.articles.related(
+      articleQuery.data?.id?.toString() || '',
+      articleQuery.data?.categories?.[0]?.id
+    ),
+    queryFn: async () => {
+      if (!articleQuery.data) return []
+      return ApiService.fetchRelatedPosts(
+        articleQuery.data.id.toString(), 
+        [articleQuery.data.categories[0].id]
+      )
+    },
+    enabled: !!articleQuery.data?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 2,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  })
 
-    return {
-      article: articleQuery.data,
-      articleLoading: articleQuery.isLoading,
-      articleError: articleQuery.error,
-      relatedPosts: relatedPostsQuery.data || [],
-      relatedPostsLoading: relatedPostsQuery.isLoading,
-      isLoading: articleQuery.isLoading,
-      isError: articleQuery.isError,
-      refetchArticle: articleQuery.refetch,
-      refetchRelated: relatedPostsQuery.refetch,
-      articleQuery,
-      relatedPostsQuery,
+  // Prefetch category data
+  useEffect(() => {
+    if (articleQuery.data?.categories?.[0]?.id) {
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.categories.detail(articleQuery.data.categories[0].id),
+        queryFn: () => 
+          ApiService.fetchCategoryBySlug(articleQuery.data!.categories![0].slug),
+      })
     }
+  }, [articleQuery.data?.categories, queryClient])
+
+  return {
+    article: articleQuery.data,
+    articleLoading: articleQuery.isLoading,
+    articleError: articleQuery.error,
+    relatedPosts: relatedPostsQuery.data || [],
+    relatedPostsLoading: relatedPostsQuery.isLoading,
+    isLoading: articleQuery.isLoading,
+    isError: articleQuery.isError,
+    refetchArticle: articleQuery.refetch,
+    refetchRelated: relatedPostsQuery.refetch,
+    articleQuery,
+    relatedPostsQuery,
   }
+}
 
   const searchMutation = useMutation<
     { articles: articleResponse<NewsItem>; videos?: NewsItem[] },

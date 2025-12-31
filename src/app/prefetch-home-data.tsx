@@ -451,7 +451,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
       if (search.get("fromNav") === "1") {
         // router.refresh()
         // optional: clean URL
-        router.replace("/", { scroll: false })
+        // router.replace("/", { scroll: false })
         
       }
     }, [])

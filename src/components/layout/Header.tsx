@@ -1,10 +1,10 @@
 // app/components/Header.tsx (Server Component)
 import Link from 'next/link'
 import { Col, Row } from 'react-bootstrap'
-import AdManager from '../ads/AdManager'
 import Image from 'next/image'
 import HeaderClient from './HeaderClient'
 import { ApiService } from '@/services/apiService'
+import AdManager from '../ads/AdManager'
 
 // Fetch categories on the server
 async function getCategories() {
