@@ -9,7 +9,6 @@ import { formatDateTime, getCategoryName, getCategorySlug, getFeaturedImage, get
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
-import AdManager from '../ads/AdManager'
 import { NewsItem } from '@/types/fetchData'
 import { useNewsData } from '@/hooks/useNewsData'
 import DynamicArticleCard from './DynamicArticleCard'
@@ -31,6 +30,8 @@ import SocialShare from './SocialShare'
 import CustomSlider from '../home/CustomSlider'
 import { visby } from '@/lib/fonts';
 import SideBar from '../ReUsable/SideBar'
+import AdManager from '../ads/AdManager'
+import CommentsSection from './CommentsSection'
 
 
 interface SingleNewsContentProps {
@@ -242,6 +243,13 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
 
                         </div>
 
+
+{article && (
+        <CommentsSection 
+          articleId={article.id}
+          articleTitle={stripHtml(article.title.rendered)}
+        />
+      )}
 
                     </Col>
                     <Col md="3" className='position-relative'>
