@@ -5,6 +5,7 @@ import Image from 'next/image'
 import HeaderClient from './HeaderClient'
 import { ApiService } from '@/services/apiService'
 import AdManager from '../ads/AdManager'
+import ServerSlotManager from '../ads/ServerSlotManager'
 
 // Fetch categories on the server
 async function getCategories() {
@@ -60,13 +61,13 @@ export default async function Header() {
         <div className="d-none d-md-block">
           <Row>
             <Col>
-              <AdManager
+              <ServerSlotManager
                 position="header-landscape-ad-1"
                 priority={true}
               />
             </Col>
             <Col>
-              <AdManager
+              <ServerSlotManager
                 position="header-landscape-ad-2"
                 priority={true}
               />
@@ -92,7 +93,7 @@ export default async function Header() {
           }
           desktopAdSection={
             <Col md={7}>
-              <AdManager
+              <ServerSlotManager
                 position="beside-igihe-logo"
                 priority={true}
                 imgClass="object-position-right"

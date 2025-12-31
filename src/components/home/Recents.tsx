@@ -8,7 +8,6 @@ import SectionWithToggle from '../ReUsable/SectionWithToggle'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ThemedText } from '../ThemedText'
 import { Col, Row } from 'react-bootstrap'
-import AdManager from '../ads/AdManager'
 import { useResponsive } from '@/hooks/useResponsive'
 import PopularNews from '../news/PopularNews'
 
@@ -21,6 +20,7 @@ import {
   useFeaturedAdvertorial,
   useFeaturedAnnouncement
 } from '@/hooks/useMainNewsData'
+import AdManager from '../ads/AdManager'
 
 
 const Videos = React.lazy(() => import('./Videos'))

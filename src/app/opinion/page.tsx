@@ -29,7 +29,7 @@ export default function CategoryPage() {
     error,
   } = useOpinionArticles();
 
-  console.log('Opinions Data',data)
+  // console.log('Opinions Data',data)
 
   const posts =  data?.pages.flatMap((page) => page.data) || [];
 

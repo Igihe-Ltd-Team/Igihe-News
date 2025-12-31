@@ -677,16 +677,39 @@ export class ApiService {
     )
     const cacheKey = `popular:${query}`
 
-    return this.cachedFetch(cacheKey, async () => {
-      const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+    return this.cachedFetchWithDynamicTTL(
+        cacheKey,
+        async () => {
+          const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
 
-      const posts = await response.json()
-      return Array.isArray(posts) ? posts : []
-    }, 10 * 60 * 1000)
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+
+          const populor = await response.json()
+          if (Array.isArray(populor) && populor.length > 0) {
+            // Don't await - let it happen in background
+            this.cacheArticlesFromList(populor).catch(error => {
+              console.debug('Background caching failed:', error);
+            });
+          }
+          return populor || []
+        },
+        (data) => String(24 * 60 * 60 * 1000) || null
+      )
+
+
+    // return this.cachedFetch(cacheKey, async () => {
+    //   const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
+
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`)
+    //   }
+
+    //   const posts = await response.json()
+    //   return Array.isArray(posts) ? posts : []
+    // }, 24 * 60 * 60 * 1000)
 
   }
 

@@ -1,8 +1,8 @@
 import React from 'react'
-import AdManager from '../ads/AdManager'
 import SocialMedias from './SocialMedias'
 import { NewsItem } from '@/types/fetchData'
 import PopularNews from '../news/PopularNews'
+import AdManager from '../ads/AdManager'
 
 interface SideBarProps {
     hasBanner?: boolean
