@@ -85,10 +85,20 @@ export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
     if (featuredMedia?.source_url) {
       return featuredMedia.source_url;
     }
+    else {
+      if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
+        return featuredMedia?.media_details?.sizes?.medium?.source_url;
+      }
+    }
   }
   else {
     if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
       return featuredMedia?.media_details?.sizes?.medium?.source_url;
+    }
+    else {
+      if (featuredMedia?.source_url) {
+        return featuredMedia.source_url;
+      }
     }
   }
 
@@ -119,24 +129,24 @@ export function isImageMedia(featuredMedia: NewsItem, priority?: boolean): {
   if (!priority) {
     if (media2?.source_url) {
       return {
-    isImage: media?.type !== 'file' || false,
-    filePath: media?.formatted_value?.url || '',
-    slug: featuredMedia?.slug || '',
-    img:media2?.media_details?.sizes?.medium?.source_url || ''
-  };
+        isImage: media?.type !== 'file' || false,
+        filePath: media?.formatted_value?.url || '',
+        slug: featuredMedia?.slug || '',
+        img: media2?.media_details?.sizes?.medium?.source_url || ''
+      };
     }
   }
-      
-    
-  
-return {
+
+
+
+  return {
     isImage: media?.type !== 'file' || false,
     filePath: media?.formatted_value?.url || '',
     slug: featuredMedia?.slug || '',
     img: media2?.source_url || ''
   };
 
-  
+
 }
 
 

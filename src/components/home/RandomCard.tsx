@@ -20,7 +20,7 @@ export default function RandomCard() {
             <div className="upper-space">
                 <Image
                     width={234}
-                    src={'./assets/Facts-of-the-day.png'} 
+                    src={'/assets/Facts-of-the-day.png'} 
                     height={49} 
                     className='object-fit-contain' 
                     alt={'Fact of the day'} 

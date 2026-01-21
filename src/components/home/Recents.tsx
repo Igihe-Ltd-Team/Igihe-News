@@ -18,7 +18,8 @@ import {
   useAfricaArticles,
   useEntertainmentArticles,
   useFeaturedAdvertorial,
-  useFeaturedAnnouncement
+  useFeaturedAnnouncement,
+  useInternationalArticles
 } from '@/hooks/useMainNewsData'
 import AdManager from '../ads/AdManager'
 
@@ -118,6 +119,7 @@ export default function Recents() {
     const { data: popular = [] } = usePopularArticles()
     const { data: featured = [] } = useHighlightArticles()
     const { data: africaArticles = [] } = useAfricaArticles()
+    const { data: internationalArticles = [] } = useInternationalArticles()
     const { data: entertainment = [] } = useEntertainmentArticles()
     const { data: advertorial = [] } = useFeaturedAdvertorial()
     const { data: announcement = [] } = useFeaturedAnnouncement()
@@ -202,7 +204,7 @@ export default function Recents() {
                     <Row>
                         <Col>
                             <AdManager
-                                position="header-landscape-ad-1"
+                                position="premium_leaderboard_1"
                                 priority={true}
                                 className="mb-2"
                             /></Col>
@@ -216,7 +218,7 @@ export default function Recents() {
                             className="mb-2"
                         />
                     </div>
-                    <NewsSection title="Africa" articles={africaArticles} />
+                    <NewsSection title="International" articles={internationalArticles} />
                 </div>
 
                 <div className="col-xl-4 col-lg-4 mt-0">

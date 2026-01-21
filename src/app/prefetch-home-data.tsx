@@ -86,7 +86,7 @@
 //         // Highlight tag articles
 //         if (initialData.highlightTagArticles?.length > 0) {
 //           queryClient.setQueryData(
-//             queryKeys.articles.highlightTagArticles(63),
+//             queryKeys.articles.highlightTagArticles(228),
 //             { data: initialData.highlightTagArticles, pagination: {} }
 //           )
 //         }
@@ -212,7 +212,7 @@
 //     // Highlight Articles (tag 64)
 //     if (initialData.highlightTagArticles) {
 //       client.setQueryData(
-//         queryKeys.articles.highlightTagArticles(64),
+//         queryKeys.articles.highlightTagArticles(217),
 //         initialData.highlightTagArticles
 //       )
 //     }
@@ -376,7 +376,7 @@ function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialDa
   // Highlight Articles (tag 64)
   if (initialData.highlightTagArticles) {
     client.setQueryData(
-      queryKeys.articles.highlightTagArticles(64),
+      queryKeys.articles.highlightTagArticles(217),
       initialData.highlightTagArticles
     )
   }

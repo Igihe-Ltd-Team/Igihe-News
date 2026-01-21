@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://new.igihe.com/amirv2/wp-json/wp/v2'
+const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://igihe.com/wp-json/wp/v2'
 
 // Enhanced cache with LRU eviction
 class LRUCache {

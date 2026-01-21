@@ -33,7 +33,7 @@ export function useNewsData() {
 
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [63], per_page: 8 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [228], per_page: 8 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -68,8 +68,8 @@ const liveEventArticlesQuery = useQuery({
 
 
   const highlightTagArticlesQuery = useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(64),
-    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 11,orderby: 'date' }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(217),
+    queryFn: () => ApiService.fetchArticles({ tags: [217], per_page: 11,orderby: 'date' }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -95,7 +95,7 @@ const liveEventArticlesQuery = useQuery({
   const africaArticlesQuery = useQuery({
     queryKey: queryKeys.articles.africa(),
     queryFn: () =>
-      ApiService.fetchArticles({ tags: [120], per_page: 12 }).then(
+      ApiService.fetchArticles({ tags: [248], per_page: 12 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
@@ -104,7 +104,7 @@ const liveEventArticlesQuery = useQuery({
   const entertainmentArticlesQuery = useQuery({
     queryKey: queryKeys.articles.entertainment(),
     queryFn: () =>
-      ApiService.fetchArticles({ categories: [105,123], per_page: 12 }).then(
+      ApiService.fetchArticles({ categories: [161], per_page: 12 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
@@ -214,36 +214,116 @@ const liveEventArticlesQuery = useQuery({
   }
 
 
-  const useArticleDetails = (
+//   const useArticleDetails = (
+//   slug: string, 
+//   options?: UseArticleDetailsOptions
+// ) => {
+//   const queryClient = useQueryClient()
+  
+//   // ⚡ KEY FIX: Use initialData to skip initial fetch
+//   const articleQuery = useQuery({
+//     queryKey: queryKeys.articles.detail(slug),
+//     queryFn: () => ApiService.fetchPostBySlug(slug),
+//     enabled: !!slug && typeof slug === 'string' && (options?.enabled !== false),
+    
+//     // 🚀 Use server data as initial data
+//     initialData: options?.initialData || undefined,
+    
+//     // Set initialDataUpdatedAt to prevent immediate refetch
+//     initialDataUpdatedAt: options?.initialData ? Date.now() : undefined,
+    
+//     staleTime: 5 * 60 * 1000, // 5 minutes
+//     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
+//     retry: 2,
+    
+//     // Only refetch if data is actually stale
+//     refetchOnMount: false,
+//     refetchOnWindowFocus: false,
+//   })
+
+//   const relatedPostsQuery = useQuery<NewsItem[], Error>({
+//     queryKey: queryKeys.articles.related(
+//       articleQuery.data?.id?.toString() || '',
+//       articleQuery.data?.categories?.[0]?.id
+//     ),
+//     queryFn: async () => {
+//       if (!articleQuery.data) return []
+//       return ApiService.fetchRelatedPosts(
+//         articleQuery.data.id.toString(), 
+//         [articleQuery.data.categories[0].id]
+//       )
+//     },
+//     enabled: !!articleQuery.data?.id,
+//     staleTime: 5 * 60 * 1000,
+//     gcTime: 10 * 60 * 1000,
+//     retry: 2,
+//     refetchOnMount: false,
+//     refetchOnWindowFocus: false,
+//   })
+
+//   // Prefetch category data
+//   useEffect(() => {
+//     if (articleQuery.data?.categories?.[0]?.id) {
+//       queryClient.prefetchQuery({
+//         queryKey: queryKeys.categories.detail(articleQuery.data.categories[0].id),
+//         queryFn: () => 
+//           ApiService.fetchCategoryBySlug(articleQuery.data!.categories![0].slug),
+//       })
+//     }
+//   }, [articleQuery.data?.categories, queryClient])
+
+//   return {
+//     article: articleQuery.data,
+//     articleLoading: articleQuery.isLoading,
+//     articleError: articleQuery.error,
+//     relatedPosts: relatedPostsQuery.data || [],
+//     relatedPostsLoading: relatedPostsQuery.isLoading,
+//     isLoading: articleQuery.isLoading,
+//     isError: articleQuery.isError,
+//     refetchArticle: articleQuery.refetch,
+//     refetchRelated: relatedPostsQuery.refetch,
+//     articleQuery,
+//     relatedPostsQuery,
+//   }
+// }
+
+
+
+
+const useArticleDetails = (
   slug: string, 
   options?: UseArticleDetailsOptions
 ) => {
   const queryClient = useQueryClient()
   
-  // ⚡ KEY FIX: Use initialData to skip initial fetch
+  // ⚡ KEY FIX: Check if we have valid initialData to avoid duplicate fetch
+  const hasInitialData = !!options?.initialData?.id
+  
   const articleQuery = useQuery({
     queryKey: queryKeys.articles.detail(slug),
     queryFn: () => ApiService.fetchPostBySlug(slug),
-    enabled: !!slug && typeof slug === 'string' && (options?.enabled !== false),
     
-    // 🚀 Use server data as initial data
-    initialData: options?.initialData || undefined,
+    // 🚀 CRITICAL: Only enable if we DON'T have initial data OR it's explicitly enabled
+    enabled: (!hasInitialData && !!slug && typeof slug === 'string') || (options?.enabled === true),
     
-    // Set initialDataUpdatedAt to prevent immediate refetch
-    initialDataUpdatedAt: options?.initialData ? Date.now() : undefined,
+    // Use initialData but mark it as already "fetched"
+    initialData: hasInitialData ? options.initialData : undefined,
+    initialDataUpdatedAt: hasInitialData ? Date.now() : 0,
     
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
-    retry: 2,
+    // 🎯 CRITICAL: These prevent immediate refetch
+    staleTime: hasInitialData ? 30 * 1000 : 5 * 60 * 1000, // 30 seconds for server data, 5 min for client
+    gcTime: 10 * 60 * 1000,
+    retry: hasInitialData ? 0 : 2, // Don't retry if we have server data
     
-    // Only refetch if data is actually stale
-    refetchOnMount: false,
+    // Prevent refetching when component mounts
+    refetchOnMount: hasInitialData ? false : 'always',
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 
   const relatedPostsQuery = useQuery<NewsItem[], Error>({
     queryKey: queryKeys.articles.related(
-      articleQuery.data?.id?.toString() || '',
+      articleQuery.data?.id?.toString() || slug, // Fallback to slug
       articleQuery.data?.categories?.[0]?.id
     ),
     queryFn: async () => {
@@ -274,11 +354,11 @@ const liveEventArticlesQuery = useQuery({
 
   return {
     article: articleQuery.data,
-    articleLoading: articleQuery.isLoading,
+    articleLoading: articleQuery.isLoading && !hasInitialData, // Don't show loading if we have initialData
     articleError: articleQuery.error,
     relatedPosts: relatedPostsQuery.data || [],
     relatedPostsLoading: relatedPostsQuery.isLoading,
-    isLoading: articleQuery.isLoading,
+    isLoading: articleQuery.isLoading && !hasInitialData,
     isError: articleQuery.isError,
     refetchArticle: articleQuery.refetch,
     refetchRelated: relatedPostsQuery.refetch,
@@ -286,6 +366,10 @@ const liveEventArticlesQuery = useQuery({
     relatedPostsQuery,
   }
 }
+
+
+
+
 
   const searchMutation = useMutation<
     { articles: articleResponse<NewsItem>; videos?: NewsItem[] },

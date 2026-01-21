@@ -14,17 +14,17 @@ interface ArticlesProps {
 
 export default function HomeMainSections() {
     const { isMobile } = useResponsive()
-    const { data: articles = [], isLoading:articlesLoading, error } = useFeaturedArticles()
+    // const { data: articles = [], isLoading:articlesLoading, error } = useFeaturedArticles()
     const { data: mainArticle = [], isLoading:mainNewsLoading } = useFeaturedArticles()
 
-    const safeArticles = Array.isArray(articles) ? articles : [];
+    const safeArticles = Array.isArray(mainArticle) ? mainArticle : [];
 
     const {  timeLineNews, asideNews } = useMemo(() => ({
         timeLineNews: safeArticles.slice(0, 5),
         asideNews: safeArticles.slice(5, 7)
     }), [safeArticles])
 
-    if (!articles?.length) {
+    if (!mainArticle?.length) {
         return <SingleSkeleton/>
     }
 

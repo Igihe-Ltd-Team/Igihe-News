@@ -32,6 +32,7 @@ import { visby } from '@/lib/fonts';
 import SideBar from '../ReUsable/SideBar'
 import AdManager from '../ads/AdManager'
 import CommentsSection from './CommentsSection'
+import { useEffect, useState } from 'react'
 
 
 interface SingleNewsContentProps {
@@ -41,9 +42,14 @@ interface SingleNewsContentProps {
 
 export default function SingleNewsContent({ slug, initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
-
+    const [isClient, setIsClient] = useState(false)
 
     const { useArticleDetails } = useNewsData()
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+    
     const {
         article: post,
         relatedPosts,
@@ -53,7 +59,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     } = useArticleDetails(slug, 
         {
             initialData: initialArticle,
-            enabled: true
+            enabled: isClient
         }
     )
 
@@ -65,7 +71,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
         )
     }
 
-    const article = initialArticle || post
+    const article = post || initialArticle
 
     if (!article) {
         return (
@@ -100,7 +106,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                     smDisplay={1}
                 >
                     <AdManager
-                        position="header-landscape-ad-1"
+                        position="premium_leaderboard_1"
                         priority={true}
                     //   className="mb-2"
                     />

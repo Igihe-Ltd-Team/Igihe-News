@@ -2,11 +2,18 @@ import { Advertisement } from "@/types/fetchData"
 
 export const AD_POSITIONS = {
   // Header positions
-  'header-landscape-ad-1': {
+  'premium_leaderboard_1': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
     dimensions: { width: 728, height: 96 },
     priority: 1
+  },
+
+  'ad1_leaderboard_728x90': {
+    name: 'Header Landscape Ad 2',
+    description: 'Secondary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 2
   },
   'header-landscape-ad-2': {
     name: 'Header Landscape Ad 2',
@@ -14,7 +21,7 @@ export const AD_POSITIONS = {
     dimensions: { width: 728, height: 96 },
     priority: 2
   },
-  
+
   // Homepage positions
   'home-featured': {
     name: 'Home Featured',
@@ -34,13 +41,13 @@ export const AD_POSITIONS = {
     dimensions: { width: 300, height: 250 },
     priority: 1
   },
-'after-facts': {
+  'after-facts': {
     name: 'after announcements',
     description: 'after-announcements',
     dimensions: { width: 300, height: 250 },
     priority: 1
   },
-  
+
   'home-after-highlights': {
     name: 'Home After Highlights',
     description: 'After highlights section',
@@ -53,7 +60,7 @@ export const AD_POSITIONS = {
     dimensions: { width: 728, height: 96 },
     priority: 2
   },
-  
+
   'home-bellow-hights': {
     name: 'Home bellow Highlights',
     description: 'bellow highlights section',
@@ -73,7 +80,7 @@ export const AD_POSITIONS = {
     priority: 2
   },
 
-  
+
 
   'home-section-1': {
     name: 'Home Section 1',
@@ -81,7 +88,7 @@ export const AD_POSITIONS = {
     dimensions: { width: 300, height: 250 },
     priority: 3
   },
-  
+
   // No positioned ads
   'no-positioned': {
     name: 'No Position',
@@ -95,8 +102,8 @@ export type AdPositionKey = keyof typeof AD_POSITIONS
 
 export function getAdPositionFromClassList(classList: string[]): AdPositionKey | null {
   for (const className of classList) {
-    if (className.startsWith('ads-position-')) {
-      const position = className.replace('ads-position-', '') as AdPositionKey
+    if (className.startsWith('tag-')) {
+      const position = className.replace('tag-', '') as AdPositionKey
       if (position in AD_POSITIONS) {
         return position
       }
@@ -106,6 +113,7 @@ export function getAdPositionFromClassList(classList: string[]): AdPositionKey |
 }
 
 export function getAdsByPosition(ads: Advertisement[], position: AdPositionKey): Advertisement[] {
+  // console.log(ads)
   return ads
     .filter(ad => getAdPositionFromClassList(ad.class_list) === position)
     .sort((a, b) => b.menu_order - a.menu_order) // Higher menu_order first

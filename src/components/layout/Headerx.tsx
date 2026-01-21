@@ -125,7 +125,7 @@ export default function Header() {
                     <Row>
                         <Col>
                             <AdManager
-                                position="header-landscape-ad-1"
+                                position="premium_leaderboard_1"
                                 priority={true}
                             /></Col>
                         <Col>

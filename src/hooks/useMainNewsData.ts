@@ -26,8 +26,8 @@ export function useMainArticle() {
 
 export function useTopSliderArticles() {
   return useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(198),
-    queryFn: () => ApiService.fetchArticles({ tags: [198], per_page: 9 }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(296),
+    queryFn: () => ApiService.fetchArticles({ tags: [296], per_page: 9 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -35,7 +35,7 @@ export function useTopSliderArticles() {
 export function useFeaturedArticles() {
   return useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [63], per_page: 8 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [228], per_page: 8 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -50,8 +50,8 @@ export function usePopularArticles() {
 
 export function useHighlightArticles() {
   return useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(64),
-    queryFn: () => ApiService.fetchArticles({ tags: [64], per_page: 11, orderby: 'date' }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(217),
+    queryFn: () => ApiService.fetchArticles({ tags: [217], per_page: 11, orderby: 'date' }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -67,7 +67,14 @@ export function useLatestArticles() {
 export function useAfricaArticles() {
   return useQuery({
     queryKey: queryKeys.articles.africa(),
-    queryFn: () => ApiService.fetchArticles({ tags: [120], per_page: 12 }).then(r => r?.data || []),
+    queryFn: () => ApiService.fetchArticles({ tags: [248], per_page: 12 }).then(r => r?.data || []),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+export function useInternationalArticles() {
+  return useQuery({
+    queryKey: queryKeys.articles.list('249'),
+    queryFn: () => ApiService.fetchArticles({ tags: [249], per_page: 12 }).then(r => r?.data || []),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -75,7 +82,7 @@ export function useAfricaArticles() {
 export function useEntertainmentArticles() {
   return useQuery({
     queryKey: queryKeys.articles.entertainment(),
-    queryFn: () => ApiService.fetchArticles({ categories: [105, 123], per_page: 12 }).then(r => r?.data || []),
+    queryFn: () => ApiService.fetchArticles({ categories: [161], per_page: 12 }).then(r => r?.data || []),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -144,7 +151,7 @@ export function useAdsFromCache(position: AdPositionKey) {
   const allAds = queryClient.getQueryData<Advertisement[]>(['advertisements'])
 
   if (allAds) {
-    return allAds.filter(ad => ad.class_list.includes(`ads-position-${position}`))
+    return allAds.filter(ad => ad.class_list.includes(`tag-${position}`))
   }
   return null
 }

@@ -62,13 +62,13 @@ export default async function Header() {
           <Row>
             <Col>
               <ServerSlotManager
-                position="header-landscape-ad-1"
+                position="premium_leaderboard_1"
                 priority={true}
               />
             </Col>
             <Col>
               <ServerSlotManager
-                position="header-landscape-ad-2"
+                position="ad1_leaderboard_728x90"
                 priority={true}
               />
             </Col>

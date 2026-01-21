@@ -39,7 +39,7 @@
 //       // ApiService.fetchCategories({ per_page: 100 }),
       
 //       // Featured articles
-//       ApiService.fetchArticles({ tags: [63], per_page: 8 }),
+//       ApiService.fetchArticles({ tags: [228], per_page: 8 }),
 //       // Popular articles
 //       ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
       
@@ -47,7 +47,7 @@
 //       // ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
       
 //       // highlight
-//       ApiService.fetchArticles({ tags: [64], per_page: 11, orderby: 'date' }),
+//       ApiService.fetchArticles({ tags: [217], per_page: 11, orderby: 'date' }),
 
       
 //       // Africa category articles (adjust category slug as needed)
@@ -150,9 +150,9 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       ApiService.fetchArticles({ tags: [199], per_page: 1 }),
       ApiService.fetchArticles({ tags: [197], per_page: 1 }),
       ApiService.fetchArticles({ tags: [198], per_page: 9 }),
-      ApiService.fetchArticles({ tags: [63], per_page: 8 }),
+      ApiService.fetchArticles({ tags: [228], per_page: 8 }),
       ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
-      ApiService.fetchArticles({ tags: [64], per_page: 11, orderby: 'date' }),
+      ApiService.fetchArticles({ tags: [217], per_page: 11, orderby: 'date' }),
       ApiService.fetchAdvertisements()
     ])
 
@@ -196,7 +196,7 @@ export async function prefetchBelowFoldData() {
       announcementResponse
     ] = await Promise.allSettled([
       ApiService.fetchArticles({ per_page: 6, orderby: 'date' }),
-      ApiService.fetchArticles({ tags: [120], per_page: 12 }),
+      ApiService.fetchArticles({ tags: [248], per_page: 12 }),
       ApiService.fetchArticles({ categories: [105, 123], per_page: 12 }),
       ApiService.fetchAdvertorals(),
       ApiService.fetchOpinions(),

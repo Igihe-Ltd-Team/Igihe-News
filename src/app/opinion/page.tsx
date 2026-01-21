@@ -85,7 +85,7 @@ export default function CategoryPage() {
                     smDisplay={1}
                 >
                     <AdManager
-                        position="header-landscape-ad-1"
+                        position="premium_leaderboard_1"
                         priority={true}
                       className="mb-md-2"
                     />

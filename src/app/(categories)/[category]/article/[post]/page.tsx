@@ -28,9 +28,8 @@ async function getPostData(slug: string, section: string) {
     if (section === 'posts') {
       return await ApiService.fetchPostBySlug(slug)
     }
-    else
-    {
-     return await ApiService.customPostFetch(api,slug)
+    else {
+      return await ApiService.customPostFetch(api, slug)
     }
 
     // const response = await fetch(
@@ -157,13 +156,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 /* ------------------------ PAGE ------------------------ */
+
 export default async function SingleNewsPage({ params }: PageProps) {
   const { post: slug, category } = await params
   // console.log('category',category)
 
   const postData = await getPostData(slug, category)
-  return(<HydrateArticle article={postData} slug={slug}>
+
+  return (
+    <HydrateArticle article={postData} slug={slug}>
       {postData && <ViewTrackerComponent postId={postData.id} />}
       <SingleNewsContent slug={slug} initialArticle={postData || undefined} />
-    </HydrateArticle>)
+    </HydrateArticle>
+  )
 }

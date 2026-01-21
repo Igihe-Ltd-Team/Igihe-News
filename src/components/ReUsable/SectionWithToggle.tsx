@@ -122,7 +122,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
     const [expanded, setExpanded] = useState(false);
       const { theme, setTheme, systemTheme } = useTheme();
 
-
+ 
     // const visiblePosts = expanded ? articles : articles.slice(0, 4);
     const visiblePosts = articles;
 

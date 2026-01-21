@@ -16,44 +16,44 @@ import AdManager from '@/components/ads/AdManager'
 
 const upperCats = [
   {
-    id: 87,
+    id: 156,
     name: 'Business',
     slug: 'business'
   },
   {
     id: 157,
     name: 'Science',
-    slug: 'science-news'
+    slug: 'science-technology'
   },
   {
-    id: 116,
+    id: 158,
     name: 'Health',
     slug: 'health'
   },
   {
-    id: 115,
+    id: 163,
     name: 'Tourism',
     slug: 'tourism'
   }]
 
 const lowerCats = [
   {
-    id: 103,
+    id: 159,
     name: 'Sports',
     slug: 'sports'
   },
   {
-    id: 126,
+    id: 160,
     name: 'Arts & Culture',
     slug: 'arts-culture'
   },
   {
-    id: 124,
+    id: 162,
     name: 'Environment',
     slug: 'environment'
   },
   {
-    id: 155,
+    id: 167,
     name: 'Diaspora',
     slug: 'diaspora'
   }]
@@ -120,7 +120,7 @@ export function Home() {
           >
             <Suspense fallback={null}>
             <AdManager
-              position="header-landscape-ad-1"
+              position="premium_leaderboard_1"
               priority={true}
               className="mb-2"
             />
@@ -146,7 +146,7 @@ export function Home() {
             smDisplay={1}
           ><Suspense fallback={null}>
             <AdManager
-              position="header-landscape-ad-1"
+              position="premium_leaderboard_1"
               priority={true}
               className="mb-2"
             />

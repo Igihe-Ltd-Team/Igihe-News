@@ -19,11 +19,16 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "new.igihe.com",
+        hostname: "en.igihe.com",
         pathname: "/**",
       },
+      {
+        protocol: 'https',
+        hostname: 'secure.gravatar.com',
+        pathname: '/avatar/**',
+      },
     ],
-    unoptimized: true,
+    unoptimized: false,
   },
 
   headers: async () => [

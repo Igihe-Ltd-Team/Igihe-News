@@ -27,7 +27,7 @@
 //     const [ initialArticles, highlightArticles] = await Promise.all([
 //       ApiService.fetchArticles({categories: [categoryId]}),
 //       ApiService.fetchArticles({ 
-//       tags: [63], 
+//       tags: [228], 
 //       ...(categoryId && { categories: [categoryId] }),
 //       per_page: 7 
 //     }).then(r => r.data)
@@ -301,7 +301,7 @@
 //     const [initialArticles, highlightArticlesResponse] = await Promise.all([
 //       ApiService.fetchArticles({ categories: [categoryId] }),
 //       ApiService.fetchArticles({ 
-//         tags: [63], 
+//         tags: [228], 
 //         categories: [categoryId],
 //         per_page: 7 
 //       })
@@ -412,7 +412,7 @@
 //         pagination: { currentPage: 1, totalPages: 1, totalPosts: 0 }
 //       })),
 //       ApiService.fetchArticles({ 
-//         tags: [63], 
+//         tags: [228], 
 //         categories: [categoryId], // Fixed: Use categoryId
 //         per_page: 7 
 //       }).catch(() => ({ data: [] }))
@@ -497,7 +497,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   // We fetch only the first page here. The Client component handles the rest.
   const [initialArticles, highlightArticles] = await Promise.all([
     ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
-    ApiService.fetchArticles({ tags: [63], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
+    ApiService.fetchArticles({ tags: [228], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
   ]);
 
   return (

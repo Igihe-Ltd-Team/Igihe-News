@@ -617,19 +617,6 @@ export class ApiService {
 
     const cacheKey = `popular:fallback:${query}`
 
-    // return this.cachedFetch(cacheKey, async () => {
-    //   const response = await this.fetchWithTimeout(
-    //     `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
-    //   )
-
-    //   if (!response.ok) {
-    //     throw new Error(`HTTP error! status: ${response.status}`)
-    //   }
-
-    //   const posts = await response.json()
-    //   return Array.isArray(posts) ? posts : []
-    // }, 10 * 60 * 1000)
-
     return this.cachedFetchWithDynamicTTL(
       cacheKey,
       async () => {
@@ -797,37 +784,6 @@ export class ApiService {
       throw error
     }
   }
-
-
-
-  // static async fetchPostsByCategorySlug(
-  //   slug: string,
-  //   params?: {
-  //     per_page?: number
-  //     page?: number
-  //     orderby?: 'date' | 'modified' | 'title' | 'comment_count'
-  //     order?: 'asc' | 'desc'
-  //   }
-  // ): Promise<CategoryPostsResponse | null> {
-  //   try {
-  //     const category = await this.fetchCategoryBySlug(slug)
-  //     if (!category) {
-  //       console.log('Category not found for slug:', slug)
-  //       return null
-  //     }
-  //     const postsResponse = await this.fetchArticles({
-  //       categories: [category.id],
-  //       ...params
-  //     })
-  //     return {
-  //       posts: postsResponse,
-  //       category: category
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching posts by category slug:', error)
-  //     return null
-  //   }
-  // }
 
 
   static async fetchPostsByCategorySlug(
@@ -1829,6 +1785,390 @@ export class ApiService {
   }
 
 
+
+
+
+
+
+
+
+  static async refreshArticle(slug: string, bypassCache: boolean = true): Promise<NewsItem | null> {
+    const cacheKey = `post:${slug}`;
+    
+    console.log(`🔄 Refreshing article: ${slug}`);
+    
+    // 1. Clear all caches for this article
+    await this.clearArticleCaches(slug);
+    
+    // 2. Fetch fresh data with cache-busting
+    try {
+      const freshArticle = await this.forceFetchArticleBySlug(slug, bypassCache);
+      
+      if (!freshArticle) {
+        console.warn(`No article found for slug: ${slug}`);
+        return null;
+      }
+      
+      // 3. Recache the article
+      await this.recacheArticle(freshArticle);
+      
+      // 4. Clear related list caches
+      await this.clearRelatedListCaches(freshArticle);
+      
+      // 5. Optionally warm up related caches in background
+      this.warmUpRelatedCaches(freshArticle).catch(error => {
+        console.debug('Background cache warm-up failed:', error);
+      });
+      
+      console.log(`✅ Article fully refreshed: ${slug}`);
+      return freshArticle;
+      
+    } catch (error) {
+      console.error(`Failed to refresh article ${slug}:`, error);
+      
+      // Try to get stale cache as fallback
+      const stale = await this.getStaleArticle(slug);
+      if (stale) {
+        console.warn('⚠️ Returning stale article due to refresh failure');
+        return stale;
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Clear ALL caches for a specific article
+   */
+  private static async clearArticleCaches(slug: string): Promise<void> {
+    const cacheKey = `post:${slug}`;
+    
+    // 1. Clear memory cache
+    if (requestCache.has(cacheKey)) {
+      requestCache.delete(cacheKey);
+      console.log(`✅ Cleared memory cache for: ${cacheKey}`);
+    }
+    
+    // 2. Clear file cache (server-side)
+    if (typeof window === 'undefined') {
+      try {
+        await fileCache.delete(cacheKey);
+        console.log(`✅ Cleared file cache for: ${cacheKey}`);
+      } catch (error) {
+        console.warn('Failed to clear file cache:', error);
+      }
+    }
+    
+    // 3. Clear any pending requests
+    if (pendingRequests.has(cacheKey)) {
+      pendingRequests.delete(cacheKey);
+      console.log(`✅ Cleared pending request for: ${cacheKey}`);
+    }
+    
+    // 4. Clear any alternative cache keys (e.g., by ID)
+    await this.clearAlternativeCacheKeys(slug);
+  }
+
+  /**
+   * Clear alternative cache keys (like by ID)
+   */
+  private static async clearAlternativeCacheKeys(slug: string): Promise<void> {
+    // Find article in memory cache to get its ID
+    const cacheKey = `post:${slug}`;
+    const cached = requestCache.get(cacheKey);
+    
+    if (cached?.data?.id) {
+      const idCacheKey = `post:${cached.data.id}`;
+      if (requestCache.has(idCacheKey)) {
+        requestCache.delete(idCacheKey);
+        console.log(`✅ Cleared alternative cache: ${idCacheKey}`);
+      }
+    }
+  }
+
+  /**
+   * Force fetch article directly from API
+   */
+  private static async forceFetchArticleBySlug(slug: string, bypassCache: boolean = true): Promise<NewsItem | null> {
+    const timestamp = bypassCache ? Date.now() : '';
+    const url = `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1${bypassCache ? `&_nocache=${timestamp}` : ''}`;
+    
+    const response = await this.fetchWithTimeout(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const posts = await response.json();
+    if (!Array.isArray(posts) || posts.length === 0) {
+      return null;
+    }
+    
+    return posts[0];
+  }
+
+  /**
+   * Recache article with dynamic TTL
+   */
+  private static async recacheArticle(article: NewsItem): Promise<void> {
+    const cacheKey = `post:${article.slug}`;
+    const ttl = calculateArticleCacheTTL(article.date);
+    const now = Date.now();
+    
+    // 1. Memory cache
+    requestCache.set(cacheKey, { data: article, timestamp: now });
+    console.log(`💾 Updated memory cache: ${cacheKey} (TTL: ${(ttl / 1000 / 60).toFixed(1)} min)`);
+    
+    // 2. File cache (server-side)
+    if (typeof window === 'undefined') {
+      try {
+        await fileCache.set(cacheKey, article, ttl, { contentDate: article.date });
+        console.log(`💾 Updated file cache: ${cacheKey}`);
+      } catch (error) {
+        console.warn('Failed to update file cache:', error);
+      }
+    }
+  }
+
+  /**
+   * Clear list caches that might contain this article
+   */
+  private static async clearRelatedListCaches(article: NewsItem): Promise<void> {
+    const patterns = this.getCachePatternsForArticle(article);
+    console.log(`🗑️  Clearing related caches for article: ${article.slug}`);
+    
+    // 1. Clear memory cache entries
+    const memoryKeys = Array.from(requestCache.keys());
+    const keysToClear = memoryKeys.filter(key =>
+      patterns.some(pattern => key.includes(pattern))
+    );
+    
+    if (keysToClear.length > 0) {
+      keysToClear.forEach(key => {
+        requestCache.delete(key);
+        console.log(`   - Cleared memory cache: ${key}`);
+      });
+    }
+    
+    // 2. Clear file cache entries (server-side)
+    if (typeof window === 'undefined' && patterns.length > 0) {
+      try {
+        // Clear file caches matching patterns
+        await this.clearFileCachesByPatterns(patterns);
+      } catch (error) {
+        console.debug('File cache clearance error:', error);
+      }
+    }
+  }
+
+  /**
+   * Get cache patterns that might contain this article
+   */
+  private static getCachePatternsForArticle(article: NewsItem): string[] {
+    const patterns = [
+      // Generic article lists
+      'articles:',
+      'popular:',
+      'opinion:',
+      'advertorial:',
+      'announcement:',
+      'fact-of-the-day:',
+      'videos:',
+    ];
+    
+    // Add category-specific patterns
+    if (article.categories && article.categories.length > 0) {
+      article.categories.forEach(catId => {
+        patterns.push(`categories":"${catId}`);
+        patterns.push(`category:${catId}`);
+      });
+    }
+    
+    // Add author-specific patterns
+    if (article.author) {
+      patterns.push(`author":"${article.author}`);
+      patterns.push(`author-posts:${article.author}`);
+    }
+    
+    // Add search patterns if article has specific keywords in title
+    const titleWords = article.title.rendered.split(' ').slice(0, 3);
+    titleWords.forEach(word => {
+      if (word.length > 3) {
+        patterns.push(`search":"${word.toLowerCase()}`);
+      }
+    });
+    
+    return patterns;
+  }
+
+  /**
+   * Clear file caches by patterns
+   */
+  private static async clearFileCachesByPatterns(patterns: string[]): Promise<void> {
+    if (typeof window !== 'undefined') return;
+    
+    try {
+      // Get all cache files
+      const stats = await fileCache.getStats();
+      console.log(`📊 File cache stats before clear: ${stats.count} files`);
+      
+      // We can't pattern-match easily with current fileCache implementation,
+      // so we'll clear based on known patterns
+      for (const pattern of patterns.slice(0, 5)) { // Limit to first 5 patterns
+        try {
+          // Extract the main part of the pattern
+          const simplePattern = pattern.replace(/[^a-zA-Z0-9:]/g, '');
+          if (simplePattern) {
+            await fileCache.clear(simplePattern);
+          }
+        } catch (error) {
+          // Pattern might not exist, continue
+        }
+      }
+    } catch (error) {
+      console.debug('File cache pattern clearance failed:', error);
+    }
+  }
+
+  /**
+   * Warm up related caches in background
+   */
+  private static async warmUpRelatedCaches(article: NewsItem): Promise<void> {
+    console.log(`🔥 Warming up related caches for: ${article.slug}`);
+    
+    const promises = [];
+    
+    // If article is in category, warm up category cache
+    if (article.categories && article.categories.length > 0) {
+      const mainCategory = article.categories[0];
+      promises.push(
+        this.fetchArticles({
+          categories: [mainCategory.id],
+          per_page: 5,
+          page: 1
+        }).catch(() => null)
+      );
+    }
+    
+    // If article is by author, warm up author cache
+    if (article.author) {
+      promises.push(
+        this.fetchPostsByAuthorId(article.author, {
+          per_page: 5,
+          page: 1
+        }).catch(() => [])
+      );
+    }
+    
+    // Always warm up homepage
+    promises.push(
+      this.fetchArticles({
+        page: 1,
+        per_page: 20
+      }).catch(() => null)
+    );
+    
+    // Execute in background
+    Promise.allSettled(promises).then(results => {
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      console.log(`✅ Cache warm-up completed: ${successful}/${promises.length} successful`);
+    });
+  }
+
+  /**
+   * Get stale article as fallback
+   */
+  private static async getStaleArticle(slug: string): Promise<NewsItem | null> {
+    const cacheKey = `post:${slug}`;
+    
+    // 1. Check memory cache
+    const memoryCached = requestCache.get(cacheKey);
+    if (memoryCached) {
+      return memoryCached.data;
+    }
+    
+    // 2. Check file cache (server-side)
+    if (typeof window === 'undefined') {
+      try {
+        const fileCached = await fileCache.get<NewsItem>(cacheKey);
+        if (fileCached) {
+          return fileCached;
+        }
+      } catch (error) {
+        console.debug('Failed to get stale file cache:', error);
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Batch refresh multiple articles
+   */
+  // static async batchRefresh(slugs: string[]): Promise<Array<{
+  //   slug: string;
+  //   success: boolean;
+  //   article?: NewsItem;
+  //   error?: string;
+  // }>> {
+  //   console.log(`🔄 Batch refreshing ${slugs.length} articles`);
+    
+  //   const results = [];
+    
+  //   for (const slug of slugs) {
+  //     try {
+  //       const article = await this.refreshArticle(slug, true);
+  //       results.push({
+  //         slug,
+  //         success: true,
+  //         article
+  //       });
+  //       console.log(`✅ Refreshed: ${slug}`);
+  //     } catch (error: any) {
+  //       results.push({
+  //         slug,
+  //         success: false,
+  //         error: error.message
+  //       });
+  //       console.error(`❌ Failed: ${slug}`, error.message);
+  //     }
+      
+  //     // Add delay to avoid overwhelming the API
+  //     await new Promise(resolve => setTimeout(resolve, 200));
+  //   }
+    
+  //   return results;
+  // }
+
+  /**
+   * Refresh article by ID (convenience method)
+   */
+  static async refreshArticleById(id: number, bypassCache: boolean = true): Promise<NewsItem | null> {
+    console.log(`🔄 Refreshing article by ID: ${id}`);
+    
+    // First get the slug
+    try {
+      const response = await this.fetchWithTimeout(
+        `${API_CONFIG.baseURL}/posts/${id}?_fields=slug${bypassCache ? `&_nocache=${Date.now()}` : ''}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const post = await response.json();
+      if (!post.slug) {
+        throw new Error(`No slug found for article ID: ${id}`);
+      }
+      
+      // Then refresh by slug
+      return this.refreshArticle(post.slug, bypassCache);
+      
+    } catch (error) {
+      console.error(`Failed to refresh article by ID ${id}:`, error);
+      throw error;
+    }
+  }
 
 
 }
