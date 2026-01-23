@@ -497,7 +497,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   // We fetch only the first page here. The Client component handles the rest.
   const [initialArticles, highlightArticles] = await Promise.all([
     ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
-    ApiService.fetchArticles({ tags: [228], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
+    ApiService.fetchArticles({ tags: [217], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
   ]);
 
   return (

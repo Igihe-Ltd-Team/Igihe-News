@@ -28,10 +28,10 @@
 //     if (PrefetchTracker.hasPrefetched() || hasPrefetched.current) {
 //       return
 //     }
-    
+
 //     // Check if data is already in cache
 //     // const hasCategories = queryClient.getQueryData(queryKeys.categories.lists())
-    
+
 //     // If we already have data, skip prefetching but mark as done
 //     // if (hasCategories) {
 //     //   hasPrefetched.current = true
@@ -47,25 +47,25 @@
 //         //   queryKeys.categories.lists(),
 //         //   initialData.categories
 //         // )
-        
+
 //         // Featured articles
 //         queryClient.setQueryData(
 //           queryKeys.articles.list({ featured: true }),
 //           { data: initialData.featuredArticles, pagination: {} }
 //         )
-        
+
 //         // Popular articles
 //         queryClient.setQueryData(
 //           queryKeys.articles.popular({ period: 'week' }),
 //           initialData.popularArticles
 //         )
-        
+
 //         // Latest articles
 //         // queryClient.setQueryData(
 //         //   queryKeys.articles.latest(),
 //         //   { data: initialData.latestArticles, pagination: {} }
 //         // )
-        
+
 
 //         // Africa articles (by category)
 //         // if (initialData.africaArticles?.length > 0) {
@@ -99,7 +99,7 @@
 //       }
 //     }
 
-    
+
 
 
 //     // Use requestIdleCallback for better performance
@@ -294,7 +294,7 @@ import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query
 import { queryKeys } from '@/lib/queryKeys'
 import { ReactNode, useEffect } from 'react'
 import { NewsItem, Advertisement } from '@/types/fetchData'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 interface PrefetchHomeDataProps {
   children: ReactNode
@@ -332,7 +332,7 @@ function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialDa
   // CRITICAL: Hydrate data IMMEDIATELY
   // This makes data available to hooks instantly
   // ============================================
-  
+
   // Live Event Articles (tag 199)
   if (initialData.liveEvent) {
     client.setQueryData(
@@ -392,7 +392,7 @@ function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialDa
   // ============================================
   // OPTIONAL: Below-fold data (if prefetched)
   // ============================================
-  
+
   if (initialData.latestArticles) {
     client.setQueryData(
       queryKeys.articles.latest(),
@@ -428,7 +428,7 @@ function createQueryClientWithData(initialData: PrefetchHomeDataProps['initialDa
     )
   }
 
-  
+
 
   if (initialData.featuredAnnouncement) {
     client.setQueryData(
@@ -445,17 +445,30 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
 
 
   const search = useSearchParams()
-    const router = useRouter()
-  
-    useEffect(() => {
-      if (search.get("fromNav") === "1") {
-        // router.refresh()
-        // optional: clean URL
-        router.replace("/", { scroll: false })
-        
-      }
-    }, [])
-    
+  const router = useRouter()
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (search.get("fromNav") === "1") {
+      router.refresh()
+      // optional: clean URL
+      router.replace("/", { scroll: false }) 
+    }
+
+
+    // if (search.get("fromNav") === "1") {
+    //   const params = new URLSearchParams(search.toString());
+    //   params.delete("fromNav");
+
+    //   const newUrl = params.toString()
+    //     ? `${pathname}?${params.toString()}`
+    //     : pathname;
+
+    //   router.replace(newUrl, { scroll: false });
+    // }
+
+  }, [])
+
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

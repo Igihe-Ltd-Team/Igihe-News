@@ -73,7 +73,7 @@ export function useAfricaArticles() {
 }
 export function useInternationalArticles() {
   return useQuery({
-    queryKey: queryKeys.articles.list('249'),
+    queryKey: queryKeys.articles.highlightTagArticles(249),
     queryFn: () => ApiService.fetchArticles({ tags: [249], per_page: 12 }).then(r => r?.data || []),
     staleTime: 5 * 60 * 1000,
   })

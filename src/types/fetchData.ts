@@ -85,6 +85,7 @@ export interface NewsItem {
   categories: Category[]
   tags: Tag[]
   class_list: string[]
+  video_url?:string,
   acf: {
     igh_yt_video_url?: string;
     igh_yt_video_url_source?: {

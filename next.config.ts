@@ -27,6 +27,13 @@ const nextConfig: NextConfig = {
         hostname: 'secure.gravatar.com',
         pathname: '/avatar/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        pathname: '/**',
+      },
+
+      
     ],
     unoptimized: false,
   },

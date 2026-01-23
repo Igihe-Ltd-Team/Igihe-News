@@ -68,7 +68,7 @@ export default async function Header() {
             </Col>
             <Col>
               <ServerSlotManager
-                position="ad1_leaderboard_728x90"
+                position="mot-premium_leaderboard_1_b"
                 priority={true}
               />
             </Col>
@@ -94,7 +94,7 @@ export default async function Header() {
           desktopAdSection={
             <Col md={7}>
               <ServerSlotManager
-                position="beside-igihe-logo"
+                position="ad1_leaderboard_728x90"
                 priority={true}
                 imgClass="object-position-right"
               />

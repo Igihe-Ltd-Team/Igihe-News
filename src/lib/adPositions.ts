@@ -15,6 +15,14 @@ export const AD_POSITIONS = {
     dimensions: { width: 728, height: 96 },
     priority: 2
   },
+  
+  'mot-premium_leaderboard_1_b': {
+    name: 'Header Landscape Ad 2',
+    description: 'Secondary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 2
+  },
+
   'header-landscape-ad-2': {
     name: 'Header Landscape Ad 2',
     description: 'Secondary header banner',
@@ -109,7 +117,7 @@ export function getAdPositionFromClassList(classList: string[]): AdPositionKey |
       }
     }
   }
-  return 'no-positioned'
+  return null
 }
 
 export function getAdsByPosition(ads: Advertisement[], position: AdPositionKey): Advertisement[] {

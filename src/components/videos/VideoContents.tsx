@@ -18,8 +18,7 @@ export default function VideoContents({slug}:SingleVideoContentProps) {
 
   // ✅ Find the video that matches the slug
   const currentVideo = videos?.find((video: NewsItem) => video.slug === slug);
-
-  const igiheVideoId = getYouTubeVideoId(currentVideo?.acf?.igh_yt_video_url!)
+  const igiheVideoId = getYouTubeVideoId(currentVideo?.video_url!)
 
   const embedUrl = igiheVideoId
     ? `https://www.youtube.com/embed/${igiheVideoId}?controls=1&rel=0&playsinline=1`

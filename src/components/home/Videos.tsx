@@ -8,15 +8,20 @@ import Slides from './Slides'
 import HomeVideoCard from '../videos/HomeVideoCard'
 import CustomSlider from './CustomSlider'
 import NewsSkeleton from '../NewsSkeleton'
+import { useNewsData } from '@/hooks/useNewsData'
 
 export default function Videos() {
-  const { data: videos, isLoading, error } = useQuery({
+  const { data: videosx, isLoading, error } = useQuery({
     queryKey: ['videos'],
     queryFn: () => ApiService.fetchVideos({ per_page: 9 }),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  if (isLoading) {
+  const {videos,videosLoading} = useNewsData()
+
+  console.log('videos',JSON.stringify(videos))
+
+  if (videosLoading) {
     return (
       <>
         <HeaderDivider title="Latest Videos" />
@@ -39,7 +44,7 @@ export default function Videos() {
       <HeaderDivider title="Latest Videos" />
       <CustomSlider showControll lgDisplay={3} mdDisplay={2} smDisplay={1}>
         {
-            videos?.map(video => <HomeVideoCard key={video.id} article={video}/>)
+          videos?.map(video => <HomeVideoCard key={video.id} article={video}/>)
         }
       </CustomSlider>
       {/* <Slides articles={videos || []} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll /> */}
