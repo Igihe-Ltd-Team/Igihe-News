@@ -29,7 +29,7 @@ export default function CategoryPage() {
     error,
   } = useOpinionArticles();
 
-  // console.log('Opinions Data',data)
+  console.log('Opinions Data',data)
 
   const posts =  data?.pages.flatMap((page) => page.data) || [];
 
@@ -61,7 +61,7 @@ export default function CategoryPage() {
     );
   }
 
-  if (!isLoading && !posts.length) {
+  if (!isLoading && !posts?.length) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">

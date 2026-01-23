@@ -1581,9 +1581,6 @@ export class ApiService {
 
     const cacheKey = `opinion:${JSON.stringify(queryParams)}`
 
-
-
-
     return this.cachedFetch(cacheKey, async () => {
       const queryString = this.buildQuery(queryParams)
       const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?${queryString}`)

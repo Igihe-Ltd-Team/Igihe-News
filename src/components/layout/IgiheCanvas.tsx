@@ -192,7 +192,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
 
 
                             <li className="nav-item">
-                                <Link href={`/advertorials`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
+                                <Link href={`/advertorial`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
                                     <span className="nav-hover-effect d-flex">
                                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <g clipPath="url(#clip0_1277_4757)">

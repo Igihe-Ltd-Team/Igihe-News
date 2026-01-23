@@ -8,6 +8,6 @@ export const metadata: Metadata = {
   description: 'Meet our talented team of writers and journalists',
 }
 
-export default async function AuthorsPage() {
+export default function AuthorsPage() {
   return <AuthorsList />
 }
