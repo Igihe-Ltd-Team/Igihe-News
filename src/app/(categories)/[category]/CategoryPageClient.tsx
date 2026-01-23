@@ -43,12 +43,12 @@ export default function CategoryPageClient({
   // ALWAYS call hooks unconditionally at the top level
   // Use the categoryInfo if available, otherwise use thisCategory?.id
   const categoryId = categoryInfo?.id || thisCategory?.id;
-  const highlightsQuery = useCategoryTagArticles(63, categoryId);
-  const { data: clientHighlights,isLoading:lodingHighlight } = useCategoryTagArticles(63, categoryId);
+  const highlightsQuery = useCategoryTagArticles(217, categoryId);
+  const { data: clientHighlights,isLoading:lodingHighlight } = useCategoryTagArticles(217, categoryId);
 
   const displayHighlights = clientHighlights || highlightArticles;
 
-// console.log('highlightsQuery',highlightsQuery)
+// console.log('highlightsQuery',displayHighlights)
 
 
 
