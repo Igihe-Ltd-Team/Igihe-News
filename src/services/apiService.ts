@@ -1517,20 +1517,46 @@ export class ApiService {
   }
 
 
+  static async fetchAdvertorals(params?: {
+    page?: number,
+    per_page?: number
+    orderby?: string
+    order?: 'asc' | 'desc'
+  }): Promise<NewsItem[]> {
 
 
-  static async fetchAdvertorals(): Promise<NewsItem[]> {
-    const cacheKey = 'advertorial:all'
+    const queryParams: Record<string, any> = {
+      page: params?.page || 1,
+      per_page: params?.per_page || 50,
+      _embed: '1',
+      orderby: params?.orderby || 'date',
+      order: params?.order || 'desc',
+    }
+
+    if (params?.page) {
+      queryParams.page = params.page
+    }
+    if (params?.per_page) {
+      queryParams.per_page = params.per_page
+    }
+    if (params?.orderby) {
+      queryParams.orderby = params.orderby
+    }
+    if (params?.order) {
+      queryParams.order = params.order
+    }
+
+    const cacheKey = `advertorial:${JSON.stringify(queryParams)}`
 
     try {
       return this.dedupedFetch(cacheKey, async () => {
-        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/advertorial?_embed&per_page=50`)
+        const queryString = this.buildQuery(queryParams)
+        const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/advertorial?${queryString}`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
 
         const ads = await response.json()
-
 
         if (Array.isArray(ads) && ads.length > 0) {
           // Don't await - let it happen in background

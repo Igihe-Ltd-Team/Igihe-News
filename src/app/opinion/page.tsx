@@ -2,14 +2,12 @@
 
 import DynamicArticleCard from "@/components/news/DynamicArticleCard";
 import { Col, Row, Button } from "react-bootstrap";
-import PopularNews from "@/components/news/PopularNews";
 import HeaderDivider from "@/components/HeaderDivider";
 import AdManager from "@/components/ads/AdManager";
 import { useNewsData } from "@/hooks/useNewsData";
 import { Suspense, useEffect, useState } from "react";
 import NewsSkeleton from "@/components/NewsSkeleton";
 import CustomSlider from "@/components/home/CustomSlider";
-import SocialMedias from "@/components/ReUsable/SocialMedias";
 import SideBar from "@/components/ReUsable/SideBar";
 
 
@@ -72,7 +70,6 @@ export default function CategoryPage() {
     );
   }
 
-  // const categoryName = category.charAt(0).toUpperCase() + category.slice(1)
 
   return (
     <div className="container mx-auto px-4 py-8">
