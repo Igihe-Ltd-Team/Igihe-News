@@ -11,6 +11,7 @@ import { useFeaturedArticles, useTopSliderArticles } from '@/hooks/useMainNewsDa
 import CustomSlider from '@/components/home/CustomSlider'
 import AdManager from '@/components/ads/AdManager'
 import TopSection from './TopSection'
+import ServerSlotManager from '@/components/ads/ServerSlotManager'
 
 
 const upperCats = [
@@ -80,13 +81,13 @@ export function Home() {
             smDisplay={1}
           >
             <Suspense fallback={null}>
-            <AdManager
+            <ServerSlotManager
               position="home-bellow-hights"
               priority={true}
             />
             </Suspense>
             <Suspense fallback={null}>
-            <AdManager
+            <ServerSlotManager
               position="home-bellow-hights-2"
               priority={true}
             />
@@ -106,14 +107,14 @@ export function Home() {
             smDisplay={1}
           >
             <Suspense fallback={null}>
-            <AdManager
+            <ServerSlotManager
               position="premium_leaderboard_1"
               priority={true}
               className="mb-2"
             />
             </Suspense>
             <Suspense fallback={null}>
-            <AdManager
+            <ServerSlotManager
               position="header-landscape-ad-2"
               priority={true}
               className="mb-2"
@@ -132,14 +133,14 @@ export function Home() {
             mdDisplay={2}
             smDisplay={1}
           ><Suspense fallback={null}>
-            <AdManager
+            <ServerSlotManager
               position="premium_leaderboard_1"
               priority={true}
               className="mb-2"
             />
             </Suspense>
             <Suspense fallback={null}>
-            <AdManager
+            <ServerSlotManager
               position="header-landscape-ad-2"
               priority={true}
               className="mb-2"

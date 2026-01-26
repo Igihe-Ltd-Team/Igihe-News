@@ -4,7 +4,7 @@ import { Col, Row } from 'react-bootstrap'
 import Image from 'next/image'
 import HeaderClient from './HeaderClient'
 import { ApiService } from '@/services/apiService'
-import AdManager from '../ads/AdManager'
+// import AdManager from '../ads/AdManager'
 import ServerSlotManager from '../ads/ServerSlotManager'
 
 // Fetch categories on the server

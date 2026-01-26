@@ -2194,4 +2194,93 @@ export class ApiService {
   }
 
 
+
+
+
+
+  static async fetchOtherPosts(params?: {
+    postType:string
+    page?: number
+    per_page?: number
+    categories?: number[]
+    search?: string
+    exclude?: number[]
+    include?: number[]
+    orderby?: 'date' | 'modified' | 'title' | 'comment_count' | 'relevance' | 'slug' | 'include' | 'id'
+    order?: 'asc' | 'desc'
+    after?: string
+    before?: string
+    author?: number
+    tags?: number[]
+  }): Promise<articleResponse<NewsItem>> {
+    const queryParams: Record<string, any> = {
+      page: params?.page || 1,
+      per_page: params?.per_page || 20,
+      _embed: '1',
+      orderby: params?.orderby || 'date',
+      order: params?.order || 'desc',
+    }
+
+    if (params?.categories?.length) {
+      queryParams.categories = params.categories.join(',')
+    }
+    if (params?.tags?.length) {
+      queryParams.tags = params.tags.join(',')
+    }
+    if (params?.search) {
+      queryParams.search = params.search
+    }
+    if (params?.exclude?.length) {
+      queryParams.exclude = params.exclude.join(',')
+    }
+    if (params?.include?.length) {
+      queryParams.include = params.include.join(',')
+    }
+    if (params?.after) {
+      queryParams.after = params.after
+    }
+    if (params?.before) {
+      queryParams.before = params.before
+    }
+    if (params?.author) {
+      queryParams.author = params.author
+    }
+
+    const cacheKey = `${params?.postType}:${JSON.stringify(queryParams)}`
+
+    return this.cachedFetchWithDynamicTTL(
+      cacheKey,
+      async () => {
+        const queryString = this.buildQuery(queryParams)
+        const response = await this.fetchWithTimeout(
+          `${API_CONFIG.baseURL}/${params?.postType}?${queryString}`
+        )
+        const data = await response.json()
+
+        if (Array.isArray(data) && data.length > 0) {
+          // Don't await - let it happen in background
+          this.cacheArticlesFromList(data).catch(error => {
+            console.debug('Background caching failed:', error);
+          });
+        }
+
+        return this.buildPaginationResponse(data, response, {
+          page: params?.page,
+          per_page: params?.per_page,
+        })
+      },
+      // Use the newest article's date for TTL calculation
+      (response) => {
+        if (response?.data?.length > 0) {
+          return response.data[0].date
+        }
+        return null
+      }
+    )
+  }
+
+
+
+
+
 }

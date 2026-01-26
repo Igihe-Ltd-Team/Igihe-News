@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import { ThemedText } from '../ThemedText'
 import { ApiService } from '@/services/apiService'
