@@ -79,7 +79,7 @@ export default async function Header() {
         <HeaderClient 
           categories={orderedCategories} 
           logoSection={
-            <Link href="/?fromNav=1">
+            <Link href="/">
               <span className='site-logo'>
                 <Image
                   width={240}

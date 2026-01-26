@@ -68,7 +68,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                             {
                                 showHome &&
                                 <li className="nav-item">
-                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/?fromNav=1">
+                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/">
                                         <span className="nav-hover-effect d-flex">
                                             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <g clipPath="url(#clip0_1277_4757)">
