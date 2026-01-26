@@ -449,11 +449,11 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
   const pathname = usePathname();
 
   useEffect(() => {
-    if (search.get("fromNav") === "1") {
-      router.refresh()
-      // optional: clean URL
-      router.replace("/", { scroll: false }) 
-    }
+    // if (search.get("fromNav") === "1") {
+    //   router.refresh()
+    //   // optional: clean URL
+    //   router.replace("/", { scroll: false }) 
+    // }
 
 
     // if (search.get("fromNav") === "1") {

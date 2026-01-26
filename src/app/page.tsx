@@ -64,8 +64,8 @@ export default async function HomePage() {
   //   ? await prefetchAllHomeData()
   //   : await prefetchHomeData() 
 
-  const initialData = await prefetchHomeData()
-  // const initialData = await prefetchAllHomeData()
+  // const initialData = await prefetchHomeData()
+  const initialData = await prefetchAllHomeData()
 
 
   
