@@ -452,6 +452,12 @@
 
 
 
+
+
+
+
+
+
 import { Category } from "@/types/fetchData";
 import CategoryPageClient from "./CategoryPageClient";
 import { notFound } from "next/navigation";
