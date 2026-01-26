@@ -49,7 +49,7 @@ import { PrefetchHomeData } from './prefetch-home-data'
 
 export const revalidate = 300
 
-const STRATEGY = 'full' // Options: 'fast' | 'full'
+// const STRATEGY = 'full' // Options: 'fast' | 'full'
 
 export async function generateMetadata() {
   return {

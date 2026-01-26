@@ -448,7 +448,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
   const router = useRouter()
   const pathname = usePathname();
 
-  useEffect(() => {
+  // useEffect(() => {
     // if (search.get("fromNav") === "1") {
     //   router.refresh()
     //   // optional: clean URL
@@ -467,7 +467,7 @@ export function PrefetchHomeData({ children, initialData }: PrefetchHomeDataProp
     //   router.replace(newUrl, { scroll: false });
     // }
 
-  }, [])
+  // }, [])
 
 
   return (

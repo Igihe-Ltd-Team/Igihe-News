@@ -1,3 +1,5 @@
+"use client"
+
 import React, { Suspense, useMemo } from 'react'
 import HeaderDivider from '../HeaderDivider'
 import { NewsItem } from '@/types/fetchData'

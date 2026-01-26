@@ -1,5 +1,3 @@
-'use client'
-
 import Categories from '@/components/home/Categories'
 import HomeMainSections from '@/components/home/HomeMainSections'
 import Recents from '@/components/home/Recents'
@@ -7,11 +5,12 @@ import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import TimeLine from '@/components/ReUsable/TimeLine'
 import { useNewsData } from '@/hooks/useNewsData'
-import React, { Suspense, useEffect, useMemo } from 'react'
+import React, { Suspense } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { useFeaturedArticles, useTopSliderArticles } from '@/hooks/useMainNewsData'
 import CustomSlider from '@/components/home/CustomSlider'
 import AdManager from '@/components/ads/AdManager'
+import TopSection from './TopSection'
 
 
 const upperCats = [
@@ -60,24 +59,12 @@ const lowerCats = [
 
 
 export function Home() {
-  const { data: topSlider = []} = useTopSliderArticles()
-  const {
-    liveEvent
-  } = useNewsData()
+  
 
   return (
     <>
       <Container>
-        <Suspense fallback={<NewsSkeleton count={3} />}>
-          {
-            liveEvent?.length > 0 ?
-              // <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
-              <TimeLine articles={liveEvent} />
-              :
-              topSlider?.length > 0 &&
-              <Slides articles={topSlider} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
-          }
-        </Suspense>
+        <TopSection/>
       </Container>
 
       <Suspense fallback={<NewsSkeleton count={3} />}>

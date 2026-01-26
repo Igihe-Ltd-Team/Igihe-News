@@ -1,3 +1,4 @@
+"use client"
 import React, { useMemo } from 'react'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import { NewsItem } from '@/types/fetchData'
