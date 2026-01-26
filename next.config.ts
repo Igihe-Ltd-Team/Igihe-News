@@ -33,7 +33,16 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
 
-      
+      {
+        protocol: 'https',
+        hostname: 'stage.igihe.com',
+        pathname: '/_next/image',
+      },
+      {
+        protocol: 'https',
+        hostname: 'new.igihe.com',
+        pathname: '/wp-content/uploads/**',
+      },
     ],
     unoptimized: false,
   },
