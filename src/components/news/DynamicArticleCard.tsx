@@ -82,7 +82,6 @@ const { isMobile } = useResponsive()
           // prefetch={true}
           // onMouseEnter={() => mouseEnter(article)}
         >
-          <ThemedText>{featuredImage}</ThemedText>
           <OptimizedImage
             src={featuredImage || '/assets/igiheIcon.png'}
             alt={article.title.rendered}
