@@ -105,7 +105,6 @@ import { formatDate, getCategoryName, getCategorySlug, getFeaturedImage, isImage
 import { OptimizedImage } from '../ui/OptimizedImage';
 import { NewsItem } from '@/types/fetchData';
 import { useTheme } from 'next-themes';
-import Link from 'next/link';
 interface SectionProps {
     title?: string,
     titleBG?: string,
@@ -156,7 +155,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                 {visiblePosts.map((item, index) => {
                     const chechedfile = isImageMedia(item,true)
                     return(
-                    <Link 
+                    <a 
                         href={chechedfile.isImage? `/advertorial/article/${item.slug}` : chechedfile.filePath} 
                         key={item.id}
                         className={`list-group-item px-0 list-group-item-action ${index !== visiblePosts.length - 1 ? 'border-bottom' : ''}`}
@@ -197,7 +196,7 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                                 </ThemedText>
                             </div>
                         </div>
-                    </Link>
+                    </a>
                 )
                 })}
             </div>

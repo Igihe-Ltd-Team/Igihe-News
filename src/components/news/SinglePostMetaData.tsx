@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
 import { ThemedText } from '../ThemedText'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { Author } from '@/types/fetchData'
@@ -10,13 +9,13 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
     return (
         <div className="article-meta-data has-gray-border d-flex align-items-center justify-content-between mt-4 pt-4">
             <div className="meta-left d-flex align-items-center gap-5 w-75">
-                <Link href={`/${categorySlug}`} className='text-decoration-none'>
+                <a href={`/${categorySlug}`} className='text-decoration-none'>
                     <ThemedText type='small' className='hasBorder'>{category}</ThemedText>
-                </Link>
+                </a>
 
                 <div className="meta-wrapper d-flex align-items-center gap-2 flex-wrap">
 
-                    <Link href={`/author/${author?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
+                    <a href={`/author/${author?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
                         <OptimizedImage // Author Image
                             src={authorImage || '/assets/user-avatar.png'}
                             alt={authorName || 'Author'}
@@ -28,7 +27,7 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
                         <ThemedText type='smallBold' className='ms-0'>
                             {authorName}
                         </ThemedText>
-                    </Link>
+                    </a>
 
                     <span className="d-flex align-items-center">
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">

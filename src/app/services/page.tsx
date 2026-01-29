@@ -7,7 +7,6 @@ import { useNewsData } from '@/hooks/useNewsData'
 import { categoryIcons } from '@/lib/utils'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { ThemedText } from '@/components/ThemedText'
-import Link from 'next/link'
 
 
 export default function OurNewsCategories() {
@@ -31,9 +30,9 @@ export default function OurNewsCategories() {
                                     <ThemedText type='subtitle'>{category.name}</ThemedText>
                                 </div>
                                 <p>{category.description}</p>
-                                <Link href={`/services/${category.slug}`} className='text-reset text-decoration-none'>
+                                <a href={`/services/${category.slug}`} className='text-reset text-decoration-none'>
                                     Read News
-                                </Link>
+                                </a>
                             </Col>
                         )
                     }

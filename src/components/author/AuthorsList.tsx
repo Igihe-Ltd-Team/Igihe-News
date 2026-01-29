@@ -1,6 +1,5 @@
 "use client"
 import { Author, AuthorWithPosts } from '@/types/fetchData'
-import Link from 'next/link'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ApiService } from '@/services/apiService'
 import { Col, Row } from 'react-bootstrap'
@@ -47,7 +46,7 @@ if(isLoading)
           {
             authors?.map((author) => {
               return (
-                <Link href={`/author/${author.slug}`} className='feature col-md-3 text-decoration-none text-dark' key={author.id}>
+                <a href={`/author/${author.slug}`} className='feature col-md-3 text-decoration-none text-dark' key={author.id}>
                   
                     {author.avatar_urls && (
                       <OptimizedImage
@@ -63,7 +62,7 @@ if(isLoading)
                     <ThemedText type='defaultSemiBold'>{author.name}</ThemedText>
                   </div>
                   {/* <p className='line-clamp-3'>{author.description}</p> */}
-                </Link>
+                </a>
               )
             }
             )

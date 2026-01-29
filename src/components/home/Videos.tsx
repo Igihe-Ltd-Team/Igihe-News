@@ -19,7 +19,7 @@ export default function Videos() {
 
   const {videos,videosLoading} = useNewsData()
 
-  console.log('videos',JSON.stringify(videos))
+  // console.log('videos',JSON.stringify(videos))
 
   if (videosLoading) {
     return (

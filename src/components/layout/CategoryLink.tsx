@@ -1,7 +1,6 @@
-// components/CategoryLink.tsx
+
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -54,7 +53,7 @@ export default function CategoryLink({ slug, name, id }: CategoryLinkProps) {
   };
 
   return (
-    <Link
+    <a
       href={`/${slug}`}
       onMouseEnter={handleMouseEnter}
       onTouchStart={handleMouseEnter} // Mobile support
@@ -63,6 +62,6 @@ export default function CategoryLink({ slug, name, id }: CategoryLinkProps) {
     >
       {name}
       {isNavigating && <span className="ml-2">...</span>}
-    </Link>
+    </a>
   );
 }

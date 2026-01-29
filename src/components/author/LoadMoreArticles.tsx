@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+
 
 interface LoadMoreArticlesProps {
     authorSlug: string
@@ -17,12 +17,12 @@ export default function LoadMoreArticles({
     
     return (
         <div className="text-center mt-5">
-            <Link 
+            <a 
                 href={`/author/${authorSlug}?page=${nextPage}`}
                 className="btn btn-primary btn-lg"
             >
                 Load More Articles
-            </Link>
+            </a>
             <p className="text-muted mt-2 small">
                 Page {currentPage} of {totalPages}
             </p>

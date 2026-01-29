@@ -2,7 +2,6 @@
 
 import { useNewsData } from '@/hooks/useNewsData'
 import { Category } from '@/types/fetchData'
-import Link from 'next/link'
 import { useState } from 'react'
 import { Offcanvas, Button, Container, Row, Col } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
@@ -68,7 +67,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                             {
                                 showHome &&
                                 <li className="nav-item">
-                                    <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/">
+                                    <a className="nav-link active d-flex align-items-center" aria-current="page" href="/">
                                         <span className="nav-hover-effect d-flex">
                                             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <g clipPath="url(#clip0_1277_4757)">
@@ -89,11 +88,11 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                         </span>
                                         <ThemedText>Home</ThemedText>
 
-                                    </Link>
+                                    </a>
                                 </li>
                             }
                             <li className="nav-item">
-                                <Link className="nav-link active d-flex align-items-center" aria-current="page" href="/videos">
+                                <a className="nav-link active d-flex align-items-center" aria-current="page" href="/videos">
                                     <span className="nav-hover-effect d-flex">
                                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <g clipPath="url(#clip0_1277_4757)">
@@ -114,12 +113,12 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                     </span>
                                     <ThemedText>Videos</ThemedText>
 
-                                </Link>
+                                </a>
                             </li>
 
 
                             <li className="nav-item">
-                                <Link href={`/tag/228`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
+                                <a href={`/tag/228`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
                                     <span className="nav-hover-effect d-flex">
                                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <g clipPath="url(#clip0_1277_4757)">
@@ -139,7 +138,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                         </svg>
                                     </span>
                                     <ThemedText>Features</ThemedText>
-                                </Link>
+                                </a>
                             </li>
 
                             {/* <li className="nav-item">
@@ -167,7 +166,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                             </li> */}
 
                             <li className="nav-item">
-                                <Link href={`/opinion`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
+                                <a href={`/opinion`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
                                     <span className="nav-hover-effect d-flex">
                                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <g clipPath="url(#clip0_1277_4757)">
@@ -187,7 +186,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                         </svg>
                                     </span>
                                     <ThemedText>Opinion</ThemedText>
-                                </Link>
+                                </a>
                             </li>
 
 
@@ -271,7 +270,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                     .filter((category): category is Category => category !== undefined)
                                     .map((category: Category, index: number) => (
                                         <li className="nav-item" key={category.id}>
-                                            <Link href={`/${category.slug}`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
+                                            <a href={`/${category.slug}`} style={{ textTransform: 'capitalize' }} className="nav-link active d-flex align-items-center">
                                                 <span className="nav-hover-effect d-flex">
                                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <g clipPath="url(#clip0_1277_4757)">
@@ -291,7 +290,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                                     </svg>
                                                 </span>
                                                 <ThemedText>{category.name}</ThemedText>
-                                            </Link>
+                                            </a>
                                         </li>
                                     ))
                             ) : null}

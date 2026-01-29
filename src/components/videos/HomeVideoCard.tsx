@@ -1,6 +1,5 @@
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { NewsItem } from '@/types/fetchData'
 import { getFeaturedImage, stripHtml } from '@/lib/utils'
 import { OptimizedImage } from '../ui/OptimizedImage'
@@ -26,7 +25,7 @@ export default function HomeVideoCard({ article }: VideoProps) {
         /> */}
       </div>
       <div className="card-details">
-        <Link href={`/videos/${article.slug}`} className="text-decoration-none">
+        <a href={`/videos/${article.slug}`} className="text-decoration-none">
           <span className="play-icon">
 
             <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -44,7 +43,7 @@ export default function HomeVideoCard({ article }: VideoProps) {
           </span>
           <ThemedText className='heading-title'>{stripHtml(article.title.rendered)}</ThemedText>
           {/* <p className="heading-title">Ingabire Victoire yageze mu Rukiko…</p> */}
-        </Link>
+        </a>
 
       </div>
     </div>

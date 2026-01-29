@@ -1,5 +1,3 @@
-// app/components/Header.tsx (Server Component)
-import Link from 'next/link'
 import { Col, Row } from 'react-bootstrap'
 import Image from 'next/image'
 import HeaderClient from './HeaderClient'
@@ -79,7 +77,7 @@ export default async function Header() {
         <HeaderClient 
           categories={orderedCategories} 
           logoSection={
-            <Link href="/">
+            <a href="/">
               <span className='site-logo'>
                 <Image
                   width={240}
@@ -89,7 +87,7 @@ export default async function Header() {
                   alt={'IGEHE Logo'}
                 />
               </span>
-            </Link>
+            </a>
           }
           desktopAdSection={
             <Col md={7}>
