@@ -508,6 +508,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <CategoryPageClient
+      key={categorySlug}
       initialPosts={initialArticles?.data || []}
       highlightArticles={highlightArticles?.data || []}
       categoryInfo={thisCategory}

@@ -72,15 +72,14 @@ const { isMobile } = useResponsive()
     }}>
       {
         showImage &&
-        <Link
+        <a
           href={`/${getCategorySlug(article)}/article/${article.slug}`}
           className="text-decoration-none text-reset"
           style={
             isSlider ? { width:'20%' }:{ flex: 1 }
           }
           aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
-          // prefetch={true}
-          // onMouseEnter={() => mouseEnter(article)}
+          // prefetch={false}
         >
           <OptimizedImage
             src={featuredImage || '/assets/igiheIcon.png'}
@@ -90,7 +89,7 @@ const { isMobile } = useResponsive()
             imgClass="object-fit-cover"
             className={bordered ? "":'mb-2'}
           />
-        </Link>
+        </a>
       }
       <div className='d-flex align-items-center gap-2' style={{ flex: 2 }}>
         {
@@ -123,7 +122,8 @@ const { isMobile } = useResponsive()
                 </ThemedText>
                 {
                   showCategorie &&
-                  <Link href={`/${getCategorySlug(article)}`}
+                  <a href={`/${getCategorySlug(article)}`}
+                  // prefetch={false}
                   className="text-decoration-none text-reset d-flex gap-1"
                   aria-label={`Read full article: ${getCategoryName(article)}`}
                   style={{flex:1}}
@@ -147,7 +147,7 @@ const { isMobile } = useResponsive()
                     </svg>
                   </span>
                   <ThemedText type='small'>{getCategoryName(article)}</ThemedText>
-                </Link>
+                </a>
                 }
                 
               </small>
@@ -160,7 +160,8 @@ const { isMobile } = useResponsive()
             paddingBottom: bottomBorder ? 10: 0
           }}>
 
-          <Link
+          <a
+          // prefetch={false}
             href={`/${getCategorySlug(article)}/article/${article.slug}`}
             className="text-decoration-none text-reset"
             aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
@@ -187,7 +188,7 @@ const { isMobile } = useResponsive()
                 </ThemedText>
               </div>
             }
-          </Link>
+          </a>
           </div>
         </div>
 

@@ -324,7 +324,7 @@ export default async function SingleNewsPage({ params }: PageProps) {
   const { post: slug, category } = await params
 
   return (
-    <Suspense fallback={<ArticleSkeleton />}>
+    <Suspense key={slug} fallback={<ArticleSkeleton />}>
       <ArticleContent slug={slug} category={category} />
     </Suspense>
   )
