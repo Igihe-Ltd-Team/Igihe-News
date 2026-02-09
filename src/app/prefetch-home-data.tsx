@@ -293,7 +293,7 @@
 import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import { ReactNode, useEffect } from 'react'
-import { NewsItem, Advertisement } from '@/types/fetchData'
+import { NewsItem, Advertisement, TraficNews } from '@/types/fetchData'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 interface PrefetchHomeDataProps {
@@ -303,7 +303,7 @@ interface PrefetchHomeDataProps {
     mainArticle: NewsItem[]
     topSliders: NewsItem[]
     featuredArticles: NewsItem[]
-    popularArticles: NewsItem[]
+    popularArticles: TraficNews[]
     highlightTagArticles: NewsItem[]
     prefetchedAdds: Advertisement[]
     // Optional below-fold data
