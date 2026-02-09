@@ -104,7 +104,7 @@
 
 
 import { ApiService } from '@/services/apiService'
-import { Advertisement, Category, NewsItem } from '@/types/fetchData'
+import { Advertisement, Category, NewsItem, TraficNews } from '@/types/fetchData'
 
 export interface HomePageData {
   categories: Category[]
@@ -112,7 +112,7 @@ export interface HomePageData {
   mainArticle: NewsItem[]
   topSliders: NewsItem[]
   featuredArticles: NewsItem[]
-  popularArticles: NewsItem[]
+  popularArticles: TraficNews[]
   highlightTagArticles: NewsItem[]
   prefetchedAdds: Advertisement[]
 }
@@ -151,7 +151,7 @@ export async function prefetchHomeData(): Promise<HomePageData> {
       ApiService.fetchArticles({ tags: [197], per_page: 1 }),
       ApiService.fetchArticles({ tags: [198], per_page: 9 }),
       ApiService.fetchArticles({ tags: [228], per_page: 8 }),
-      ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
+      ApiService.fetchMostPopularArticlesFallback({ period: 'week', limit: 5 }),
       ApiService.fetchArticles({ tags: [217], per_page: 11, orderby: 'date' }),
       ApiService.fetchAdvertisements()
     ])

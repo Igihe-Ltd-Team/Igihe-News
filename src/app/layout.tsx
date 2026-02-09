@@ -5,6 +5,7 @@ import { raleway } from '@/lib/fonts';
 import Header from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { initCacheCleanup } from '@/lib/cache/cleanup'
+import Script from 'next/script';
 
 
 export const metadata = {
@@ -28,6 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="py-2">{children}</main>
           <Footer/>
         </Providers>
+        <Script
+          src="https://traffic.igihe.com/t.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

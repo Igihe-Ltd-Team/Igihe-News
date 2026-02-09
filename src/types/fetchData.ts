@@ -46,6 +46,17 @@ export interface Tag {
 }
 
 
+
+export interface TraficNews {
+  content_id: string;
+  title: string;
+  url: string;
+  category: string;
+  author: string;
+  thumbnail_url: string | null;
+  views: number;
+}
+
 // types/fetchData.ts
 export interface NewsItem {
   id: number
@@ -341,5 +352,67 @@ export interface Comment {
     24: string;
     48: string;
     96: string;
+  };
+}
+
+
+
+
+export function transformToNewsItem(apiItem: TraficNews): NewsItem {
+  const now = new Date().toISOString();
+  
+  return {
+    id: parseInt(apiItem.content_id),
+    date: now,
+    date_gmt: now,
+    guid: {
+      rendered: apiItem.url
+    },
+    modified: now,
+    modified_gmt: now,
+    slug: apiItem.url.split('/').filter(Boolean).pop() || '',
+    status: 'publish',
+    type: 'post',
+    link: apiItem.url,
+    title: {
+      rendered: apiItem.title
+    },
+    content: {
+      rendered: '',
+      protected: false
+    },
+    excerpt: {
+      rendered: '',
+      protected: false
+    },
+    author: 0, // You might want to create an author mapping
+    featured_media: 0,
+    comment_status: 'open',
+    ping_status: 'open',
+    sticky: false,
+    template: '',
+    format: 'standard',
+    meta: {
+      _acf_changed: false,
+      footnotes: ''
+    },
+    categories: [], // You'd need to map category string to Category type
+    tags: [],
+    class_list: [],
+    video_url: undefined,
+    acf: {},
+    _links: {
+    self: [],
+    collection: [],
+    about: [],
+    author: [],
+    replies: [],
+    'version-history': [],
+    'predecessor-version': [],
+    'wp:featuredmedia': [],
+    'wp:attachment': [],
+    'wp:term': [],
+    curies: []
+  }
   };
 }

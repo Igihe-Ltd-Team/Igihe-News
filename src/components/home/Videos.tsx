@@ -1,43 +1,41 @@
-'use client'
+// 'use client'
 
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { ApiService } from '@/services/apiService'
 import HeaderDivider from '../HeaderDivider'
-import Slides from './Slides'
 import HomeVideoCard from '../videos/HomeVideoCard'
 import CustomSlider from './CustomSlider'
-import NewsSkeleton from '../NewsSkeleton'
-import { useNewsData } from '@/hooks/useNewsData'
 
-export default function Videos() {
-  const { data: videosx, isLoading, error } = useQuery({
-    queryKey: ['videos'],
-    queryFn: () => ApiService.fetchVideos({ per_page: 9 }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+export default async function Videos() {
+  // const { data: videosx, isLoading, error } = useQuery({
+  //   queryKey: ['videos'],
+  //   queryFn: () => ApiService.fetchVideos({ per_page: 9 }),
+  //   staleTime: 5 * 60 * 1000, // 5 minutes
+  // })
 
-  const {videos,videosLoading} = useNewsData()
+  // const {videos,videosLoading} = useNewsData()
 
-  // console.log('videos',JSON.stringify(videos))
+  const videos = await ApiService.fetchVideos({per_page:9})
 
-  if (videosLoading) {
-    return (
-      <>
-        <HeaderDivider title="Latest Videos" />
-        <NewsSkeleton count={3}/>
-      </>
-    )
-  }
+  // console.log('videos from server',videos)
 
-  if (error) {
-    return (
-      <>
-        {/* <HeaderDivider title="Latest Videos" />
-        <div className="text-red-500">Failed to load videos</div> */}
-      </>
-    )
-  }
+  // if (videosLoading) {
+  //   return (
+  //     <>
+  //       <HeaderDivider title="Latest Videos" />
+  //       <NewsSkeleton count={3}/>
+  //     </>
+  //   )
+  // }
+
+  // if (error) {
+  //   return (
+  //     <>
+  //       {/* <HeaderDivider title="Latest Videos" />
+  //       <div className="text-red-500">Failed to load videos</div> */}
+  //     </>
+  //   )
+  // }
 
   return (
     <div className='mb-4 mt-2'>

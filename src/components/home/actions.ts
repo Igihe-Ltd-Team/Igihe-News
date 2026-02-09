@@ -1,5 +1,5 @@
 import { ApiService } from '@/services/apiService'
-import { NewsItem } from '@/types/fetchData'
+import { NewsItem, TraficNews } from '@/types/fetchData'
 import { cache } from 'react'
 
 // Cache wrapper to deduplicate requests during SSR
@@ -19,12 +19,13 @@ export const getLatestArticles = createCachedFetch(async (): Promise<NewsItem[]>
 })
 
 // Popular Articles
-export const getPopularArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
+export const getPopularArticles = createCachedFetch(async (): Promise<TraficNews[]> => {
   try {
     const data = await ApiService.fetchMostPopularArticlesFallback({ 
       period: 'week', 
-      per_page: 5 
+      limit: 5 
     })
+    // console.log('Logedd popula data',data)
     return data || []
   } catch (error) {
     console.error('Error fetching popular articles:', error)

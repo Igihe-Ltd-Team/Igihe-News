@@ -1,55 +1,42 @@
+// import { cache } from 'react'
+// import { Suspense } from 'react'
 // import SingleNewsContent from '@/components/news/SingleNewsContent'
 // import { ViewTrackerComponent } from '@/components/ViewTracker'
 // import { stripHtml } from '@/lib/utils'
 // import { ApiService } from '@/services/apiService'
 // import { Metadata } from 'next'
-// import { notFound, redirect } from 'next/navigation'
+// import { notFound } from 'next/navigation'
 // import HydrateArticle from './HydrateArticle'
 
 // interface PageProps {
 //   params: Promise<{ post: string, category: string }>
 // }
 
-// /* ------------------------ STRIP HTML ------------------------ */
-
+// /* ------------------------ ENDPOINTS ------------------------ */
 // const endpoints: Record<string, string> = {
 //   opinion: "opinion",
 //   'rubrique-19': "opinion",
 //   advertorials: "advertorial",
 //   facts: "facts",
-// };
-// /* ------------------------ FETCH POST ------------------------ */
-// async function getPostData(slug: string, section: string) {
-//   const endpoint = endpoints[section] ?? "posts";
-//   const apiUrl = `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/${endpoint}?slug=${slug}&_embed`;
-//   const api = `${endpoint}?slug=${slug}&_embed`;
+// }
+
+// /* ------------------------ CACHED FETCH POST ------------------------ */
+// // Cache deduplicates requests during the same render cycle
+// const getPostData = cache(async (slug: string, section: string) => {
+//   const endpoint = endpoints[section] ?? "posts"
+//   const api = `${endpoint}?slug=${slug}&_embed`
 
 //   try {
 //     if (section === 'posts') {
 //       return await ApiService.fetchPostBySlug(slug)
-//     }
-//     else {
+//     } else {
 //       return await ApiService.customPostFetch(api, slug)
 //     }
-
-//     // const response = await fetch(
-//     //   apiUrl,
-//     //   {
-//     //     next: { revalidate: 60 },
-//     //     // cache: 'no-store' // Force fresh data
-//     //   }
-//     // )
-
-//     // if (!response.ok) return null
-
-//     // const posts = await response.json()
-//     // return posts && posts.length > 0 ? posts[0] : null
-
 //   } catch (error) {
 //     console.error('❌ Fetch error:', error)
 //     return null
 //   }
-// }
+// })
 
 // /* ------------------------ METADATA ------------------------ */
 // export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -62,6 +49,7 @@
 //     .join(' ')
 
 //   try {
+//     // This will use cached data from the page render
 //     const postData = await getPostData(slug, category)
 
 //     // If no post data, return simple metadata
@@ -147,7 +135,6 @@
 
 //   } catch (error) {
 //     console.error('❌ Metadata error:', error)
-//     // Return basic metadata on error (NOT "Article Not Found")
 //     return {
 //       title: `${fallbackTitle} | IGIHE`,
 //       description: 'Latest news from IGIHE Rwanda'
@@ -156,21 +143,70 @@
 // }
 
 // /* ------------------------ PAGE ------------------------ */
-
 // export default async function SingleNewsPage({ params }: PageProps) {
 //   const { post: slug, category } = await params
-//   // console.log('category',category)
 
+//   return (
+//     <Suspense key={slug} fallback={<ArticleSkeleton />}>
+//       <ArticleContent slug={slug} category={category} />
+//     </Suspense>
+//   )
+// }
+
+// /* ------------------------ ARTICLE CONTENT ------------------------ */
+// async function ArticleContent({ 
+//   slug, 
+//   category 
+// }: { 
+//   slug: string
+//   category: string 
+// }) {
+//   // This will use cached data from generateMetadata
 //   const postData = await getPostData(slug, category)
+
+//   // Handle 404 if no post found
+//   if (!postData) {
+//     notFound()
+//   }
 
 //   return (
 //     <HydrateArticle article={postData} slug={slug}>
-//       {postData && <ViewTrackerComponent postId={postData.id} />}
-//       <SingleNewsContent slug={slug} initialArticle={postData || undefined} />
+//       <ViewTrackerComponent postId={postData.id} />
+//       <SingleNewsContent slug={slug} initialArticle={postData} />
 //     </HydrateArticle>
 //   )
 // }
 
+// /* ------------------------ LOADING SKELETON ------------------------ */
+// function ArticleSkeleton() {
+//   return (
+//     <div className="max-w-4xl mx-auto px-4 py-8 animate-pulse">
+//       {/* Title skeleton */}
+//       <div className="h-10 bg-gray-200 rounded-lg w-3/4 mb-4"></div>
+//       <div className="h-10 bg-gray-200 rounded-lg w-2/3 mb-6"></div>
+      
+//       {/* Meta info skeleton */}
+//       <div className="flex gap-4 mb-6">
+//         <div className="h-4 bg-gray-200 rounded w-24"></div>
+//         <div className="h-4 bg-gray-200 rounded w-32"></div>
+//       </div>
+      
+//       {/* Image skeleton */}
+//       <div className="h-96 bg-gray-200 rounded-lg mb-6"></div>
+      
+//       {/* Content skeleton */}
+//       <div className="space-y-3">
+//         <div className="h-4 bg-gray-200 rounded w-full"></div>
+//         <div className="h-4 bg-gray-200 rounded w-full"></div>
+//         <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+//         <div className="h-4 bg-gray-200 rounded w-full"></div>
+//         <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+//         <div className="h-4 bg-gray-200 rounded w-full"></div>
+//         <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+//       </div>
+//     </div>
+//   )
+// }
 
 
 
@@ -225,15 +261,45 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 
+  const mergeTrafficOther = (
+    existingOther: Metadata['other'] | undefined,
+    contentId: string | number,
+    pageTitle: string
+  ): Record<string, string | number | Array<string | number>> => {
+    const merged: Record<string, string | number | Array<string | number>> = {}
+
+    if (existingOther) {
+      for (const [key, value] of Object.entries(existingOther as Record<string, unknown>)) {
+        if (typeof value === 'string' || typeof value === 'number') {
+          merged[key] = value
+          continue
+        }
+
+        if (Array.isArray(value) && value.every((item) => typeof item === 'string' || typeof item === 'number')) {
+          merged[key] = value as Array<string | number>
+        }
+      }
+    }
+
+    merged['traffic:property_id'] = 'igihe-en'
+    merged['traffic:content_id'] = String(contentId)
+    merged['traffic:title'] = pageTitle
+    return merged
+  }
+
   try {
     // This will use cached data from the page render
     const postData = await getPostData(slug, category)
 
     // If no post data, return simple metadata
     if (!postData) {
-      return {
+      const baseMetadata: Metadata = {
         title: `${fallbackTitle} | IGIHE`,
         description: 'Latest news from IGIHE Rwanda'
+      }
+      return {
+        ...baseMetadata,
+        other: mergeTrafficOther(baseMetadata.other, slug, fallbackTitle),
       }
     }
 
@@ -260,7 +326,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const author = postData._embedded?.author?.[0]?.name
 
     // Build clean metadata
-    return {
+    const baseMetadata: Metadata = {
       title: `${title} | IGIHE`,
       description,
 
@@ -309,12 +375,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         follow: true
       }
     }
+    return {
+      ...baseMetadata,
+      other: mergeTrafficOther(baseMetadata.other, postData.id ?? slug, title || fallbackTitle),
+    }
 
   } catch (error) {
     console.error('❌ Metadata error:', error)
-    return {
+    const baseMetadata: Metadata = {
       title: `${fallbackTitle} | IGIHE`,
       description: 'Latest news from IGIHE Rwanda'
+    }
+    return {
+      ...baseMetadata,
+      other: mergeTrafficOther(baseMetadata.other, slug, fallbackTitle),
     }
   }
 }

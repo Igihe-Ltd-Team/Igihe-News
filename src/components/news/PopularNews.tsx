@@ -1,12 +1,15 @@
-import { NewsItem } from '@/types/fetchData'
+import { NewsItem, TraficNews, transformToNewsItem } from '@/types/fetchData'
 import React from 'react'
 import HeaderDivider from '../HeaderDivider'
 import DynamicArticleCard from './DynamicArticleCard'
 
 interface PopularProps {
-  articles: NewsItem[]
+  articles: TraficNews[]
   name?: string
 }
+
+
+
 
 function PopularNews({ articles, name = "Popular News" }: PopularProps) {
   if (!articles || articles.length === 0) {
@@ -17,13 +20,16 @@ function PopularNews({ articles, name = "Popular News" }: PopularProps) {
     )
   }
 
-  const featuredArticle = articles[0]
-  const remainingArticles = articles.slice(1, 5)
+
+  const transformedArticles: NewsItem[] = articles?.map(transformToNewsItem);
+// console.log('formated trafics',transformedArticles)
+
+  const featuredArticle = transformedArticles[0]
+  const remainingArticles = transformedArticles.slice(1, 5)
 
   return (
     <section aria-labelledby="popular-news-heading">
       <HeaderDivider title={name}/>
-    
       <div>
         <DynamicArticleCard
           article={featuredArticle}

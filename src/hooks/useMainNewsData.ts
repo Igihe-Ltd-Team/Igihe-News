@@ -43,7 +43,7 @@ export function useFeaturedArticles() {
 export function usePopularArticles() {
   return useQuery({
     queryKey: queryKeys.articles.popular({ period: 'all' }),
-    queryFn: () => ApiService.fetchMostPopularArticlesFallback({ period: 'week', per_page: 5 }),
+    queryFn: () => ApiService.fetchMostPopularArticlesFallback({ period: 'week', limit: 5 }),
     staleTime: 10 * 60 * 1000,
   })
 }

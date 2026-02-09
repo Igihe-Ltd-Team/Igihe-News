@@ -2,7 +2,7 @@ import { fileCache } from '@/lib/cache/fileCache'
 import { calculateArticleCacheTTL, calculateListCacheTTL, shouldRevalidateCache } from '@/lib/cache/dynamicCache'
 
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
-import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem } from '@/types/fetchData'
+import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem, TraficNews } from '@/types/fetchData'
 
 
 // Configuration
@@ -594,12 +594,12 @@ export class ApiService {
 
   static async fetchMostPopularArticlesFallback(params?: {
     period?: 'day' | 'week' | 'month' | 'all'
-    per_page?: number
+    limit?: number
     page?: number
-  }): Promise<NewsItem[]> {
+  }): Promise<TraficNews[]> {
     const defaultParams = {
       period: 'week',
-      per_page: 5,
+      limit: 5,
       page: 1,
       ...params
     }
@@ -616,20 +616,24 @@ export class ApiService {
     )
 
     const cacheKey = `popular:fallback:${query}`
-
     return this.cachedFetchWithDynamicTTL(
       cacheKey,
       async () => {
+
         const response = await this.fetchWithTimeout(
-          `${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`
+          `https://traffic.igihe.com/api/popular.php?property_id=igihe-en&${query}`
         )
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
+
+        // console.log('Loged popula data',response.articles)
+
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`)
+        // }
 
         const posts = await response.json()
-        return Array.isArray(posts) ? posts : []
+
+        return Array.isArray(posts.articles) ? posts.articles : []
       },
       // Use newest article for TTL
       (posts) => posts.length > 0 ? posts[0].date : null
@@ -643,12 +647,12 @@ export class ApiService {
 
   static async fetchMostPopularArticles(params?: {
     period?: 'day' | 'week' | 'month' | 'all'
-    per_page?: number
+    limit?: number
     page?: number
-  }): Promise<NewsItem[]> {
+  }): Promise<TraficNews[]> {
     const defaultParams = {
       period: 'week',
-      per_page: 10,
+      limit: 10,
       page: 1,
       ...params
     }
@@ -668,7 +672,9 @@ export class ApiService {
     return this.cachedFetchWithDynamicTTL(
         cacheKey,
         async () => {
-          const response = await this.fetchWithTimeout(`${API_CONFIG.baseURL}/pvt/v1/popular-posts?${query}&_embed=1`)
+          const response = await this.fetchWithTimeout(
+            `https://traffic.igihe.com/api/popular.php?property_id=igihe-en&${query}`
+          )
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
