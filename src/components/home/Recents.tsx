@@ -279,7 +279,7 @@
 
 import React, { Suspense } from 'react'
 import HeaderDivider from '../HeaderDivider'
-import { NewsItem } from '@/types/fetchData'
+import { NewsItem, transformToNewsItem } from '@/types/fetchData'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import TimeLine from '../ReUsable/TimeLine'
 import NewsSkeleton from '../NewsSkeleton'
@@ -399,6 +399,7 @@ export default async function Recents() {
   const latestsSidebar = safeLatests?.slice(1, 6) || []
 
 
+  const transformedArticles: NewsItem[] = popular?.map(transformToNewsItem);
 
         
 
@@ -493,7 +494,7 @@ export default async function Recents() {
 
         <div className="col-xl-4 col-lg-4 mt-0">
           <Suspense fallback={<NewsSkeleton count={1}/>}>
-            <PopularNews articles={popular || []} name='Popular News' />
+            <PopularNews articles={transformedArticles || []} name='Popular News' />
           </Suspense>
           
           <div className='pt-2'>
