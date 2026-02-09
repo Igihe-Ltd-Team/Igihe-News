@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Form, ListGroup, Badge, Spinner } from 'react-bootstrap';
 import { useNewsData } from '@/hooks/useNewsData';
 import { useRouter } from 'next/navigation';
-import { NewsItem } from '@/types/fetchData';
+import { NewsItem, transformToNewsItem } from '@/types/fetchData';
 import { stripHtml } from '@/lib/utils';
 import { ThemedText } from './ThemedText';
 
@@ -20,6 +20,9 @@ export default function SearchModal() {
     searchLoading,
     popularArticles
   } = useNewsData();
+
+
+  const transformedArticles: NewsItem[] = popularArticles?.map(transformToNewsItem);
 
   // Load recent searches
   useEffect(() => {
@@ -245,14 +248,14 @@ export default function SearchModal() {
               )}
 
               {/* Trending Articles */}
-              {popularArticles.length > 0 && (
+              {transformedArticles.length > 0 && (
                 <div className="col-md-6">
                   <div className="d-flex align-items-center gap-2 mb-3">
                     <i className="bi bi-fire text-danger"></i>
                     <h6 className="mb-0 fw-bold">Populor Now</h6>
                   </div>
                   <ListGroup>
-                    {popularArticles.slice(0, 4).map((article) => (
+                    {transformedArticles.slice(0, 4).map((article) => (
 
                         <ListGroup.Item
                         key={article.id}
