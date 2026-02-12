@@ -2,10 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
+  staticPageGenerationTimeout: 600,
+  
   compress: true,
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['react-bootstrap'],
+    optimizePackageImports: ['react-bootstrap', 'react-icons'],
+    taint: true,
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
@@ -51,6 +57,9 @@ const nextConfig: NextConfig = {
     {
       source: '/(.*)',
       headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        { key: 'X-XSS-Protection', value: '1; mode=block' },
         {
           key: 'Cache-Control',
           value: 's-maxage=3600, stale-while-revalidate=86400,public, immutable, no-transform, max-age=31536000',
