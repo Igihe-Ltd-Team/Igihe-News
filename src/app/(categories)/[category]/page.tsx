@@ -461,6 +461,7 @@
 import { Category } from "@/types/fetchData";
 import CategoryPageClient from "./CategoryPageClient";
 import { notFound } from "next/navigation";
+import { fetchArticlesByCategory, fetchArticlesByTaHighlight } from "./action";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
@@ -501,10 +502,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   // 2. Parallel Fetch (Crucial for speed)
   // We fetch only the first page here. The Client component handles the rest.
+  // const [initialArticles, highlightArticles] = await Promise.all([
+  //   ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
+  //   ApiService.fetchArticles({ tags: [217], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
+  // ]);
+
+
   const [initialArticles, highlightArticles] = await Promise.all([
-    ApiService.fetchArticles({ categories: [thisCategory.id] }).catch(() => null),
-    ApiService.fetchArticles({ tags: [217], categories: [thisCategory.id], per_page: 7 }).catch(() => null)
+    fetchArticlesByCategory(thisCategory.id, 2),
+    fetchArticlesByTaHighlight(217,thisCategory.id)
   ]);
+
 
   return (
     <CategoryPageClient

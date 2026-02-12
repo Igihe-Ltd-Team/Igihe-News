@@ -1,5 +1,5 @@
 import { fileCache } from '@/lib/cache/fileCache'
-import { calculateArticleCacheTTL, calculateListCacheTTL, shouldRevalidateCache } from '@/lib/cache/dynamicCache'
+import { calculateArticleCacheTTL, calculateListCacheTTL } from '@/lib/cache/dynamicCache'
 
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions';
 import { Advertisement, articleResponse, Author, AuthorWithPosts, Category, CategoryPostsResponse, NewsItem, TraficNews } from '@/types/fetchData'
@@ -212,106 +212,276 @@ export class ApiService {
 
 
 
+  // private static async cachedFetchWithDynamicTTL<T>(
+  //   cacheKey: string,
+  //   fetchFn: () => Promise<T>,
+  //   getContentDate?: (data: T) => string | Date | null,
+  //   baseTTL: number = API_CONFIG.cacheTimeout
+  // ): Promise<T> {
+  //   const now = Date.now()
+  //   const isServer = typeof window === 'undefined'
+
+
+  //   // 1. Check memory cache
+  //   const memoryCached = requestCache.get(cacheKey)
+    
+  //   if (memoryCached) {
+  //     const data = memoryCached.data;
+
+  //     // If we have a date extractor, check if we should revalidate
+  //     if (getContentDate) {
+  //       const contentDate = getContentDate(data);
+  //       if (contentDate) {
+  //         const dynamicTTL = calculateArticleCacheTTL(contentDate);
+  //         const cacheAge = now - memoryCached.timestamp;
+
+  //         if (cacheAge < dynamicTTL) {
+  //           console.log(`✅ Memory cache HIT (age: ${(cacheAge / 1000).toFixed(0)}s, TTL: ${(dynamicTTL / 1000).toFixed(0)}s)`);
+  //           return data;
+  //         }
+  //       }
+  //     } else if ((now - memoryCached.timestamp) < baseTTL) {
+  //       return data;
+  //     }
+  //   }
+
+    
+  //   // 2. Check file cache (server-side only)
+  //   if (isServer) {
+  //     const fileCached = await fileCache.get<T>(cacheKey)
+  //     if (fileCached !== null) {
+  //       requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+  //       console.log(`✅ File cache HIT: ${cacheKey}`);
+  //       return fileCached
+  //     }
+  //     else{
+  //        console.log(`✅ File cache MISS: ${cacheKey}`);
+  //     }
+  //   }
+
+  //   // 3. Check for in-flight requests
+  //   if (pendingRequests.has(cacheKey)) {
+  //     return pendingRequests.get(cacheKey)!
+  //   }
+
+  //   // 4. Rate limiting check
+  //   rateLimit.check('api_requests', 100, 60000)
+
+  //   try {
+  //     const requestPromise = fetchFn()
+  //     pendingRequests.set(cacheKey, requestPromise)
+  //     const data = await requestPromise
+
+  //     // Calculate dynamic TTL based on content
+  //     let finalTTL = baseTTL;
+  //     if (getContentDate) {
+  //       const contentDate = getContentDate(data);
+  //       if (contentDate) {
+  //         finalTTL = calculateArticleCacheTTL(contentDate);
+  //         console.log(`📊 Dynamic TTL: ${(finalTTL / 1000 / 60).toFixed(1)} minutes for content from ${contentDate}`);
+  //       }
+  //     }
+
+  //     // Cache the successful response
+  //     requestCache.set(cacheKey, { data, timestamp: now })
+
+  //     if (isServer) {
+  //       console.log(`💾 File cache SET: ${cacheKey} (TTL: ${(finalTTL / 1000 / 60).toFixed(1)} min)`)
+  //       await fileCache.set(cacheKey, data, finalTTL)
+  //     }
+
+  //     return data
+  //   } catch (error) {
+  //     // On error, return cached data even if expired
+  //     if (memoryCached) {
+  //       console.warn('⚠️ Using stale memory cache due to API error:', error)
+  //       return memoryCached.data
+  //     }
+
+  //     if (isServer) {
+  //       const staleCacheData = await fileCache.get<T>(cacheKey)
+  //       if (staleCacheData !== null) {
+  //         console.warn('⚠️ Using stale file cache due to API error:', error)
+  //         return staleCacheData
+  //       }
+  //     }
+
+  //     throw error
+  //   } finally {
+  //     pendingRequests.delete(cacheKey)
+  //   }
+  // }
+
+
+
+
   private static async cachedFetchWithDynamicTTL<T>(
-    cacheKey: string,
-    fetchFn: () => Promise<T>,
-    getContentDate?: (data: T) => string | Date | null,
-    baseTTL: number = API_CONFIG.cacheTimeout
-  ): Promise<T> {
-    const now = Date.now()
-    const isServer = typeof window === 'undefined'
+  cacheKey: string,
+  fetchFn: () => Promise<T>,
+  getContentDate?: (data: T) => string | Date | null,
+  baseTTL: number = API_CONFIG.cacheTimeout
+): Promise<T> {
+  const now = Date.now()
+  const isServer = typeof window === 'undefined'
 
-    
+  // 1. Check memory cache
+  const memoryCached = requestCache.get(cacheKey)
+  
+  if (memoryCached) {
+    const data = memoryCached.data;
+    const cacheAge = now - memoryCached.timestamp;
 
-    // 1. Check memory cache
-    const memoryCached = requestCache.get(cacheKey)
-    
-    if (memoryCached) {
-      const data = memoryCached.data;
-
-      // If we have a date extractor, check if we should revalidate
-      if (getContentDate) {
-        const contentDate = getContentDate(data);
-        if (contentDate) {
-          const dynamicTTL = calculateArticleCacheTTL(contentDate);
-          const cacheAge = now - memoryCached.timestamp;
-
-          if (cacheAge < dynamicTTL) {
-            console.log(`✅ Memory cache HIT (age: ${(cacheAge / 1000).toFixed(0)}s, TTL: ${(dynamicTTL / 1000).toFixed(0)}s)`);
-            return data;
-          }
-        }
-      } else if ((now - memoryCached.timestamp) < baseTTL) {
-        return data;
+    // Calculate TTL
+    let dynamicTTL = baseTTL;
+    if (getContentDate) {
+      const contentDate = getContentDate(data);
+      if (contentDate) {
+        dynamicTTL = calculateArticleCacheTTL(contentDate);
       }
     }
 
-    
-    // 2. Check file cache (server-side only)
-    if (isServer) {
-      const fileCached = await fileCache.get<T>(cacheKey)
-      if (fileCached !== null) {
-        requestCache.set(cacheKey, { data: fileCached, timestamp: now })
-        console.log(`✅ File cache HIT: ${cacheKey}`);
-        return fileCached
-      }
-      else{
-         console.log(`✅ File cache MISS: ${cacheKey}`);
-      }
+    // ✅ STALE-WHILE-REVALIDATE STRATEGY
+    const STALE_TIME = dynamicTTL; // Cache is "fresh" for this long
+    const MAX_STALE_TIME = dynamicTTL * 10; // Cache is "acceptable" for 10x longer
+
+    // If cache is fresh, return immediately
+    if (cacheAge < STALE_TIME) {
+      console.log(`✅ Memory cache HIT (fresh, age: ${(cacheAge / 1000).toFixed(0)}s)`);
+      return data;
     }
 
-    // 3. Check for in-flight requests
-    if (pendingRequests.has(cacheKey)) {
-      return pendingRequests.get(cacheKey)!
+    // If cache is stale but acceptable, return it AND revalidate in background
+    if (cacheAge < MAX_STALE_TIME) {
+      console.log(`⚡ Memory cache HIT (stale, age: ${(cacheAge / 1000 / 60).toFixed(1)}m) - revalidating in background`);
+      
+      // Return stale data immediately
+      const staleData = data;
+      
+      // ✅ Revalidate in background (non-blocking)
+      // Only if no other request is already doing this
+      if (!pendingRequests.has(cacheKey)) {
+        this.revalidateInBackground(cacheKey, fetchFn, getContentDate, dynamicTTL)
+          .catch(error => {
+            console.debug('Background revalidation failed:', error);
+          });
+      }
+      
+      return staleData;
     }
 
-    // 4. Rate limiting check
-    rateLimit.check('api_requests', 100, 60000)
+    // Cache is too old, fall through to fetch fresh data
+    console.log(`⚠️ Cache too old (${(cacheAge / 1000 / 60).toFixed(1)}m), fetching fresh`);
+  }
 
-    try {
-      const requestPromise = fetchFn()
-      pendingRequests.set(cacheKey, requestPromise)
-      const data = await requestPromise
-
-      // Calculate dynamic TTL based on content
-      let finalTTL = baseTTL;
-      if (getContentDate) {
-        const contentDate = getContentDate(data);
-        if (contentDate) {
-          finalTTL = calculateArticleCacheTTL(contentDate);
-          console.log(`📊 Dynamic TTL: ${(finalTTL / 1000 / 60).toFixed(1)} minutes for content from ${contentDate}`);
-        }
+  // 2. Check file cache (server-side only)
+  if (isServer) {
+    const fileCached = await fileCache.get<T>(cacheKey)
+    if (fileCached !== null) {
+      requestCache.set(cacheKey, { data: fileCached, timestamp: now })
+      console.log(`✅ File cache HIT: ${cacheKey}`);
+      
+      // Also trigger background revalidation for file cache
+      if (!pendingRequests.has(cacheKey)) {
+        this.revalidateInBackground(cacheKey, fetchFn, getContentDate, baseTTL)
+          .catch(error => {
+            console.debug('Background revalidation failed:', error);
+          });
       }
-
-      // Cache the successful response
-      requestCache.set(cacheKey, { data, timestamp: now })
-
-      if (isServer) {
-        console.log(`💾 File cache SET: ${cacheKey} (TTL: ${(finalTTL / 1000 / 60).toFixed(1)} min)`)
-        await fileCache.set(cacheKey, data, finalTTL)
-      }
-
-      return data
-    } catch (error) {
-      // On error, return cached data even if expired
-      if (memoryCached) {
-        console.warn('⚠️ Using stale memory cache due to API error:', error)
-        return memoryCached.data
-      }
-
-      if (isServer) {
-        const staleCacheData = await fileCache.get<T>(cacheKey)
-        if (staleCacheData !== null) {
-          console.warn('⚠️ Using stale file cache due to API error:', error)
-          return staleCacheData
-        }
-      }
-
-      throw error
-    } finally {
-      pendingRequests.delete(cacheKey)
+      
+      return fileCached
     }
   }
+
+  // 3. Check for in-flight requests (deduplication)
+  if (pendingRequests.has(cacheKey)) {
+    console.log(`⏳ Request already in-flight, waiting: ${cacheKey}`);
+    return pendingRequests.get(cacheKey)!
+  }
+
+  // 4. Fetch fresh data
+  return this.fetchAndCache(cacheKey, fetchFn, getContentDate, baseTTL);
+}
+
+/**
+ * ✅ NEW: Revalidate cache in background without blocking user
+ */
+private static async revalidateInBackground<T>(
+  cacheKey: string,
+  fetchFn: () => Promise<T>,
+  getContentDate?: (data: T) => string | Date | null,
+  ttl: number = API_CONFIG.cacheTimeout
+): Promise<void> {
+  console.log(`🔄 Background revalidation started: ${cacheKey}`);
+  
+  try {
+    await this.fetchAndCache(cacheKey, fetchFn, getContentDate, ttl);
+    console.log(`✅ Background revalidation complete: ${cacheKey}`);
+  } catch (error) {
+    console.warn(`❌ Background revalidation failed: ${cacheKey}`, error);
+    // Don't throw - this is background, we already returned stale data
+  }
+}
+
+/**
+ * ✅ NEW: Fetch and cache helper (extracted for reuse)
+ */
+private static async fetchAndCache<T>(
+  cacheKey: string,
+  fetchFn: () => Promise<T>,
+  getContentDate?: (data: T) => string | Date | null,
+  baseTTL: number = API_CONFIG.cacheTimeout
+): Promise<T> {
+  const now = Date.now();
+  const isServer = typeof window === 'undefined';
+
+  // Rate limiting check
+  rateLimit.check('api_requests', 100, 60000);
+
+  try {
+    const requestPromise = fetchFn();
+    pendingRequests.set(cacheKey, requestPromise);
+    const data = await requestPromise;
+
+    // Calculate dynamic TTL based on content
+    let finalTTL = baseTTL;
+    if (getContentDate) {
+      const contentDate = getContentDate(data);
+      if (contentDate) {
+        finalTTL = calculateArticleCacheTTL(contentDate);
+        console.log(`📊 Dynamic TTL: ${(finalTTL / 1000 / 60).toFixed(1)} minutes`);
+      }
+    }
+
+    // Cache the successful response
+    requestCache.set(cacheKey, { data, timestamp: now });
+
+    if (isServer) {
+      console.log(`💾 File cache SET: ${cacheKey} (TTL: ${(finalTTL / 1000 / 60).toFixed(1)} min)`);
+      await fileCache.set(cacheKey, data, finalTTL);
+    }
+
+    return data;
+  } catch (error) {
+    // On error, try to return cached data even if expired
+    const memoryCached = requestCache.get(cacheKey);
+    if (memoryCached) {
+      console.warn('⚠️ Using stale memory cache due to API error:', error);
+      return memoryCached.data;
+    }
+
+    if (isServer) {
+      const staleCacheData = await fileCache.get<T>(cacheKey);
+      if (staleCacheData !== null) {
+        console.warn('⚠️ Using stale file cache due to API error:', error);
+        return staleCacheData;
+      }
+    }
+
+    throw error;
+  } finally {
+    pendingRequests.delete(cacheKey);
+  }
+}
 
 
 
@@ -975,6 +1145,11 @@ export class ApiService {
 
     const cacheKey = `articles:${JSON.stringify(queryParams)}`
 
+  const isFirstPage = !params?.page || params.page === 1;
+  const listTTL = calculateListCacheTTL(isFirstPage);
+
+
+
     return this.cachedFetchWithDynamicTTL(
       cacheKey,
       async () => {
@@ -1003,7 +1178,8 @@ export class ApiService {
           return response.data[0].date
         }
         return null
-      }
+      },
+      listTTL
     )
   }
 
@@ -2284,9 +2460,5 @@ export class ApiService {
       }
     )
   }
-
-
-
-
 
 }
