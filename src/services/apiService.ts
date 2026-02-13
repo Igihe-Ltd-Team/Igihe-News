@@ -1,16 +1,4 @@
-/**
- * ╔══════════════════════════════════════════════════════════════════════╗
- * ║  ApiService — Backward-compatible barrel file                       ║
- * ║                                                                      ║
- * ║  This file re-exports all service modules as static methods on a    ║
- * ║  single class so that existing code like `ApiService.fetchArticles` ║
- * ║  continues to work without changes.                                  ║
- * ║                                                                      ║
- * ║  NEW code should import directly from the individual modules:        ║
- * ║    import { fetchArticles } from '@/lib/api/articleService'          ║
- * ║    import { fetchCategories } from '@/lib/api/categoryService'       ║
- * ╚══════════════════════════════════════════════════════════════════════╝
- */
+
 
 // Re-export individual modules for tree-shakeable imports
 export * from './cacheManager'
@@ -81,18 +69,7 @@ import { ApiError } from './apiClient'
 
 export { ApiError }
 
-/**
- * @deprecated Import from individual service modules instead.
- *
- * Example:
- *   // Before
- *   import { ApiService } from '@/lib/api/apiService'
- *   const article = await ApiService.fetchPostBySlug('hello')
- *
- *   // After
- *   import { fetchPostBySlug } from '@/lib/api/articleService'
- *   const article = await fetchPostBySlug('hello')
- */
+
 export class ApiService {
   // ── Cache ────────────────────────────────────────
   static getCachedArticle = getCachedArticle
