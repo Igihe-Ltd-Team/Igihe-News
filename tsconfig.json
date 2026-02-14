@@ -30,5 +30,16 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+  "node_modules",
+  "tests",              // ← Exclude entire tests directory
+  "**/*.test.ts",       // ← Exclude all test files
+  "**/*.test.tsx",
+  "**/*.spec.ts",
+  "**/*.spec.tsx",
+  "**/*.mock.ts",       // ← Exclude all mock files
+  "**/*.mock.tsx",
+  "jest.config.js",
+  "jest.config.ts"
+]
 }
