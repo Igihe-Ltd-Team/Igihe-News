@@ -30,44 +30,9 @@ export default function AdUnit({
   const adImage = ad
   const { dimensions } = positionConfig
 
-  
- 
-  // Get the best image size based on position
-  // const getBestImageUrl = () => {
-  //   // if (!adImage?.sizes) return adImage?.url
-    
-    
-  //   console.log('this position dimensions',dimensions)
-    
-  //   if (dimensions.width <= 300 && adImage?.sizes.medium) {
-  //     return adImage?.sizes?.medium
-  //   } else if (dimensions.width <= 768 && adImage?.sizes.large) {
-  //     return adImage?.sizes.large
-  //   } else if (adImage?.sizes['1536x1536']) {
-  //     return adImage?.sizes['1536x1536']
-  //   }
-
-
-  //   if(adImage.ads_image.url)
-  //   {
-  //       setIsVisible(true)
-  //       setImageError(false)
-  //   }
-    
-  //   return adImage.ads_image.url
-  // }
-
-  // const imageUrl = getBestImageUrl()
-
-
-  console.log('this position dimensions',ad.ads_image.url)
-
 
   const rawUrl = ad.ads_image.url
   const imageUrl = rawUrl ? `${rawUrl}?v=${dimensions.height || ad.id}` : rawUrl
-
-
-  console.log('this position rows',imageUrl)
 
   if (!adImage.ads_image.url || imageError) {
     return (

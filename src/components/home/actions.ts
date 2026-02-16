@@ -187,7 +187,22 @@ export const getTopSliderArticles = createCachedFetch(async (): Promise<NewsItem
   try {
     const response = await ApiService.fetchArticles({ 
       tags: [151], 
-      per_page: 9 
+      per_page: 9,
+      page:1
+    })
+    return response.data || []
+  } catch (error) {
+    console.error('Error fetching top slider articles:', error)
+    return []
+  }
+})
+
+export const getLiveEvents = createCachedFetch(async (): Promise<NewsItem[]> => {
+  try {
+    const response = await ApiService.fetchArticles({ 
+      tags: [199], 
+      per_page: 9,
+      page:1
     })
     return response.data || []
   } catch (error) {

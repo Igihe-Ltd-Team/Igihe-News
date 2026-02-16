@@ -1,5 +1,4 @@
-"use client"
-
+import { getLiveEvents, getTopSliderArticles } from '@/components/home/actions'
 import Slides from '@/components/home/Slides'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import TimeLine from '@/components/ReUsable/TimeLine'
@@ -7,11 +6,16 @@ import { useTopSliderArticles } from '@/hooks/useMainNewsData'
 import { useNewsData } from '@/hooks/useNewsData'
 import React, { Suspense } from 'react'
 
-function TopSection() {
-    const { data: topSlider = []} = useTopSliderArticles()
-      const {
+async function TopSection() {
+
+const [
+        topSlider,
         liveEvent
-      } = useNewsData()
+      ] = await Promise.all([
+        getTopSliderArticles(),
+        getLiveEvents(),
+      ])
+
       
   return (
     <Suspense fallback={<NewsSkeleton count={3} />}>
