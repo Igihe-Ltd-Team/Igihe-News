@@ -119,7 +119,7 @@ export default function AdManager({
   const adsToShow = ads.slice(0, maxAds)
 
   return (
-    <div className={`slot-position slot-${position} ${className}`}>
+    <div className={`slot-position tag-${position} ${className}`}>
       {adsToShow.map((ad, index) => (
         <AdUnit
           key={ad.id}

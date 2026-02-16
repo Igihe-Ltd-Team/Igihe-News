@@ -16,6 +16,7 @@ interface AdManagerProps {
 async function getSlot(position:AdPositionKey) {
   try {
     const res = await ApiService.fetchAdsByPosition(position)
+
     return res
   } catch (error) {
     console.error('Error fetching categories:', error)
@@ -36,7 +37,7 @@ export default async function ServerSlotManager({
   const slots = await getSlot(position)
 const slotsToShow = slots.slice(0, maxAds)
 return(
-<div className={`slot-position slot-${position} ${className}`}>
+<div className={`slot-position tag-${position} ${className}`}>
       {slotsToShow.map((ad, index) => (
         <AdUnit
           key={ad.id}

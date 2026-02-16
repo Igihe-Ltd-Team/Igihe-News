@@ -70,7 +70,7 @@ export default function AdManagerClient({
     const adsToShow = displayAds.slice(0, maxAds)
     
     return (
-      <div className={`slot-position slot-${position} ${className}`}>
+      <div className={`slot-position tag-${position} ${className}`}>
         {adsToShow.map((ad, index) => (
           <AdUnit
             key={`${ad.id}-${index}-${isMounted ? 'client' : 'server'}`}

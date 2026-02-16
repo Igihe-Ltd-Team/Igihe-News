@@ -1,31 +1,34 @@
-"use client"
-import React, { useMemo } from 'react'
+
+import React from 'react'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import { NewsItem } from '@/types/fetchData'
 import TimeLine from '../ReUsable/TimeLine'
-import NewsSkeleton from '../NewsSkeleton'
-import AdManager from '../ads/AdManager'
-import { useResponsive } from '@/hooks/useResponsive'
+// import NewsSkeleton from '../NewsSkeleton'
+// import { useResponsive } from '@/hooks/useResponsive'
 import SingleSkeleton from '../Loading/SingleSkeleton'
-import { useFeaturedArticles } from '@/hooks/useMainNewsData'
+import { useFeaturedArticles, useMainNewsArticles } from '@/hooks/useMainNewsData'
+import { getMainHomeHighlights, getOtherHomeHighlights } from './actions'
+
+import ServerSlotManager from '../ads/ServerSlotManager'
 
 interface ArticlesProps {
     articles: NewsItem[]
 }
 
-export default function HomeMainSections() {
-    const { isMobile } = useResponsive()
-    // const { data: articles = [], isLoading:articlesLoading, error } = useFeaturedArticles()
-    const { data: mainArticle = [], isLoading:mainNewsLoading } = useFeaturedArticles()
+export default async function HomeMainSections() {
+    // const { isMobile } = useResponsive()
+    const [
+        main,
+        other,
+      ] = await Promise.all([
+        getMainHomeHighlights(),
+        getOtherHomeHighlights(),
+      ])
+    const safeArticles = Array.isArray(other) ? other : []
+    const timeLineNews = safeArticles.slice(0, 5)
+    const asideNews = safeArticles.slice(5, 7)
 
-    const safeArticles = Array.isArray(mainArticle) ? mainArticle : [];
-
-    const {  timeLineNews, asideNews } = useMemo(() => ({
-        timeLineNews: safeArticles.slice(0, 5),
-        asideNews: safeArticles.slice(5, 7)
-    }), [safeArticles])
-
-    if (!mainArticle?.length) {
+    if (!other?.length) {
         return <SingleSkeleton/>
     }
 
@@ -33,9 +36,9 @@ export default function HomeMainSections() {
         <div className="container p-2">
             <div className="row g-0">
                 <div className="col-xl-6 col-lg-12">
-                    {mainArticle && (
+                    {main && (
                         <DynamicArticleCard 
-                            article={mainArticle[0]} 
+                            article={main[0]} 
                             showImage 
                             showHeader 
                             priority
@@ -51,19 +54,23 @@ export default function HomeMainSections() {
 
                 <div className="col-xl-3 col-lg-6 col-md-6">
                     
-                    <AdManager
+                    <ServerSlotManager
                         position="home-after-highlights"
                         priority={true}
                         className="mb-2"
                     />
-                    <div style={{paddingTop:isMobile?'15px':''}}>
+                    <div style={
+                        {
+                            // paddingTop:isMobile?'15px':''
+                            }
+                            }>
                     {asideNews.map((article) => (
                         <DynamicArticleCard 
                             key={article.id || article.slug}
                             article={article}
                             bottomBorder 
                             isSlider
-                            showImage={isMobile}
+                            // showImage={isMobile}
                             imgHeight={80}
                             className='d-flex flex-row gap-3'
                         />

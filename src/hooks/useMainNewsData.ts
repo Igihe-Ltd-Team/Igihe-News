@@ -26,8 +26,8 @@ export function useMainArticle() {
 
 export function useTopSliderArticles() {
   return useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(296),
-    queryFn: () => ApiService.fetchArticles({ tags: [296], per_page: 9 }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(151),
+    queryFn: () => ApiService.fetchArticles({ tags: [151], per_page: 9 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -35,7 +35,15 @@ export function useTopSliderArticles() {
 export function useFeaturedArticles() {
   return useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [228], per_page: 8 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [80], per_page: 8 }).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useMainNewsArticles() {
+  return useQuery({
+    queryKey: queryKeys.articles.list({ featured: true }),
+    queryFn: () => ApiService.fetchArticles({ tags: [80], per_page: 8 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -50,8 +58,8 @@ export function usePopularArticles() {
 
 export function useHighlightArticles() {
   return useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(217),
-    queryFn: () => ApiService.fetchArticles({ tags: [217], per_page: 11, orderby: 'date' }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(133),
+    queryFn: () => ApiService.fetchArticles({ tags: [133], per_page: 11, orderby: 'date' }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -67,14 +75,14 @@ export function useLatestArticles() {
 export function useAfricaArticles() {
   return useQuery({
     queryKey: queryKeys.articles.africa(),
-    queryFn: () => ApiService.fetchArticles({ tags: [248], per_page: 12 }).then(r => r?.data || []),
+    queryFn: () => ApiService.fetchArticles({ tags: [99], per_page: 12 }).then(r => r?.data || []),
     staleTime: 5 * 60 * 1000,
   })
 }
 export function useInternationalArticles() {
   return useQuery({
     queryKey: queryKeys.articles.highlightTagArticles(249),
-    queryFn: () => ApiService.fetchArticles({ tags: [249], per_page: 12 }).then(r => r?.data || []),
+    queryFn: () => ApiService.fetchArticles({ tags: [101], per_page: 12 }).then(r => r?.data || []),
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -82,7 +90,7 @@ export function useInternationalArticles() {
 export function useEntertainmentArticles() {
   return useQuery({
     queryKey: queryKeys.articles.entertainment(),
-    queryFn: () => ApiService.fetchArticles({ categories: [161], per_page: 12 }).then(r => r?.data || []),
+    queryFn: () => ApiService.fetchArticles({ categories: [13], per_page: 12 }).then(r => r?.data || []),
     staleTime: 5 * 60 * 1000,
   })
 }

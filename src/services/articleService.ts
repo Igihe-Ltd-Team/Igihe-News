@@ -91,6 +91,13 @@ export async function fetchArticles(params?: {
   const isFirstPage = !params?.page || params.page === 1
   const listTTL = calculateListCacheTTL(isFirstPage)
 
+
+  
+  console.log('fetchArticles fetched',buildQuery(queryParams))
+  
+
+  
+
   return cachedRequest({
     key: cacheKey,
     fetchFn: async () => {

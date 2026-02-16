@@ -29,6 +29,11 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
       {
+        protocol: "https",
+        hostname: "en-images.igihe.com",
+        pathname: "/**",
+      },
+      {
         protocol: 'https',
         hostname: 'secure.gravatar.com',
         pathname: '/avatar/**',

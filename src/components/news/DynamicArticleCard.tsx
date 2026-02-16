@@ -54,6 +54,7 @@ function DynamicArticleCard({
   priority = false
 }: ArticleCardProps) {
 const { isMobile } = useResponsive()
+
   const featuredImage = getFeaturedImage(article,priority);
 
   // const mouseEnter = (articles:NewsItem)=>{
@@ -70,7 +71,7 @@ const { isMobile } = useResponsive()
       borderColor: '#0000001A'
     }}>
       {
-        showImage &&
+        (showImage || (!showImage && isMobile)) &&
         <a
           href={`/${getCategorySlug(article)}/article/${article.slug}`}
           className="text-decoration-none text-reset"

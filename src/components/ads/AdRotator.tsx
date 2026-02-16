@@ -45,7 +45,7 @@ export default function AdRotator({
   const currentAd = ads[currentAdIndex]
 
   return (
-    <div className={`slot-rotator slot-${position} ${className}`}>
+    <div className={`slot-rotator tag-${position} ${className}`}>
       <AdUnit 
         ad={currentAd} 
         position={position} 

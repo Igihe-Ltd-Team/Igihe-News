@@ -33,7 +33,7 @@ export function useNewsData() {
 
   const featuredArticlesQuery = useQuery({
     queryKey: queryKeys.articles.list({ featured: true }),
-    queryFn: () => ApiService.fetchArticles({ tags: [228], per_page: 8 }).then(r => r.data),
+    queryFn: () => ApiService.fetchArticles({ tags: [80], per_page: 8 }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -68,8 +68,8 @@ const liveEventArticlesQuery = useQuery({
 
 
   const highlightTagArticlesQuery = useQuery({
-    queryKey: queryKeys.articles.highlightTagArticles(217),
-    queryFn: () => ApiService.fetchArticles({ tags: [217], per_page: 11,orderby: 'date' }).then(r => r.data),
+    queryKey: queryKeys.articles.highlightTagArticles(133),
+    queryFn: () => ApiService.fetchArticles({ tags: [133], per_page: 11,orderby: 'date' }).then(r => r.data),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -92,10 +92,10 @@ const liveEventArticlesQuery = useQuery({
     staleTime: 2 * 60 * 1000,
   })
 
-  const africaArticlesQuery = useQuery({
+  const greatLakesArticlesQuery = useQuery({
     queryKey: queryKeys.articles.africa(),
     queryFn: () =>
-      ApiService.fetchArticles({ tags: [248], per_page: 12 }).then(
+      ApiService.fetchArticles({ tags: [99], per_page: 12 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
@@ -104,7 +104,7 @@ const liveEventArticlesQuery = useQuery({
   const entertainmentArticlesQuery = useQuery({
     queryKey: queryKeys.articles.entertainment(),
     queryFn: () =>
-      ApiService.fetchArticles({ categories: [161], per_page: 12 }).then(
+      ApiService.fetchArticles({ categories: [13], per_page: 12 }).then(
         r => r?.data || []
       ),
     staleTime: 5 * 60 * 1000,
@@ -435,7 +435,7 @@ const useArticleDetails = (
     trendingArticles: trendingArticlesQuery.data || [],
     highlightArticles: highlightTagArticlesQuery.data || [], // ← Home uses HighlightArticles
     latestArticles: latestArticlesQuery.data || [],
-    africaArticles: africaArticlesQuery.data || [],
+    greatLakesArticles: greatLakesArticlesQuery.data || [],
     entertainmentArticles: entertainmentArticlesQuery.data || [],
     videos: videosQuery.data || [],
     featuredAdvertorial: featuredAdvertorialQuery.data || [],
@@ -451,7 +451,7 @@ const useArticleDetails = (
     trendingArticlesLoading: trendingArticlesQuery.isLoading,
     highlightArticlesLoading: highlightTagArticlesQuery.isLoading,
     latestArticlesLoading: latestArticlesQuery.isLoading,
-    africaArticlesLoading: africaArticlesQuery.isLoading,
+    greatLakesArticlesLoading: greatLakesArticlesQuery.isLoading,
     entertainmentArticlesLoading: entertainmentArticlesQuery.isLoading,
     videosLoading: videosQuery.isLoading,
     featuredAdvertorialLoading: featuredAdvertorialQuery.isLoading,

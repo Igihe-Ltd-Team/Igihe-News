@@ -27,39 +27,49 @@ export default function AdUnit({
   const [imageError, setImageError] = useState(false)
 
   const positionConfig = AD_POSITIONS[position]
-  const adImage = ad.acf?.ads_image_source?.formatted_value
+  const adImage = ad
+  const { dimensions } = positionConfig
 
-
+  
+ 
   // Get the best image size based on position
-  const getBestImageUrl = () => {
-    if (!adImage.sizes) return adImage.url
+  // const getBestImageUrl = () => {
+  //   // if (!adImage?.sizes) return adImage?.url
     
-    const { dimensions } = positionConfig
     
-    if (dimensions.width <= 300 && adImage.sizes.medium) {
-      return adImage.sizes.medium
-    } else if (dimensions.width <= 768 && adImage.sizes.large) {
-      return adImage.sizes.large
-    } else if (adImage.sizes['1536x1536']) {
-      return adImage.sizes['1536x1536']
-    }
+  //   console.log('this position dimensions',dimensions)
+    
+  //   if (dimensions.width <= 300 && adImage?.sizes.medium) {
+  //     return adImage?.sizes?.medium
+  //   } else if (dimensions.width <= 768 && adImage?.sizes.large) {
+  //     return adImage?.sizes.large
+  //   } else if (adImage?.sizes['1536x1536']) {
+  //     return adImage?.sizes['1536x1536']
+  //   }
 
 
-    if(adImage.url)
-    {
-        setIsVisible(true)
-        setImageError(false)
-    }
+  //   if(adImage.ads_image.url)
+  //   {
+  //       setIsVisible(true)
+  //       setImageError(false)
+  //   }
     
-    return adImage.url
-  }
+  //   return adImage.ads_image.url
+  // }
 
   // const imageUrl = getBestImageUrl()
 
-  const rawUrl = getBestImageUrl()
-  const imageUrl = rawUrl ? `${rawUrl}?v=${adImage.height || ad.id}` : rawUrl
 
-  if (!isVisible || !adImage || imageError) {
+  console.log('this position dimensions',ad.ads_image.url)
+
+
+  const rawUrl = ad.ads_image.url
+  const imageUrl = rawUrl ? `${rawUrl}?v=${dimensions.height || ad.id}` : rawUrl
+
+
+  console.log('this position rows',imageUrl)
+
+  if (!adImage.ads_image.url || imageError) {
     return (
       <div 
         className={`slot-placeholder ${className}`} 
@@ -75,9 +85,9 @@ export default function AdUnit({
 
 
   return (
-    <div className={`slot-unit slot-${position} ${className}`}>
+    <div className={`slot-unit tag-${position} ${className}`}>
       <a 
-        href={ad.acf.igh_ad_url || ad.link} 
+        href={ad?.acf?.igh_ad_url || ad?.link} 
         target="_blank" 
         rel="noopener noreferrer nofollow sponsored"
         className="d-block text-decoration-none"

@@ -311,6 +311,13 @@ export interface Advertisement {
   }
   menu_order: number
   class_list: string[]
+  ads_image:{
+    id:number
+    mime_type:string
+    title:string
+    url:string
+  }
+
   acf: {
     ads_image: number
     ads_image_source: {
@@ -331,6 +338,7 @@ export interface Advertisement {
     ad_position: number[]
   }
   link: string
+  url?:string
 }
 
 export interface AdPosition {

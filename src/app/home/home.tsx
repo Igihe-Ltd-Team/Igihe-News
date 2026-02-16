@@ -16,44 +16,44 @@ import ServerSlotManager from '@/components/ads/ServerSlotManager'
 
 const upperCats = [
   {
-    id: 156,
+    id: 8,
     name: 'Business',
     slug: 'business'
   },
   {
-    id: 157,
+    id: 9,
     name: 'Science',
     slug: 'science-technology'
   },
   {
-    id: 158,
+    id: 10,
     name: 'Health',
     slug: 'health'
   },
   {
-    id: 163,
+    id: 15,
     name: 'Tourism',
     slug: 'tourism'
   }]
 
 const lowerCats = [
   {
-    id: 159,
+    id: 11,
     name: 'Sports',
     slug: 'sports'
   },
   {
-    id: 160,
+    id: 12,
     name: 'Arts & Culture',
     slug: 'arts-culture'
   },
   {
-    id: 162,
+    id: 14,
     name: 'Environment',
     slug: 'environment'
   },
   {
-    id: 167,
+    id: 19,
     name: 'Diaspora',
     slug: 'diaspora'
   }]
