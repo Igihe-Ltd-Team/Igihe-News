@@ -157,8 +157,8 @@ const SectionWithToggle = ({ title, titleBG = '#1176BB', showImgs, showDate, art
                     return(
                     <a 
                         // href={chechedfile.isImage? `/advertorial/article/${item.slug}` : chechedfile.filePath} 
-                        href={item?.file?.url ? item?.file?.url : `/advertorial/article/${item.slug}`} 
-                        target={item?.file?.url ? '_blank' : '_parent'}
+                        href={!showImgs ? item?.file?.url : `/advertorial/article/${item.slug}`} 
+                        target={!showImgs ? '_blank' : '_parent'}
                         key={item.id}
                         className={`list-group-item px-0 list-group-item-action ${index !== visiblePosts.length - 1 ? 'border-bottom' : ''}`}
                         style={{ cursor: 'pointer', backgroundColor: 'transparent' }}
