@@ -230,7 +230,7 @@ export default async function Recents() {
           </div>
           
           <div className='pt-3'>
-            <SectionWithToggle title='Announcements' articles={announcement} titleBG='#282F2F' />
+            <SectionWithToggle isFile={true} title='Announcements' articles={announcement} titleBG='#282F2F' />
           </div>
           
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
