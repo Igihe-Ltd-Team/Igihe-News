@@ -62,7 +62,7 @@ export default function AnnouncePageClient({
               {posts.map((article,index) => (
                 <a 
                                         // href={chechedfile.isImage? `/advertorial/article/${item.slug}` : chechedfile.filePath} 
-                                        href={article?.file?.url ? article?.file?.url : `/advertorial/article/${article.slug}`} 
+                                        href={article?.file?.url ? article?.file?.url : `/announcement/article/${article.slug}`} 
                                         target={article?.file?.url ? '_blank' : '_parent'}
                                         key={article.id}
                                         className={`list-group-item px-0 list-group-item-action}`}
