@@ -81,26 +81,26 @@ export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
   // Check if _embedded data exists and has featured media
   const featuredMedia = articleData._embedded?.['wp:featuredmedia']?.[0];
 
-  if (priority) {
+  // if (priority) {
     if (featuredMedia?.source_url) {
       return featuredMedia.source_url;
     }
-    else {
-      if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
-        return featuredMedia?.media_details?.sizes?.medium?.source_url;
-      }
-    }
-  }
-  else {
-    if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
-      return featuredMedia?.media_details?.sizes?.medium?.source_url;
-    }
-    else {
-      if (featuredMedia?.source_url) {
-        return featuredMedia.source_url;
-      }
-    }
-  }
+  //   else {
+  //     if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
+  //       return featuredMedia?.media_details?.sizes?.medium?.source_url;
+  //     }
+  //   }
+  // }
+  // else {
+  //   if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
+  //     return featuredMedia?.media_details?.sizes?.medium?.source_url;
+  //   }
+  //   else {
+  //     if (featuredMedia?.source_url) {
+  //       return featuredMedia.source_url;
+  //     }
+  //   }
+  // }
 
 
   // Fallback: Check if there's a featured_media ID but no embedded data
