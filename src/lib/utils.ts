@@ -1,32 +1,56 @@
 import { NewsItem } from '@/types/fetchData'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import moment from 'moment'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+// export function formatDate(dateString: string): string {
+//   const date = new Date(dateString)
+//   const now = new Date()
+//   const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
 
-  if (diffInHours < 1) {
+//   if (diffInHours < 1) {
+//     return 'Just now'
+//   } else if (diffInHours < 24) {
+//     const hours = Math.floor(diffInHours)
+//     return `${hours} hour${hours > 1 ? 's' : ''} ago`
+//   } else if (diffInHours < 168) { // 7 days
+//     const days = Math.floor(diffInHours / 24)
+//     return `${days} day${days > 1 ? 's' : ''} ago`
+//   } else {
+//     return date.toLocaleDateString('en-US', {
+//       year: 'numeric',
+//       month: 'short',
+//       day: 'numeric'
+//     })
+//   }
+// }
+
+
+export function formatDate(dateString: string): string {
+  const date = moment(dateString)
+  const diffInMinutes = moment().diff(date, 'minutes')
+  const diffInHours = moment().diff(date, 'hours')
+  const diffInDays = moment().diff(date, 'days')
+
+  if (diffInMinutes < 1) {
     return 'Just now'
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`
   } else if (diffInHours < 24) {
-    const hours = Math.floor(diffInHours)
-    return `${hours} hour${hours > 1 ? 's' : ''} ago`
-  } else if (diffInHours < 168) { // 7 days
-    const days = Math.floor(diffInHours / 24)
-    return `${days} day${days > 1 ? 's' : ''} ago`
+    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`
+  } else if (diffInDays < 7) {
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`
   } else {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return date.format('MMM D, YYYY')
   }
 }
+
+
+
 
 export function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
@@ -130,7 +154,7 @@ export function isImageMedia(featuredMedia: NewsItem, priority?: boolean): {
     if (media2?.source_url) {
       return {
         isImage: media?.type !== 'file' || false,
-        filePath: media?.formatted_value?.url || '',
+        filePath: featuredMedia?.file?.url || '',
         slug: featuredMedia?.slug || '',
         img: media2?.media_details?.sizes?.medium?.source_url || ''
       };
@@ -141,7 +165,7 @@ export function isImageMedia(featuredMedia: NewsItem, priority?: boolean): {
 
   return {
     isImage: media?.type !== 'file' || false,
-    filePath: media?.formatted_value?.url || '',
+    filePath: featuredMedia?.file?.url || '',
     slug: featuredMedia?.slug || '',
     img: media2?.source_url || ''
   };

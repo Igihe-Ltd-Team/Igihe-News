@@ -52,14 +52,10 @@ export default function AdUnit({
   return (
     <div className={`slot-unit tag-${position} ${className}`}>
       <a 
-        href={ad?.acf?.igh_ad_url || ad?.link} 
+        href={ad?.meta?.igh_ad_url || '#'} 
         target="_blank" 
         rel="noopener noreferrer nofollow sponsored"
         className="d-block text-decoration-none"
-        onClick={(e) => {
-          // Track ad clicks if needed
-        //   console.log('Ad clicked:', ad.title.rendered, ad.acf.igh_ad_url)
-        }}
       >
         <OptimizedImage
           src={imageUrl}

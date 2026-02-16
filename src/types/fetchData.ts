@@ -62,6 +62,11 @@ export interface NewsItem {
   id: number
   date: string
   date_gmt: string
+
+
+  file?:{
+    url:string
+  }
   guid: {
     rendered: string
   }
@@ -308,6 +313,9 @@ export interface Advertisement {
   slug: string
   title: {
     rendered: string
+  }
+  meta?:{
+    igh_ad_url:string
   }
   menu_order: number
   class_list: string[]

@@ -36,6 +36,9 @@ export default async function ServerSlotManager({
 }: AdManagerProps) {
   const slots = await getSlot(position)
 const slotsToShow = slots.slice(0, maxAds)
+
+// console.log('selected adds position: ',position,slotsToShow)
+
 return(
 <div className={`slot-position tag-${position} ${className}`}>
       {slotsToShow.map((ad, index) => (
