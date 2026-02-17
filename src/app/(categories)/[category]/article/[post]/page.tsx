@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     // Extract image safely
     const ogImage =
-      postData.yoast_head_json?.og_image?.[0]?.url ||
+      postData.yoast_head_json?.og_image?.[0]?.url || postData.featured_image?.url ||
       postData._embedded?.['wp:featuredmedia']?.[0]?.source_url || ''
 
     // Extract author safely
