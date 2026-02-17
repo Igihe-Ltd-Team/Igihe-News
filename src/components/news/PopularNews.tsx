@@ -18,6 +18,8 @@ function PopularNews({ articles, name = "Popular News" }: PopularProps) {
   }
 
   const featuredArticle = articles[0]
+
+  // console.log('featuredArticle',featuredArticle)
   const remainingArticles = articles.slice(1, 5)
 
   return (

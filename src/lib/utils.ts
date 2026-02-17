@@ -102,6 +102,11 @@ export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
   // console.log(articleData)
   if (!articleData) return null;
 
+  if(articleData.featured_image?.url)
+  {
+    return articleData.featured_image.url
+  }
+
   // Check if _embedded data exists and has featured media
   const featuredMedia = articleData._embedded?.['wp:featuredmedia']?.[0];
 
@@ -109,24 +114,6 @@ export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
     if (featuredMedia?.source_url) {
       return featuredMedia.source_url;
     }
-  //   else {
-  //     if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
-  //       return featuredMedia?.media_details?.sizes?.medium?.source_url;
-  //     }
-  //   }
-  // }
-  // else {
-  //   if (featuredMedia?.media_details?.sizes?.medium?.source_url) {
-  //     return featuredMedia?.media_details?.sizes?.medium?.source_url;
-  //   }
-  //   else {
-  //     if (featuredMedia?.source_url) {
-  //       return featuredMedia.source_url;
-  //     }
-  //   }
-  // }
-
-
   // Fallback: Check if there's a featured_media ID but no embedded data
   if (articleData.featured_media && !featuredMedia) {
     console.warn('Featured media ID exists but no embedded data. Consider adding _embed to API call.');
@@ -134,6 +121,9 @@ export const getFeaturedImage = (articleData: NewsItem, priority?: boolean) => {
 
   return null;
 }
+
+
+
 
 export function isImageMedia(featuredMedia: NewsItem, priority?: boolean): {
   isImage: boolean,

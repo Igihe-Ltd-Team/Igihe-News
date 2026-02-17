@@ -62,10 +62,46 @@ export interface NewsItem {
   id: number
   date: string
   date_gmt: string
+thumbnail_url?:string
+  featured_image?: {
+    id: number,
+    url: string,
+    alt: string,
+    caption: string,
+    mime_type: string,
+    width: number,
+    height: number,
+    sizes?: {
+      thumbnail: {
+        url: string,
+        width: number,
+        height: number
+      },
+      medium: {
+        url: string,
+        width: number,
+        height: number
+      },
+      medium_large: {
+        url: string,
+        width: number,
+        height: number
+      },
+      large: {
+        url: string,
+        width: number,
+        height: number
+      },
+      full: {
+        url: string,
+        width: number,
+        height: number
+      }
+    }
+  }
 
-
-  file?:{
-    url:string
+  file?: {
+    url: string
   }
   guid: {
     rendered: string
@@ -101,7 +137,7 @@ export interface NewsItem {
   categories: Category[]
   tags: Tag[]
   class_list: string[]
-  video_url?:string,
+  video_url?: string,
   acf: {
     igh_yt_video_url?: string;
     igh_yt_video_url_source?: {
@@ -274,7 +310,7 @@ export interface NewsItemWithSEO extends NewsItem {
 
 
 export interface Author {
-  id?: number
+  id: number
   name?: string
   url?: string
   description?: string
@@ -314,16 +350,16 @@ export interface Advertisement {
   title: {
     rendered: string
   }
-  meta?:{
-    igh_ad_url:string
+  meta?: {
+    igh_ad_url: string
   }
   menu_order: number
   class_list: string[]
-  ads_image:{
-    id:number
-    mime_type:string
-    title:string
-    url:string
+  ads_image: {
+    id: number
+    mime_type: string
+    title: string
+    url: string
   }
 
   acf: {
@@ -346,7 +382,7 @@ export interface Advertisement {
     ad_position: number[]
   }
   link: string
-  url?:string
+  url?: string
 }
 
 export interface AdPosition {
@@ -376,7 +412,7 @@ export interface Comment {
 
 export function transformToNewsItem(apiItem: TraficNews): NewsItem {
   const now = new Date().toISOString();
-  
+
   return {
     id: parseInt(apiItem.content_id),
     date: now,
@@ -384,6 +420,17 @@ export function transformToNewsItem(apiItem: TraficNews): NewsItem {
     guid: {
       rendered: apiItem.url
     },
+
+    featured_image: {
+      id: 0,
+    alt: '',
+    caption: '',
+    mime_type: '',
+    width: 0,
+    height: 0,
+    url: apiItem.thumbnail_url|| '',
+    },
+    
     modified: now,
     modified_gmt: now,
     slug: apiItem.url.split('/').filter(Boolean).pop() || '',
@@ -418,17 +465,17 @@ export function transformToNewsItem(apiItem: TraficNews): NewsItem {
     video_url: undefined,
     acf: {},
     _links: {
-    self: [],
-    collection: [],
-    about: [],
-    author: [],
-    replies: [],
-    'version-history': [],
-    'predecessor-version': [],
-    'wp:featuredmedia': [],
-    'wp:attachment': [],
-    'wp:term': [],
-    curies: []
-  }
+      self: [],
+      collection: [],
+      about: [],
+      author: [],
+      replies: [],
+      'version-history': [],
+      'predecessor-version': [],
+      'wp:featuredmedia': [],
+      'wp:attachment': [],
+      'wp:term': [],
+      curies: []
+    }
   };
 }

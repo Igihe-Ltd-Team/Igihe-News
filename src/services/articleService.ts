@@ -68,6 +68,7 @@ export async function fetchArticles(params?: {
   after?: string
   before?: string
   author?: number
+  user?: number
   tags?: number[]
 }): Promise<articleResponse<NewsItem>> {
   const queryParams: Record<string, any> = {
@@ -86,6 +87,7 @@ export async function fetchArticles(params?: {
   if (params?.after) queryParams.after = params.after
   if (params?.before) queryParams.before = params.before
   if (params?.author) queryParams.author = params.author
+  if (params?.user) queryParams.user = params.user
 
   const cacheKey = `articles:${JSON.stringify(queryParams)}`
   const isFirstPage = !params?.page || params.page === 1
@@ -93,7 +95,7 @@ export async function fetchArticles(params?: {
 
 
   
-  console.log('fetchArticles fetched',buildQuery(queryParams))
+  // console.log('fetchArticles fetched',`${API_CONFIG.baseURL}/posts?${buildQuery(queryParams)}`)
   
 
   

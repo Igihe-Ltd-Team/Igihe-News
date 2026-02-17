@@ -9,46 +9,54 @@ import SocialMedias from '@/components/ReUsable/SocialMedias'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useAuthorData } from '@/hooks/useAuthorData'
 import { Author, NewsItem } from '@/types/fetchData'
-import AdManager from '../ads/AdManager'
-import { useEffect, useState } from 'react'
+
+import {  useState, useTransition } from 'react'
+import AdManager from '@/components/ads/AdManager'
+import { fetchArticlesAuthor } from './action'
 
 interface AuthorPageProps {
-    author: string
+    author: Author
+    initialPosts: NewsItem[]
+    authorID: number
+    initialPageInfo: {
+        currentPage: number;
+        lastPage: number;
+        total: number;
+    };
 }
 
 
 
-export default function AuthorContent({ author: slug }: AuthorPageProps) {
-    const { usePostsByAuthorSlug } = useAuthorData()
-    const [showLoadMore, setShowLoadMore] = useState(false);
-    const {
-        isFetchingNextPage,
-        fetchNextPage,
-        hasNextPage,
-        isLoading,
-        isError,
-        error,
-        data,
-    } = usePostsByAuthorSlug(slug)
-    useEffect(() => {
-        if (!isLoading && hasNextPage) {
-            setShowLoadMore(true);
-        }
-    }, [isLoading, hasNextPage]);
+export default function AuthorClientPage({ author, initialPosts, initialPageInfo, authorID }: AuthorPageProps) {
+    const [posts, setPosts] = useState(initialPosts);
+    const [pageInfo, setPageInfo] = useState(initialPageInfo);
+    const [isPending, startTransition] = useTransition();
 
-    const author = data?.pages?.[0].author || {}
-    const articles = data?.pages.flatMap((page) => page.data) || [];
+    const loadMore = () => {
+        if (!author) return null
 
+        if (pageInfo.currentPage >= pageInfo.lastPage) return;
 
+        const nextPage = pageInfo.currentPage + 1;
 
-    const handleLoadMore = () => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
+        startTransition(async () => {
+
+            const result = await fetchArticlesAuthor(authorID, nextPage);
+            if (result?.data) {
+                setPosts(prevPosts => [...prevPosts, ...result.data]);
+                setPageInfo({
+                    currentPage: result.pagination.currentPage,
+                    lastPage: result.pagination.totalPages,
+                    total: result.pagination.totalPosts || 0
+                });
+            }
+
+        });
     };
 
+    const canLoadMore = pageInfo.currentPage < pageInfo.lastPage;
 
-    if (isLoading) return <NewsSkeleton />
+    // if (isPending) return <NewsSkeleton />
 
     return (
 
@@ -58,9 +66,9 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
                 <Col lg={9}>
                     <HeaderDivider title={`Latest from ${author.name}`} />
 
-                    {articles.length > 0 ? (
+                    {posts.length > 0 ? (
                         <>
-                            {articles.map((article) => (
+                            {posts.map((article) => (
                                 <DynamicArticleCard
                                     key={article.id || article.slug}
                                     article={article}
@@ -72,24 +80,12 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
                                     priority={false}
                                 />
                             ))}
-
-                            {/* Load More / Pagination */}
-                            {/* {totalPages > 1 && (
-                                <LoadMoreArticles
-                                    authorSlug={author.slug}
-                                    currentPage={1}
-                                    totalPages={totalPages}
-                                />
-                            )} */}
-
-
-
-                            {showLoadMore && hasNextPage && (
+                            {canLoadMore && (
                                 <div className="text-center mb-8">
                                     <Button
                                         variant="outline-light"
-                                        onClick={handleLoadMore}
-                                        disabled={isFetchingNextPage}
+                                        onClick={loadMore}
+                                        disabled={isPending}
                                         size="lg"
                                         className="px-8 py-2"
                                         style={{
@@ -97,7 +93,7 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
                                             color: "#1176BB",
                                         }}
                                     >
-                                        {isFetchingNextPage ? (
+                                        {isPending ? (
                                             <>
                                                 <span
                                                     className="spinner-border spinner-border-sm me-2"
@@ -112,7 +108,6 @@ export default function AuthorContent({ author: slug }: AuthorPageProps) {
                                     </Button>
                                 </div>
                             )}
-
                         </>
                     ) : (
                         <div className="text-center py-8">
