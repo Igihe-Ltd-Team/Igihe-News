@@ -176,7 +176,7 @@ function DynamicArticleCard({
                     ${hoverEffect ? 'hover-text' : ''}
                   `}
                 >
-                  {stripHtml(article.title.rendered)}
+                  {article.title.rendered}
                 </ThemedText>
                 {
                   numbers &&
@@ -191,7 +191,7 @@ function DynamicArticleCard({
                 showExpt &&
                 <div className='pt-3'>
                   <ThemedText type='small' className='line-clamp-3'>
-                    {stripHtml(article.excerpt?.rendered ?? '')}
+                    {article.excerpt?.rendered ?? ''}
                   </ThemedText>
                 </div>
               }

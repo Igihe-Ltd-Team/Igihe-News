@@ -96,21 +96,29 @@ export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   className?: string;
 };
 
-const parseCustomMarkup = (content: string): string => {
-  if (!content) return '';
 
-  return content
-    .replace(/&#8217;/g, "'")
-    .replace(/&#8216;/g, "'")
-    .replace(/&#8220;/g, '"')
-    .replace(/&#8221;/g, '"')
-    .replace(/&#8211;/g, '–')
-    .replace(/&#8212;/g, '—')
-    .replace(/&#038;/g, '&')
-    .replace(/&amp;/g, '&')
+const parseCustomMarkup = (content: string) => {
+    if (!content) return '';
+
+    return content
+        // Convert [text->url] to <a href="url">text</a>
+        .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        // Convert {{text}} to <strong>text</strong>
+        .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>')
+        .replace(/&#8217;/g, "'")
+    .replace(/&#8216;/g, "'")   // opening single quote
+    .replace(/&#8220;/g, '"')   // opening double quote
+    .replace(/&#8221;/g, '"')   // closing double quote
+    .replace(/&#8211;/g, '–')   // en dash
+    .replace(/&#8212;/g, '—')   // em dash
+    .replace(/&#038;/g, '&')    // ampersand
+    .replace(/&amp;/g, '&')     // ampersand (named)
+    // Convert [text->url] to <a>
     .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    // Convert {{text}} to <strong>
     .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>');
 };
+
 
 export function ThemedText({
   style,
