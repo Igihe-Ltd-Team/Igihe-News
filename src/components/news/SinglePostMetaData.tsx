@@ -69,7 +69,7 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
 
 
                         </span>
-                        <ThemedText type='small' className='gray-color'>3 Comments</ThemedText>
+                        {/* <ThemedText type='small' className='gray-color'>3 Comments</ThemedText> */}
                     </div>
 
 

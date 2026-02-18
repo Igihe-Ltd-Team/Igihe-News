@@ -40,6 +40,30 @@ interface SingleNewsContentProps {
     initialArticle?: NewsItem
 }
 
+
+const parseCustomMarkup = (content: string) => {
+    if (!content) return '';
+
+    return content
+        // Convert [text->url] to <a href="url">text</a>
+        .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        // Convert {{text}} to <strong>text</strong>
+        .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>')
+        .replace(/&#8217;/g, "'")
+    .replace(/&#8216;/g, "'")   // opening single quote
+    .replace(/&#8220;/g, '"')   // opening double quote
+    .replace(/&#8221;/g, '"')   // closing double quote
+    .replace(/&#8211;/g, '–')   // en dash
+    .replace(/&#8212;/g, '—')   // em dash
+    .replace(/&#038;/g, '&')    // ampersand
+    .replace(/&amp;/g, '&')     // ampersand (named)
+    // Convert [text->url] to <a>
+    .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    // Convert {{text}} to <strong>
+    .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>');
+};
+
+
 export default function SingleNewsContent({ slug, initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
     const [isClient, setIsClient] = useState(false)
@@ -49,14 +73,14 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     useEffect(() => {
         setIsClient(true)
     }, [])
-    
+
     const {
         article: post,
         relatedPosts,
         articleLoading,
         refetchArticle,
         relatedPostsLoading
-    } = useArticleDetails(slug, 
+    } = useArticleDetails(slug,
         {
             initialData: initialArticle,
             enabled: isClient
@@ -96,6 +120,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const authorImage = article._embedded?.author?.[0]?.avatar_urls?.['96'];
     const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/${articleCategory?.toLowerCase()}/article/${article.slug}` : '';
     const tags = getTags(article)
+    
 
     return (
         <Container>
@@ -161,13 +186,20 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     </div>
                                 }
                                 <div
-                                    className={`post-content font-visby`}
-                                    style={{
-                                        overflow: 'hidden',
-                                        width: '100%'
+                                    className="post-content font-visby"
+                                    style={{ overflow: 'hidden', width: '100%' }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(
+                                            parseCustomMarkup(article?.content?.rendered || ''),
+                                            {
+                                                ADD_TAGS: ['iframe'],
+                                                ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'allow', 'loading']
+                                            }
+                                        )
                                     }}
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article?.content?.rendered || '') }}
                                 />
+
+
                                 {/* <div className='d-flex gap-2'>
                                     {
                                         tags.map(tag =>
@@ -250,12 +282,12 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                         </div>
 
 
-{article && (
-        <CommentsSection 
-          articleId={article.id}
-          articleTitle={stripHtml(article.title.rendered)}
-        />
-      )}
+                        {article && (
+                            <CommentsSection
+                                articleId={article.id}
+                                articleTitle={stripHtml(article.title.rendered)}
+                            />
+                        )}
 
                     </Col>
                     <Col md="3" className='position-relative'>

@@ -4,6 +4,8 @@ import HeaderClient from './HeaderClient'
 import { ApiService } from '@/services/apiService'
 // import AdManager from '../ads/AdManager'
 import ServerSlotManager from '../ads/ServerSlotManager'
+import HeaderClientx from './HeaderClientx'
+import DeskHeader from './DeskHeader'
 
 // Fetch categories on the server
 async function getCategories() {
@@ -52,7 +54,8 @@ export default async function Header() {
     .filter(Boolean)
 
   return (
-    <div className='site-header'>
+    <DeskHeader categories={categories}>
+      <div className='site-header'>
       <div className="overlay"></div>
       <div className="container z-1 position-relative">
         {/* Desktop Ads - Server Side */}
@@ -74,8 +77,8 @@ export default async function Header() {
         </div>
 
         {/* Client-side interactive header */}
-        <HeaderClient 
-          categories={orderedCategories} 
+        <HeaderClient
+          categories={orderedCategories}
           logoSection={
             <a href="/">
               <span className='site-logo'>
@@ -90,7 +93,7 @@ export default async function Header() {
             </a>
           }
           desktopAdSection={
-            <Col md={7}>
+            <Col md={7} key={Math.random()}>
               <ServerSlotManager
                 position="ad1_leaderboard_728x90"
                 priority={true}
@@ -100,6 +103,33 @@ export default async function Header() {
           }
         />
       </div>
+
+      <HeaderClientx
+        categories={orderedCategories}
+        logoSection={
+          <a href="/">
+            <span className='site-logo'>
+              <Image
+                width={240}
+                src={'/assets/newlogo.png'}
+                height={100}
+                className='object-fit-contain'
+                alt={'IGEHE Logo'}
+              />
+            </span>
+          </a>
+        }
+        desktopAdSection={
+          <Col md={7}>
+            <ServerSlotManager
+              position="ad1_leaderboard_728x90"
+              priority={true}
+              imgClass="object-position-right"
+            />
+          </Col>
+        }
+      />
     </div>
+    </DeskHeader>
   )
 }

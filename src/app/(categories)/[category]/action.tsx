@@ -2,10 +2,12 @@
 
 import { ApiService } from "@/services/apiService";
 
-export async function fetchArticlesByCategory(category: number, page: number) {
+export async function fetchArticlesByCategory(category: number, page: number,per_page?:number,offset?:number) {
   return await ApiService.fetchArticles({ 
     categories: [category],
-    page 
+    page,
+    per_page,
+    offset
   }).catch(() => null);
 }
 

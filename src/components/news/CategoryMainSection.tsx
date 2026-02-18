@@ -14,10 +14,9 @@ export default function CategoryMainSection({ articles }: ArticlesProps) {
 
     const safeArticles = Array.isArray(articles) ? articles : [];
     
-        const { mainArticle, timeLineNews, asideNews } = useMemo(() => ({
+        const { mainArticle, timeLineNews } = useMemo(() => ({
             mainArticle: safeArticles?.[0],
-            timeLineNews: safeArticles.slice(1, 5),
-            asideNews: safeArticles.slice(5, 7)
+            timeLineNews: safeArticles.slice(1, 7)
         }), [safeArticles])
 
 

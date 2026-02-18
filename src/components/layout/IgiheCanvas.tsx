@@ -25,17 +25,17 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
 
     return (
         <div className="justify-content-center">
-            <Button variant={btnVariant} onClick={handleShow}>
+            <Button className='custom-menu-button' variant={btnVariant} onClick={handleShow}>
                 <span className="navbar-toggler-icon">
                     <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#282F2F" />
-                        <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#282F2F" />
-                        <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#282F2F" />
+                        <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#fff" />
+                        <path d="M21.603 14H4.24302C3.68394 14 3.23071 14.3682 3.23071 14.8225V14.9275C3.23071 15.3818 3.68394 15.75 4.24302 15.75H21.603C22.1621 15.75 22.6153 15.3818 22.6153 14.9275V14.8225C22.6153 14.3682 22.1621 14 21.603 14Z" fill="#fff" />
+                        <path d="M21.603 5.25H4.24302C3.68394 5.25 3.23071 5.61825 3.23071 6.0725V6.1775C3.23071 6.63175 3.68394 7 4.24302 7H21.603C22.1621 7 22.6153 6.63175 22.6153 6.1775V6.0725C22.6153 5.61825 22.1621 5.25 21.603 5.25Z" fill="#fff" />
                     </svg>
                 </span>
             </Button>
 
-            <Offcanvas show={show} onHide={handleClose} placement={'start'}>
+            <Offcanvas show={show} onHide={handleClose} placement={'end'}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title className='d-flex justify-content-center py-4' style={{ flex: 1 }}>
                         <span className='site-logo'>
@@ -137,7 +137,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
                                             </defs>
                                         </svg>
                                     </span>
-                                    <ThemedText>Features</ThemedText>
+                                    <ThemedText lightColor={'#282F2F'} darkColor='#fff'>Features</ThemedText>
                                 </a>
                             </li>
 

@@ -142,15 +142,14 @@ html.dark .site-header{
   transform: translateX(0);
 }
 /* Navigation link hover effect */
-.igihe-nav-menu .nav-hover-effect, .service-item .nav-hover-effect{
+.igihe-nav-menu .nav-hover-effect, .service-item .nav-hover-effect, .divider-separator .nav-hover-effect{
   opacity: 0;
   margin-left: 0;
-  /* initial gap */
   transition:
     margin-right 0.3s ease,
     opacity 0.3s ease;
 }
-.service-item .nav-hover-effect{
+.service-item .nav-hover-effect, .divider-separator .nav-hover-effect{
   align-items: center;
 }
 .service-item:hover span{
@@ -172,7 +171,82 @@ html.dark .site-header{
   opacity: 1;
   margin-right: 5px;
 }
+.divider-separator:hover .nav-hover-effect {
+  opacity: 1;
+  margin-left: 5px;
+}
 
+.post-content figcaption,
+.post-content .wp-element-caption,
+.post-content .wp-caption-text{
+font-size: 0.813rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+
+/* Figures / images */
+.post-content figure {
+  margin: 1.5rem 0;
+}
+
+.post-content figure img {
+  width: 100%;
+  height: auto;
+  /* border-radius: 8px; */
+}
+
+/* Iframe embeds (YouTube, Twitter, etc.) */
+.post-content iframe {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+/* WordPress embed wrapper */
+.post-content .wp-block-embed {
+  margin: 1.5rem 0;
+}
+
+.post-content .wp-block-embed__wrapper {
+   position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  background-color: #0f0f0f; /* dark background while loading */
+  border-radius: 8px;
+}
+.post-content .wp-block-embed__wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  z-index: 0;
+}
+
+
+.post-content .wp-block-embed__wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* sits above the shimmer */
+}
+
+.dynamic-card-item:hover .hover-text{
+  color:#1176BB
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 
 
@@ -235,9 +309,11 @@ html.dark .site-header{
   text-transform: capitalize;
   margin-left: 0 !important;
   flex-shrink: 0;
-  margin: 0 20px;
+  /* margin: 0 10px; */
   max-width: 95%;
 }
+
+
 
 .divider-separator:after {
   border-block-end: 0;
@@ -246,6 +322,7 @@ html.dark .site-header{
   display: block;
   flex-grow: 1;
   direction: ltr;
+  margin-left: 20px;
 }
 
 
@@ -1117,12 +1194,18 @@ body {
 
 
 
-
-
+.mobile-header{
+  background-color: #0076bf;
+}
+.dropdown-toggle,.custom-menu-button{
+  background-color: transparent!important;
+  border: 0!important;
+}
 
 /* search */
 .blur {
-    filter: blur(3px);
+    /* filter: blur(3px); */
+    filter: grayscale(100%);
     transition: all 0.6s ease;
   }
 .slider-section {

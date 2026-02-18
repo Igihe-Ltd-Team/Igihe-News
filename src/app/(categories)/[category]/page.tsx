@@ -43,8 +43,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
 
   const [initialArticles, highlightArticles] = await Promise.all([
-    fetchArticlesByCategory(thisCategory.id, 1),
-    fetchArticlesByTaHighlight(69,thisCategory.id)
+    fetchArticlesByCategory(thisCategory.id, 1,20,7),
+    fetchArticlesByCategory(thisCategory.id, 1,7),
+    // fetchArticlesByTaHighlight(69,thisCategory.id)
   ]);
 
 

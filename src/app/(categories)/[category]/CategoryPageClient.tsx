@@ -88,7 +88,7 @@ export default function CategoryPageClient({
         <Row>
           {/* Articles Column */}
           <Col md={8}>
-            <HeaderDivider title={`Latest ${categoryInfo.name} News`} />
+            <HeaderDivider title={`Other ${categoryInfo.name} News`} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {posts.map((article) => (
@@ -97,6 +97,7 @@ export default function CategoryPageClient({
                   article={article}
                   showImage
                   showExpt
+                  hoverEffect
                   imgHeight={160}
                   className="d-flex flex-row gap-3"
                 />
