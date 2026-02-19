@@ -31,7 +31,7 @@ export function normalizeRawImage(item: RawImageItem): LightboxImage {
 
 export interface LightboxProps {
   isOpen: boolean;
-  images: (string | RawImageObject)[];
+  images: LightboxImage[];
   startIndex: number;
   onClose: () => void;
 }
