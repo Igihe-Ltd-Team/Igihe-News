@@ -57,12 +57,22 @@ export interface TraficNews {
   views: number;
 }
 
+export interface Byline{
+        id: number,
+        name: string,
+        slug: string,
+        description: string,
+        image: string,
+        user_id: number
+      }
+
 // types/fetchData.ts
 export interface NewsItem {
   id: number
   date: string
   date_gmt: string
-thumbnail_url?:string
+  thumbnail_url?: string
+  bylines?:Byline[]
   featured_image?: {
     id: number,
     url: string,
@@ -423,14 +433,13 @@ export function transformToNewsItem(apiItem: TraficNews): NewsItem {
 
     featured_image: {
       id: 0,
-    alt: '',
-    caption: '',
-    mime_type: '',
-    width: 0,
-    height: 0,
-    url: apiItem.thumbnail_url|| '',
+      alt: '',
+      caption: '',
+      mime_type: '',
+      width: 0,
+      height: 0,
+      url: apiItem.thumbnail_url || '',
     },
-    
     modified: now,
     modified_gmt: now,
     slug: apiItem.url.split('/').filter(Boolean).pop() || '',

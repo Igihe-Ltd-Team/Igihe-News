@@ -8,14 +8,14 @@ import LoadMoreArticles from '@/components/author/LoadMoreArticles'
 import SocialMedias from '@/components/ReUsable/SocialMedias'
 import NewsSkeleton from '@/components/NewsSkeleton'
 import { useAuthorData } from '@/hooks/useAuthorData'
-import { Author, NewsItem } from '@/types/fetchData'
+import { Author, Byline, NewsItem } from '@/types/fetchData'
 
 import {  useState, useTransition } from 'react'
 import AdManager from '@/components/ads/AdManager'
 import { fetchArticlesAuthor } from './action'
 
 interface AuthorPageProps {
-    author: Author
+    author: Byline
     initialPosts: NewsItem[]
     authorID: number
     initialPageInfo: {

@@ -2,9 +2,9 @@
 import React from 'react'
 import { ThemedText } from '../ThemedText'
 import { OptimizedImage } from '../ui/OptimizedImage'
-import { Author } from '@/types/fetchData'
+import { Author, Byline } from '@/types/fetchData'
 export default function SinglePostMetaData({ author, authorName, authorImage, publishDate, category,categorySlug }:
-    { author?: Author, authorName: string, authorImage: string, publishDate?: string, category: string | undefined,categorySlug?:string }) {
+    { author?: Byline[], authorName: string, authorImage: string, publishDate?: string, category: string | undefined,categorySlug?:string }) {
 
     return (
         <div className="article-meta-data has-gray-border d-flex align-items-center justify-content-between mt-4 pt-4">
@@ -15,10 +15,10 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
 
                 <div className="meta-wrapper d-flex align-items-center gap-2 flex-wrap">
 
-                    <a href={`/author/${author?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
+                    <a href={`/author/${author?.[0]?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
                         <OptimizedImage // Author Image
                             src={authorImage || '/assets/user-avatar.png'}
-                            alt={authorName || 'Author'}
+                            alt={authorName || 'IGIHE'}
                             width={32}
                             height={32}
                             className="rounded-circle"

@@ -32,7 +32,7 @@ function SocialMedias() {
                 </div>
 
                 <div className="col-md-6">
-                    <a target='_blank' href="#" className="social-card">
+                    <a target='_blank' href="https://whatsapp.com/channel/0029VaESIcN5a249FL5Clf12" className="social-card">
                         <i className="bi bi-whatsapp whatsapp social-icon"></i>
                         <span className="social-name">WhatsApp</span>
                     </a>

@@ -1,9 +1,9 @@
-import { Author } from '@/types/fetchData'
+import { Author, Byline } from '@/types/fetchData'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ThemedText } from '../ThemedText'
 
 interface AuthorBioProps {
-    author: Author
+    author: Byline
 }
 
 export default function AuthorBio({ author }: AuthorBioProps) {
@@ -14,9 +14,9 @@ export default function AuthorBio({ author }: AuthorBioProps) {
                     <div className="card-body p-4">
                         <div className="row align-items-center">
                             <div className="col-md-2 text-center mb-3 mb-md-0">
-                                {author.avatar_urls && (
+                                {author.image && (
                                     <OptimizedImage
-                                        src={author.avatar_urls['96']}
+                                        src={author.image}
                                         alt={author.name || ''}
                                         width={100}
                                         height={150}

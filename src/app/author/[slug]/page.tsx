@@ -20,6 +20,7 @@ export default async function AuthorsPage({ params }: AuthorPageProps) {
     const { slug } = await params
 
     const author = await getAuthor(slug)
+
     if (author?.author)
         return <AuthorClientPage
         authorID={author.author.id}

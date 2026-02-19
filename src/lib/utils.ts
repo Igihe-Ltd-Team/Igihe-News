@@ -2,6 +2,7 @@ import { NewsItem } from '@/types/fetchData'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import moment from 'moment'
+import { RawImageObject } from '@/components/lightbox/Lightbox.types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -260,6 +261,53 @@ export const getYouTubeVideoId = (url: string) => {
   const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const match = url.match(regex);
   return match ? match[1] : null;
+};
+
+
+
+
+
+export const extractImagesFromHtml = (html: string): (string | RawImageObject)[] => {
+  if (!html) return [];
+
+  const images: (string | RawImageObject)[] = [];
+
+  // Match figure blocks with images and figcaptions
+  const figureRegex =
+    /<figure[^>]*>[\s\S]*?<img[^>]+src="([^">]+)"[^>]*(?:alt="([^"]*)")?[^>]*>[\s\S]*?(?:<figcaption[^>]*>[\s\S]*?<\/figcaption>)?[\s\S]*?<\/figure>/g;
+  let figureMatch;
+
+  while ((figureMatch = figureRegex.exec(html)) !== null) {
+    const url = figureMatch[1];
+    const alt = figureMatch[2] || "";
+
+    // Extract caption text if present
+    const captionMatch = figureMatch[0].match(
+      /<figcaption[^>]*>([\s\S]*?)<\/figcaption>/,
+    );
+    const caption = captionMatch
+      ? captionMatch[1].replace(/<[^>]*>/g, "").trim()
+      : "";
+
+    images.push({ url, alt, caption });
+  }
+
+  // Also match standalone img tags not in figures
+  const standaloneImgRegex =
+    /<img[^>]+src="([^">]+)"[^>]*(?:alt="([^"]*)")?[^>]*>/g;
+  const figureImgUrls = new Set(images.map((img) => img));
+  let imgMatch;
+
+  while ((imgMatch = standaloneImgRegex.exec(html)) !== null) {
+    const url = imgMatch[1];
+    // Skip if already captured in a figure
+    if (!figureImgUrls.has(url)) {
+      const alt = imgMatch[2] || "";
+      images.push({ url, alt });
+    }
+  }
+
+  return images;
 };
 
 

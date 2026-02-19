@@ -1,37 +1,24 @@
-"use client"
+import VideosClientPage from "./VideosClientPage";
 
-import React from 'react'
-import HeaderDivider from '@/components/HeaderDivider'
-import { useNewsData } from '@/hooks/useNewsData'
-import VideoCard from '@/components/videos/VideoCard'
-import { getFeaturedImage, getYouTubeVideoId, stripHtml } from '@/lib/utils'
-import { Container } from 'react-bootstrap'
-export default function Page() {
-  const { videos, videosLoading } = useNewsData()
+interface OpinionPageProps {
+  params: Promise<{ tag: string }>;
+}
+
+export default async function OpinionPage({ params }: OpinionPageProps) {
+  const { ApiService } = await import("@/services/apiService");
+  
+  const initialArticles = await ApiService.fetchOtherPosts({ 
+    postType:'igh-yt-videos',
+    page: 1 
+  }).catch(() => null);
+
   return (
-    <Container className='igihe-videos py-4'>
-      <HeaderDivider title="Latest Videos" />
-      <div className="video-container d-grid pt-4">
-        {
-          videosLoading ? (
-            <p>Loading...</p>
-          ) : videos && videos.length > 0 ? (
-            videos.map((video: any) => (
-              <VideoCard
-                key={video.id}
-                thumbNail={getFeaturedImage(video) || '/default-thumb.jpg'}
-                title={stripHtml(video?.title?.rendered )|| 'Untitled Video'}
-                slug={video?.slug || 'youtube-video'}
-                videoId={getYouTubeVideoId(video?.acf?.igh_yt_video_url)}
-              />
-              
-            ))
-          ) : (
-            <p>No videos available.</p>
-          )
-        }
-        
-      </div>
-    </Container>
-  )
+    <VideosClientPage
+      initialPosts={initialArticles?.data || []}
+      initialPageInfo={{
+        currentPage: initialArticles?.pagination?.currentPage || 1,
+        lastPage: initialArticles?.pagination?.totalPages || 1,
+        total: initialArticles?.pagination?.totalPosts || 0
+      }}/>
+  );
 }

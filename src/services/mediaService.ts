@@ -1,5 +1,5 @@
 import { AdPositionKey, getAdsByPosition } from '@/lib/adPositions'
-import { Advertisement, Author, NewsItem } from '@/types/fetchData'
+import { Advertisement, Author, Byline, NewsItem } from '@/types/fetchData'
 import { API_CONFIG, fetchWithTimeout, buildQuery } from './apiClient'
 import { cachedRequest } from './cacheManager'
 import { fetchArticles } from './articleService'
@@ -170,15 +170,15 @@ export async function fetchAdsByPositions(
 
 // ─── Authors ─────────────────────────────────────────────────────────────────
 
-export async function fetchAuthorBySlug(slug: string): Promise<Author | null> {
-  const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/users?slug=${slug}&_embed`)
+export async function fetchAuthorBySlug(slug: string): Promise<Byline | null> {
+  const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/byline?slug=${slug}&_embed`)
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
   const authors = await response.json()
   return authors[0] || null
 }
 
 export async function fetchAuthorById(id: number): Promise<Author | null> {
-  const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/users/${id}?_embed`)
+  const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/bylines/${id}?_embed`)
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
   return (await response.json()) || null
 }
@@ -241,7 +241,7 @@ export async function fetchAllAuthors(params?: {
     if (params?.orderby) qp.append('orderby', params.orderby)
     if (params?.order) qp.append('order', params.order)
 
-    const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/users?${qp}`)
+    const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/byline?${qp}`)
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     return (await response.json()) || []
   } catch {

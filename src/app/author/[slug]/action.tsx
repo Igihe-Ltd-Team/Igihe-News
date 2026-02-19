@@ -5,7 +5,8 @@ import { ApiService } from "@/services/apiService";
 export async function fetchArticlesAuthor(author: number, page: number) {
     console.log('author', author)
     return await ApiService.fetchArticles({
-        author: author,
+        // author: author,
+        bylines:author,
         page
     }).catch(() => null);
 }
@@ -14,11 +15,11 @@ export async function getAuthor(slug: string, page: number = 1) {
     try {
         const author = await ApiService.fetchAuthorBySlug(slug)
 
-        // console.log('author author author author author',author)
         if (!author) return null   // ★ fix 2: null check before accessing .id
 
         const posts = await ApiService.fetchArticles({
-            user: author.id,
+            // user: author.id,
+            bylines:author.id,
             page,
             per_page:10
         })

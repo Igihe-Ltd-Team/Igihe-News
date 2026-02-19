@@ -5,7 +5,7 @@
 import { EnhancedErrorMessage } from '../ui/EnhancedErrorMessage'
 import { Col, Container, Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
-import { formatDateTime, getCategoryName, getCategorySlug, getFeaturedImage, getTags, stripHtml } from '@/lib/utils'
+import { extractImagesFromHtml, formatDateTime, getCategoryName, getCategorySlug, getFeaturedImage, getTags, injectGalleryImages, stripHtml } from '@/lib/utils'
 import CardAdds from '../ReUsable/CardAdds'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import SocialMedias from '../ReUsable/SocialMedias'
@@ -33,6 +33,8 @@ import SideBar from '../ReUsable/SideBar'
 import AdManager from '../ads/AdManager'
 import CommentsSection from './CommentsSection'
 import { useEffect, useState } from 'react'
+import Lightbox from '../lightbox/LightBox'
+import { usePostContentLightbox } from '../lightbox/Uselightbox'
 
 
 interface SingleNewsContentProps {
@@ -50,17 +52,17 @@ const parseCustomMarkup = (content: string) => {
         // Convert {{text}} to <strong>text</strong>
         .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>')
         .replace(/&#8217;/g, "'")
-    .replace(/&#8216;/g, "'")   // opening single quote
-    .replace(/&#8220;/g, '"')   // opening double quote
-    .replace(/&#8221;/g, '"')   // closing double quote
-    .replace(/&#8211;/g, '–')   // en dash
-    .replace(/&#8212;/g, '—')   // em dash
-    .replace(/&#038;/g, '&')    // ampersand
-    .replace(/&amp;/g, '&')     // ampersand (named)
-    // Convert [text->url] to <a>
-    .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    // Convert {{text}} to <strong>
-    .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>');
+        .replace(/&#8216;/g, "'")   // opening single quote
+        .replace(/&#8220;/g, '"')   // opening double quote
+        .replace(/&#8221;/g, '"')   // closing double quote
+        .replace(/&#8211;/g, '–')   // en dash
+        .replace(/&#8212;/g, '—')   // em dash
+        .replace(/&#038;/g, '&')    // ampersand
+        .replace(/&amp;/g, '&')     // ampersand (named)
+        // Convert [text->url] to <a>
+        .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        // Convert {{text}} to <strong>
+        .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>');
 };
 
 
@@ -115,12 +117,16 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const articleCategory = article ? getCategoryName(article) : undefined;
     const articleCategorySlug = article ? getCategorySlug(article) : undefined;
     const publishDate = article ? formatDateTime(article.date) : '';
-    const author = article._embedded?.author?.[0];
-    const authorsName = article._embedded?.author?.[0]?.name || '';
-    const authorImage = article._embedded?.author?.[0]?.avatar_urls?.['96'];
+    const author = article.bylines;
+    const authorsName = article.bylines?.[0]?.name || '';
+    const authorImage = article.bylines?.[0]?.image;
     const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/${articleCategory?.toLowerCase()}/article/${article.slug}` : '';
     const tags = getTags(article)
-    
+
+    const imgs = extractImagesFromHtml(article?.content?.rendered || "")
+    // console.log('post imgs', imgs)
+
+    const { containerRef, lightboxProps } = usePostContentLightbox(imgs);
 
     return (
         <Container>
@@ -186,6 +192,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     </div>
                                 }
                                 <div
+                                    ref={containerRef}
                                     className="post-content font-visby"
                                     style={{ overflow: 'hidden', width: '100%' }}
                                     dangerouslySetInnerHTML={{
@@ -198,7 +205,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                         )
                                     }}
                                 />
-
+                                <Lightbox {...lightboxProps} />
 
                                 {/* <div className='d-flex gap-2'>
                                     {
