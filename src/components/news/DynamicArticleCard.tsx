@@ -170,9 +170,8 @@ function DynamicArticleCard({
             >
               <div className='d-flex'>
                 <ThemedText type={showExpt ? showHeader ? titleStyle : 'defaultSemiBold' : titleStyle}
-                  // className={isSlider ? 'line-clamp-2':'line-clamp-3 ' hoverEffect?'hover-text':''}
                   className={`
-                    ${isSlider ? 'line-clamp-2' : 'line-clamp-3'}
+                    ${isSlider ? 'line-clamp-2' : ''}
                     ${hoverEffect ? 'hover-text' : ''}
                   `}
                 >

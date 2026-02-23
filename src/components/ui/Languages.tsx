@@ -6,7 +6,7 @@ function Languages() {
     return (
         <ul className="language-list d-flex align-items-center gap-4 list-unstyled m-0">
             <li className='d-flex align-items-center gap-2'>
-                <a href="#" className='text-decoration-none text-reset g-2'>
+                <a href="https://igihe.com" target='_blank' className='text-decoration-none text-reset g-2'>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M16.875 3.125H3.125C1.05406 3.125 0 4.66406 0 6.5625V10H20V6.5625C20 4.66406 18.9459 3.125 16.875 3.125Z" fill="#27AAE1" />
                         <path d="M0 13.4375C0 15.3359 1.05406 16.875 3.125 16.875H16.875C18.9459 16.875 20 15.3359 20 13.4375V13.125H0V13.4375Z" fill="#128807" />
@@ -156,7 +156,7 @@ function Languages() {
             </li>
 
             <li className='d-flex align-items-center gap-2'>
-                <a href="#" className='text-decoration-none text-reset gap-2'>
+                <a href="https://fr.igihe.com" target='_blank' className='text-decoration-none text-reset gap-2'>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clipPath="url(#clip0_2928_1159)">
                             <path d="M20 15C20 15.5894 19.7659 16.1546 19.3491 16.5713C18.9324 16.9881 18.3672 17.2222 17.7778 17.2222H13.3333V2.77778H17.7778C18.3672 2.77778 18.9324 3.0119 19.3491 3.42865C19.7659 3.8454 20 4.41063 20 5V15Z" fill="#ED2939" />

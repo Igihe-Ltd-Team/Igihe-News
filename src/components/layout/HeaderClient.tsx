@@ -37,7 +37,7 @@ export default function HeaderClient({
       </div>
 
       {/* Logo and banner */}
-      <div className="row flex align-items-center py-2 justify-content-between">
+      <div className="row flex align-items-center py-2 justify-content-between header-row-cotainer">
         <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
           {logoSection}
           

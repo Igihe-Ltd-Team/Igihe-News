@@ -66,13 +66,23 @@ body {
 }
 /* Site Header styles */
 .site-header {
-  background-image: url('/assets/headerBG.webp');
+  background-image: url('/assets/newIgiheBG.webp');
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
   z-index: 1;
   /* min-height: 301.4px */
+}
+
+
+.site-logo-wrapper,.header-row-cotainer{
+      z-index: 1;
+    background-image: url('/assets/cloudsBG.webp');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    position: relative;
 }
 
 html.dark .site-header{
