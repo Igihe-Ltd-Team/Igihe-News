@@ -43,10 +43,6 @@ const slotsToShow = slots.slice(0, maxAds)
 
 
 
-console.log('adds by position',position,slotsToShow[0])
-console.log('adds by position',position,slotsToShow[0]?.ads_image.url)
-
-
 return(
 <div className={`slot-position tag-${position} ${className}`}>
       {slotsToShow.map((ad, index) => (

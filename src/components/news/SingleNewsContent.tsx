@@ -124,7 +124,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const tags = getTags(article)
 
     const imgs = extractImagesFromHtml(article?.content?.rendered || "")
-    // console.log('post imgs', imgs)
+   
 
     const { containerRef, lightboxProps } = usePostContentLightbox(imgs);
 

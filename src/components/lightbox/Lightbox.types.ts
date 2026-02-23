@@ -4,6 +4,7 @@ import type { RefObject, CSSProperties } from 'react';
 export interface LightboxImage {
   src: string;
   alt?: string;
+  caption?:string
 }
 
 /**
@@ -26,6 +27,7 @@ export function normalizeRawImage(item: RawImageItem): LightboxImage {
   return {
     src: item.url ?? item.src ?? '',
     alt: item.alt ?? item.caption ?? '',
+    caption: item.caption ?? '',
   };
 }
 

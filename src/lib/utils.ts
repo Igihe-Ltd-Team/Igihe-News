@@ -295,7 +295,8 @@ export const extractImagesFromHtml = (html: string): (string | RawImageObject)[]
   // Also match standalone img tags not in figures
   const standaloneImgRegex =
     /<img[^>]+src="([^">]+)"[^>]*(?:alt="([^"]*)")?[^>]*>/g;
-  const figureImgUrls = new Set(images.map((img) => img));
+  // const figureImgUrls = new Set(images.map((img) => img));
+  const figureImgUrls = new Set(images.map((img) => (img as RawImageObject).url));
   let imgMatch;
 
   while ((imgMatch = standaloneImgRegex.exec(html)) !== null) {

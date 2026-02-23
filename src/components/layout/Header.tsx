@@ -60,8 +60,6 @@ export default async function Header() {
       <div className="overlay-sky"></div>
       <div className="overlay-sky-right"></div>
 
-      
-
       <div className="container z-1 position-relative hero-bg">
         {/* Desktop Ads - Server Side */}
         <div className="d-none d-md-block">
