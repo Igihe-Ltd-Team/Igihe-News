@@ -17,6 +17,8 @@ async function getSlot(position:AdPositionKey) {
   try {
     const res = await ApiService.fetchAdsByPosition(position)
 
+    // console.log('adds by position',position,res)
+
     return res
   } catch (error) {
     console.error('Error fetching categories:', error)
@@ -38,6 +40,12 @@ export default async function ServerSlotManager({
 const slotsToShow = slots.slice(0, maxAds)
 
 // console.log('selected adds position: ',position,slotsToShow)
+
+
+
+console.log('adds by position',position,slotsToShow[0])
+console.log('adds by position',position,slotsToShow[0]?.ads_image.url)
+
 
 return(
 <div className={`slot-position tag-${position} ${className}`}>

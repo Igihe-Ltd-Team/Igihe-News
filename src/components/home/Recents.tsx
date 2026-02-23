@@ -193,7 +193,7 @@ export default async function Recents() {
           <Row>
             <Col>
               <ServerSlotManager
-                position="premium_leaderboard_1"
+                position="bellow-videos"
                 priority={true}
                 className="mb-2"
               />

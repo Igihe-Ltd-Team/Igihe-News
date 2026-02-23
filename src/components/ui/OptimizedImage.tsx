@@ -58,7 +58,10 @@ useEffect(() => {
   }
 
   // Fallback image
-  const imageSrc = hasError ? '/images/placeholder.jpg' : src
+  // console.log('Image Error',hasError)
+  // console.log('Image src Error',src)
+
+  const imageSrc = hasError ? '/assets/igiheIcon.png' : src
 const containerHeight = Math.max(Number(height), 100) + 'px'
 
 
@@ -120,7 +123,6 @@ if (!isMounted) {
         onError={handleError}
         placeholder="blur"
         blurDataURL="/assets/igiheIcon.png"
-        // blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
         style={{
           opacity: isLoading ? 0 : 1,
           transition: 'opacity 0.3s ease-in-out',

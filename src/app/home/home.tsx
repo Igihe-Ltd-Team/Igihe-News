@@ -72,7 +72,7 @@ export function Home() {
         <HomeMainSections />
       </Suspense>
 
-
+      
       <Suspense fallback={null}>
         <Container>
           <CustomSlider
@@ -82,13 +82,13 @@ export function Home() {
           >
             <Suspense fallback={null}>
             <ServerSlotManager
-              position="home-bellow-hights"
+              position="above-latest-news-1"
               priority={true}
             />
             </Suspense>
             <Suspense fallback={null}>
             <ServerSlotManager
-              position="home-bellow-hights-2"
+              position="above-latest-news-2"
               priority={true}
             />
             </Suspense>
@@ -108,16 +108,14 @@ export function Home() {
           >
             <Suspense fallback={null}>
             <ServerSlotManager
-              position="premium_leaderboard_1"
+              position="top-of-categories-1"
               priority={true}
-              className="mb-2"
             />
             </Suspense>
             <Suspense fallback={null}>
             <ServerSlotManager
-              position="header-landscape-ad-2"
+              position="top-of-categories-2"
               priority={true}
-              className="mb-2"
             />
             </Suspense>
           </CustomSlider>
@@ -134,14 +132,14 @@ export function Home() {
             smDisplay={1}
           ><Suspense fallback={null}>
             <ServerSlotManager
-              position="premium_leaderboard_1"
+              position="inside-of-categories-1"
               priority={true}
               className="mb-2"
             />
             </Suspense>
             <Suspense fallback={null}>
             <ServerSlotManager
-              position="header-landscape-ad-2"
+              position="inside-of-categories-2"
               priority={true}
               className="mb-2"
             />

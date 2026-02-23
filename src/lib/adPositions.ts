@@ -8,6 +8,52 @@ export const AD_POSITIONS = {
     dimensions: { width: 728, height: 96 },
     priority: 1
   },
+  'bellow-videos': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
+  'top-of-categories-1': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
+
+  'above-latest-news-1': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
+  'above-latest-news-2': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
+
+  
+
+  'top-of-categories-2': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
+  'inside-of-categories-1': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
+  'inside-of-categories-2': {
+    name: 'Header Landscape Ad 1',
+    description: 'Primary header banner',
+    dimensions: { width: 728, height: 96 },
+    priority: 1
+  },
 
   'ad1_leaderboard_728x90': {
     name: 'Header Landscape Ad 2',

@@ -34,6 +34,7 @@ export default function AdUnit({
   const rawUrl = ad.ads_image.url
   const imageUrl = rawUrl ? `${rawUrl}?v=${dimensions.height || ad.id}` : rawUrl
 
+
   if (!adImage.ads_image.url || imageError) {
     return (
       <div 

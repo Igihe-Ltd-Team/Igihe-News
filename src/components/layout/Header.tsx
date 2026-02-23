@@ -57,7 +57,12 @@ export default async function Header() {
     <DeskHeader categories={categories}>
       <div className='site-header'>
       <div className="overlay"></div>
-      <div className="container z-1 position-relative">
+      <div className="overlay-sky"></div>
+      <div className="overlay-sky-right"></div>
+
+      
+
+      <div className="container z-1 position-relative hero-bg">
         {/* Desktop Ads - Server Side */}
         <div className="d-none d-md-block">
           <Row>

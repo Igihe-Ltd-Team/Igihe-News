@@ -71,12 +71,12 @@ export default function CategoryPageClient({
           smDisplay={1}
         >
           <AdManager
-            position="premium_leaderboard_1"
+            position="above-latest-news-1"
             priority={true}
             className="mb-md-2"
           />
           <AdManager
-            position="header-landscape-ad-2"
+            position="above-latest-news-2"
             priority={true}
             className="mb-md-2"
           />

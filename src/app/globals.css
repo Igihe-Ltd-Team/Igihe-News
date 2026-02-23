@@ -75,14 +75,40 @@ body {
   /* min-height: 301.4px */
 }
 
-
-.site-logo-wrapper,.header-row-cotainer{
-      z-index: 1;
-    background-image: url('/assets/cloudsBG.webp');
-    background-position: 16%;
+.header-row-cotainer{
+    z-index: 1;
+    background-image: url('/assets/bigSky.webp');
+    background-position: 0% 35%;
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: 36%;
     position: relative;
+}
+
+.overlay-sky{
+  background-image: url(/assets/sideSky.webp);
+    background-position: -54% 10%;
+    background-repeat: no-repeat;
+    background-size: 46%;
+    position: absolute;
+    z-index: 0;
+    height: 100%;
+    top: 0;
+    border: 0;
+    left: 0;
+    right: 0;
+}
+.overlay-sky-right{
+  background-image: url(/assets/sideSky.webp);
+    background-position: 104% 57%;
+    background-repeat: no-repeat;
+    background-size: 46%;
+    position: absolute;
+    z-index: 0;
+    height: 100%;
+    top: 0;
+    border: 0;
+    left: 0;
+    right: 0;
 }
 
 

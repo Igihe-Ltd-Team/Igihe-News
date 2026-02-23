@@ -105,7 +105,7 @@ export async function fetchMedia(mediaId: number): Promise<any> {
 
 // ─── Advertisements ──────────────────────────────────────────────────────────
 
-const ADS_CACHE_TTL = 60 * 60 * 1000 // 1 hour
+const ADS_CACHE_TTL = 5 * 60 * 1000 // 1 hour
 let adsCache: Advertisement[] | null = null
 let adsCacheTimestamp = 0
 let adsFetchInProgress: Promise<Advertisement[]> | null = null
