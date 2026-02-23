@@ -79,11 +79,12 @@ body {
 .site-logo-wrapper,.header-row-cotainer{
       z-index: 1;
     background-image: url('/assets/cloudsBG.webp');
-    background-position: center;
+    background-position: 16%;
     background-repeat: no-repeat;
     background-size: contain;
     position: relative;
 }
+
 
 html.dark .site-header{
   background-image: url('/assets/darkBg.webp');
