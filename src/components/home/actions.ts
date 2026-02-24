@@ -21,8 +21,16 @@ export const getLatestArticles = createCachedFetch(async (): Promise<NewsItem[]>
 
 export const getMainHomeHighlights = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 1,tags:[70] })
-    return response.data || []
+    const response = await ApiService.fetchArticles({ per_page: 1, tags: [70] })
+    if (response.data.length > 0)
+      return response.data || []
+    else {
+      const response = await ApiService.fetchArticles({ per_page: 1, tags: [69] })
+      if (response.data.length > 0)
+        return response.data || []
+      else
+        return []
+    }
   } catch (error) {
     console.error('Error fetching latest articles:', error)
     return []
@@ -31,7 +39,7 @@ export const getMainHomeHighlights = createCachedFetch(async (): Promise<NewsIte
 
 export const getOtherHomeHighlights = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 7,tags:[69] })
+    const response = await ApiService.fetchArticles({ per_page: 7, tags: [69] })
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
@@ -42,7 +50,7 @@ export const getOtherHomeHighlights = createCachedFetch(async (): Promise<NewsIt
 
 export const getMainFeatured = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 1,tags:[133] })
+    const response = await ApiService.fetchArticles({ per_page: 1, tags: [133] })
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
@@ -51,7 +59,7 @@ export const getMainFeatured = createCachedFetch(async (): Promise<NewsItem[]> =
 })
 export const getOtherFeatured = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 11,tags:[72] })
+    const response = await ApiService.fetchArticles({ per_page: 11, tags: [72] })
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
@@ -63,9 +71,9 @@ export const getOtherFeatured = createCachedFetch(async (): Promise<NewsItem[]> 
 // Popular Articles
 export const getPopularArticles = createCachedFetch(async (): Promise<TraficNews[]> => {
   try {
-    const data = await ApiService.fetchMostPopularArticlesFallback({ 
-      period: 'week', 
-      limit: 5 
+    const data = await ApiService.fetchMostPopularArticlesFallback({
+      period: 'week',
+      limit: 5
     })
     // console.log('Logedd popula data',data)
     return data || []
@@ -78,10 +86,10 @@ export const getPopularArticles = createCachedFetch(async (): Promise<TraficNews
 // Highlight Articles
 export const getHighlightArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [133], 
-      per_page: 11, 
-      orderby: 'date' 
+    const response = await ApiService.fetchArticles({
+      tags: [133],
+      per_page: 11,
+      orderby: 'date'
     })
     return response.data || []
   } catch (error) {
@@ -93,9 +101,9 @@ export const getHighlightArticles = createCachedFetch(async (): Promise<NewsItem
 // Africa/Great Lakes Region Articles
 export const getGreatLakesArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [99], 
-      per_page: 12 
+    const response = await ApiService.fetchArticles({
+      tags: [99],
+      per_page: 12
     })
     return response.data || []
   } catch (error) {
@@ -107,9 +115,9 @@ export const getGreatLakesArticles = createCachedFetch(async (): Promise<NewsIte
 // International Articles
 export const getInternationalArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [101], 
-      per_page: 12 
+    const response = await ApiService.fetchArticles({
+      tags: [101],
+      per_page: 12
     })
     return response.data || []
   } catch (error) {
@@ -121,9 +129,9 @@ export const getInternationalArticles = createCachedFetch(async (): Promise<News
 // Entertainment Articles
 export const getEntertainmentArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      categories: [13], 
-      per_page: 12 
+    const response = await ApiService.fetchArticles({
+      categories: [13],
+      per_page: 12
     })
     return response.data || []
   } catch (error) {
@@ -157,9 +165,9 @@ export const getFeaturedAnnouncement = createCachedFetch(async (): Promise<NewsI
 // Live Event Articles
 export const getLiveEventArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [199], 
-      per_page: 1 
+    const response = await ApiService.fetchArticles({
+      tags: [199],
+      per_page: 1
     })
     return response.data || []
   } catch (error) {
@@ -171,9 +179,9 @@ export const getLiveEventArticles = createCachedFetch(async (): Promise<NewsItem
 // Main Article
 export const getMainArticle = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [197], 
-      per_page: 1 
+    const response = await ApiService.fetchArticles({
+      tags: [197],
+      per_page: 1
     })
     return response.data || []
   } catch (error) {
@@ -185,10 +193,10 @@ export const getMainArticle = createCachedFetch(async (): Promise<NewsItem[]> =>
 // Top Slider Articles
 export const getTopSliderArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [151], 
+    const response = await ApiService.fetchArticles({
+      tags: [151],
       per_page: 9,
-      page:1
+      page: 1
     })
     return response.data || []
   } catch (error) {
@@ -199,10 +207,10 @@ export const getTopSliderArticles = createCachedFetch(async (): Promise<NewsItem
 
 export const getLiveEvents = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [199], 
+    const response = await ApiService.fetchArticles({
+      tags: [199],
       per_page: 9,
-      page:1
+      page: 1
     })
     return response.data || []
   } catch (error) {
@@ -214,9 +222,9 @@ export const getLiveEvents = createCachedFetch(async (): Promise<NewsItem[]> => 
 // Featured Articles
 export const getFeaturedArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
-      tags: [80], 
-      per_page: 8 
+    const response = await ApiService.fetchArticles({
+      tags: [80],
+      per_page: 8
     })
     return response.data || []
   } catch (error) {
