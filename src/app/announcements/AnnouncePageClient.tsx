@@ -77,7 +77,7 @@ export default function AnnouncePageClient({
                                                         <small style={{ color: '#999' }}>
                                                             <ThemedText className="me-3" type='small'>
                                                                 {
-                                                                    formatDate(article.date)
+                                                                    formatDate(article?.date)
                                                                 }
                                                             </ThemedText>
                                                             <ThemedText type='small'>

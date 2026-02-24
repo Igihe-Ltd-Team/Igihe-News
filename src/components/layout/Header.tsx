@@ -83,7 +83,7 @@ export default async function Header() {
         <HeaderClient
           categories={orderedCategories}
           logoSection={
-            <a href="/">
+            <a href="/" key={'10987654'}>
               <span className='site-logo'>
                 <Image
                   width={240}
@@ -110,7 +110,7 @@ export default async function Header() {
       <HeaderClientx
         categories={orderedCategories}
         logoSection={
-          <a href="/">
+          <a href="/"  key={'1098765jd4'}>
             <span className='site-logo'>
               <Image
                 width={240}

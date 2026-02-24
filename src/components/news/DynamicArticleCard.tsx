@@ -5,8 +5,6 @@ import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { formatDate, getCategoryName, getCategorySlug, getFeaturedImage, stripHtml } from '@/lib/utils'
 import { NewsItem } from '@/types/fetchData'
 import { ThemedText } from '../ThemedText'
-import { useNewsData } from '@/hooks/useNewsData'
-import { ApiService } from '@/services/apiService'
 import { useResponsive } from '@/hooks/useResponsive'
 
 interface ArticleCardProps {
@@ -73,20 +71,21 @@ function DynamicArticleCard({
       borderColor: '#0000001A'
     }}>
       {
-        (showImage || (!showImage && isMobile)) &&
+        (showImage || isMobile) &&
         <a
-          href={`/${getCategorySlug(article)}/article/${article.slug}`}
+          href={article?.slug? `/${getCategorySlug(article)}/article/${article?.slug}`:'#'}
           className="text-decoration-none text-reset"
           style={
             isSlider ? { width: '20%' } : { flex: 1 }
           }
-          aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
+          aria-label={`Read full article: ${stripHtml(article?.title?.rendered)}`}
         >
           <OptimizedImage
             src={featuredImage || '/assets/igiheIcon.png'}
-            alt={article.title.rendered}
+            alt={article?.title?.rendered}
             fill
-            height={isMobile ? imgHeight : mobileImgHeight ? mobileImgHeight : imgHeight}
+            // height={isMobile ? imgHeight : mobileImgHeight ? mobileImgHeight : imgHeight}
+            height={isMobile ? mobileImgHeight ?? imgHeight : imgHeight}
             imgClass="object-fit-cover"
             className={bordered ? "" : 'mb-2'}
           />
@@ -118,7 +117,7 @@ function DynamicArticleCard({
               <small className='d-flex' style={{ color: '#999' }}>
                 <ThemedText className="me-3" type='small'>
                   {
-                    formatDate(article.date)
+                    formatDate(article?.date)
                   }
                 </ThemedText>
                 {
@@ -163,9 +162,9 @@ function DynamicArticleCard({
 
             <a
               // prefetch={false}
-              href={`/${getCategorySlug(article)}/article/${article.slug}`}
+              href={article?.slug? `/${getCategorySlug(article)}/article/${article?.slug}`:'#'}
               className="text-decoration-none text-reset"
-              aria-label={`Read full article: ${stripHtml(article.title.rendered)}`}
+              aria-label={`Read full article: ${stripHtml(article?.title?.rendered)}`}
             // onMouseEnter={() => mouseEnter(article)}
             >
               <div className='d-flex'>
@@ -175,7 +174,7 @@ function DynamicArticleCard({
                     ${hoverEffect ? 'hover-text' : ''}
                   `}
                 >
-                  {article.title.rendered}
+                  {article?.title?.rendered}
                 </ThemedText>
                 {
                   numbers &&

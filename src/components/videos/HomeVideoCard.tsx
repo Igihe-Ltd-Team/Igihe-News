@@ -14,7 +14,7 @@ export default function HomeVideoCard({ article }: VideoProps) {
       <div className="video-thumbnail" style={{flex:1}}>
         <OptimizedImage
           src={getFeaturedImage(article) || '/assets/igiheIcon.png'}
-          alt={article.title.rendered}
+          alt={article?.title?.rendered}
           fill
           height={200}
           imgClass="object-fit-cover" />
