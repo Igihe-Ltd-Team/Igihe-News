@@ -90,7 +90,7 @@ export async function fetchArticles(params?: {
   if (params?.before) queryParams.before = params.before
   if (params?.author) queryParams.author = params.author
   if (params?.user) queryParams.user = params.user
-  if (params?.bylines) queryParams.bylines = params.bylines
+  if (params?.bylines) queryParams.byline = params.bylines
   if (params?.offset) queryParams.offset = params.offset
   
 

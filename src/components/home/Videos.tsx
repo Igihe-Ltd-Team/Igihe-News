@@ -39,7 +39,7 @@ export default async function Videos() {
 
   return (
     <div className='mb-4 mt-2'>
-      <HeaderDivider title="Latest Videos" />
+      <HeaderDivider title="Latest Videos" slug={'videos'} />
       <CustomSlider showControll lgDisplay={3} mdDisplay={2} smDisplay={1}>
         {
           videos?.map(video => <HomeVideoCard key={video.id} article={video}/>)

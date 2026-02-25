@@ -15,7 +15,7 @@ export async function getAuthor(slug: string, page: number = 1) {
     try {
         const author = await ApiService.fetchAuthorBySlug(slug)
 
-        if (!author) return null   // ★ fix 2: null check before accessing .id
+        if (!author) return null 
 
         const posts = await ApiService.fetchArticles({
             // user: author.id,

@@ -35,7 +35,7 @@ export default function Opinios() {
 
   return (
     <div className='mb-4 mt-2'>
-      <HeaderDivider title="Opinions" />
+      <HeaderDivider title="Opinions" slug={'opinion'}/>
       <div className='g-2'>
         { 
             data?.data?.map(opinion => <OpionCard key={opinion.id} article={opinion}/>)

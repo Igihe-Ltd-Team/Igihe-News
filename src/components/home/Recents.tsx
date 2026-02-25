@@ -31,9 +31,10 @@ interface NewsSectionProps {
   title: string
   articles?: NewsItem[]
   isMobile: boolean
+  slug?:string
 }
 
-async function NewsSection({ title, articles, isMobile }: NewsSectionProps) {
+async function NewsSection({ title, articles, isMobile,slug }: NewsSectionProps) {
   const safeArticles = Array.isArray(articles) ? articles : []
   const mainArticle = safeArticles?.[0]
   const subArticles = safeArticles?.slice(1, 3) || []
@@ -43,7 +44,7 @@ async function NewsSection({ title, articles, isMobile }: NewsSectionProps) {
 
   return (
     <div className="col-xl-12 col-lg-12 col-md-12">
-      <HeaderDivider title={title} />
+      <HeaderDivider title={title} slug={slug} />
       <div className="row g-3">
         <div className="col-xl-6 col-lg-6 col-md-6">
           {mainArticle && (
@@ -130,7 +131,7 @@ export default async function Recents() {
     <div className="container p-2">
       <div className="row g-4">
         <div className="col-xl-8 col-lg-12 mt-0">
-          <HeaderDivider title="Latest news" />
+          <HeaderDivider title="Latest news" slug={'articles'}/>
           <div className="row g-3">
             <div className="col-xl-4 col-lg-6 col-md-6">
               <div className="row">
@@ -166,7 +167,7 @@ export default async function Recents() {
                 )}
               </div>
               <div className="py-2">
-                <HeaderDivider title="Featured News" />
+                <HeaderDivider title="Featured News" slug={'tag/72'} />
                 <div>
                   <TimeLine articles={otherFeatured || []} />
                 </div>
@@ -184,7 +185,7 @@ export default async function Recents() {
             </Col>
           </Row>
           
-          <NewsSection title="Great Lakes Region" articles={greatLakesArticles} isMobile={isMobile} />
+          <NewsSection title="Great Lakes Region" articles={greatLakesArticles} isMobile={isMobile} slug={'tag/99'} />
 
           <Suspense fallback={<NewsSkeleton count={3} />}>
             <Videos />
@@ -200,7 +201,7 @@ export default async function Recents() {
             </Col>
           </Row>
           
-          <NewsSection title="Entertainment" articles={entertainment} isMobile={isMobile} />
+          <NewsSection title="Entertainment" articles={entertainment} isMobile={isMobile} slug={'entertainment'}/>
           
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
             <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
@@ -211,7 +212,7 @@ export default async function Recents() {
             />
           </div>
           
-          <NewsSection title="International" articles={internationalArticles} isMobile={isMobile} />
+          <NewsSection title="International" articles={internationalArticles} isMobile={isMobile} slug={'tag/101'}/>
         </div>
 
         <div className="col-xl-4 col-lg-4 mt-0">
@@ -226,11 +227,12 @@ export default async function Recents() {
               showImgs
               showDate
               titleBG='#1176BB'
+              slug={'advertorials'}
             />
           </div>
           
           <div className='pt-3'>
-            <SectionWithToggle isFile={true} title='Announcements' articles={announcement} titleBG='#282F2F' />
+            <SectionWithToggle isFile={true} slug={'announcements'} title='Announcements' articles={announcement} titleBG='#282F2F' />
           </div>
           
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>

@@ -21,6 +21,10 @@ export default async function AuthorsPage({ params }: AuthorPageProps) {
 
     const author = await getAuthor(slug)
 
+
+    // console.log('byline data',author)
+
+
     if (author?.author)
         return <AuthorClientPage
         authorID={author.author.id}
@@ -29,7 +33,7 @@ export default async function AuthorsPage({ params }: AuthorPageProps) {
             initialPageInfo={{
                 currentPage: author.postsData?.pagination?.currentPage || 1,
                 lastPage: author.postsData?.pagination?.totalPages || 1,
-                total: author.postsData?.pagination?.totalPosts || 0
+                total: author.postsData?.pagination?.totalPosts || 0 
             }}
         />
     return NotFound()

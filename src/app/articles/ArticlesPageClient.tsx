@@ -1,0 +1,156 @@
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
+import { Col, Row, Button } from "react-bootstrap";
+import { Category, NewsItem } from "@/types/fetchData";
+import DynamicArticleCard from "@/components/news/DynamicArticleCard";
+import CategoryMainSection from "@/components/news/CategoryMainSection";
+import HeaderDivider from "@/components/HeaderDivider";
+import AdManager from "@/components/ads/AdManager";
+import CustomSlider from "@/components/home/CustomSlider";
+import SideBar from "@/components/ReUsable/SideBar";
+import { fetchArticles } from "./actions";
+
+interface ArticlesPageClientProps {
+  initialPosts: NewsItem[];
+  highlightArticles: NewsItem[];
+  initialPageInfo: {
+    currentPage: number;
+    lastPage: number;
+    total: number;
+  };
+}
+
+export default function ArticlesPageClient({
+  initialPosts,
+  highlightArticles,
+  initialPageInfo,
+}: ArticlesPageClientProps) {
+  const [posts, setPosts] = useState(initialPosts);
+  const [pageInfo, setPageInfo] = useState(initialPageInfo);
+    const [isPending, startTransition] = useTransition();
+
+  const [displayHighlights] = useState(highlightArticles);
+  const loadMore = () => {
+      if (pageInfo.currentPage >= pageInfo.lastPage) return;
+  
+      const nextPage = pageInfo.currentPage + 1;
+  
+      startTransition(async () => {
+        const result = await fetchArticles(nextPage);
+  
+        if (result?.data) {
+          // Append new posts to existing posts
+          setPosts(prevPosts => [...prevPosts, ...result.data]);
+          setPageInfo({
+            currentPage: result.pagination.currentPage,
+            lastPage: result.pagination.totalPages,
+            total: result.pagination.totalPosts || 0
+          });
+        }
+      });
+    };
+
+  const canLoadMore = pageInfo.currentPage < pageInfo.lastPage;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Highlight Section */}
+      <CategoryMainSection articles={displayHighlights} />
+
+      {/* Ads Section */}
+      <div className="pt-2 pb-4">
+        <CustomSlider
+          lgDisplay={2}
+          mdDisplay={2}
+          smDisplay={1}
+        >
+          <AdManager
+            position="above-latest-news-1"
+            priority={true}
+            className="mb-md-2"
+          />
+          <AdManager
+            position="above-latest-news-2"
+            priority={true}
+            className="mb-md-2"
+          />
+        </CustomSlider>
+      </div>
+
+      {/* Main Content */}
+      <div className="pb-md-4">
+        <Row>
+          {/* Articles Column */}
+          <Col md={8}>
+            <HeaderDivider title={`Other Latest News`} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {posts.map((article) => (
+                <DynamicArticleCard
+                  key={article.id}
+                  article={article}
+                  showImage
+                  showExpt
+                  hoverEffect
+                  imgHeight={160}
+                  className="d-flex flex-row gap-3"
+                />
+              ))}
+              
+              {/* Loading more skeletons */}
+              {isPending && (
+                <>
+                  {[...Array(3)].map((_, i) => (
+                    <div key={`skeleton-${i}`} className="animate-pulse">
+                      <div className="bg-gray-200 h-48 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded mt-2"></div>
+                      <div className="h-4 bg-gray-200 rounded mt-1 w-3/4"></div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Load More Button */}
+            {canLoadMore && (
+              <div className="text-center mb-8">
+                <Button
+                  variant="outline-light"
+                  onClick={loadMore}
+                  disabled={isPending}
+                  size="lg"
+                  className="px-8 py-2"
+                  style={{
+                    borderColor: "#1176BB",
+                    color: "#1176BB",
+                  }}
+                >
+                  {isPending ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </>
+                  ) : (
+                    `Load More`
+                  )}
+                </Button>
+              </div>
+            )}
+          </Col>
+
+          {/* Sidebar */}
+          <Col md={4} className="sticky-sidebar">
+            <SideBar
+              showSocials
+            />
+          </Col>
+        </Row>
+      </div>
+    </div>
+  );
+}

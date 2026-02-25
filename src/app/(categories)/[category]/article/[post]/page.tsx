@@ -1,12 +1,14 @@
 import { cache } from 'react'
 import { Suspense } from 'react'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
-import { ViewTrackerComponent } from '@/components/ViewTracker'
 import { stripHtml } from '@/lib/utils'
 import { ApiService } from '@/services/apiService'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import HydrateArticle from './HydrateArticle'
+import { Container } from 'react-bootstrap'
+import CustomSlider from '@/components/home/CustomSlider'
+import ServerSlotManager from '@/components/ads/ServerSlotManager'
 
 interface PageProps {
   params: Promise<{ post: string, category: string }>
@@ -18,7 +20,7 @@ const endpoints: Record<string, string> = {
   'rubrique-19': "opinion",
   advertorials: "advertorial",
   facts: "facts",
-  announcements:'announcement'
+  announcements: 'announcement'
 }
 
 /* ------------------------ CACHED FETCH POST ------------------------ */
@@ -193,12 +195,12 @@ export default async function SingleNewsPage({ params }: PageProps) {
 }
 
 /* ------------------------ ARTICLE CONTENT ------------------------ */
-async function ArticleContent({ 
-  slug, 
-  category 
-}: { 
+async function ArticleContent({
+  slug,
+  category
+}: {
   slug: string
-  category: string 
+  category: string
 }) {
   // This will use cached data from generateMetadata
   const postData = await getPostData(slug, category)
@@ -210,7 +212,32 @@ async function ArticleContent({
 
   return (
     <HydrateArticle article={postData} slug={slug}>
-      <ViewTrackerComponent postId={postData.id} />
+      {/* <ViewTrackerComponent postId={postData.id} /> */}
+
+      <div className='pb-md-4'>
+        <Suspense fallback={null}>
+          <Container>
+            <CustomSlider
+              lgDisplay={2}
+              mdDisplay={2}
+              smDisplay={1}
+            >
+              <Suspense fallback={null}>
+                <ServerSlotManager
+                  position="above-latest-news-1"
+                  priority={true}
+                />
+              </Suspense>
+              <Suspense fallback={null}>
+                <ServerSlotManager
+                  position="above-latest-news-2"
+                  priority={true}
+                />
+              </Suspense>
+            </CustomSlider>
+          </Container>
+        </Suspense>
+      </div>
       <SingleNewsContent slug={slug} initialArticle={postData} />
     </HydrateArticle>
   )
@@ -223,16 +250,16 @@ function ArticleSkeleton() {
       {/* Title skeleton */}
       <div className="h-10 bg-gray-200 rounded-lg w-3/4 mb-4"></div>
       <div className="h-10 bg-gray-200 rounded-lg w-2/3 mb-6"></div>
-      
+
       {/* Meta info skeleton */}
       <div className="flex gap-4 mb-6">
         <div className="h-4 bg-gray-200 rounded w-24"></div>
         <div className="h-4 bg-gray-200 rounded w-32"></div>
       </div>
-      
+
       {/* Image skeleton */}
       <div className="h-96 bg-gray-200 rounded-lg mb-6"></div>
-      
+
       {/* Content skeleton */}
       <div className="space-y-3">
         <div className="h-4 bg-gray-200 rounded w-full"></div>

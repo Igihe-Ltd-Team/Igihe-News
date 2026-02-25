@@ -3,9 +3,11 @@ import React from 'react'
 import { ThemedText } from '../ThemedText'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { Author, Byline } from '@/types/fetchData'
-export default function SinglePostMetaData({ author, authorName, authorImage, publishDate, category,categorySlug }:
-    { author?: Byline[], authorName: string, authorImage: string, publishDate?: string, category: string | undefined,categorySlug?:string }) {
-
+export default function SinglePostMetaData(
+    { author, authorName, authorImage, publishDate, category, categorySlug, bylines }:
+        { author?: Byline[], authorName: string, authorImage: string, publishDate?: string, category: string | undefined, categorySlug?: string, bylines: Byline[] | undefined }
+) {
+    // console.log(bylines)
     return (
         <div className="article-meta-data has-gray-border d-flex align-items-center justify-content-between mt-4 pt-4">
             <div className="meta-left d-flex align-items-center gap-5 w-75">
@@ -15,19 +17,26 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
 
                 <div className="meta-wrapper d-flex align-items-center gap-2 flex-wrap">
 
-                    <a href={`/author/${author?.[0]?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
+                    <>
                         <OptimizedImage // Author Image
-                            src={authorImage || '/assets/user-avatar.png'}
+                            src={authorImage || '/assets/igiheIcon.png'}
                             alt={authorName || 'IGIHE'}
                             width={32}
                             height={32}
                             className="rounded-circle"
                         />
                         <ThemedText type='small' className='gray-color'>By</ThemedText>
-                        <ThemedText type='smallBold' className='ms-0'>
-                            {authorName}
-                        </ThemedText>
-                    </a>
+                        {
+                            bylines?.map((byline, i) => (
+                                <a key={i} href={`/author/${byline?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
+                                    <ThemedText type='smallBold' className='ms-0'>
+                                        {i > 0 && ','}
+                                        {byline.name}
+                                    </ThemedText>
+                                </a>
+                            ))
+                        }
+                    </>
 
                     <span className="d-flex align-items-center">
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -61,7 +70,7 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
                         {/* <ThemedText type='small' className='gray-color'>5 min read</ThemedText> */}
                     </div>
 
-                    <div className="comments-count d-flex align-items-center gap-1">
+                    {/* <div className="comments-count d-flex align-items-center gap-1">
                         <span className='d-flex align-items-cente'>
                             <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M7.00342 0.99853C6.19183 0.99853 5.42127 1.10568 4.69174 1.31998C3.96678 1.53427 3.33073 1.8238 2.78359 2.18856C2.23644 2.55333 1.80329 2.97736 1.48412 3.46067C1.1604 3.94398 0.998535 4.4592 0.998535 5.00635C0.998535 5.2936 1.04641 5.57857 1.14216 5.86126C1.23791 6.14395 1.37697 6.41524 1.55936 6.67513C1.74174 6.93502 1.96515 7.17896 2.2296 7.40693C2.49406 7.63947 2.79498 7.85149 3.13239 8.04299L3.81632 8.43282L3.6043 9.18514C3.53135 9.46327 3.447 9.71177 3.35125 9.93063C3.2555 10.1495 3.15747 10.3501 3.05716 10.5325C3.25322 10.4504 3.44472 10.3592 3.63166 10.2589C3.82316 10.1632 4.00782 10.0594 4.18564 9.94772C4.36346 9.83602 4.539 9.71861 4.71226 9.5955C4.88096 9.46783 5.04511 9.33333 5.20469 9.19198L5.53981 8.89789L5.98437 8.94577C6.15307 8.96401 6.32291 8.97883 6.49389 8.99022C6.66488 9.00162 6.83472 9.00732 7.00342 9.00732C7.81501 9.00732 8.58557 8.90017 9.3151 8.68588C10.0401 8.47158 10.6761 8.18205 11.2233 7.81729C11.7704 7.45253 12.2036 7.02849 12.5227 6.54518C12.8464 6.06187 13.0083 5.54893 13.0083 5.00635C13.0083 4.4592 12.8464 3.94398 12.5227 3.46067C12.2036 2.97736 11.7704 2.55333 11.2233 2.18856C10.6761 1.8238 10.0401 1.53427 9.3151 1.31998C8.58557 1.10568 7.81501 0.99853 7.00342 0.99853ZM14.0068 5.00635C14.0068 5.69483 13.8245 6.34456 13.4597 6.95554C13.0904 7.56196 12.5888 8.09086 11.9551 8.54225C11.3213 8.99364 10.5804 9.35157 9.73229 9.61602C8.87966 9.87591 7.97004 10.0059 7.00342 10.0059C6.81192 10.0059 6.62156 10.0002 6.43234 9.98876C6.24312 9.97736 6.05504 9.96254 5.8681 9.9443C5.61277 10.1723 5.34604 10.382 5.0679 10.5735C4.78521 10.765 4.49341 10.9406 4.19248 11.1001C3.89155 11.2597 3.5815 11.4011 3.26234 11.5242C2.94317 11.6473 2.61488 11.7499 2.27748 11.8319C2.13613 11.873 1.99023 11.9072 1.83977 11.9345C1.6893 11.9619 1.53656 11.987 1.38153 12.0098H1.34734C1.26527 12.0098 1.19345 11.9813 1.1319 11.9243C1.07035 11.8673 1.02817 11.7955 1.00537 11.7088V11.702C0.987136 11.6062 1.00309 11.5242 1.05325 11.4558C1.1034 11.3874 1.15812 11.319 1.21739 11.2506C1.3405 11.1093 1.46816 10.9702 1.60039 10.8334C1.72806 10.6966 1.85344 10.5405 1.97655 10.3649C2.09966 10.1894 2.21821 9.98534 2.33219 9.7528C2.44618 9.52483 2.54877 9.2467 2.63996 8.91841C2.23872 8.69044 1.87624 8.43282 1.55252 8.14557C1.22423 7.85832 0.9461 7.54828 0.718124 7.21543C0.490148 6.88259 0.312327 6.52923 0.18466 6.15534C0.0615535 5.78602 0 5.40302 0 5.00635C0 4.3133 0.182381 3.66357 0.547142 3.05715C0.916463 2.44618 1.41801 1.91499 2.05178 1.4636C2.68556 1.01221 3.42648 0.656567 4.27455 0.396674C5.12718 0.132221 6.0368 -4.76837e-06 7.00342 -4.76837e-06C7.97004 -4.76837e-06 8.87966 0.132221 9.73229 0.396674C10.5804 0.656567 11.3213 1.01221 11.9551 1.4636C12.5888 1.91499 13.0904 2.44618 13.4597 3.05715C13.8245 3.66357 14.0068 4.3133 14.0068 5.00635Z" fill="#A0A0A0" />
@@ -69,8 +78,8 @@ export default function SinglePostMetaData({ author, authorName, authorImage, pu
 
 
                         </span>
-                        {/* <ThemedText type='small' className='gray-color'>3 Comments</ThemedText> */}
-                    </div>
+                        <ThemedText type='small' className='gray-color'>3 Comments</ThemedText> 
+                    </div> */}
 
 
 

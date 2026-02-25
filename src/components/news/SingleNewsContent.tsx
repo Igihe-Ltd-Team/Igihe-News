@@ -130,24 +130,6 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
 
     return (
         <Container>
-            <div className='pb-md-4'>
-                <CustomSlider
-                    lgDisplay={2}
-                    mdDisplay={2}
-                    smDisplay={1}
-                >
-                    <AdManager
-                        position="premium_leaderboard_1"
-                        priority={true}
-                    //   className="mb-2"
-                    />
-                    <AdManager
-                        position="header-landscape-ad-2"
-                        priority={true}
-                    //   className="mb-2"
-                    />
-                </CustomSlider>
-            </div>
 
             <article>
                 <Col xl="12" md="12">
@@ -161,9 +143,9 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                     publishDate={publishDate}
                     category={articleCategory}
                     categorySlug={articleCategorySlug}
+                    bylines={article.bylines}
                 />
                 <Row className='pt-4'>
-
                     <Col md="9">
                         <div className='d-flex flex-column-reverse flex-md-row'>
                             <Col md="1">
