@@ -98,7 +98,7 @@ export default async function Header() {
           desktopAdSection={
             <Col md={7} key={Math.random()}>
               <ServerSlotManager
-                position="ad1_leaderboard_728x90"
+                position="next-to-logo"
                 priority={true}
                 imgClass="object-position-right"
               />
@@ -106,32 +106,9 @@ export default async function Header() {
           }
         />
       </div>
-
-      <HeaderClientx
-        categories={orderedCategories}
-        logoSection={
-          <a href="/"  key={'1098765jd4'}>
-            <span className='site-logo'>
-              <Image
-                width={240}
-                src={'/assets/newlogo.png'}
-                height={100}
-                className='object-fit-contain'
-                alt={'IGEHE Logo'}
-              />
-            </span>
-          </a>
-        }
-        desktopAdSection={
-          <Col md={7}>
-            <ServerSlotManager
-              position="ad1_leaderboard_728x90"
-              priority={true}
-              imgClass="object-position-right"
-            />
-          </Col>
-        }
-      />
+        <HeaderClientx
+          categories={orderedCategories}
+        />
     </div>
     </DeskHeader>
   )

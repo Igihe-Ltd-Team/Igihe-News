@@ -13,10 +13,10 @@ export default function CommentsSection({ articleId, articleTitle }: CommentsSec
     const script = document.createElement('script')
     script.src = 'https://en.igihe.com/comments/embed.js'
     script.async = true
-    document.body.appendChild(script)
+    document.body.appendChild(script);
 
     // Set configuration
-    ;(window as any).commentics_config = {
+    (window as any).commentics_config = {
       identifier: `en-article-${articleId}`,
       reference: articleTitle
     }

@@ -15,7 +15,8 @@ interface OptimizedImageProps {
   sizes?: string
   onLoad?: () => void,
   imgClass?:string
-  placeholderType?: 'blur' | 'solid' | 'skeleton'
+  placeholderType?: 'blur' | 'solid' | 'skeleton',
+  aspectRatio?:string
 }
 
 export function OptimizedImage({
@@ -30,6 +31,7 @@ export function OptimizedImage({
   imgClass,
     placeholderType = 'solid',
   fill = false,
+  aspectRatio = 'unset'
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -94,6 +96,7 @@ if (!isMounted) {
         minHeight: height ? `${height}px` : 'auto',
         height: height ? `${height}px` : 'auto',
         overflow: 'hidden',
+        aspectRatio: aspectRatio,
     }}>
 
 

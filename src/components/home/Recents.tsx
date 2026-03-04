@@ -206,7 +206,7 @@ export default async function Recents() {
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
             <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
             <ServerSlotManager
-              position="home-after-highlights"
+              position="midle-large-size-add"
               priority={true}
               className="mb-2"
             />

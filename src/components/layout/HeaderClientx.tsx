@@ -12,14 +12,10 @@ import { Container } from 'react-bootstrap'
 
 interface HeaderClientProps {
   categories: any[]
-  logoSection: ReactNode
-  desktopAdSection: ReactNode
 }
 
 export default function HeaderClientx({ 
-  categories, 
-  logoSection,
-  desktopAdSection 
+  categories
 }: HeaderClientProps) {
   const pathname = usePathname()
   const { isMobile } = useResponsive()

@@ -1,6 +1,7 @@
-import { AdPositionKey } from "@/lib/adPositions"
+import { AD_POSITIONS, AdPositionKey } from "@/lib/adPositions"
 import { ApiService } from "@/services/apiService"
 import AdUnit from "./AdUnit"
+import { OptimizedImage } from "../ui/OptimizedImage"
 
 interface AdManagerProps {
   position: AdPositionKey
@@ -38,9 +39,30 @@ export default async function ServerSlotManager({
 }: AdManagerProps) {
   const slots = await getSlot(position)
 const slotsToShow = slots.slice(0, maxAds)
+const positionConfig = AD_POSITIONS[position]
 
-// console.log('selected adds position: ',position,slotsToShow)
 
+
+if (slotsToShow.length === 0) {
+    return (
+      <div className={`slot-position tag-${position} ${className}`}>
+        {fallbackComponent ?? (
+          <div className={`slot-unit tag-${position}`}>
+            <OptimizedImage
+              src={`/assets/${positionConfig.default}`}
+              alt="Advertisement"
+              aspectRatio={positionConfig.dimensions.ratio}
+              width={positionConfig.dimensions.width}
+              className="img-fluid"
+              priority={priority}
+              imgClass={`object-fit-cover ${imgClass ?? ''}`}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+  
 
 
 return(

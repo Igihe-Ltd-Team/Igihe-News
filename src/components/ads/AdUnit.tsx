@@ -61,11 +61,12 @@ export default function AdUnit({
         <OptimizedImage
           src={imageUrl}
           alt={ad.title.rendered}
+          aspectRatio={positionConfig.dimensions.ratio}
           width={positionConfig.dimensions.width}
-          height={positionConfig.dimensions.height}
+          // height={positionConfig.dimensions.height}
           className="img-fluid"
           priority={priority}
-          imgClass={`object-fit-contain ${imgClass}`}
+          imgClass={`object-fit-cover ${imgClass}`}
         />
       </a>
       {/* {showLabel && (
