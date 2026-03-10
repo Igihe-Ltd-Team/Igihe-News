@@ -5,42 +5,42 @@ export const AD_POSITIONS = {
   'premium_leaderboard_1': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'bellow-videos': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'top-of-categories-1': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'next-to-logo': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'above-latest-news-1': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'above-latest-news-2': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
@@ -48,21 +48,21 @@ export const AD_POSITIONS = {
   'top-of-categories-2': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'inside-of-categories-1': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
   'inside-of-categories-2': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 1,
     default:'landScap.webp'
   },
@@ -70,7 +70,7 @@ export const AD_POSITIONS = {
   'ad1_leaderboard_728x90': {
     name: 'Header Landscape Ad 2',
     description: 'Secondary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
@@ -78,7 +78,7 @@ export const AD_POSITIONS = {
   'mot-premium_leaderboard_1_b': {
     name: 'Header Landscape Ad 2',
     description: 'Secondary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
@@ -86,7 +86,7 @@ export const AD_POSITIONS = {
   'header-landscape-ad-2': {
     name: 'Header Landscape Ad 2',
     description: 'Secondary header banner',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
@@ -131,7 +131,7 @@ export const AD_POSITIONS = {
   'beside-igihe-logo': {
     name: 'Beside Igihe Logo',
     description: 'Beside Igihe Logo',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
@@ -139,21 +139,21 @@ export const AD_POSITIONS = {
   'home-bellow-hights': {
     name: 'Home bellow Highlights',
     description: 'bellow highlights section',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
   'home-bellow-hights-2': {
     name: 'Home bellow Highlights',
     description: 'bellow highlights section',
-    dimensions: { width: 728, height: 96,ratio:'800/90' },
+    dimensions: { width: 728, height: 96,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
   'bellow-featured-news': {
     name: 'Home bellow Featured',
     description: 'bellow Featured section',
-    dimensions: { width: 850, height: 91,ratio:'800/90' },
+    dimensions: { width: 850, height: 91,ratio:'770/99' },
     priority: 2,
     default:'landScap.webp'
   },
