@@ -11,7 +11,7 @@ export default function CommentsSection({ articleId, articleTitle }: CommentsSec
   useEffect(() => {
     // Dynamically load Commentics script
     const script = document.createElement('script')
-    script.src = 'https://en.igihe.com/comments/embed.js'
+    script.src = 'https://cmtscript.igihe.com/embed.js'
     script.async = true
     document.body.appendChild(script);
 
