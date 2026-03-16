@@ -43,31 +43,31 @@ const positionConfig = AD_POSITIONS[position]
 
 
 
-if (slotsToShow.length === 0) {
-    return (
-      <div className={`slot-position tag-${position} ${className}`}>
-        {fallbackComponent ?? (
-          <div className={`slot-unit tag-${position}`}>
-            <OptimizedImage
-              src={`/assets/${positionConfig.default}`}
-              alt="Advertisement"
-              aspectRatio={positionConfig.dimensions.ratio}
-              width={positionConfig.dimensions.width}
-              className="img-fluid"
-              priority={priority}
-              imgClass={`object-fit-cover ${imgClass ?? ''}`}
-            />
-          </div>
-        )}
-      </div>
-    )
-  }
+// if (slotsToShow.length === 0) {
+//     return (
+//       <div className={`slot-position tag-${position} ${className}`}>
+//         {fallbackComponent ?? (
+//           <div className={`slot-unit tag-${position}`}>
+//             <OptimizedImage
+//               src={`/assets/${positionConfig.default}`}
+//               alt="Advertisement"
+//               aspectRatio={positionConfig.dimensions.ratio}
+//               width={positionConfig.dimensions.width}
+//               className="img-fluid"
+//               priority={priority}
+//               imgClass={`object-fit-cover ${imgClass ?? ''}`}
+//             />
+//           </div>
+//         )}
+//       </div>
+//     )
+//   }
   
 
 
 return(
 <div className={`slot-position tag-${position} ${className}`}>
-      {slotsToShow.map((ad, index) => (
+      {slotsToShow?.map((ad, index) => (
         <AdUnit
           key={ad.id}
           ad={ad}
