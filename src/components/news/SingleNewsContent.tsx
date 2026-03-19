@@ -271,12 +271,12 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                         </div>
 
 
-                        {/* {article && (
+                         {article && (
                             <CommentsSection
                                 articleId={article.id}
                                 articleTitle={stripHtml(article.title.rendered)}
                             />
-                        )} */}
+                        )}
 
                     </Col>
                     <Col md="3" className='position-relative'>

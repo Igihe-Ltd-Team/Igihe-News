@@ -26,7 +26,7 @@ export const AD_POSITIONS = {
   'next-to-logo': {
     name: 'Header Landscape Ad 1',
     description: 'Primary header banner',
-    dimensions: { width: 728, height: 96,ratio:'770/99' },
+    dimensions: { width: 728, height: 96,ratio:'770/95' },
     priority: 1,
     default:'landScap.webp'
   },

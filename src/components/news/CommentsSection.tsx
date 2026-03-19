@@ -71,5 +71,5 @@ export default function CommentsSection({ articleId, articleTitle }: CommentsSec
     }
   }, [articleId, articleTitle])
 
-  return <div id="commentics" className="mt-8 border-t pt-8" />
+  return <div id="commentics" className="mt-8 border-t pt-8" style={{display:'none'}}/>
 }
