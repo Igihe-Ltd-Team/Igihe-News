@@ -273,8 +273,9 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
 
                          {article && (
                             <CommentsSection
-                                articleId={article.id}
-                                articleTitle={stripHtml(article.title.rendered)}
+                                identifier={article.id} 
+                                reference={stripHtml(article.title.rendered)} 
+                                url={postUrls}
                             />
                         )}
 

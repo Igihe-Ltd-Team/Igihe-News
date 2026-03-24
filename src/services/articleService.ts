@@ -100,10 +100,6 @@ export async function fetchArticles(params?: {
 
 
   
-  // console.log('fetchArticles fetched',`${API_CONFIG.baseURL}/posts?${buildQuery(queryParams)}`)
-  
-
-  
 
   return cachedRequest({
     key: cacheKey,

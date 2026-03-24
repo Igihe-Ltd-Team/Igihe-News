@@ -2,11 +2,19 @@
 
 export const runtime = 'nodejs' // required — fileCache uses fs, not available on Edge
 
+import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
 import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 const SECRET = process.env.REVALIDATION_SECRET
+
+
+async function getAllCategories(): Promise<string[]> {
+  const categories = await ApiService.fetchCategories()
+  // Adjust `.slug` to match your category object shape
+  return categories.map((c: { slug: string }) => c.slug).filter(Boolean)
+}
 
 async function purgeAll(slug?: string, category?: string) {
   // ── 1. Clear custom memory + file cache ────────────────────────────────────
@@ -55,6 +63,10 @@ async function purgeAll(slug?: string, category?: string) {
   if (slug && category) {
     revalidatePath(`/${category}/article/${slug}`)
     revalidatePath(`/${category}`)
+  }
+  else{
+    const allSlugs = await getAllCategories()
+    allSlugs.forEach(cat => revalidatePath(`/${cat}`))
   }
 }
 

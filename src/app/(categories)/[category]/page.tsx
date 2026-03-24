@@ -31,7 +31,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   // 1. Get Category List (This should be cached/memoized by Next.js)
   const { prefetchAllHomeData } = await import("@/lib/prefetch-home-data");
-  const { ApiService } = await import("@/services/apiService");
   
   const initialData = await prefetchAllHomeData().catch(() => ({ categories: [] }));
   const thisCategory = initialData.categories?.find(
