@@ -5,8 +5,10 @@ export function Footer() {
   return (
     <footer className="bg-gray-900 d-flex justify-content-center py-12 footer-bg">
       <div className="container d-flex justify-content-center flex-column">
-        <div className="row bottom-container">
-          <div className="col-md-4 has-border-left">
+        <div className="row bottom-container justify-content-between">
+          <div className="col-md-4 
+          
+          ">
             <div className="mb-3">
               <ThemedText type="smallBold" className="footer--heading">Newsletter</ThemedText>
             </div>
@@ -29,7 +31,7 @@ export function Footer() {
               </form>
             </div>
           </div>
-          <div className="col-md-4 has-left-space has-border-left md-pb-4">
+          {/* <div className="col-md-4 has-left-space has-border-left md-pb-4">
             <div className="mb-3">
               <ThemedText type="smallBold" className="footer--heading">Our Services</ThemedText>
             </div>
@@ -174,7 +176,7 @@ export function Footer() {
                 <ThemedText>Photography</ThemedText>
                 </a></li>
             </ul>
-          </div>
+          </div> */}
           <div className="col-md-4 has-left-space">
             <div className="mb-3">
               <ThemedText type="smallBold" className="footer--heading">Follow Us</ThemedText>

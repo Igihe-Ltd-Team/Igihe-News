@@ -1555,3 +1555,25 @@ kbd {
   font-size: 0.9rem;
   color: #4b5563;
 }
+
+
+
+
+/* Emoji toggle button — sits bottom-right of textarea */
+.emoji-toggle {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.emoji-toggle:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
