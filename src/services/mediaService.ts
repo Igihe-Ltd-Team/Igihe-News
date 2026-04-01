@@ -134,6 +134,7 @@ export async function fetchAdvertisements(): Promise<Advertisement[]> {
           return ads
         },
         ttl: ADS_CACHE_TTL,
+        dedup: true,
       })
     } catch (error) {
       console.error('Error fetching advertisements:', error)
@@ -146,11 +147,28 @@ export async function fetchAdvertisements(): Promise<Advertisement[]> {
   return adsFetchInProgress
 }
 
+// export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+//   try {
+//     const allAds = await fetchAdvertisements()
+//     return getAdsByPosition(allAds, position)
+//   } catch {
+//     return []
+//   }
+// }
+
 export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
   try {
-    const allAds = await fetchAdvertisements()
-    return getAdsByPosition(allAds, position)
-  } catch {
+    return cachedRequest({
+      key: `slots:${position}`,
+      fetchFn: async () => {
+        const allAds = await fetchAdvertisements()
+        return getAdsByPosition(allAds, position)
+      },
+      ttl: ADS_CACHE_TTL,
+      dedup: true,
+    })
+  } catch (error) {
+    console.error(`Error fetching ads for position ${position}:`, error)
     return []
   }
 }

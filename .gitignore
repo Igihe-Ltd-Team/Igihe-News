@@ -17,6 +17,7 @@ app.js
 
 # testing
 /coverage
+/.swc
 
 # next.js
 /.next/

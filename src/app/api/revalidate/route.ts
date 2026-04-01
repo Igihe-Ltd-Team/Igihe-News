@@ -41,6 +41,7 @@ async function purgeAll(slug?: string, category?: string) {
     'categories:',    // category lists + counts (new article changes count)
     'search:',        // search results now stale
     'author-posts:',  // author article lists now stale
+    'slots:',
   ].filter(Boolean) as string[]
 
   await Promise.all(patterns.map(p => clearCache(p)))
