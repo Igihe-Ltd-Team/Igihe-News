@@ -72,6 +72,7 @@ body {
   background-size: cover;
   position: relative;
   z-index: 1;
+  /* filter: grayscale(100%); */
   /* min-height: 301.4px */
 }
 
@@ -1232,7 +1233,7 @@ body {
 
 
 .mobile-header{
-  background-color: #0076bf;
+  /* background-color: #0076bf; */
 }
 .dropdown-toggle,.custom-menu-button{
   background-color: transparent!important;

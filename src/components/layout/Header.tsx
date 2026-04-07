@@ -53,9 +53,27 @@ export default async function Header() {
     )
     .filter(Boolean)
 
+
+    const today = new Date();
+    const getLogo = () => {
+
+      const start = new Date(today.getFullYear(), 3, 7);  // April = month 3 (0-based)
+      const end = new Date(today.getFullYear(), 3, 14);
+
+      if (today >= start && today <= end) {
+        return '/assets/newlogo.webp';
+      }
+      return '/assets/newlogo.png';
+    };
+
+const isSpecialDate =
+  today >= new Date(today.getFullYear(), 3, 7) &&
+  today <= new Date(today.getFullYear(), 3, 14);
+
+
   return (
     <DeskHeader categories={categories}>
-      <div className='site-header'>
+      <div className='site-header' style={{ filter: isSpecialDate ? 'grayscale(100%)' : 'none' }}>
       <div className="overlay"></div>
       <div className="overlay-sky"></div>
       <div className="overlay-sky-right"></div>
@@ -87,7 +105,7 @@ export default async function Header() {
               <span className='site-logo'>
                 <Image
                   width={240}
-                  src={'/assets/newlogo.png'}
+                  src={getLogo()}
                   height={100}
                   className='object-fit-contain'
                   alt={'IGEHE Logo'}

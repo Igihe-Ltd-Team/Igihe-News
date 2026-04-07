@@ -16,7 +16,12 @@ export default function MobileHeader({
     require('bootstrap/dist/js/bootstrap.bundle.min.js');
   }, []);
 
-  return <div className="mobile-header">
+const today = new Date();
+  const isSpecialDate =
+  today >= new Date(today.getFullYear(), 3, 7) &&
+  today <= new Date(today.getFullYear(), 3, 14);
+
+  return <div className="mobile-header" style={{ backgroundColor: isSpecialDate ? '#4e5661' : '#0076bf' }}>
         <div className="d-flex justify-content-between p-2">
           <span className="menu-taggle">
             <IgiheCanvas
