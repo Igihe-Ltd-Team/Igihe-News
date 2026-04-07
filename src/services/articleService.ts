@@ -274,7 +274,7 @@ export async function fetchOpinions(params?: {
         per_page: params?.per_page,
       })
     },
-    ttl: 60 * 60 * 1000,
+    ttl: 5 * 60 * 1000,
   })
 }
 
