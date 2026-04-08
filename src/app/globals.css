@@ -66,16 +66,30 @@ body {
 }
 /* Site Header styles */
 .site-header {
-  background-image: url('/assets/newIgiheBG.webp');
-  background-position: center top;
+  /* background-image: url('/assets/newIgiheBG.webp'); */
+  /* background-position: center top;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: cover; */
   position: relative;
   z-index: 1;
   /* filter: grayscale(100%); */
   /* min-height: 301.4px */
 }
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/newIgiheBG.webp');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: -1;
+}
 
+/* apply grayscale ONLY when class is present */
+.site-header.grayscale-bg::before {
+  filter: grayscale(100%);
+}
 .header-row-cotainer{
     z-index: 1;
     background-image: url('/assets/bigSky.webp');
@@ -86,7 +100,7 @@ body {
 }
 
 .overlay-sky{
-  background-image: url(/assets/sideSky.webp);
+  background-image: url("/assets/sideSky.webp");
     background-position: -54% 10%;
     background-repeat: no-repeat;
     background-size: 46%;
@@ -99,7 +113,7 @@ body {
     right: 0;
 }
 .overlay-sky-right{
-  background-image: url(/assets/sideSky.webp);
+  background-image: url("/assets/sideSky.webp");
     background-position: 104% 57%;
     background-repeat: no-repeat;
     background-size: 46%;

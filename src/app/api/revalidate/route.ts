@@ -4,7 +4,7 @@ export const runtime = 'nodejs' // required — fileCache uses fs, not available
 
 import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 const SECRET = process.env.REVALIDATION_SECRET
@@ -45,7 +45,7 @@ async function purgeAll(slug?: string, category?: string) {
   ].filter(Boolean) as string[]
 
   await Promise.all(patterns.map(p => clearCache(p)))
-
+  revalidateTag('advertisements', 'default')
   // ── 2. Revalidate Next.js page cache ──────────────────────────────────────
   //
   // Pattern revalidation — marks ALL instances of each dynamic route stale.

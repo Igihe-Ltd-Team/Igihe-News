@@ -2,35 +2,46 @@
 
 import { useEffect } from 'react';
 import IgiheCanvas from './IgiheCanvas';
-
+import Image from 'next/image'
 
 interface HeaderClientProps {
   categories: any[]
 }
 
 
-export default function MobileHeader({ 
+export default function MobileHeader({
   categories
 }: HeaderClientProps) {
   useEffect(() => {
     require('bootstrap/dist/js/bootstrap.bundle.min.js');
   }, []);
 
-const today = new Date();
+  const today = new Date();
   const isSpecialDate =
-  today >= new Date(today.getFullYear(), 3, 7) &&
-  today <= new Date(today.getFullYear(), 3, 14);
+    today >= new Date(today.getFullYear(), 3, 7) &&
+    today <= new Date(today.getFullYear(), 3, 14);
 
   return <div className="mobile-header" style={{ backgroundColor: isSpecialDate ? '#4e5661' : '#0076bf' }}>
-        <div className="d-flex justify-content-between p-2">
-          <span className="menu-taggle">
-            <IgiheCanvas
-              categories={categories}
-              showHome
-              btnVariant='light'
+    <div className="d-flex justify-content-between p-2">
+      <span className="menu-taggle">
+        <IgiheCanvas
+          categories={categories}
+          showHome
+          btnVariant='light'
+        />
+      </span>
+      <span className="mobile-site-logo">
+        {
+          isSpecialDate ?
+
+            <Image
+              width={240}
+              src={'/assets/newlogo.webp'}
+              height={50}
+              className='object-fit-contain'
+              alt={'IGEHE Logo'}
             />
-          </span>
-          <span className="mobile-site-logo">
+            :
             <svg width="240" height="34" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clipPath="url(#clip0_2928_1291)">
                 <path d="M123.532 18.5566C123.532 13.8136 123.532 9.0673 123.532 4.32431C123.532 3.6701 123.555 3.6434 124.198 3.6434C127.981 3.6434 131.768 3.6434 135.551 3.6434C136.208 3.6434 136.234 3.6701 136.234 4.30762C136.234 7.38506 136.234 10.4658 136.234 13.5433C136.234 14.0673 136.271 14.1074 136.804 14.1074C139.324 14.1074 141.841 14.1074 144.361 14.1074C144.941 14.1074 144.967 14.0773 144.967 13.4965C144.967 10.4058 144.967 7.31163 144.967 4.22084C144.967 3.68679 145.004 3.6434 145.527 3.6434C149.244 3.6434 152.964 3.6434 156.68 3.6434C157.27 3.6434 157.303 3.68012 157.303 4.28426C157.303 13.8136 157.303 23.343 157.303 32.8724C157.303 33.4098 157.283 33.4298 156.74 33.4298C152.997 33.4298 149.25 33.4298 145.507 33.4298C145.004 33.4298 144.971 33.3964 144.971 32.8791C144.971 29.1074 144.971 25.3357 144.971 21.564C144.971 20.9398 144.961 20.9298 144.351 20.9298C141.844 20.9298 139.341 20.9298 136.834 20.9298C136.278 20.9298 136.238 20.9665 136.238 21.5106C136.238 25.2823 136.238 29.054 136.238 32.8256C136.238 33.4031 136.214 33.4264 135.624 33.4264C131.801 33.4264 127.975 33.4264 124.151 33.4264C123.548 33.4264 123.535 33.4131 123.535 32.7889C123.535 28.0459 123.535 23.2996 123.535 18.5566H123.532Z" fill="#fff" />
@@ -47,108 +58,110 @@ const today = new Date();
                 </clipPath>
               </defs>
             </svg>
+        }
 
-          </span>
-          <span className="langueges">
 
-            <div className="dropdown">
-              <button
-                className="btn btn-secondary dropdown-toggle"
-                type="button"
-                data-bs-toggle="dropdown"
-              >
-                <svg
-                        width="20"
-                        height="15"
-                        viewBox="0 0 20 15"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <g clipPath="url(#clip0_2928_1141)">
-                            <path
-                                fillRule="evenodd"
-                                clipRule="evenodd"
-                                d="M0.00332642 0V15H19.9993V0H0.00332642Z"
-                                fill="#2E42A5"
-                            />
-                            <mask
-                                id="mask0_2928_1141"
-                                style={{ maskType: "luminance" }}
-                                maskUnits="userSpaceOnUse"
-                                x="0"
-                                y="0"
-                                width="20"
-                                height="15"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M0.00332642 0V15H19.9993V0H0.00332642Z"
-                                    fill="white"
-                                />
-                            </mask>
-                            <g mask="url(#mask0_2928_1141)">
-                                <path
-                                    d="M-2.22446 13.9281L2.17591 15.79L20.0973 2.02375L22.4187 -0.742497L17.7134 -1.36437L10.4036 4.5675L4.51982 8.565L-2.22446 13.9281Z"
-                                    fill="white"
-                                />
-                                <path
-                                    d="M-1.62268 15.2325L0.619996 16.3125L21.5852 -0.999374H18.4377L-1.62268 15.2325Z"
-                                    fill="#F50100"
-                                />
-                                <path
-                                    d="M22.2244 13.9281L17.824 15.79L-0.0973823 2.02375L-2.41879 -0.742497L2.28652 -1.36437L9.5963 4.5675L15.4801 8.565L22.2244 13.9281Z"
-                                    fill="white"
-                                />
-                                <path
-                                    d="M22.0744 14.8644L19.8324 15.9444L10.9054 8.53187L8.25846 7.70437L-2.64249 -0.733124H0.505634L11.3997 7.50437L14.2935 8.49687L22.0744 14.8644Z"
-                                    fill="#F50100"
-                                />
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M12.3608 -1.25H7.63922V5H-1.23026V10H7.63922V16.25H12.3608V10H21.2652V5H12.3608V-1.25Z"
-                                    fill="#F50100"
-                                />
-                                <mask
-                                    id="mask1_2928_1141"
-                                    style={{ maskType: "luminance" }}
-                                    maskUnits="userSpaceOnUse"
-                                    x="-2"
-                                    y="-2"
-                                    width="24"
-                                    height="19"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        clipRule="evenodd"
-                                        d="M12.3608 -1.25H7.63922V5H-1.23026V10H7.63922V16.25H12.3608V10H21.2652V5H12.3608V-1.25Z"
-                                        fill="white"
-                                    />
-                                </mask>
-                                <g mask="url(#mask1_2928_1141)">
-                                    <path
-                                        d="M7.63922 -1.25V-2.5H6.38947V-1.25H7.63922ZM12.3608 -1.25H13.6105V-2.5H12.3608V-1.25ZM7.63922 5V6.25H8.88896V5H7.63922ZM-1.23026 5V3.75H-2.48001V5H-1.23026ZM-1.23026 10H-2.48001V11.25H-1.23026V10ZM7.63922 10H8.88896V8.75H7.63922V10ZM7.63922 16.25H6.38947V17.5H7.63922V16.25ZM12.3608 16.25V17.5H13.6105V16.25H12.3608ZM12.3608 10V8.75H11.111V10H12.3608ZM21.2652 10V11.25H22.515V10H21.2652ZM21.2652 5H22.515V3.75H21.2652V5ZM12.3608 5H11.111V6.25H12.3608V5ZM7.63922 -4.76837e-07H12.3608V-2.5H7.63922V-4.76837e-07ZM8.88896 5V-1.25H6.38947V5H8.88896ZM-1.23026 6.25H7.63922V3.75H-1.23026V6.25ZM0.019489 10V5H-2.48001V10H0.019489ZM7.63922 8.75H-1.23026V11.25H7.63922V8.75ZM8.88896 16.25V10H6.38947V16.25H8.88896ZM12.3608 15H7.63922V17.5H12.3608V15ZM11.111 10V16.25H13.6105V10H11.111ZM21.2652 8.75H12.3608V11.25H21.2652V8.75ZM20.0155 5V10H22.515V5H20.0155ZM12.3608 6.25H21.2652V3.75H12.3608V6.25ZM11.111 -1.25V5H13.6105V-1.25H11.111Z"
-                                        fill="white"
-                                    />
-                                </g>
-                            </g>
-                        </g>
-                        <defs>
-                            <clipPath id="clip0_2928_1141">
-                                <rect width="20" height="15" rx="3" fill="white" />
-                            </clipPath>
-                        </defs>
-                    </svg>
-              </button>
+      </span>
+      <span className="langueges">
 
-              <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="igihe.com">Kinyarwanda</a></li>
-                <li><a className="dropdown-item" href="fr.igihe.com">French</a></li>
-              </ul>
-            </div>
+        <div className="dropdown">
+          <button
+            className="btn btn-secondary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+          >
+            <svg
+              width="20"
+              height="15"
+              viewBox="0 0 20 15"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g clipPath="url(#clip0_2928_1141)">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M0.00332642 0V15H19.9993V0H0.00332642Z"
+                  fill="#2E42A5"
+                />
+                <mask
+                  id="mask0_2928_1141"
+                  style={{ maskType: "luminance" }}
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width="20"
+                  height="15"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M0.00332642 0V15H19.9993V0H0.00332642Z"
+                    fill="white"
+                  />
+                </mask>
+                <g mask="url(#mask0_2928_1141)">
+                  <path
+                    d="M-2.22446 13.9281L2.17591 15.79L20.0973 2.02375L22.4187 -0.742497L17.7134 -1.36437L10.4036 4.5675L4.51982 8.565L-2.22446 13.9281Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M-1.62268 15.2325L0.619996 16.3125L21.5852 -0.999374H18.4377L-1.62268 15.2325Z"
+                    fill="#F50100"
+                  />
+                  <path
+                    d="M22.2244 13.9281L17.824 15.79L-0.0973823 2.02375L-2.41879 -0.742497L2.28652 -1.36437L9.5963 4.5675L15.4801 8.565L22.2244 13.9281Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M22.0744 14.8644L19.8324 15.9444L10.9054 8.53187L8.25846 7.70437L-2.64249 -0.733124H0.505634L11.3997 7.50437L14.2935 8.49687L22.0744 14.8644Z"
+                    fill="#F50100"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M12.3608 -1.25H7.63922V5H-1.23026V10H7.63922V16.25H12.3608V10H21.2652V5H12.3608V-1.25Z"
+                    fill="#F50100"
+                  />
+                  <mask
+                    id="mask1_2928_1141"
+                    style={{ maskType: "luminance" }}
+                    maskUnits="userSpaceOnUse"
+                    x="-2"
+                    y="-2"
+                    width="24"
+                    height="19"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M12.3608 -1.25H7.63922V5H-1.23026V10H7.63922V16.25H12.3608V10H21.2652V5H12.3608V-1.25Z"
+                      fill="white"
+                    />
+                  </mask>
+                  <g mask="url(#mask1_2928_1141)">
+                    <path
+                      d="M7.63922 -1.25V-2.5H6.38947V-1.25H7.63922ZM12.3608 -1.25H13.6105V-2.5H12.3608V-1.25ZM7.63922 5V6.25H8.88896V5H7.63922ZM-1.23026 5V3.75H-2.48001V5H-1.23026ZM-1.23026 10H-2.48001V11.25H-1.23026V10ZM7.63922 10H8.88896V8.75H7.63922V10ZM7.63922 16.25H6.38947V17.5H7.63922V16.25ZM12.3608 16.25V17.5H13.6105V16.25H12.3608ZM12.3608 10V8.75H11.111V10H12.3608ZM21.2652 10V11.25H22.515V10H21.2652ZM21.2652 5H22.515V3.75H21.2652V5ZM12.3608 5H11.111V6.25H12.3608V5ZM7.63922 -4.76837e-07H12.3608V-2.5H7.63922V-4.76837e-07ZM8.88896 5V-1.25H6.38947V5H8.88896ZM-1.23026 6.25H7.63922V3.75H-1.23026V6.25ZM0.019489 10V5H-2.48001V10H0.019489ZM7.63922 8.75H-1.23026V11.25H7.63922V8.75ZM8.88896 16.25V10H6.38947V16.25H8.88896ZM12.3608 15H7.63922V17.5H12.3608V15ZM11.111 10V16.25H13.6105V10H11.111ZM21.2652 8.75H12.3608V11.25H21.2652V8.75ZM20.0155 5V10H22.515V5H20.0155ZM12.3608 6.25H21.2652V3.75H12.3608V6.25ZM11.111 -1.25V5H13.6105V-1.25H11.111Z"
+                      fill="white"
+                    />
+                  </g>
+                </g>
+              </g>
+              <defs>
+                <clipPath id="clip0_2928_1141">
+                  <rect width="20" height="15" rx="3" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </button>
 
-          </span>
+          <ul className="dropdown-menu">
+            <li><a className="dropdown-item" href="igihe.com">Kinyarwanda</a></li>
+            <li><a className="dropdown-item" href="fr.igihe.com">French</a></li>
+          </ul>
         </div>
-      </div>;
+
+      </span>
+    </div>
+  </div>;
 }

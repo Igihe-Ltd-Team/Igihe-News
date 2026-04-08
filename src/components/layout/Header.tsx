@@ -73,7 +73,7 @@ const isSpecialDate =
 
   return (
     <DeskHeader categories={categories}>
-      <div className='site-header' style={{ filter: isSpecialDate ? 'grayscale(100%)' : 'none' }}>
+      <div className={`site-header ${isSpecialDate ? 'grayscale-bg' : ''}`}>
       <div className="overlay"></div>
       <div className="overlay-sky"></div>
       <div className="overlay-sky-right"></div>

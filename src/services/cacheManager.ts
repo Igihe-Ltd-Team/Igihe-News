@@ -426,6 +426,7 @@ export interface CacheRequestOptions<T> {
   ttl?: number
   getContentDate?: (data: T) => string | Date | null
   dedup?: boolean
+  tags?: string[] 
 }
 
 export async function cachedRequest<T>(opts: CacheRequestOptions<T>): Promise<T> {

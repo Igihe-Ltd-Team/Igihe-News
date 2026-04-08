@@ -134,6 +134,7 @@ export async function fetchAdvertisements(): Promise<Advertisement[]> {
           return ads
         },
         ttl: ADS_CACHE_TTL,
+        tags: ['advertisements'],
         dedup: true,
       })
     } catch (error) {
