@@ -44,6 +44,16 @@ export async function fetchCategoryBySlug(slug: string): Promise<Category | null
   return categories[0] || null
 }
 
+export async function fetchCategoryById(category: number): Promise<Category | null> {
+  // console.log('category Data',`${API_CONFIG.baseURL}/categories/${category}&_embed`)
+  const response = await fetchWithTimeout(
+    `${API_CONFIG.baseURL}/categories/${category}?_embed`
+  )
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+  const categories = await response.json()
+  return categories[0] || null
+}
+
 export async function fetchPostsByCategorySlug(
   slug: string,
   params?: {
@@ -104,4 +114,39 @@ export async function fetchCategoriesWithPosts(
     console.error('Error fetching categories with posts:', error)
     return []
   }
+}
+
+
+
+
+export async function fetchTags(params?: {
+  page?:number
+  per_page?: number
+  orderby?: string
+  exclude?: number[]
+}): Promise<Category[]> {
+  const cacheKey = `tags:${params?.per_page ?? 100}:${params?.orderby ?? 'count'}:${params?.exclude?.join(',') ?? ''}`
+
+  return cachedRequest({
+    key: cacheKey,
+    fetchFn: async () => {
+      const queryParams: Record<string, any> = {
+        page: params?.page,
+        per_page: params?.per_page || 100,
+        _fields: 'id,name,slug,count,description',
+        orderby: params?.orderby || 'count',
+        order: 'desc',
+      }
+
+      if (params?.exclude?.length) {
+        queryParams.exclude = params.exclude.join(',')
+      }
+
+      const qs = buildQuery(queryParams)
+      const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/tags?${qs}`)
+      const data = await response.json()
+      return data.filter((cat: Category) => cat.count > 0)
+    },
+    ttl: 120 * 60 * 1000, // 2 hours
+  })
 }

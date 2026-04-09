@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -19,8 +19,25 @@ interface CommentFormData {
   comment: string;
   saveInfo: boolean;
 }
+interface ToastProps{
+  type?: string
+  message?: string
+}
 
 const API_BASE_URL = '/api/comments';
+
+
+const Toast = ({ type, message }: ToastProps) => {
+  if (!message) return null;
+  const c = type === "success" ? "#36D146" : "#EF4444";
+  return (
+    <div style={{ position: "fixed", bottom: 28, right: 28, zIndex: 9999, background: "#181818", border: `1px solid ${c}40`, borderRadius: 12, padding: "13px 18px", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 12px 40px rgba(0,0,0,0.7)", animation: "slideUp 0.25s ease", maxWidth: 360 }}>
+      <div style={{ width: 7, height: 7, borderRadius: "50%", background: c, flexShrink: 0 }} />
+      <span style={{ fontSize: 13, color: "#ddd", fontWeight: 500 }}>{message}</span>
+    </div>
+  );
+};
+
 
 const fetchComments = async (identifier: number): Promise<Comment[]> => {
   const response = await axios.get(`${API_BASE_URL}?identifier=${identifier}`);
@@ -76,6 +93,8 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ identifier, reference
     saveInfo: false,
   });
 
+  const [toast, setToast]         = useState<ToastProps | null>(null);
+
   // Track which comment is being replied to
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
 
@@ -99,6 +118,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ identifier, reference
         saveInfo: prev.saveInfo,
       }));
       setReplyingTo(null); // clear reply context after submit
+      showToast("Your idea has been submitted successfully. It will be visible after review. Thank you!");
     },
     onError: (error) => {
       console.error('Failed to submit comment:', error);
@@ -126,6 +146,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ identifier, reference
   const topLevelComments = comments.filter(c => c.replyTo === '0');
   const getReplies = (parentId: string) => comments.filter(c => c.replyTo === parentId);
 
+
+  const showToast = (message: string, type: string = "success") => {
+  setToast({ message, type });
+  setTimeout(() => setToast(null), 3500);
+};
+
+// useEffect(()=>{
+//       showToast("Your idea has been submitted successfully. It will be visible after review. Thank you!");},[])
   return (
     <div className="comments-section">
       <div className="comments-header">
@@ -262,6 +290,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ identifier, reference
           </button>
         </form>
       </div>
+    <Toast {...toast} />
     </div>
   );
 };

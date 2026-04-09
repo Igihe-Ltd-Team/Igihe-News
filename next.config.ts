@@ -63,6 +63,8 @@
 
 
 
+
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -112,6 +114,34 @@ const nextConfig: NextConfig = {
   },
 
   headers: async () => [
+    {
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/xml',
+          },
+        ],
+      },
+
+      {
+        source: '/robots.txt',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+          },
+          {
+            key: 'Content-Type',
+            value: 'text/plain',
+          },
+        ],
+      },
+      
     {
       // ✅ Static chunks: cache forever (hash in filename = safe)
       source: '/_next/static/(.*)',

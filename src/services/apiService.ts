@@ -29,9 +29,11 @@ import {
 import {
   fetchCategories,
   fetchCategoryBySlug,
+  fetchCategoryById,
   fetchPostsByCategorySlug,
   fetchPopularCategories,
   fetchCategoriesWithPosts,
+  fetchTags
 } from './categoryService'
 
 import {
@@ -98,9 +100,14 @@ export class ApiService {
   // ── Categories ───────────────────────────────────
   static fetchCategories = fetchCategories
   static fetchCategoryBySlug = fetchCategoryBySlug
+  static fetchCategoryById = fetchCategoryById
   static fetchPostsByCategorySlug = fetchPostsByCategorySlug
   static fetchPopularCategories = fetchPopularCategories
   static fetchCategoriesWithPosts = fetchCategoriesWithPosts
+
+  // ── Tags ───────────────────────────────────
+
+  static fetchTags = fetchTags
 
   // ── Traffic / Popular ────────────────────────────
   static fetchMostPopularArticles = fetchMostPopularArticles

@@ -250,12 +250,15 @@ export async function fetchPostsByAuthorId(
 }
 
 export async function fetchAllAuthors(params?: {
+  page?:number
   per_page?: number
   orderby?: string
   order?: 'asc' | 'desc'
 }): Promise<Author[]> {
   try {
     const qp = new URLSearchParams()
+
+    if (params?.page) qp.append('page',params?.page.toString())
     if (params?.per_page) qp.append('per_page', params.per_page.toString())
     if (params?.orderby) qp.append('orderby', params.orderby)
     if (params?.order) qp.append('order', params.order)
