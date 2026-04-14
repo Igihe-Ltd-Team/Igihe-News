@@ -6,6 +6,7 @@ import { ApiService } from '@/services/apiService'
 import ServerSlotManager from '../ads/ServerSlotManager'
 import HeaderClientx from './HeaderClientx'
 import DeskHeader from './DeskHeader'
+import AdManager from '../ads/AdManager'
 
 // Fetch categories on the server
 async function getCategories() {
@@ -83,13 +84,13 @@ const isSpecialDate =
         <div className="d-none d-md-block">
           <Row>
             <Col>
-              <ServerSlotManager
+              <AdManager
                 position="premium_leaderboard_1"
                 priority={true}
               />
             </Col>
             <Col>
-              <ServerSlotManager
+              <AdManager
                 position="mot-premium_leaderboard_1_b"
                 priority={true}
               />
@@ -115,7 +116,7 @@ const isSpecialDate =
           }
           desktopAdSection={
             <Col md={7} key={Math.random()}>
-              <ServerSlotManager
+              <AdManager
                 position="next-to-logo"
                 priority={true}
                 imgClass="object-position-right"

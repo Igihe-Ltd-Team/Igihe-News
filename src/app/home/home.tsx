@@ -81,13 +81,13 @@ export function Home() {
             smDisplay={1}
           >
             <Suspense fallback={null}>
-            <ServerSlotManager
+            <AdManager
               position="above-latest-news-1"
               priority={true}
             />
             </Suspense>
             <Suspense fallback={null}>
-            <ServerSlotManager
+            <AdManager
               position="above-latest-news-2"
               priority={true}
             />
@@ -107,13 +107,13 @@ export function Home() {
             smDisplay={1}
           >
             <Suspense fallback={null}>
-            <ServerSlotManager
+            <AdManager
               position="top-of-categories-1"
               priority={true}
             />
             </Suspense>
             <Suspense fallback={null}>
-            <ServerSlotManager
+            <AdManager
               position="top-of-categories-2"
               priority={true}
             />
@@ -131,14 +131,14 @@ export function Home() {
             mdDisplay={2}
             smDisplay={1}
           ><Suspense fallback={null}>
-            <ServerSlotManager
+            <AdManager
               position="inside-of-categories-1"
               priority={true}
               className="mb-2"
             />
             </Suspense>
             <Suspense fallback={null}>
-            <ServerSlotManager
+            <AdManager
               position="inside-of-categories-2"
               priority={true}
               className="mb-2"
