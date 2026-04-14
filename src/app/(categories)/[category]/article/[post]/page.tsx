@@ -9,7 +9,6 @@ import HydrateArticle from './HydrateArticle'
 import { Container } from 'react-bootstrap'
 import CustomSlider from '@/components/home/CustomSlider'
 import ServerSlotManager from '@/components/ads/ServerSlotManager'
-import AdManager from '@/components/ads/AdManager'
 
 interface PageProps {
   params: Promise<{ post: string, category: string }>
@@ -224,13 +223,13 @@ async function ArticleContent({
               smDisplay={1}
             >
               <Suspense fallback={null}>
-                <AdManager
+                <ServerSlotManager
                   position="above-latest-news-1"
                   priority={true}
                 />
               </Suspense>
               <Suspense fallback={null}>
-                <AdManager
+                <ServerSlotManager
                   position="above-latest-news-2"
                   priority={true}
                 />

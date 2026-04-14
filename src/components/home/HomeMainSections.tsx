@@ -10,7 +10,6 @@ import { useFeaturedArticles, useMainNewsArticles } from '@/hooks/useMainNewsDat
 import { getMainHomeHighlights, getOtherHomeHighlights } from './actions'
 
 import ServerSlotManager from '../ads/ServerSlotManager'
-import AdManager from '../ads/AdManager'
 
 interface ArticlesProps {
     articles: NewsItem[]
@@ -55,7 +54,7 @@ export default async function HomeMainSections() {
 
                 <div className="col-xl-3 col-lg-6 col-md-6">
                     
-                    <AdManager
+                    <ServerSlotManager
                         position="home-after-highlights"
                         priority={true}
                         className="mb-2"

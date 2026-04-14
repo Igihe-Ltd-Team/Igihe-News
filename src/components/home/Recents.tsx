@@ -22,7 +22,6 @@ import {
   getOtherFeatured
 } from './actions'
 import ServerSlotManager from '../ads/ServerSlotManager'
-import AdManager from '../ads/AdManager'
 
 const Videos = React.lazy(() => import('./Videos'))
 const Opinios = React.lazy(() => import('./Opinion'))
@@ -178,7 +177,7 @@ export default async function Recents() {
 
           <Row className='pt-4'>
             <Col>
-              <AdManager
+              <ServerSlotManager
                 position="bellow-featured-news"
                 priority={true}
                 className="mb-2"
@@ -194,7 +193,7 @@ export default async function Recents() {
           
           <Row>
             <Col>
-              <AdManager
+              <ServerSlotManager
                 position="bellow-videos"
                 priority={true}
                 className="mb-2"
@@ -206,7 +205,7 @@ export default async function Recents() {
           
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
             <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
-            <AdManager
+            <ServerSlotManager
               position="midle-large-size-add"
               priority={true}
               className="mb-2"
@@ -238,7 +237,7 @@ export default async function Recents() {
           
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
             <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
-            <AdManager
+            <ServerSlotManager
               position="after-announcements"
               priority={true}
               className="mb-2"
@@ -251,7 +250,7 @@ export default async function Recents() {
             </Suspense>
           </div>
           
-          <AdManager
+          <ServerSlotManager
             position="after-opinions"
             priority={true}
             className="mb-2"
@@ -263,7 +262,7 @@ export default async function Recents() {
             </Suspense>
           </div>
           
-          <AdManager
+          <ServerSlotManager
             position="after-facts"
             priority={true}
             className="mb-2"
