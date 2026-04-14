@@ -51,6 +51,8 @@ import {
   submitComment,
   fetchMedia,
   fetchAdvertisements,
+  clearAdsCache,
+  getSlotFresh,
   fetchAdsByPosition,
   fetchAdsByPositions,
   fetchAuthorBySlug,
@@ -123,6 +125,8 @@ export class ApiService {
   static submitComment = submitComment
   static fetchMedia = fetchMedia
   static fetchAdvertisements = fetchAdvertisements
+  static clearAdsCache = clearAdsCache
+  static getSlotFresh = getSlotFresh
   static fetchAdsByPosition = fetchAdsByPosition
   static fetchAdsByPositions = fetchAdsByPositions
   static fetchAuthorBySlug = fetchAuthorBySlug

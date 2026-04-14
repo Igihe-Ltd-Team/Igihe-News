@@ -35,20 +35,13 @@ async function purgeAll(slug?: string, category?: string) {
 
 
   try {
-    const adModule = await import('@/services/apiService')
-    // Reset the module-level cache variables
-    if ('adsCache' in adModule) {
-      // @ts-ignore - accessing module internals
-      adModule.adsCache = null
-      // @ts-ignore
-      adModule.adsCacheTimestamp = 0
-    }
+    ApiService.fetchCategories()
   } catch (e) {
     console.warn('Could not clear ad module cache:', e)
   }
   
-  revalidateTag('advertisements','page')
-  revalidateTag('slots', 'page')
+  revalidateTag('advertisements','max')
+  revalidateTag('slots', 'max')
 
   
   // ── 2. Revalidate Next.js page cache ──────────────────────────────────────
@@ -77,6 +70,9 @@ async function purgeAll(slug?: string, category?: string) {
 }
 
 export async function POST(request: NextRequest) {
+
+  
+
   // ── Authenticate ──────────────────────────────────────────────────────────
   const incomingSecret =
     request.headers.get('x-revalidate-secret') ||
@@ -86,6 +82,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+    if (typeof globalThis !== 'undefined') {
+    // Use Object.assign or direct property assignment
+    Object.assign(globalThis, { 
+      __FORCE_AD_REFRESH__: true,
+      __LAST_AD_REVALIDATION__: Date.now() 
+    })
+  }
   // ── Parse body ────────────────────────────────────────────────────────────
   // WordPress sends:
   //   { slug: "article-slug", id: 123, type: "post", category: "sport" }

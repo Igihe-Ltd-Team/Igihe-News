@@ -12,6 +12,7 @@ interface AdManagerProps {
   fallbackComponent?: React.ReactNode
   imgClass?:string
   retryCount?:number
+  bypassCache?:boolean
 }
 
 async function getSlot(position:AdPositionKey) {
@@ -27,6 +28,9 @@ async function getSlot(position:AdPositionKey) {
   }
 }
 
+
+
+
 export default async function ServerSlotManager({ 
   position, 
   className = '', 
@@ -35,9 +39,16 @@ export default async function ServerSlotManager({
   showLabel = true,
   fallbackComponent,
   imgClass,
-  retryCount = 2
+  retryCount = 2,
+  bypassCache = false
 }: AdManagerProps) {
-  const slots = await getSlot(position)
+  // const slots = await getSlot(position)
+
+
+  const slots = bypassCache 
+    ? await ApiService.getSlotFresh(position)  // Create a fresh fetch function
+    : await getSlot(position)
+
 const slotsToShow = slots.slice(0, maxAds)
 const positionConfig = AD_POSITIONS[position]
 
