@@ -81,19 +81,12 @@ export function useRealtimeCacheInvalidation() {
   const queryClient = useQueryClient()
   
   useEffect(() => {
-    // Listen for revalidation events (if using WebSockets/SSE)
-    // Or poll the server for cache version
-    const checkForUpdates = async () => {
-      // You could store a "cache version" in localStorage or check an endpoint
-    }
-    
-    // For now, you can invalidate all ad queries when the page becomes visible
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // Optional: Invalidate ads after 5 seconds of visibility
         setTimeout(() => {
+          // Invalidate ALL ad queries, regardless of position
           queryClient.invalidateQueries({ 
-            queryKey: ['ads'] 
+            queryKey: ['ads'] // This matches queryKeys.ads.all
           })
         }, 1000)
       }
@@ -114,6 +107,7 @@ export default function AdManager({
   imgClass,
   retryCount = 2
 }: AdManagerProps) {
+  useRealtimeCacheInvalidation()
   const { data: ads, isLoading, error,refetch } = useQuery({
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),

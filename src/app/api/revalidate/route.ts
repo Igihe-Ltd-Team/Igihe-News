@@ -32,6 +32,21 @@ async function purgeAll(slug?: string, category?: string) {
   ].filter(Boolean) as string[]
 
   await Promise.all(patterns.map(p => clearCache(p)))
+
+
+  try {
+    const adModule = await import('@/services/apiService')
+    // Reset the module-level cache variables
+    if ('adsCache' in adModule) {
+      // @ts-ignore - accessing module internals
+      adModule.adsCache = null
+      // @ts-ignore
+      adModule.adsCacheTimestamp = 0
+    }
+  } catch (e) {
+    console.warn('Could not clear ad module cache:', e)
+  }
+  
   revalidateTag('advertisements','page')
   revalidateTag('slots', 'page')
 
