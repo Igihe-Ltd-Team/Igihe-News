@@ -56,7 +56,7 @@
 
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiService } from '@/services/apiService'
 import AdUnit from './AdUnit'
 import { queryKeys } from '@/lib/queryKeys'
@@ -75,6 +75,35 @@ interface AdManagerProps {
   retryCount?:number
 }
 
+
+
+export function useRealtimeCacheInvalidation() {
+  const queryClient = useQueryClient()
+  
+  useEffect(() => {
+    // Listen for revalidation events (if using WebSockets/SSE)
+    // Or poll the server for cache version
+    const checkForUpdates = async () => {
+      // You could store a "cache version" in localStorage or check an endpoint
+    }
+    
+    // For now, you can invalidate all ad queries when the page becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Optional: Invalidate ads after 5 seconds of visibility
+        setTimeout(() => {
+          queryClient.invalidateQueries({ 
+            queryKey: ['ads'] 
+          })
+        }, 1000)
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [queryClient])
+}
+
 export default function AdManager({ 
   position, 
   className = '', 
@@ -88,7 +117,7 @@ export default function AdManager({
   const { data: ads, isLoading, error,refetch } = useQuery({
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 5 minutes
   })
 
 

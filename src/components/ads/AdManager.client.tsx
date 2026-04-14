@@ -41,7 +41,7 @@ export default function AdManagerClient({
   const { data: ads, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes cache time
     initialData: initialAds, // Use server-fetched data as initial data
     enabled: shouldFetch // Only fetch on client if enabled

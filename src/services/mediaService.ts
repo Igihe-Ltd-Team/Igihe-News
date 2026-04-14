@@ -110,69 +110,90 @@ let adsCache: Advertisement[] | null = null
 let adsCacheTimestamp = 0
 let adsFetchInProgress: Promise<Advertisement[]> | null = null
 
+// export async function fetchAdvertisements(): Promise<Advertisement[]> {
+//   const now = Date.now()
+
+//   if (adsCache && (now - adsCacheTimestamp) < ADS_CACHE_TTL) {
+//     return adsCache
+//   }
+
+//   if (adsFetchInProgress) return adsFetchInProgress
+
+//   adsFetchInProgress = (async () => {
+//     try {
+//       return cachedRequest({
+//         key: 'slots:all',
+//         fetchFn: async () => {
+//           const response = await fetchWithTimeout(
+//             `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${Date.now()}`
+//           )
+//           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+//           const ads = (await response.json()) || []
+//           adsCache = ads
+//           adsCacheTimestamp = Date.now()
+//           return ads
+//         },
+//         ttl: ADS_CACHE_TTL,
+//         tags: ['advertisements'],
+//         dedup: true,
+//       })
+//     } catch (error) {
+//       console.error('Error fetching advertisements:', error)
+//       return []
+//     } finally {
+//       adsFetchInProgress = null
+//     }
+//   })()
+
+//   return adsFetchInProgress
+// }
+
+
 export async function fetchAdvertisements(): Promise<Advertisement[]> {
-  const now = Date.now()
+  return cachedRequest({
+    key: 'slots:all',
+    fetchFn: async () => {
+      const response = await fetchWithTimeout(
+        `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${Date.now()}`
+      )
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+      return (await response.json()) || []
+    },
+    ttl: ADS_CACHE_TTL,
+    tags: ['advertisements', 'slots'],
+    dedup: true,
+  })
+}
 
-  if (adsCache && (now - adsCacheTimestamp) < ADS_CACHE_TTL) {
-    return adsCache
-  }
-
-  if (adsFetchInProgress) return adsFetchInProgress
-
-  adsFetchInProgress = (async () => {
-    try {
-      return cachedRequest({
-        key: 'slots:all',
-        fetchFn: async () => {
-          const response = await fetchWithTimeout(
-            `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${Date.now()}`
-          )
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-          const ads = (await response.json()) || []
-          adsCache = ads
-          adsCacheTimestamp = Date.now()
-          return ads
-        },
-        ttl: ADS_CACHE_TTL,
-        tags: ['advertisements'],
-        dedup: true,
-      })
-    } catch (error) {
-      console.error('Error fetching advertisements:', error)
-      return []
-    } finally {
-      adsFetchInProgress = null
-    }
-  })()
-
-  return adsFetchInProgress
+export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
+  return cachedRequest({
+    key: `slots:${position}`,
+    fetchFn: async () => {
+      const allAds = await fetchAdvertisements()
+      return getAdsByPosition(allAds, position)
+    },
+    ttl: ADS_CACHE_TTL,
+    tags: ['advertisements', 'slots', `slots:${position}`],
+    dedup: true,
+  })
 }
 
 // export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
 //   try {
-//     const allAds = await fetchAdvertisements()
-//     return getAdsByPosition(allAds, position)
-//   } catch {
+//     return cachedRequest({
+//       key: `slots:${position}`,
+//       fetchFn: async () => {
+//         const allAds = await fetchAdvertisements()
+//         return getAdsByPosition(allAds, position)
+//       },
+//       ttl: ADS_CACHE_TTL,
+//       dedup: true,
+//     })
+//   } catch (error) {
+//     console.error(`Error fetching ads for position ${position}:`, error)
 //     return []
 //   }
 // }
-
-export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
-  try {
-    return cachedRequest({
-      key: `slots:${position}`,
-      fetchFn: async () => {
-        const allAds = await fetchAdvertisements()
-        return getAdsByPosition(allAds, position)
-      },
-      ttl: ADS_CACHE_TTL,
-      dedup: true,
-    })
-  } catch (error) {
-    console.error(`Error fetching ads for position ${position}:`, error)
-    return []
-  }
-}
 
 export async function fetchAdsByPositions(
   positions: AdPositionKey[]

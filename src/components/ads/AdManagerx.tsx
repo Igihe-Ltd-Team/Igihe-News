@@ -153,7 +153,7 @@ export default function AdManager({
   const { data: ads, isLoading, error,refetch } = useQuery({
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 5 minutes
   })
 
 

@@ -17,19 +17,6 @@ async function getAllCategories(): Promise<string[]> {
 }
 
 async function purgeAll(slug?: string, category?: string) {
-  // ── 1. Clear custom memory + file cache ────────────────────────────────────
-  //
-  // Every cache key prefix used across all service files:
-  //   articleService  → post:, articles:, opinion:, advertorial:, announcement:, fact-of-the-day:, search:
-  //   trafficService  → popular:
-  //   categoryService → categories:
-  //   mediaService    → videos:, author-posts:
-  //
-  // We intentionally skip:
-  //   slots:      (ads — 1hr TTL, safe to leave)
-  //   media:      (images — 1hr TTL, never changes on publish)
-  //   comments:   (per-post, unrelated to new article)
-  //   video:      (single video, unrelated)
 
   const patterns = [
     slug ? `post:${slug}` : null,  // specific article first (fast path)
@@ -45,7 +32,10 @@ async function purgeAll(slug?: string, category?: string) {
   ].filter(Boolean) as string[]
 
   await Promise.all(patterns.map(p => clearCache(p)))
-  revalidateTag('advertisements', 'default')
+  revalidateTag('advertisements','page')
+  revalidateTag('slots', 'page')
+
+  
   // ── 2. Revalidate Next.js page cache ──────────────────────────────────────
   //
   // Pattern revalidation — marks ALL instances of each dynamic route stale.
