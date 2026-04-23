@@ -6,7 +6,8 @@ import Header from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { initCacheCleanup } from '@/lib/cache/cleanup'
 import Script from 'next/script';
-
+import GoogleAnalytics from '@/components/GoogleAnalytics'
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'IGIHE',
@@ -24,6 +25,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={raleway.variable}>
+
+        <Suspense fallback={null}>
+          {/* Suspense is required because useSearchParams() suspends */}
+          <GoogleAnalytics />
+        </Suspense>
+        
         <Providers>
           <Header />
           <main className="py-2">{children}</main>

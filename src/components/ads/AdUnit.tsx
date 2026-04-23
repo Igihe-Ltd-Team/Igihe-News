@@ -34,7 +34,11 @@ export default function AdUnit({
   const rawUrl = ad.ads_image.url
   const imageUrl = rawUrl ? `${rawUrl}?v=${dimensions.height || ad.id}` : rawUrl
 
-
+const adDestination = ad?.meta?.igh_ad_url
+  const trackingHref = adDestination
+    ? `/api/ad-click?url=${encodeURIComponent(adDestination)}&adId=${encodeURIComponent(String(ad.id))}&position=${encodeURIComponent(position)}`
+    : '#'
+    
   if (!adImage.ads_image.url || imageError) {
     return (
       <div 
@@ -53,7 +57,8 @@ export default function AdUnit({
   return (
     <div className={`slot-unit tag-${position} ${className}`}>
       <a 
-        href={ad?.meta?.igh_ad_url || '#'} 
+      href={trackingHref}
+        // href={ad?.meta?.igh_ad_url || '#'} 
         target="_blank" 
         rel="noopener noreferrer nofollow sponsored"
         className="d-block text-decoration-none"
