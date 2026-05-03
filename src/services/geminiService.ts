@@ -562,6 +562,29 @@ export async function summarizeArticle(article: NewsItem): Promise<string> {
   );
 }
 
+
+export async function semanticSearch(
+  query: string,
+  articles: NewsItem[]
+): Promise<NewsItem[]> {
+  const list = articles.map((a, i) => `${i}: ${a.title.rendered}`).join("\n");
+
+  const text = await generate(`
+Search query: "${query}"
+
+From list:
+${list}
+
+Return top matching indices:
+    `);
+
+  return text
+    .split(",")
+    .map((n) => parseInt(n.trim()))
+    .filter((n) => !isNaN(n) && n < articles.length)
+    .map((i) => articles[i]);
+}
+
 export async function askAboutArticle(article: NewsItem, q: string): Promise<string> {
   const content = stripHtml(article.content?.rendered || "");
   return generate(
