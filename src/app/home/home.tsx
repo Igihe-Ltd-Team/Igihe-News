@@ -12,6 +12,7 @@ import CustomSlider from '@/components/home/CustomSlider'
 import AdManager from '@/components/ads/AdManager'
 import TopSection from './TopSection'
 import ServerSlotManager from '@/components/ads/ServerSlotManager'
+import NewsAgent from '@/components/NewsAgent'
 
 
 const upperCats = [
@@ -150,6 +151,8 @@ export function Home() {
       <Suspense fallback={<NewsSkeleton count={1} />}>
         <Categories categories={lowerCats} />
       </Suspense>
+
+      <NewsAgent/>
     </>
   )
 }

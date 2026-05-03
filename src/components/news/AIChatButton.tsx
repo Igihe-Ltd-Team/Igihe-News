@@ -11,6 +11,11 @@ interface Message {
   text: string
 }
 
+
+
+
+
+
 export default function AIChatButton({ article }: { article?: NewsItem }) {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
