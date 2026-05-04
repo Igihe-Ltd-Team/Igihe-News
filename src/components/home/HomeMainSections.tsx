@@ -10,6 +10,7 @@ import { useFeaturedArticles, useMainNewsArticles } from '@/hooks/useMainNewsDat
 import { getMainHomeHighlights, getOtherHomeHighlights } from './actions'
 
 import ServerSlotManager from '../ads/ServerSlotManager'
+import { ApiService } from '@/services/apiService'
 
 interface ArticlesProps {
     articles: NewsItem[]
@@ -20,13 +21,19 @@ export default async function HomeMainSections() {
     const [
         main,
         other,
+        adSlots
       ] = await Promise.all([
         getMainHomeHighlights(),
         getOtherHomeHighlights(),
+        ApiService.fetchAdsByPosition("home-after-highlights"),
       ])
+
+      const hasAd = Array.isArray(adSlots) && adSlots.length > 0;
+
     const safeArticles = Array.isArray(other) ? other : []
     const timeLineNews = safeArticles.slice(0, 5)
-    const asideNews = safeArticles.slice(5, 7)
+    const asideNews =  hasAd ? safeArticles.slice(5, 7) : safeArticles.slice(5, 10);
+    
 
     if (!other?.length) {
         return <SingleSkeleton/>

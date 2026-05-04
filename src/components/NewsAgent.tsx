@@ -182,8 +182,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-
         :root {
           --igihe-bg: #0d0f14;
           --igihe-surface: #13161d;
@@ -197,8 +195,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           --igihe-accent-glow: rgba(59,130,246,0.25);
           --igihe-green: #10b981;
           --igihe-user-bg: #1d4ed8;
-          --font-main: 'Sora', sans-serif;
-          --font-mono: 'JetBrains Mono', monospace;
           --radius: 18px;
           --radius-sm: 10px;
         }
@@ -281,7 +277,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           overflow: hidden;
           box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
           animation: panel-in 0.3s cubic-bezier(.16,1,.3,1);
-          font-family: var(--font-main);
         }
         @keyframes panel-in {
           from { opacity: 0; transform: translateY(24px) scale(0.97); }
@@ -431,7 +426,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           font-size: 10.5px;
           color: var(--igihe-text-muted);
           padding: 0 4px;
-          font-family: var(--font-mono);
         }
 
         /* ── Typing ── */
@@ -461,7 +455,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         .igihe-typing__label {
           font-size: 12px;
           color: var(--igihe-text-muted);
-          font-family: var(--font-mono);
           transition: opacity 0.4s;
         }
 
@@ -495,7 +488,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           border: 1px solid var(--igihe-border-bright);
           color: var(--igihe-text);
           font-size: 12.5px;
-          font-family: var(--font-main);
           cursor: pointer;
           display: flex; align-items: center; gap: 6px;
           transition: all 0.15s;
@@ -536,7 +528,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           border: none;
           outline: none;
           color: var(--igihe-text);
-          font-family: var(--font-main);
           font-size: 14px;
           line-height: 1.6;
           resize: none;
@@ -584,7 +575,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           color: var(--igihe-text-muted);
           text-align: center;
           margin-top: 8px;
-          font-family: var(--font-mono);
         }
 
         .igihe-divider {
@@ -592,7 +582,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           font-size: 11px;
           color: var(--igihe-text-muted);
           position: relative;
-          font-family: var(--font-mono);
         }
         .igihe-divider::before, .igihe-divider::after {
           content: '';

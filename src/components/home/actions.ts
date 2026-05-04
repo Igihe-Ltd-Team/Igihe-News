@@ -39,7 +39,7 @@ export const getMainHomeHighlights = createCachedFetch(async (): Promise<NewsIte
 
 export const getOtherHomeHighlights = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 7, tags: [69] })
+    const response = await ApiService.fetchArticles({ per_page: 10, tags: [69] })
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
