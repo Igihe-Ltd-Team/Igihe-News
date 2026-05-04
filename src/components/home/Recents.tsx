@@ -122,9 +122,14 @@ export default async function Recents() {
   const isMobile = false // This should be determined from user agent
 
 
-  const transformedArticles: NewsItem[] = popular?.map(transformToNewsItem);
+  // console.log('popular popular popular',popular)
 
-        
+  // const transformedArticles: NewsItem[] = popular?.map(transformToNewsItem);
+
+  const transformedArticles: NewsItem[] =
+  (popular ?? [])
+    .filter((item) => item?.url && item?.title)
+    .map(transformToNewsItem);
 
 
   return (

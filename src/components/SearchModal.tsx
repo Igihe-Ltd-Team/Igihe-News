@@ -22,7 +22,13 @@ export default function SearchModal() {
   } = useNewsData();
 
 
-  const transformedArticles: NewsItem[] = popularArticles?.map(transformToNewsItem);
+  // const transformedArticles: NewsItem[] = popularArticles?.map(transformToNewsItem);
+
+
+  const transformedArticles: NewsItem[] = (popularArticles ?? [])
+      .filter((item) => item?.url && item?.title)
+      .map(transformToNewsItem);
+
 
   // Load recent searches
   useEffect(() => {
