@@ -53,7 +53,7 @@ describe('fetchPostBySlug', () => {
   it('returns cached result on second call', async () => {
     let callCount = 0
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', () => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', () => {
         callCount++
         return HttpResponse.json([makePost()])
       })
@@ -122,7 +122,7 @@ describe('fetchArticles', () => {
   it('applies orderby and order params', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([], {
           headers: { 'X-WP-Total': '0', 'X-WP-TotalPages': '1' },
@@ -165,7 +165,7 @@ describe('fetchRelatedPosts', () => {
 
   it('falls back to fetchArticles when no related posts found', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', ({ request }) => {
         const url = new URL(request.url)
         if (url.searchParams.get('exclude')) {
           return HttpResponse.json([]) // no related
@@ -231,7 +231,7 @@ describe('fetchAdvertorials', () => {
 
   it('throws on non-OK response', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/advertorial', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/advertorial', () =>
         HttpResponse.json({}, { status: 500 })
       )
     )
@@ -250,7 +250,7 @@ describe('fetchFacts', () => {
 
   it('throws on server error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/fact-of-the-day', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/fact-of-the-day', () =>
         HttpResponse.json({}, { status: 500 })
       )
     )
@@ -298,7 +298,7 @@ describe('refreshArticle', () => {
 describe('refreshArticleById', () => {
   it('resolves slug from ID then refreshes', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts/42', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts/42', () =>
         HttpResponse.json({ slug: 'test-post' })
       )
     )
@@ -308,7 +308,7 @@ describe('refreshArticleById', () => {
 
   it('throws when no slug is returned', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts/42', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts/42', () =>
         HttpResponse.json({ id: 42 }) // no slug
       )
     )

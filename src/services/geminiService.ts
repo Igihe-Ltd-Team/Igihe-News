@@ -11,7 +11,7 @@
 // const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 // const model = genAI?.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-// // const WP_API = "https://new.igihe.com/wp-json/wp/v2";
+// // const WP_API = "https://new.igihe.com/english/wp-json/wp/v2";
 
 // const ARTICLE_FIELDS = [
 //   "id", "date", "title", "excerpt", "content",
@@ -395,7 +395,7 @@ async function generate(prompt: string, fallback?: string): Promise<string> {
 
 // ─── WordPress fetchers ───────────────────────────────────────────────────────
 const WP_API = process.env.NEXT_PUBLIC_WORDPRESS_API_URL;
-// const WP_API = "https://new.igihe.com/wp-json/wp/v2";
+// const WP_API = "https://new.igihe.com/english/wp-json/wp/v2";
 const ARTICLE_FIELDS = [
   "id", "date", "title", "excerpt", "content",
   "featured_image", "categories", "bylines", "link", "slug",

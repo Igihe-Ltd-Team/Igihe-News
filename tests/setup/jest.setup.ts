@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom'
 
-process.env.NEXT_PUBLIC_WORDPRESS_API_URL = 'https://new.igihe.com/wp-json/wp/v2'
+process.env.NEXT_PUBLIC_WORDPRESS_API_URL = 'https://new.igihe.com/english/wp-json/wp/v2'
 
 // Silence noise unless TEST_VERBOSE is set
 if (!process.env.TEST_VERBOSE) {

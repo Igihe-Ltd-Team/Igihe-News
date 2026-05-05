@@ -7,11 +7,11 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-const BASE = 'https://new.igihe.com/wp-json/wp/v2'
+const BASE = 'https://new.igihe.com/english/wp-json/wp/v2'
 
 describe('API_CONFIG', () => {
   it('reads baseURL from env', () => {
-    expect(API_CONFIG.baseURL).toBe('https://new.igihe.com/wp-json/wp/v2')
+    expect(API_CONFIG.baseURL).toBe('https://new.igihe.com/english/wp-json/wp/v2')
   })
 
   it('has timeout of 20 seconds', () => {

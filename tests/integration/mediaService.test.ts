@@ -39,7 +39,7 @@ describe('fetchVideos', () => {
   it('supports search param', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/igh-yt-videos', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/igh-yt-videos', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })
@@ -74,7 +74,7 @@ describe('fetchComments', () => {
   it('supports pagination params', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/comments', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/comments', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })
@@ -103,7 +103,7 @@ describe('submitComment', () => {
   it('supports parent comment threading', async () => {
     let capturedBody: any
     server.use(
-      http.post('https://new.igihe.com/wp-json/wp/v2/comments', async ({ request }) => {
+      http.post('https://new.igihe.com/english/wp-json/wp/v2/comments', async ({ request }) => {
         capturedBody = await request.json()
         return HttpResponse.json({ id: 100, ...capturedBody }, { status: 201 })
       })
@@ -149,7 +149,7 @@ describe('fetchAdvertisements', () => {
   
   // Now simulate an error - the function should return cached data or handle gracefully
   server.use(
-    http.get('https://new.igihe.com/wp-json/wp/v2/advertisement', () => {
+    http.get('https://new.igihe.com/english/wp-json/wp/v2/advertisement', () => {
       return HttpResponse.json({ error: 'Server Error' }, { status: 500 })
     })
   )
@@ -170,7 +170,7 @@ describe('fetchAdvertisements', () => {
 
     let callCount = 0
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/advertisement', async () => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/advertisement', async () => {
         callCount++
         await new Promise(res => setTimeout(res, 100))
         return HttpResponse.json([{ id: 1, acf: { position: 'test', image: '', link: '' } }])
@@ -197,7 +197,7 @@ describe('fetchAdsByPosition', () => {
 
   it('returns empty array on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/advertisement', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/advertisement', () =>
         HttpResponse.error()
       )
     )
@@ -235,7 +235,7 @@ describe('fetchAuthorBySlug', () => {
 
   it('throws on server error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/users', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', () =>
         HttpResponse.json({}, { status: 500 })
       )
     )
@@ -268,7 +268,7 @@ describe('fetchPostsByAuthorSlug', () => {
 
   it('returns empty data on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/users', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', () =>
         HttpResponse.error()
       )
     )
@@ -285,7 +285,7 @@ describe('fetchPostsByAuthorId', () => {
 
   it('returns empty array on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', () =>
         HttpResponse.error()
       )
     )
@@ -304,7 +304,7 @@ describe('fetchAllAuthors', () => {
   it('accepts per_page param', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/users', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })
@@ -315,7 +315,7 @@ describe('fetchAllAuthors', () => {
 
   it('returns empty array on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/users', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', () =>
         HttpResponse.error()
       )
     )

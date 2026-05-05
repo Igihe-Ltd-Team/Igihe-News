@@ -91,7 +91,7 @@ describe('fetchPopularPosts', () => {
   it('fetches posts ordered by comment count', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })
@@ -103,7 +103,7 @@ describe('fetchPopularPosts', () => {
   it('filters by date range when days param given', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })

@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 
-const BASE = 'https://new.igihe.com/wp-json/wp/v2'
+const BASE = 'https://new.igihe.com/english/wp-json/wp/v2'
 const TRAFFIC = 'https://traffic.igihe.com/api/popular.php'
 
 // ── Factories ────────────────────────────────────────────────────────────────
@@ -195,7 +195,7 @@ export const handlers = [
   }),
 
   // Health check
-  http.get('https://new.igihe.com/wp-json/wp/v2/', () => {
+  http.get('https://new.igihe.com/english/wp-json/wp/v2/', () => {
     return HttpResponse.json({ name: 'Test Site' })
   }),
 ]

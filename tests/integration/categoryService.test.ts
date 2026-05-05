@@ -30,7 +30,7 @@ describe('fetchCategories', () => {
   it('accepts per_page param', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/categories', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/categories', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([{ id: 1, name: 'Tech', slug: 'tech', count: 5, description: '' }])
       })
@@ -42,7 +42,7 @@ describe('fetchCategories', () => {
   it('excludes specified category IDs', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/categories', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/categories', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })
@@ -71,7 +71,7 @@ describe('fetchCategoryBySlug', () => {
 
   it('throws on server error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/categories', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/categories', () =>
         HttpResponse.json({}, { status: 500 })
       )
     )
@@ -101,7 +101,7 @@ describe('fetchPopularCategories', () => {
 
   it('returns empty array on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/categories', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/categories', () =>
         HttpResponse.error()
       )
     )
@@ -123,7 +123,7 @@ describe('fetchCategoriesWithPosts', () => {
   it('gracefully handles post fetch failure per category', async () => {
     let callCount = 0
     server.use(
-      http.get('https://new.igihe.com/wp-json/wp/v2/posts', () => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/posts', () => {
         callCount++
         if (callCount > 1) return HttpResponse.error()
         return HttpResponse.json([{ id: 1, slug: 'p', title: { rendered: 'T' }, date: new Date().toISOString() }], {
