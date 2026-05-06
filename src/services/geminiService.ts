@@ -338,38 +338,161 @@ const GEMINI_KEYS = [
   // process.env.GEMINI_API_KEY_5,
 ].filter(Boolean) as string[];
 
+
 if (GEMINI_KEYS.length === 0) {
   console.warn("[AI] No Gemini API keys configured. Add GEMINI_API_KEY_1 to .env");
 }
 
 // Track which keys are exhausted for this process lifetime
 // (resets when the server restarts, which is fine — daily quota resets too)
-const exhaustedKeys = new Set<string>();
 
-function getAvailableKey(): string | null {
-  return GEMINI_KEYS.find(k => !exhaustedKeys.has(k)) ?? null;
+
+const keyCooldowns = new Map<string, number>();
+const keyFailCounts = new Map<string, number>();
+const COOLDOWN_MS = 60_000;
+const responseCache = new Map<string, { response: string; timestamp: number }>();
+const CACHE_TTL = 30 * 60 * 1000;
+const QUEUE_DELAY_MS = 1000; // 1 second between batches
+
+
+
+const userRateLimits = new Map<string, { count: number; resetTime: number }>();
+const USER_RATE_LIMIT = 5; // requests per minute per user
+const USER_RATE_WINDOW = 60_000; // 1 minute
+const keyQueues = new Map<string, Array<() => Promise<void>>>();
+
+let processingKeyQueues = false;
+
+function checkUserRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const userLimit = userRateLimits.get(userId);
+
+  if (!userLimit || now > userLimit.resetTime) {
+    userRateLimits.set(userId, { count: 1, resetTime: now + USER_RATE_WINDOW });
+    return true;
+  }
+
+  if (userLimit.count >= USER_RATE_LIMIT) {
+    return false; // Rate limited
+  }
+
+  userLimit.count++;
+  return true;
 }
+
+
+GEMINI_KEYS.forEach(key => {
+  keyQueues.set(key, []);
+});
 
 function markExhausted(key: string) {
-  exhaustedKeys.add(key);
-  const remaining = GEMINI_KEYS.length - exhaustedKeys.size;
-  console.warn(`[AI] Key ...${key.slice(-6)} exhausted. ${remaining} key(s) remaining.`);
+  const fails = (keyFailCounts.get(key) ?? 0) + 1;
+  keyFailCounts.set(key, fails);
+
+  // Exponential backoff: 60s, 120s, 240s, 480s
+  const cooldown = COOLDOWN_MS * Math.pow(2, fails - 1);
+  const until = Date.now() + cooldown;
+  keyCooldowns.set(key, until);
+
+  const available = GEMINI_KEYS.filter(k => Date.now() > (keyCooldowns.get(k) ?? 0)).length;
+  console.warn(`[AI] Key ...${key.slice(-6)} cooling down for ${cooldown / 1000}s (failure #${fails}). ${available} key(s) still available.`);
+
+  // Reset fail count after 5 minutes of no failures
+  setTimeout(() => {
+    keyFailCounts.delete(key);
+  }, 5 * 60 * 1000);
 }
 
-// ─── Core generate() with key rotation ───────────────────────────────────────
+// ─── Core generate() with queue and retry ───────────────────────────────────
 
-async function generate(prompt: string, fallback?: string): Promise<string> {
-  // Try each available key in order
-  for (let attempt = 0; attempt < GEMINI_KEYS.length; attempt++) {
+
+function getAvailableKey(): string | null {
+  const now = Date.now();
+
+  const availableKeys = GEMINI_KEYS.filter(k => {
+    const cooldownUntil = keyCooldowns.get(k) ?? 0;
+    return now > cooldownUntil;
+  });
+
+  if (availableKeys.length === 0) return null;
+
+  // Prefer keys with fewer recent failures AND shorter queues
+  availableKeys.sort((a, b) => {
+    const aFails = keyFailCounts.get(a) ?? 0;
+    const bFails = keyFailCounts.get(b) ?? 0;
+    if (aFails !== bFails) return aFails - bFails;
+
+    // If fail counts equal, prefer shorter queue
+    const aQueue = keyQueues.get(a)?.length ?? 0;
+    const bQueue = keyQueues.get(b)?.length ?? 0;
+    return aQueue - bQueue;
+  });
+
+  return availableKeys[0];
+}
+
+
+async function processAllKeyQueues() {
+  if (processingKeyQueues) return;
+  processingKeyQueues = true;
+
+  try {
+    while (true) {
+      // Collect available tasks from all queues
+      const tasks: Array<() => Promise<void>> = [];
+
+      for (const key of GEMINI_KEYS) {
+        const queue = keyQueues.get(key)!;
+        // Take up to 1 task per key (since each key can handle 1 request at a time)
+        if (queue.length > 0) {
+          const task = queue.shift();
+          if (task) tasks.push(task);
+        }
+      }
+
+      if (tasks.length === 0) break; // No more tasks
+
+      // Process all tasks in parallel (one per key)
+      await Promise.allSettled(tasks.map(task => task()));
+
+      // Small delay between batches
+      await new Promise(resolve => setTimeout(resolve, QUEUE_DELAY_MS));
+    }
+  } finally {
+    processingKeyQueues = false;
+  }
+}
+
+
+async function actualGenerate(prompt: string, fallback?: string): Promise<string> {
+  const maxWaitMs = 90_000;
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitMs) {
     const key = getAvailableKey();
-    if (!key) break; // all keys exhausted
+
+    if (!key) {
+      // Find soonest key to recover
+      const cooldowns = [...keyCooldowns.values()];
+      if (cooldowns.length === 0) break;
+
+      const soonest = Math.min(...cooldowns);
+      const waitMs = Math.max(0, soonest - Date.now()) + 500;
+      console.log(`[AI] All keys cooling down. Waiting ${Math.ceil(waitMs / 1000)}s...`);
+      await new Promise(res => setTimeout(res, waitMs));
+      continue;
+    }
 
     try {
       const client = new GoogleGenerativeAI(key);
-      const model = client.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = client.getGenerativeModel({ model: "gemini-3-flash-preview" });
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim();
-      if (text) return text;
+      if (text) {
+        // Success! Reset fail count
+        keyFailCounts.delete(key);
+        return text;
+      }
     } catch (err: any) {
       const isQuota =
         err?.status === 429 ||
@@ -380,19 +503,64 @@ async function generate(prompt: string, fallback?: string): Promise<string> {
 
       if (isQuota) {
         markExhausted(key);
-        continue; // try next key
+        continue;
       }
 
-      // Real error (bad prompt, network, etc.) — don't rotate, just fail
       console.error("[AI] Gemini error:", err?.message);
       break;
     }
   }
 
-  // All keys exhausted or failed — use rule-based fallback
   if (fallback !== undefined) return fallback;
-  throw new Error("All Gemini API keys are exhausted. Please try again tomorrow or add more keys.");
+  throw new Error("All Gemini API keys are temporarily exhausted. Please wait a minute and try again.");
 }
+function getCacheKey(prompt: string): string {
+  // Create deterministic cache key from prompt
+  return prompt.slice(0, 200) + prompt.slice(-50);
+}
+
+async function generate(prompt: string, fallback?: string): Promise<string> {
+  // Check cache first
+  const cacheKey = getCacheKey(prompt);
+  const cached = responseCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log("[AI] Cache hit! Skipping API call.");
+    return cached.response;
+  }
+
+  return new Promise((resolve, reject) => {
+    const task = async () => {
+      try {
+        const result = await actualGenerate(prompt, fallback);
+        // Store in cache
+        responseCache.set(cacheKey, { response: result, timestamp: Date.now() });
+        resolve(result);
+      } catch (err) {
+        if (fallback !== undefined) {
+          console.warn("[AI] Using fallback:", fallback.substring(0, 100));
+          resolve(fallback);
+        } else {
+          reject(err);
+        }
+      }
+    };
+
+    // Add to the least loaded key's queue
+    const key = getAvailableKey() || GEMINI_KEYS[0]; // Fallback to first key even if cooling down
+    keyQueues.get(key)!.push(task);
+    processAllKeyQueues();
+  });
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of responseCache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      responseCache.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
 
 // ─── WordPress fetchers ───────────────────────────────────────────────────────
 const WP_API = process.env.NEXT_PUBLIC_WORDPRESS_API_URL;
@@ -450,18 +618,18 @@ interface SearchPlan {
 }
 
 const TOPIC_MAP: Array<{ patterns: RegExp; terms: string[] }> = [
-  { patterns: /polit|gouvern|ministe|preside|parlement|senat|inteko|leta/i,    terms: ["politique", "gouvernement"] },
-  { patterns: /sport|football|soccer|nba|tennis|athletics|ikipe|umupira/i,     terms: ["sport", "football"] },
-  { patterns: /econom|business|finance|bank|franc|dollar|isoko|ubucuruzi/i,    terms: ["economie", "business"] },
-  { patterns: /health|hospital|disease|covid|ubuzima|indwara/i,                terms: ["sante", "ubuzima"] },
-  { patterns: /educat|school|university|kaminuza|amashuri/i,                   terms: ["education", "amashuri"] },
-  { patterns: /securit|police|military|ingabo|umutekano|crime/i,               terms: ["securite", "umutekano"] },
-  { patterns: /kagame|perezida/i,                                               terms: ["Kagame"] },
-  { patterns: /africa|afrique|continental|union africaine/i,                   terms: ["Afrique"] },
-  { patterns: /rwanda|kigali|intara|akarere/i,                                 terms: ["Rwanda"] },
-  { patterns: /culture|music|art|umuco|muziki/i,                               terms: ["culture", "umuco"] },
-  { patterns: /technolog|internet|digital|ikoranabuhanga/i,                    terms: ["technologie"] },
-  { patterns: /environment|ibidukikije|climate|ikirere/i,                      terms: ["environnement", "ibidukikije"] },
+  { patterns: /polit|gouvern|ministe|preside|parlement|senat|inteko|leta/i, terms: ["politique", "gouvernement"] },
+  { patterns: /sport|football|soccer|nba|tennis|athletics|ikipe|umupira/i, terms: ["sport", "football"] },
+  { patterns: /econom|business|finance|bank|franc|dollar|isoko|ubucuruzi/i, terms: ["economie", "business"] },
+  { patterns: /health|hospital|disease|covid|ubuzima|indwara/i, terms: ["sante", "ubuzima"] },
+  { patterns: /educat|school|university|kaminuza|amashuri/i, terms: ["education", "amashuri"] },
+  { patterns: /securit|police|military|ingabo|umutekano|crime/i, terms: ["securite", "umutekano"] },
+  { patterns: /kagame|perezida/i, terms: ["Kagame"] },
+  { patterns: /africa|afrique|continental|union africaine/i, terms: ["Afrique"] },
+  { patterns: /rwanda|kigali|intara|akarere/i, terms: ["Rwanda"] },
+  { patterns: /culture|music|art|umuco|muziki/i, terms: ["culture", "umuco"] },
+  { patterns: /technolog|internet|digital|ikoranabuhanga/i, terms: ["technologie"] },
+  { patterns: /environment|ibidukikije|climate|ikirere/i, terms: ["environnement", "ibidukikije"] },
 ];
 
 const RECENCY_RE = /today|uyu munsi|aujourd|latest|breaking|now|just|recent|this week|iki cyumweru|dernier|maintenant/i;
@@ -657,8 +825,14 @@ export interface AgentMessage {
   content: string;
 }
 
-export async function chatWithNewsAgent(messages: AgentMessage[]): Promise<string> {
+export async function chatWithNewsAgent(messages: AgentMessage[],
+  userId?: string
+): Promise<string> {
   const lastUser = [...messages].reverse().find(m => m.role === "user");
+  if (userId && !checkUserRateLimit(userId)) {
+    return "You're sending messages too quickly. Please wait a moment before trying again.";
+  }
+
   if (!lastUser) return "Please ask me something!";
 
   const todayFormatted = new Date().toLocaleDateString("en-GB", {
@@ -671,7 +845,7 @@ export async function chatWithNewsAgent(messages: AgentMessage[]): Promise<strin
   // Step 2 — WP fetches in parallel (free, 0 Gemini calls)
   const fetches: Promise<NewsItem[]>[] = plan.searches.map(q => wpSearch(q, 15));
   if (plan.needsRecent) fetches.push(wpRecent(25));
-  if (plan.dateAfter)   fetches.push(wpByDate(plan.dateAfter, undefined, 20));
+  if (plan.dateAfter) fetches.push(wpByDate(plan.dateAfter, undefined, 20));
   const articles = dedup(await Promise.all(fetches));
 
   // Step 3 — one Gemini call, with rule-based fallback if all keys exhausted
