@@ -612,21 +612,96 @@ interface SearchPlan {
   needsRecent: boolean;
   dateAfter?: string;
 }
-
 const TOPIC_MAP: Array<{ patterns: RegExp; terms: string[] }> = [
-  { patterns: /polit|gouvern|ministe|preside|parlement|senat|inteko|leta/i, terms: ["politique", "gouvernement"] },
-  { patterns: /sport|football|soccer|nba|tennis|athletics|ikipe|umupira/i, terms: ["sport", "football"] },
-  { patterns: /econom|business|finance|bank|franc|dollar|isoko|ubucuruzi/i, terms: ["economie", "business"] },
-  { patterns: /health|hospital|disease|covid|ubuzima|indwara/i, terms: ["sante", "ubuzima"] },
-  { patterns: /educat|school|university|kaminuza|amashuri/i, terms: ["education", "amashuri"] },
-  { patterns: /securit|police|military|ingabo|umutekano|crime/i, terms: ["securite", "umutekano"] },
+  { patterns: /polit|gouvern|ministe|preside|parlement|senat|inteko|leta|gov't|govt|pm\b|president|government/i, terms: ["Govt", "government"] },
+  { patterns: /sport|football|soccer|nba|nfl|epl|caf|afcon|tennis|athletics|ikipe|umupira|bal\b|fut\b/i, terms: ["sport", "football"] },
+  { patterns: /econom|business|finance|bank|bnr|frw|usd|franc|dollar|isoko|ubucuruzi|gdp|imf|world bank/i, terms: ["economy", "business"] },
+  { patterns: /health|hospital|disease|covid|hiv|aids|\btb\b|ubuzima|indwara|chuk/i, terms: ["health", "ubuzima"] },
+  { patterns: /educat|school|univ\b|reb\b|tvet|kaminuza|amashuri/i, terms: ["education", "amashuri"] },
+  { patterns: /securit|police|military|rdf\b|rnp\b|ingabo|umutekano|crime/i, terms: ["security", "RDF"] },
   { patterns: /kagame|perezida/i, terms: ["Kagame"] },
-  { patterns: /africa|afrique|continental|union africaine/i, terms: ["Afrique"] },
+  { patterns: /africa|afrique|\bau\b|union africaine|eac\b|comesa/i, terms: ["Africa", "EAC"] },
   { patterns: /rwanda|kigali|intara|akarere/i, terms: ["Rwanda"] },
-  { patterns: /culture|music|art|umuco|muziki/i, terms: ["culture", "umuco"] },
-  { patterns: /technolog|internet|digital|ikoranabuhanga/i, terms: ["technologie"] },
-  { patterns: /environment|ibidukikije|climate|ikirere/i, terms: ["environnement", "ibidukikije"] },
+  { patterns: /culture|music|art|umuco|muziki|film|cinema/i, terms: ["culture", "umuco"] },
+  { patterns: /tech|technolog|internet|digital|\bai\b|ikoranabuhanga|ict\b|risa\b/i, terms: ["technology", "ICT"] },
+  { patterns: /environment|ibidukikije|climate|ikirere|rema\b|energy/i, terms: ["environment", "energy"] },
+  { patterns: /justice|gacaca|inkiko|tribunal|court/i, terms: ["justice", "inkiko"] },
+  { patterns: /transport|road|trafic|bus|moto|\bcar\b|rtda\b/i, terms: ["transport", "RTDA"] },
+  { patterns: /agri|farm|ubuhinzi|crop|harvest|minagri|naeb/i, terms: ["agriculture", "ubuhinzi"] },
 ];
+
+const STOP_WORDS = new Set([
+  "the","a","an","is","are","was","were","be","been","have","has","had",
+  "do","does","did","will","would","could","should","may","might","can",
+  "what","who","how","when","where","why","which","that","this","these",
+  "those","i","me","my","we","our","you","your","he","she","it","they",
+  "them","their","and","or","but","in","on","at","to","for","of","with",
+  "about","tell","show","find","get","give","news","article",
+  "ndashaka","nifuza","mpabaze","jyandikira","ambwire","mbwire",
+  "set","also","just","some","more","than","its","been","said",
+]);
+
+// Maps user words → best WP search terms (kept tight — 1 or 2 per word)
+const SYNONYMS: Record<string, string[]> = {
+  // Government
+  "government": ["Govt"],
+  "govt":       ["government"],
+  "leta":       ["Govt", "government"],
+  // Budget / Finance
+  "budget":     ["budget"],
+  "ingengo":    ["budget"],
+  "framework":  ["budget framework"],
+  // Economy
+  "economy":    ["economy", "economic"],
+  "economic":   ["economy"],
+  "isoko":      ["economy", "business"],
+  "ubucuruzi":  ["business"],
+  // Changes
+  "increase":   ["increase", "growth"],
+  "rise":       ["increase", "growth"],
+  "ikuze":      ["growth", "increase"],
+  "decrease":   ["decrease", "reduction"],
+  "drop":       ["decrease", "fall"],
+  "fall":       ["decrease", "drop"],
+  // People
+  "president":  ["president", "Kagame"],
+  "perezida":   ["president", "Kagame"],
+  "minister":   ["minister", "ministry"],
+  "minisitiri": ["minister"],
+  // Institutions
+  "hospital":   ["hospital", "health"],
+  "indwara":    ["health", "disease"],
+  "ubuzima":    ["health"],
+  "police":     ["police", "RNP"],
+  "polisi":     ["police", "RNP"],
+  "army":       ["military", "RDF"],
+  "ingabo":     ["military", "RDF"],
+  "school":     ["school", "education"],
+  "amashuri":   ["school", "education"],
+  "kaminuza":   ["university"],
+  "university": ["university", "kaminuza"],
+  // Specific orgs
+  "bnr":        ["BNR", "bank"],
+  "bank":       ["bank", "BNR"],
+  "banki":      ["bank"],
+  "rra":        ["RRA", "tax"],
+  "tax":        ["tax", "RRA"],
+  "umusoro":    ["tax", "RRA"],
+  "election":   ["election", "amatora"],
+  "amatora":    ["election", "vote"],
+  "road":       ["road", "infrastructure"],
+  "energy":     ["energy", "electricity"],
+  "electricity":["electricity", "energy", "REG"],
+  "reg":        ["REG", "energy"],
+  "water":      ["water", "WASAC"],
+  "amazi":      ["water", "WASAC"],
+  "wasac":      ["WASAC", "water"],
+  "internet":   ["internet", "digital"],
+  "digital":    ["digital", "ICT"],
+  "ict":        ["ICT", "digital"],
+};
+
+
 
 const RECENCY_RE = /today|uyu munsi|aujourd|latest|breaking|now|just|recent|this week|iki cyumweru|dernier|maintenant/i;
 
@@ -652,23 +727,67 @@ function extractDateAfter(msg: string): string | undefined {
   return undefined;
 }
 
+
+
 function buildSearchPlan(msg: string): SearchPlan {
-  const searches = new Set<string>();
+  // Priority buckets — higher priority fills slots first
+  const p1 = new Set<string>(); // quoted phrases & proper nouns — most precise
+  const p2 = new Set<string>(); // synonym expansions — handles abbreviation variance
+  const p3 = new Set<string>(); // topic map — broad category terms
+  const p4 = new Set<string>(); // individual meaningful words — catch-all
+
+  const cleanMsg = msg.replace(/[^\w\s\u00C0-\u024F]/g, " ");
+  const words = cleanMsg.toLowerCase().split(/\s+/).filter(Boolean);
+
+  // P1 — Quoted phrases (exact match intent)
+  [...msg.matchAll(/"([^"]+)"/g)].forEach(m => p1.add(m[1]));
+
+  // P1 — Proper noun sequences (e.g. "Paul Kagame", "National Bank")
+  [...msg.matchAll(/\b([A-ZÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÙÚÛÜ][a-zàáâãäåèéêëìíîïòóôõùúûü]{1,}(?:\s[A-ZÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÙÚÛÜ][a-zàáâãäåèéêëìíîïòóôõùúûü]{1,})*)\b/g)]
+    .forEach(m => p1.add(m[1]));
+
+  // P1 — ALL-CAPS abbreviations typed by user (RDF, BNR, EAC...)
+  [...msg.matchAll(/\b([A-Z]{2,6})\b/g)]
+    .forEach(m => p1.add(m[1]));
+
+  // P2 — Synonym expansion for every word in the message
+  words.forEach(word => {
+    const syns = SYNONYMS[word];
+    if (syns) syns.forEach(s => p2.add(s));
+  });
+
+  // P3 — Topic map (broad category)
   for (const { patterns, terms } of TOPIC_MAP) {
-    if (patterns.test(msg)) terms.forEach(t => searches.add(t));
+    if (patterns.test(msg)) terms.forEach(t => p3.add(t));
   }
-  [...msg.matchAll(/"([^"]+)"/g)].forEach(m => searches.add(m[1]));
-  [...msg.matchAll(/\b([A-ZÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÙÚÛÜ][a-zàáâãäåèéêëìíîïòóôõùúûü]{2,}(?:\s[A-ZÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÙÚÛÜ][a-zàáâãäåèéêëìíîïòóôõùúûü]{2,})*)\b/g)]
-    .forEach(m => searches.add(m[1]));
-  if (searches.size === 0) {
-    searches.add(msg.replace(/[^\w\s\u00C0-\u024F]/g, " ").trim().slice(0, 60));
+
+  // P4 — Individual meaningful words (min 4 chars to reduce noise)
+  words
+    .filter(w => w.length >= 4 && !STOP_WORDS.has(w))
+    .forEach(w => p4.add(w));
+
+  // Merge by priority, cap at 8 total searches
+  const final = new Set<string>();
+  for (const bucket of [p1, p2, p3, p4]) {
+    for (const term of bucket) {
+      if (final.size >= 8) break;
+      final.add(term);
+    }
+    if (final.size >= 8) break;
   }
+
+  // Fallback if nothing was found at all
+  if (final.size === 0) {
+    final.add(cleanMsg.trim().slice(0, 60));
+  }
+
   return {
-    searches: [...searches].slice(0, 4),
+    searches: [...final],
     needsRecent: RECENCY_RE.test(msg),
     dateAfter: extractDateAfter(msg),
   };
 }
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -867,7 +986,7 @@ export async function chatWithNewsAgent(messages: AgentMessage[],
   const plan = buildSearchPlan(lastUser.content);
 
   // Step 2 — WP fetches in parallel (free, 0 Gemini calls)
-  const fetches: Promise<NewsItem[]>[] = plan.searches.map(q => wpSearch(q, 15));
+  const fetches: Promise<NewsItem[]>[] = plan.searches.map(q => wpSearch(q, 20));
   if (plan.needsRecent) fetches.push(wpRecent(25));
   if (plan.dateAfter) fetches.push(wpByDate(plan.dateAfter, undefined, 20));
   const articles = dedup(await Promise.all(fetches));
