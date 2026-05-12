@@ -332,10 +332,6 @@ const GEMINI_KEYS = [
   process.env.NEXT_PUBLIC_GERMINI_API2,
   process.env.NEXT_PUBLIC_GERMINI_API3,
   process.env.NEXT_PUBLIC_GERMINI_API4,
-  // process.env.GEMINI_API_KEY_2,
-  // process.env.GEMINI_API_KEY_3,
-  // process.env.GEMINI_API_KEY_4,
-  // process.env.GEMINI_API_KEY_5,
 ].filter(Boolean) as string[];
 
 
@@ -688,13 +684,28 @@ function langDirective(article: NewsItem): string {
     : `Always respond in language code: ${lang}.`;
 }
 
+
+// function formatArticles(articles: NewsItem[]): string {
+//   return articles.map((a, i) => {
+//     const excerpt = stripHtml(a.excerpt?.rendered || a.content?.rendered || "").slice(0, 400);
+//     const date = new Date(a.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+//     return `[${i + 1}] (${date}) ${a.title.rendered}\nExcerpt: ${excerpt}\nSlug: ${a.slug}`;
+//   }).join("\n\n");
+// }
 function formatArticles(articles: NewsItem[]): string {
   return articles.map((a, i) => {
-    const excerpt = stripHtml(a.excerpt?.rendered || a.content?.rendered || "").slice(0, 400);
+    const excerpt = stripHtml(a.excerpt?.rendered || "").slice(0, 200);
+    const content = stripHtml(a.content?.rendered || "").slice(0, 1500); // full content, trimmed for token budget
     const date = new Date(a.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-    return `[${i + 1}] (${date}) ${a.title.rendered}\n${excerpt}\nURL: ${a.link}`;
+    return [
+      `[${i + 1}] (${date}) ${a.title.rendered}`,
+      `Excerpt: ${excerpt}`,
+      `Full Content: ${content}`,
+      `Link: ${process.env.NEXT_PUBLIC_APP_URL}/news/article/${a.slug}`,
+    ].join("\n");
   }).join("\n\n");
 }
+
 
 function dedup(batches: NewsItem[][]): NewsItem[] {
   const seen = new Set<number>();
@@ -710,17 +721,29 @@ function dedup(batches: NewsItem[][]): NewsItem[] {
 // ─── Rule-based fallback (0 AI calls) ────────────────────────────────────────
 // Shown when all Gemini keys are exhausted. Still useful — shows real articles.
 
+
 function ruleBasedSummary(articles: NewsItem[]): string {
   if (articles.length === 0) {
     return "I couldn't find articles matching your query. Please try different keywords.";
   }
-  const lines = articles.slice(0, 5).map((a, i) => {
-    const date = new Date(a.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-    const excerpt = stripHtml(a.excerpt?.rendered || "").slice(0, 120).trim();
-    return `${i + 1}. **${a.title.rendered}** (${date})${excerpt ? `\n   ${excerpt}…` : ""}`;
+
+  const lines = articles.slice(0, 5).map((a) => {
+    const date = new Date(a.date).toLocaleDateString("en-GB", {
+      day: "numeric", month: "short", year: "numeric"
+    });
+    const excerpt = stripHtml(a.excerpt?.rendered || "").slice(0, 400).trim();
+
+    return [
+      `${a.title.rendered}`,
+      `(${date}) ${excerpt ? excerpt + "…" : ""}`,
+      `[Read more →](${process.env.NEXT_PUBLIC_APP_URL}/news/article/${a.slug})`,
+      `---`,
+    ].join("\n");
   });
-  return `Here are the most relevant articles I found:\n\n${lines.join("\n\n")}\n\n_AI summarisation is temporarily unavailable — showing raw results from the database._`;
+
+  return `Here are the most relevant articles I found:\n\n${lines.join("\n\n")}\n\n_AI summarisation is temporarily unavailable._`;
 }
+
 
 // ─── Article-level AI actions ─────────────────────────────────────────────────
 
@@ -825,6 +848,7 @@ export interface AgentMessage {
   content: string;
 }
 
+
 export async function chatWithNewsAgent(messages: AgentMessage[],
   userId?: string
 ): Promise<string> {
@@ -854,15 +878,28 @@ export async function chatWithNewsAgent(messages: AgentMessage[],
     .map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
     .join("\n");
 
-  return generate(
-    `You are the AI news assistant for IGIHE (new.igihe.com), a leading Rwandan news outlet.
+    return generate(
+  `You are the AI news assistant for IGIHE (new.igihe.com), a leading Rwandan news outlet.
 You have access to IGIHE's full article database — you just searched it and retrieved the most relevant results.
 Today is ${todayFormatted}.
 
 Always respond in the same language the user writes in (English, Kinyarwanda, French, etc.).
-Be conversational and informative. Reference article titles naturally in your answers.
+Be conversational and informative.
+
+IMPORTANT: Each article below includes a "Full Content" field. Always summarize from the Full Content, NOT the Excerpt.
+
+When summarizing or mentioning an article, follow this exact format:
+
+**Article Title**
+(Date) 2–3 sentence summary written from the Full Content.
+[Read more →](full_article_link)
+
+---
+
+Never mention an article without including its "Read more →" link at the end.
+Always use the Link field provided for each article — never guess or construct URLs.
+Never invent facts — only use what's in the Full Content below.
 If the retrieved articles don't fully answer the question, say so honestly.
-Never invent facts — only use what's in the articles below.
 
 === RETRIEVED ARTICLES (${articles.length} found) ===
 ${newsContext}
@@ -870,6 +907,6 @@ ${newsContext}
 === CONVERSATION ===
 ${history}
 Assistant:`,
-    ruleBasedSummary(articles) // fallback: show raw articles if all keys exhausted
-  );
+  ruleBasedSummary(articles)
+);
 }

@@ -89,11 +89,19 @@ export const stripHtml = (html: string) => {
     .replace(/<\/p>/gi, '\n\n')          // keep paragraph spacing
     .replace(/<br\s*\/?>/gi, '\n')       // handle <br> tags
     .replace(/<[^>]+>/g, '')             // remove other HTML tags
-    .replace(/&#8220;|&#8221;|&#8217;|&nbsp;/g, '')
-    .replace(/&amp;/g, '&')
     .replace(/&#8216;|&#8217;/g, "'")
-    .replace(/&#8211;/g, '-')
     .replace(/\s+/g, ' ')
+    .replace(/\n/g, '<br />')
+    .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>')
+    .replace(/&#8220;/g, '"')   // opening double quote
+    .replace(/&#8221;/g, '"')   // closing double quote
+    .replace(/&#8211;/g, '–')   // en dash
+    .replace(/&#8212;/g, '—')   // em dash
+    .replace(/&#038;/g, '&')    // ampersand
+    .replace(/&amp;/g, '&')     // ampersand (named)
+    .replace(/\[([^\]]+)->([^\]]+)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\{\{([^}]+)\}\}/g, '<strong>$1</strong>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .trim();
 };
 

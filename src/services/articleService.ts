@@ -72,6 +72,9 @@ export async function fetchArticles(params?: {
   user?: number
   tags?: number[]
   offset?:number
+  tags_exclude?:number[]
+  categories_exclude?:number[]
+
 }): Promise<articleResponse<NewsItem>> {
   const queryParams: Record<string, any> = {
     page: params?.page || 1,
@@ -86,6 +89,8 @@ export async function fetchArticles(params?: {
   if (params?.search) queryParams.search = params.search
   if (params?.exclude?.length) queryParams.exclude = params.exclude.join(',')
   if (params?.include?.length) queryParams.include = params.include.join(',')
+  if (params?.tags_exclude?.length) queryParams.tags_exclude = params.tags_exclude.join(',')
+  if (params?.categories_exclude?.length) queryParams.categories_exclude = params.categories_exclude.join(',')
   if (params?.after) queryParams.after = params.after
   if (params?.before) queryParams.before = params.before
   if (params?.author) queryParams.author = params.author

@@ -31,7 +31,7 @@ export default async function HomeMainSections() {
       const hasAd = Array.isArray(adSlots) && adSlots.length > 0;
 
     const safeArticles = Array.isArray(other) ? other : []
-    const timeLineNews = safeArticles.slice(0, 5)
+    const timeLineNews = hasAd ? safeArticles.slice(0, 5) : safeArticles.slice(0, 7)
     const asideNews =  hasAd ? safeArticles.slice(5, 7) : safeArticles.slice(5, 10);
     
 
@@ -55,35 +55,45 @@ export default async function HomeMainSections() {
                     )}
                 </div>
 
-                <div className="col-xl-3 col-lg-6 col-md-6">
-                    <TimeLine articles={timeLineNews}/>
+                <div className={
+                    hasAd
+
+                        ? "col-xl-3 col-lg-6 col-md-6"
+
+                        : "col-xl-6 col-lg-6 col-md-6"
+
+                }>
+                    <TimeLine articles={timeLineNews} />
                 </div>
 
-                <div className="col-xl-3 col-lg-6 col-md-6">
-                    
-                    <ServerSlotManager
-                        position="home-after-highlights"
-                        priority={true}
-                        className="mb-2"
-                    />
-                    <div style={
-                        {
-                            // paddingTop:isMobile?'15px':''
-                            }
-                            }>
-                    {asideNews.map((article) => (
-                        <DynamicArticleCard 
-                            key={article.id || article.slug}
-                            article={article}
-                            bottomBorder 
-                            isSlider
-                            // showImage={isMobile}
-                            imgHeight={80}
-                            className='d-flex flex-row gap-3'
+                {
+                    hasAd &&
+                    <div className="col-xl-3 col-lg-6 col-md-6">
+
+                        <ServerSlotManager
+                            position="home-after-highlights"
+                            priority={true}
+                            className="mb-2"
                         />
-                    ))}
+                        <div style={
+                            {
+                                // paddingTop:isMobile?'15px':''
+                            }
+                        }>
+                            {asideNews.map((article) => (
+                                <DynamicArticleCard
+                                    key={article.id || article.slug}
+                                    article={article}
+                                    bottomBorder
+                                    isSlider
+                                    // showImage={isMobile}
+                                    imgHeight={80}
+                                    className='d-flex flex-row gap-3'
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     )

@@ -11,7 +11,7 @@ interface ArticleListProps {
 export default async function NewsByCategory({ categoryId, categoryName, categorySlug }: ArticleListProps) {
 
 
-    const articles = await ApiService.fetchArticles({ categories: [categoryId] })
+    const articles = await ApiService.fetchArticles({ categories: [categoryId],tags_exclude:[70,69,133,72,151,80,101,99] })
 
     return (
         <div>

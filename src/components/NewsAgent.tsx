@@ -4,8 +4,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { chatWithNewsAgent, AgentMessage } from "@/services/geminiService";
 import { NewsItem } from "@/types/fetchData";
 import Image from "next/image";
+import ReactMarkdown from 'react-markdown';
 
 import DOMPurify from 'isomorphic-dompurify';
+import { ThemedText } from "./ThemedText";
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -404,11 +406,10 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         .igihe-msg__bubble {
           padding: 13px 17px;
           border-radius: 18px;
-          font-size: 14.5px;
-          line-height: 1.65;
           color: var(--igihe-text);
           white-space: pre-wrap;
           word-break: break-word;
+          line-height:23px!important
         }
         .igihe-msg__bubble--ai {
         //   background: var(--igihe-surface);
@@ -628,11 +629,11 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                 <span className="igihe-avatar__dot" />
               </div>
               <div>
-                <div className="igihe-header__name">Ask IGIHE</div>
-                <div className="igihe-header__sub">
-                  <span className="igihe-header__sub-dot" />
+                <ThemedText className="igihe-header__name">Ask IGIHE</ThemedText>
+                <ThemedText className="igihe-header__sub">
+                  <ThemedText className="igihe-header__sub-dot" />
                   Online
-                </div>
+                </ThemedText>
               </div>
               <div className="igihe-header-actions">
                 <button
@@ -681,13 +682,14 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                       {/* <div className={`igihe-msg__bubble ${m.role === "user" ? "igihe-msg__bubble--user" : "igihe-msg__bubble--ai"}`}>
                         {parseCustomMarkup(m.text)}
                       </div> */}
-                      <div
+                      <ThemedText
                         className={`igihe-msg__bubble ${m.role === "user" ? "igihe-msg__bubble--user" : "igihe-msg__bubble--ai"}`}
                         // dangerouslySetInnerHTML={{ __html: parseCustomMarkup(m.text) }}
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseCustomMarkup(m.text) || '') }}
-                         />
+                        // dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseCustomMarkup(m.text) || '') }}
+                         ><ReactMarkdown>{m.text}</ReactMarkdown></ThemedText>
+                         
 
-                      <div className="igihe-msg__time">{formatTime(m.timestamp)}</div>
+                      <ThemedText className="igihe-msg__time">{formatTime(m.timestamp)}</ThemedText>
                     </div>
                   </div>
                 </div>
@@ -708,7 +710,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
             {/* Quick prompts */}
             {showQuickPrompts && !loading && (
               <div className="igihe-quick">
-                <div className="igihe-quick__label">Suggested</div>
+                <ThemedText className="igihe-quick__label">Suggested</ThemedText>
                 <div className="igihe-quick__chips">
                   {QUICK_PROMPTS.map(p => (
                     <button
@@ -718,7 +720,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                       onClick={() => send(p.cmd)}
                     >
                       <span>{p.icon}</span>
-                      <span>{p.label}</span>
+                      <ThemedText>{p.label}</ThemedText>
                     </button>
                   ))}
                 </div>
@@ -757,7 +759,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                     : "↑"}
                 </button>
               </div>
-              <div className="igihe-input-hint">Enter to send · Shift+Enter for new line · Esc to close</div>
+              <ThemedText className="igihe-input-hint">Enter to send · Shift+Enter for new line · Esc to close</ThemedText>
             </div>
 
           </div>
