@@ -15,7 +15,7 @@ export default async function NewsByCategory({ categoryId, categoryName, categor
     const articles = await ApiService.fetchArticles(
         { 
             categories: [categoryId],
-            exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+            exclude:excludeFrom('mainHighlight','otherHighlights','latest')
             // tags_exclude:[70,69,133,72,151,80,101,99]
          })
 

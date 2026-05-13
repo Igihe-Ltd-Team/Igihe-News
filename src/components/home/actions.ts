@@ -79,7 +79,7 @@ export const getOtherFeatured = createCachedFetch(async (): Promise<NewsItem[]> 
   try {
     const response = await ApiService.fetchArticles({ 
       per_page: 11, tags: [72],
-    exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+    exclude:excludeFrom('mainHighlight','otherHighlights','latest')
    })
     return response.data || []
   } catch (error) {
@@ -127,7 +127,7 @@ export const getGreatLakesArticles = createCachedFetch(async (): Promise<NewsIte
     const response = await ApiService.fetchArticles({
       tags: [99],
       per_page: 12,
-      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -143,7 +143,7 @@ export const getInternationalArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       tags: [101],
       per_page: 12,
-      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -159,7 +159,7 @@ export const getEntertainmentArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       categories: [13],
       per_page: 12,
-      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -226,7 +226,7 @@ export const getTopSliderArticles = createCachedFetch(async (): Promise<NewsItem
       tags: [151],
       per_page: 9,
       page: 1,
-      exclude: excludeFrom('mainHighlight')
+      // exclude: excludeFrom('mainHighlight')
       // tags_exclude:[70]
     })
     registerPosts('topSlider', response.data)
@@ -258,7 +258,7 @@ export const getFeaturedArticles = createCachedFetch(async (): Promise<NewsItem[
     const response = await ApiService.fetchArticles({
       tags: [80],
       per_page: 8,
-      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[151,70,69,133,72]
     })
     return response.data || []
