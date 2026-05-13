@@ -1,3 +1,4 @@
+import { excludeFrom, registerPosts } from '@/lib/postRegistry'
 import { ApiService } from '@/services/apiService'
 import { NewsItem, TraficNews } from '@/types/fetchData'
 import { cache } from 'react'
@@ -10,11 +11,13 @@ const createCachedFetch = <T>(
 // Latest Articles
 export const getLatestArticles = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ 
+    const response = await ApiService.fetchArticles({
       per_page: 5,
+      exclude: excludeFrom('topSlider', 'mainHighlight', 'otherHighlights')
       // tags_exclude:[70,69,133,72,151,80,101,99],
       // categories_exclude:[13]
-     })
+    })
+    registerPosts('latest', response.data)
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
@@ -26,12 +29,17 @@ export const getLatestArticles = createCachedFetch(async (): Promise<NewsItem[]>
 export const getMainHomeHighlights = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
     const response = await ApiService.fetchArticles({ per_page: 1, tags: [70] })
-    if (response.data.length > 0)
+    if (response.data.length > 0) {
+      registerPosts('mainHighlight', response.data)
       return response.data || []
+    }
     else {
       const response = await ApiService.fetchArticles({ per_page: 1, tags: [69] })
-      if (response.data.length > 0)
+      if (response.data.length > 0) {
+        registerPosts('mainHighlight', response.data)
         return response.data || []
+      }
+
       else
         return []
     }
@@ -43,7 +51,12 @@ export const getMainHomeHighlights = createCachedFetch(async (): Promise<NewsIte
 
 export const getOtherHomeHighlights = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 10, tags: [69] })
+    const response = await ApiService.fetchArticles({
+      per_page: 10, tags: [69],
+      // tags_exclude:[151],
+      exclude: excludeFrom('topSlider','mainHighlight')
+    })
+    registerPosts('otherHighlights', response.data)
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
@@ -63,7 +76,10 @@ export const getMainFeatured = createCachedFetch(async (): Promise<NewsItem[]> =
 })
 export const getOtherFeatured = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
-    const response = await ApiService.fetchArticles({ per_page: 11, tags: [72] })
+    const response = await ApiService.fetchArticles({ 
+      per_page: 11, tags: [72],
+    exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+   })
     return response.data || []
   } catch (error) {
     console.error('Error fetching latest articles:', error)
@@ -94,6 +110,7 @@ export const getHighlightArticles = createCachedFetch(async (): Promise<NewsItem
       tags: [133],
       per_page: 11,
       orderby: 'date',
+      
       // tags_exclude:[70,69,72,151,80]
     })
     return response.data || []
@@ -109,6 +126,7 @@ export const getGreatLakesArticles = createCachedFetch(async (): Promise<NewsIte
     const response = await ApiService.fetchArticles({
       tags: [99],
       per_page: 12,
+      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -124,6 +142,7 @@ export const getInternationalArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       tags: [101],
       per_page: 12,
+      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -139,6 +158,7 @@ export const getEntertainmentArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       categories: [13],
       per_page: 12,
+      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -205,8 +225,11 @@ export const getTopSliderArticles = createCachedFetch(async (): Promise<NewsItem
       tags: [151],
       per_page: 9,
       page: 1,
-      // tags_exclude:[70,133,72,80,69]
+      exclude: excludeFrom('mainHighlight')
+      // tags_exclude:[70]
     })
+    registerPosts('topSlider', response.data)
+
     return response.data || []
   } catch (error) {
     console.error('Error fetching top slider articles:', error)
@@ -234,6 +257,7 @@ export const getFeaturedArticles = createCachedFetch(async (): Promise<NewsItem[
     const response = await ApiService.fetchArticles({
       tags: [80],
       per_page: 8,
+      exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
       // tags_exclude:[151,70,69,133,72]
     })
     return response.data || []

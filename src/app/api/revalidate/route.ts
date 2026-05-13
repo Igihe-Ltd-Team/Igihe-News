@@ -2,6 +2,7 @@
 
 export const runtime = 'nodejs' // required — fileCache uses fs, not available on Edge
 
+import { resetRegistry } from '@/lib/postRegistry'
 import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
 import { revalidatePath, revalidateTag } from 'next/cache'
@@ -17,7 +18,7 @@ async function getAllCategories(): Promise<string[]> {
 }
 
 async function purgeAll(slug?: string, category?: string) {
-
+resetRegistry()
   const patterns = [
     slug ? `post:${slug}` : null,  // specific article first (fast path)
     'articles:',      // all paginated article lists

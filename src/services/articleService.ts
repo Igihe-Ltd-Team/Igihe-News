@@ -74,7 +74,6 @@ export async function fetchArticles(params?: {
   offset?:number
   tags_exclude?:number[]
   categories_exclude?:number[]
-
 }): Promise<articleResponse<NewsItem>> {
   const queryParams: Record<string, any> = {
     page: params?.page || 1,

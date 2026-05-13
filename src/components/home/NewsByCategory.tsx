@@ -2,6 +2,7 @@ import React from 'react'
 import HeaderDivider from '../HeaderDivider'
 import { ApiService } from '@/services/apiService'
 import ClientCategoryData from './ClientCategoryData'
+import { excludeFrom } from '@/lib/postRegistry'
 
 interface ArticleListProps {
     categoryId: number,
@@ -11,7 +12,12 @@ interface ArticleListProps {
 export default async function NewsByCategory({ categoryId, categoryName, categorySlug }: ArticleListProps) {
 
 
-    const articles = await ApiService.fetchArticles({ categories: [categoryId],tags_exclude:[70,69,133,72,151,80,101,99] })
+    const articles = await ApiService.fetchArticles(
+        { 
+            categories: [categoryId],
+            exclude:excludeFrom('topSlider', 'mainHighlight','otherHighlights','latest')
+            // tags_exclude:[70,69,133,72,151,80,101,99]
+         })
 
     return (
         <div>
