@@ -12,8 +12,8 @@ export const getLatestArticles = createCachedFetch(async (): Promise<NewsItem[]>
   try {
     const response = await ApiService.fetchArticles({ 
       per_page: 5,
-      tags_exclude:[70,69,133,72,151,80,101,99],
-      categories_exclude:[13]
+      // tags_exclude:[70,69,133,72,151,80,101,99],
+      // categories_exclude:[13]
      })
     return response.data || []
   } catch (error) {
@@ -94,7 +94,7 @@ export const getHighlightArticles = createCachedFetch(async (): Promise<NewsItem
       tags: [133],
       per_page: 11,
       orderby: 'date',
-      tags_exclude:[70,69,72,151,80]
+      // tags_exclude:[70,69,72,151,80]
     })
     return response.data || []
   } catch (error) {
@@ -109,7 +109,7 @@ export const getGreatLakesArticles = createCachedFetch(async (): Promise<NewsIte
     const response = await ApiService.fetchArticles({
       tags: [99],
       per_page: 12,
-      tags_exclude:[70,69,133,72,151,80]
+      // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
   } catch (error) {
@@ -124,7 +124,7 @@ export const getInternationalArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       tags: [101],
       per_page: 12,
-      tags_exclude:[70,69,133,72,151,80]
+      // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
   } catch (error) {
@@ -139,7 +139,7 @@ export const getEntertainmentArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       categories: [13],
       per_page: 12,
-      tags_exclude:[70,69,133,72,151,80]
+      // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
   } catch (error) {
@@ -205,7 +205,7 @@ export const getTopSliderArticles = createCachedFetch(async (): Promise<NewsItem
       tags: [151],
       per_page: 9,
       page: 1,
-      tags_exclude:[70,133,72,80,69]
+      // tags_exclude:[70,133,72,80,69]
     })
     return response.data || []
   } catch (error) {
@@ -234,7 +234,7 @@ export const getFeaturedArticles = createCachedFetch(async (): Promise<NewsItem[
     const response = await ApiService.fetchArticles({
       tags: [80],
       per_page: 8,
-      tags_exclude:[151,70,69,133,72]
+      // tags_exclude:[151,70,69,133,72]
     })
     return response.data || []
   } catch (error) {
