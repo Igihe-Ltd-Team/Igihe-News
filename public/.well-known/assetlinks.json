@@ -1,8 +1,16 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.elamirizidani.Igihe",
-    "sha256_cert_fingerprints": ["F8:9F:64:56:7B:33:C7:F7:BD:AA:0E:F1:B0:0D:F8:42:FA:82:A3:C3:9E:56:5E:9D:E7:43:C5:89:2F:00:1C:E0"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.elamirizidani.Igihe",
+      "sha256_cert_fingerprints": [
+        "F8:9F:64:56:7B:33:C7:F7:BD:AA:0E:F1:B0:0D:F8:42:FA:82:A3:C3:9E:56:5E:9D:E7:43:C5:89:2F:00:1C:E0",
+        "65:62:3F:F4:A1:63:C0:E9:83:AC:03:DA:B3:60:A8:E1:B8:2A:AD:DA:70:C5:6C:D2:BE:AE:5D:F6:9B:1E:E1:6F"
+      ]
+    }
   }
-}]
+]
