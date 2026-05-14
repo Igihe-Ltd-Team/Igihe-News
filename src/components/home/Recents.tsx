@@ -141,7 +141,7 @@ export default async function Recents() {
             <div className="col-xl-4 col-lg-6 col-md-6">
               <div className="row">
                 {latests.map(article => (
-                  <div className="col-xl-12 col-lg-6 col-md-6 col-sd-6 col-6" key={article.id || article.slug}>
+                  <div className="col-xl-12 col-lg-6 col-md-12 col-sd-6 col-12" key={article.id || article.slug}>
                     <DynamicArticleCard
                       article={article}
                       showImage
@@ -149,7 +149,6 @@ export default async function Recents() {
                       imgHeight={143}
                       bgColor="#1176BB08"
                       bordered
-                      showCategorie={!isMobile}
                     />
                   </div>
                 ))}

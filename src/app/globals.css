@@ -499,6 +499,14 @@ font-size: 0.813rem;
   overflow: hidden;
 }
 
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  /* number of lines to show */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .border-bottom-custom .swiper-navigation-icon {
   width: 18px !important;
   height: 18px !important;

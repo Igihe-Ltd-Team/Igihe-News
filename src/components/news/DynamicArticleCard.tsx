@@ -64,7 +64,11 @@ function DynamicArticleCard({
   // }
 
   return (
-    <div className={`my-2 position-relative ${className} dynamic-card-item`} style={{
+    <div className={`my-2 position-relative ${
+
+    isMobile && bgColor ? "d-flex flex-row" : ""
+
+  } ${className} dynamic-card-item`} style={{
       backgroundColor: bgColor ? bgColor : 'transparent',
       borderWidth: bordered ? '1px' : '0',
       borderStyle: 'solid',
@@ -146,7 +150,7 @@ function DynamicArticleCard({
                         </defs>
                       </svg>
                     </span>
-                    <ThemedText type='small'>{getCategoryName(article)}</ThemedText>
+                    <ThemedText type='small' className='line-clamp-1'>{getCategoryName(article)}</ThemedText>
                   </a>
                 }
 
