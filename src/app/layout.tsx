@@ -8,6 +8,7 @@ import { initCacheCleanup } from '@/lib/cache/cleanup'
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import { Suspense } from 'react';
+import { resetRegistry } from '@/lib/postRegistry';
 
 export const metadata = {
   title: 'IGIHE',
@@ -16,12 +17,15 @@ export const metadata = {
 
 if (typeof window === 'undefined') {
   initCacheCleanup()
+  // resetRegistry()
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 //   if (typeof window !== 'undefined') {
 //   ApiService.initialize();
 // }
+
+
   return (
     <html lang="en">
       <body className={raleway.variable}>

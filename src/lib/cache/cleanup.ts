@@ -1,11 +1,12 @@
 import { fileCache } from '@/lib/cache/fileCache'
+import { resetRegistry } from '../postRegistry'
 
 let cleanupInitialized = false
 
 export async function initCacheCleanup() {
   if (cleanupInitialized || typeof window !== 'undefined') return
   cleanupInitialized = true
-
+resetRegistry()
   // Clean on startup
   await fileCache.cleanExpired()
 
