@@ -103,8 +103,6 @@ const nextConfig: NextConfig = {
       ],
     },
     {
-      // ✅ HTML pages only: no-cache (revalidate, but allow serving stale)
-      // This replaces your overly broad rule
       source: '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
       headers: [
         { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -115,6 +113,22 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
+
+  async rewrites() {
+  return [
+    {
+      source: "/.well-known/assetlinks.json",
+      destination: "/api/assetlinks",
+    },
+    {
+      source: "/.well-known/apple-app-site-association",
+      destination: "/api/apple-app-site-association",
+    },
+  ];
+},
 };
+
+
+
 
 export default nextConfig;
