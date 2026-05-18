@@ -127,7 +127,7 @@ export const getGreatLakesArticles = createCachedFetch(async (): Promise<NewsIte
     const response = await ApiService.fetchArticles({
       tags: [99],
       per_page: 12,
-      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
+      // exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -143,7 +143,7 @@ export const getInternationalArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       tags: [101],
       per_page: 12,
-      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
+      // exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
@@ -159,7 +159,7 @@ export const getEntertainmentArticles = createCachedFetch(async (): Promise<News
     const response = await ApiService.fetchArticles({
       categories: [13],
       per_page: 12,
-      exclude:excludeFrom('mainHighlight','otherHighlights','latest')
+      // exclude:excludeFrom('mainHighlight','otherHighlights','latest')
       // tags_exclude:[70,69,133,72,151,80]
     })
     return response.data || []
