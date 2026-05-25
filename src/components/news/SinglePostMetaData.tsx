@@ -26,16 +26,18 @@ export default function SinglePostMetaData(
                             className="rounded-circle"
                         />
                         <ThemedText type='small' className='gray-color'>By</ThemedText>
+                        <span className='meta-wrapper d-flex align-items-center gap-0 flex-wrap'>
                         {
                             bylines?.map((byline, i) => (
-                                <a key={i} href={`/author/${byline?.slug}`} className="meta-wrapper d-flex align-items-center gap-2 flex-wrap text-decoration-none text-reset">
+                                <a key={i} href={`/author/${byline?.slug}`} className=" text-decoration-none text-reset">
                                     <ThemedText type='smallBold' className='ms-0'>
-                                        {i > 0 && ','}
+                                        {i > 0 && ', '}
                                         {byline.name}
                                     </ThemedText>
                                 </a>
                             ))
                         }
+                        </span>
                     </>
 
                     <span className="d-flex align-items-center">

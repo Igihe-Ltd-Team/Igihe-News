@@ -325,6 +325,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NewsItem } from "@/types/fetchData";
 import { stripHtml } from "@/lib/utils";
+import { ApiService } from "./apiService";
 
 
 const GEMINI_KEYS = [
@@ -568,21 +569,36 @@ const ARTICLE_FIELDS = [
 
 async function wpSearch(query: string, perPage = 20): Promise<NewsItem[]> {
   try {
-    const res = await fetch(
-      `${WP_API}/posts?search=${encodeURIComponent(query)}&per_page=${perPage}&_fields=${ARTICLE_FIELDS}&orderby=relevance`,
-      { next: { revalidate: 60 } }
-    );
-    return res.ok ? res.json() : [];
+    const res = await ApiService.fetchArticles({
+      _fields:ARTICLE_FIELDS,
+      per_page:perPage,
+      search:encodeURIComponent(query),
+      orderby:'relevance'
+    })
+    
+    // fetch(
+    //   `${WP_API}/posts?search=${encodeURIComponent(query)}&per_page=${perPage}&_fields=${ARTICLE_FIELDS}&orderby=relevance`,
+    //   { next: { revalidate: 60 } }
+    // );
+    return res.data || [];
   } catch { return []; }
 }
 
 async function wpRecent(perPage = 30): Promise<NewsItem[]> {
   try {
-    const res = await fetch(
-      `${WP_API}/posts?per_page=${perPage}&_fields=${ARTICLE_FIELDS}&orderby=date&order=desc`,
-      { next: { revalidate: 120 } }
-    );
-    return res.ok ? res.json() : [];
+
+    const res = await ApiService.fetchArticles({
+      _fields:ARTICLE_FIELDS,
+      per_page:perPage,
+      orderby:'date',
+      order:'desc'
+    })
+
+    // const res = await fetch(
+    //   `${WP_API}/posts?per_page=${perPage}&_fields=${ARTICLE_FIELDS}&orderby=date&order=desc`,
+    //   { next: { revalidate: 120 } }
+    // );
+    return res.data || [];
   } catch { return []; }
 }
 
@@ -590,8 +606,15 @@ async function wpByDate(after: string, before?: string, perPage = 30): Promise<N
   try {
     let url = `${WP_API}/posts?after=${after}T00:00:00&per_page=${perPage}&_fields=${ARTICLE_FIELDS}&orderby=date&order=desc`;
     if (before) url += `&before=${before}T23:59:59`;
-    const res = await fetch(url, { next: { revalidate: 120 } });
-    return res.ok ? res.json() : [];
+    const res = await ApiService.fetchArticles({
+      after:after,
+      per_page:perPage,
+      _fields:ARTICLE_FIELDS,
+      orderby:'date',
+      order:'desc'
+    });
+    // const res = await fetch(url, { next: { revalidate: 120 } });
+    return res.data || [];
   } catch { return []; }
 }
 
