@@ -52,9 +52,9 @@ export const getMainHomeHighlights = createCachedFetch(async (): Promise<NewsIte
 export const getOtherHomeHighlights = createCachedFetch(async (): Promise<NewsItem[]> => {
   try {
     const response = await ApiService.fetchArticles({
-      per_page: 10, tags: [69],
+      per_page: 7, tags: [69],
       // tags_exclude:[151],
-      exclude: excludeFrom('mainHighlight')
+      // exclude: excludeFrom('mainHighlight')
       // exclude: excludeFrom('topSlider','mainHighlight')
     })
     registerPosts('otherHighlights', response.data)
