@@ -189,26 +189,50 @@ export async function fetchOtherPosts(params?: {
   const isFirstPage = !params?.page || params.page === 1
   const listTTL = calculateListCacheTTL(isFirstPage)
 
+  // return cachedRequest({
+  //   key: cacheKey,
+  //   fetchFn: async () => {
+  //     const qs = buildQuery(queryParams)
+  //     const response = await fetchWithTimeout(
+  //       `${API_CONFIG.baseURL}/${params?.postType}?${qs}`
+  //     )
+  //     const data = await response.json()
+
+  //     if (Array.isArray(data) && data.length > 0) {
+  //       cacheArticlesFromList(data).catch(() => {})
+  //     }
+
+  //     return buildPaginationResponse(data, response, {
+  //       page: params?.page,
+  //       per_page: params?.per_page,
+  //     })
+  //   },
+  //   getContentDate: (res) => res?.data?.[0]?.date ?? null,
+  //   ttl: listTTL,
+  // })
+
+
+
+
+
   return cachedRequest({
     key: cacheKey,
     fetchFn: async () => {
-
       try {
         const qs = buildQuery(queryParams)
-      const response = await fetchWithTimeout(
-        `${API_CONFIG.baseURL}/${params?.postType}?${qs}`
-      )
-      const data = await response.json()
+        const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${params?.postType}?${qs}`)
+        const data = await response.json()
 
-      if (Array.isArray(data) && data.length > 0) {
-        cacheArticlesFromList(data).catch(() => {})
-      }
+        if (Array.isArray(data) && data.length > 0) {
+          cacheArticlesFromList(data).catch(() => { })
+        }
 
-      return buildPaginationResponse(data, response, {
-        page: params?.page,
-        per_page: params?.per_page,
-      })
-      } catch (error) {
+        return buildPaginationResponse(data, response, {
+          page: params?.page,
+          per_page: params?.per_page,
+        })
+      } catch (err) {
+        console.error('[fetchArticles] failed:', err)
         return {
           data: [],
           pagination: {
@@ -218,9 +242,8 @@ export async function fetchOtherPosts(params?: {
             totalItems: 0,
             hasNextPage: false,
           },
-        }
+        } // safe fallback
       }
-      
     },
     getContentDate: (res) => res?.data?.[0]?.date ?? null,
     ttl: listTTL,

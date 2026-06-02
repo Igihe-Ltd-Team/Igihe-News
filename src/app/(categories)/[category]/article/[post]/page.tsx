@@ -20,7 +20,8 @@ const endpoints: Record<string, string> = {
   'rubrique-19': "opinion",
   advertorials: "advertorial",
   facts: "facts",
-  announcements: 'announcement'
+  announcements: 'announcement',
+  opinions: "opinion",
 }
 
 /* ------------------------ CACHED FETCH POST ------------------------ */
