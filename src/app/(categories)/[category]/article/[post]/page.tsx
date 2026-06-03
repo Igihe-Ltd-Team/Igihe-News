@@ -46,6 +46,10 @@ const getPostData = cache(async (slug: string, section: string) => {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { post: slug, category } = await params
 
+const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://en.igihe.com').replace(/\/$/, '')
+ const nextJsUrl = `${baseUrl}/${category}/article/${slug}`;
+
+
   // Capitalize slug for fallback title
   const fallbackTitle = slug
     .split('-')
@@ -126,14 +130,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }),
 
       alternates: {
-        canonical: postData.link
+        canonical: nextJsUrl
       },
 
       openGraph: {
         type: 'article',
         title,
         description,
-        url: postData.link,
+        url: nextJsUrl,
         siteName: 'IGIHE',
         locale: 'en_US',
         images: [{
