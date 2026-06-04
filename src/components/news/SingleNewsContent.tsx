@@ -168,7 +168,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                 {
                                     article?.excerpt?.rendered &&
                                     <div className='excerpt-section'>
-                                        <ThemedText  className='excerpt-text'>
+                                        <ThemedText type='defaultItalic' className='excerpt-text'>
                                             {stripHtml(article?.excerpt?.rendered)}
                                         </ThemedText>
                                     </div>
