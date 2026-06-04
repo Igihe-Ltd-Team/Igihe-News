@@ -381,6 +381,8 @@ font-size: 0.813rem;
 .excerpt-section {
   margin-top: 24;
   margin-bottom: 15;
+  background: #1176bb12;
+    padding: 20px;
 }
 
 .post-content img {
