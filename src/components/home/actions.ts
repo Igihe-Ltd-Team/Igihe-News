@@ -79,7 +79,10 @@ export const getOtherFeatured = createCachedFetch(async (): Promise<NewsItem[]> 
   try {
     const response = await ApiService.fetchArticles({ 
       per_page: 11, tags: [72],
-    exclude:excludeFrom('mainHighlight','otherHighlights','latest')
+    // exclude:excludeFrom(
+    //   'mainHighlight',
+    //   'otherHighlights',
+    //   'latest')
    })
     return response.data || []
   } catch (error) {

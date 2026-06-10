@@ -35,6 +35,7 @@ import CommentsSection from './CommentsSection'
 import { useEffect, useState } from 'react'
 import Lightbox from '../lightbox/LightBox'
 import { usePostContentLightbox } from '../lightbox/Uselightbox'
+import Slides from '../home/Slides'
 
 
 interface SingleNewsContentProps {
@@ -209,62 +210,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
 
                                     <div className='pt-4 pb-4 g-3'>
                                         <HeaderDivider title="Related Articles" />
-                                        <div className="position-relative">
-                                            <Swiper
-                                                spaceBetween={30}
-                                                slidesPerView={3}
-                                                navigation={{
-                                                    nextEl: '.swiper-button-next',
-                                                    prevEl: '.swiper-button-prev',
-                                                }}
-                                                pagination={{
-                                                    clickable: true,
-                                                    el: '.swiper-pagination',
-                                                }}
-                                                autoplay={{
-                                                    delay: 5000,
-                                                    disableOnInteraction: false,
-                                                }}
-                                                modules={[Navigation, Pagination, Autoplay]}
-                                                breakpoints={{
-                                                    320: {
-                                                        slidesPerView: 2,
-                                                        spaceBetween: 10,
-                                                    },
-                                                    640: {
-                                                        slidesPerView: 2,
-                                                        spaceBetween: 20,
-                                                    },
-                                                    1024: {
-                                                        slidesPerView: 3,
-                                                        spaceBetween: 30,
-                                                    },
-                                                }}
-                                            >
-                                                {
-                                                    relatedPostsLoading &&
-                                                    <NewsSkeleton count={3} />
-                                                }
-                                                {relatedPosts.map(article => (
-                                                    <SwiperSlide key={article.id || article.slug}>
-                                                        <DynamicArticleCard
-                                                            article={article}
-                                                            showImage
-                                                            priority={false}
-                                                            imgHeight={143}
-                                                            bgColor="#1176BB08"
-                                                            bordered
-                                                            isSlider
-                                                            showCategorie={!isMobile}
-                                                        />
-                                                    </SwiperSlide>
-                                                ))}
-                                            </Swiper>
-                                            <div className="swiper-button-prev !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
-                                            <div className="swiper-button-next !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"></div>
-
-                                            {/* Custom Pagination */}
-                                        </div>
+                                            <Slides articles={relatedPosts} lgDisplay={3} mdDisplay={2} smDisplay={1} showControll />
                                     </div>
                                 }</Col>
 
