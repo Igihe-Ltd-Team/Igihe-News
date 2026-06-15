@@ -60,7 +60,7 @@ export function OptimizedImage({
   const normalizedHeight = Number(height) > 0 ? Number(height) : undefined
   const minimumHeight = `${Math.max(normalizedHeight ?? 0, 100)}px`
   const isAnimatedGif = /\.gif(?:$|[?#])/i.test(imageSrc)
-  const isLegacyImageHost = imageSrc.startsWith('https://en-images.igihe.com/')
+  const isLegacyImageHost = imageSrc.startsWith('https://en-images.igihe.com/') || imageSrc.startsWith('https://cdn.igihe.com/')
   const hasAspectRatio = aspectRatio !== 'unset'
 
 
@@ -79,7 +79,7 @@ export function OptimizedImage({
     }}>
 
 
-      {/* {isLoading && (
+      {isLoading && (
   <div
     style={{
       position: 'absolute',
@@ -91,7 +91,7 @@ export function OptimizedImage({
       transition: 'opacity 0.3s ease-in-out',
     }}
   />
-)} */}
+)}
 
 
       {isAnimatedGif || isLegacyImageHost ? (

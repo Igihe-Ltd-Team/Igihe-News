@@ -11,8 +11,9 @@ import { NextRequest, NextResponse } from 'next/server'
 const SECRET = process.env.REVALIDATION_SECRET
 
 function isAuthorized(request: NextRequest): boolean {
-  const incomingSecret = request.headers.get('x-revalidate-secret')
-  return Boolean(SECRET && incomingSecret === SECRET)
+  const headerSecret = request.headers.get('x-revalidate-secret')
+  const querySecret = request.nextUrl.searchParams.get('secret')
+  return Boolean(SECRET && (headerSecret === SECRET || querySecret === SECRET))
 }
 
 async function warmFreshData(change: WordPressChange, warmTargets: string[]) {
