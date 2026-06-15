@@ -32,7 +32,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
       <p className="text-red-600">{error.message}</p>
       <button 
         onClick={() => window.location.reload()} 
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        className="mt-4 btn btn-primary"
       >
         Reload Page
       </button>

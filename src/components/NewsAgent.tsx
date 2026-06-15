@@ -640,7 +640,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
             {/* Header */}
             <div className="igihe-header">
               <div className="igihe-avatar">
-                <Image src={"assets/igiheIcon.png"} alt={""} height={30} width={30} />
+                <Image src={"/assets/igiheIcon.png"} alt={""} height={30} width={30} />
                 <span className="igihe-avatar__dot" />
               </div>
               <div>
@@ -685,7 +685,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                         👤
                       </div> :
                       <div className={`igihe-msg__avatar igihe-msg__avatar--ai`}>
-                        <Image src={"assets/igiheIcon.png"} alt={""} height={18} width={18} />
+                        <Image src={"/assets/igiheIcon.png"} alt={""} height={18} width={18} />
                       </div>
                     }
 

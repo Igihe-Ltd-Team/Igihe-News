@@ -82,13 +82,13 @@ const isSpecialDate =
         {/* Desktop Ads - Server Side */}
         <div className="d-none d-md-block">
           <Row>
-            <Col md={6}>
+            <Col>
               <ServerSlotManager
                 position="premium_leaderboard_1"
                 priority={true}
               />
             </Col>
-            <Col md={6}>
+            <Col>
               <ServerSlotManager
                 position="mot-premium_leaderboard_1_b"
                 priority={true}

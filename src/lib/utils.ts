@@ -1,12 +1,6 @@
 import { NewsItem } from '@/types/fetchData'
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 import moment from 'moment'
 import { RawImageObject } from '@/components/lightbox/Lightbox.types'
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
 
 // export function formatDate(dateString: string): string {
 //   const date = new Date(dateString)

@@ -70,7 +70,7 @@ const adDestination = ad?.meta?.igh_ad_url
           // height={positionConfig.dimensions.height}
           className="img-fluid"
           priority={priority}
-          imgClass={`object-fit-contain ${imgClass}`}
+          imgClass={`object-fit-cover ${imgClass}`}
         />
       </a>
       {/* {showLabel && (

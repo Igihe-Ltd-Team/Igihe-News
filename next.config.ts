@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
   compress: true,
 
   experimental: {
-    optimizeCss: true,
+    optimizeCss: process.env.NODE_ENV === 'production',
     optimizePackageImports: ['react-bootstrap', 'react-icons'],
     taint: true,
   },
@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  reactCompiler: true,
+  reactCompiler: process.env.NODE_ENV === 'production',
 
   // Use git commit as build ID so chunks are consistent across instances
   generateBuildId: async () => {

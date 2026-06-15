@@ -65,6 +65,7 @@ export function OptimizedImage({
   const isLegacyImageHost = imageSrc.startsWith('https://en-images.igihe.com/') || imageSrc.startsWith('https://cdn.igihe.com/')
   const hasAspectRatio = aspectRatio !== 'unset'
 
+const effectiveHeight = height && height > 0 ? height : undefined
 
 
   return (
@@ -74,8 +75,13 @@ export function OptimizedImage({
       // maxHeight:'100%',
       // height: containerHeight
 
-        minHeight: minimumHeight,
-        height: normalizedHeight ? `${normalizedHeight}px` : hasAspectRatio ? 'auto' : minimumHeight,
+        // minHeight: minimumHeight,
+        // height: normalizedHeight ? `${normalizedHeight}px` : hasAspectRatio ? 'auto' : minimumHeight,
+        // overflow: 'hidden',
+        // aspectRatio: aspectRatio,
+
+        minHeight: effectiveHeight ? `${effectiveHeight}px` : (aspectRatio !== 'unset' ? undefined : '50px'),
+        height: effectiveHeight ? `${effectiveHeight}px` : 'auto',
         overflow: 'hidden',
         aspectRatio: aspectRatio,
     }}>

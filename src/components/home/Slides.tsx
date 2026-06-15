@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useRef, useState } from 'react'
+import React from 'react'
 
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper/modules'
-import type { Swiper as SwiperInstance } from 'swiper'
+import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
@@ -29,21 +28,24 @@ function Slides({
     mdDisplay = 2,
     smDisplay = 1
 }: SlidesProps) {
-    const swiperRef = useRef<SwiperInstance | null>(null)
-    const [activeIndex, setActiveIndex] = useState(0)
-
     return (
         <div className="position-relative mb-2 border-bottom-custom pt-2 pb-2 slider-section">
             <Swiper
-                onSwiper={(swiper) => { swiperRef.current = swiper }}
-                onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
                 spaceBetween={20}
                 slidesPerView={3}
+                navigation={{
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                }}
+                pagination={{
+                    clickable: true,
+                    el: '.swiper-pagination',
+                }}
                 autoplay={{
                     delay: 5000,
                     disableOnInteraction: false,
                 }}
-                modules={[Autoplay]}
+                modules={[Navigation, Pagination, Autoplay]}
                 breakpoints={{
                     320: {
                         slidesPerView: smDisplay,
@@ -76,34 +78,14 @@ function Slides({
             {
                 showControll &&
                 <>
-                    <button
-                        type="button"
-                        aria-label="Previous slide"
-                        className="swiper-button-prev !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"
-                        onClick={() => swiperRef.current?.slidePrev()}
-                    />
-                    <button
-                        type="button"
-                        aria-label="Next slide"
-                        className="swiper-button-next !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"
-                        onClick={() => swiperRef.current?.slideNext()}
-                    />
+                    <div className="swiper-button-prev "></div>
+                    <div className="swiper-button-next"></div>
                 </>
             }
 
             {
                 showPagination &&
-                <div className="swiper-pagination !bottom-0 mt-4">
-                    {articles.map((article, index) => (
-                        <button
-                            key={article.id || article.slug || index}
-                            type="button"
-                            aria-label={`Go to slide ${index + 1}`}
-                            className={`swiper-pagination-bullet ${activeIndex === index ? 'swiper-pagination-bullet-active' : ''}`}
-                            onClick={() => swiperRef.current?.slideTo(index)}
-                        />
-                    ))}
-                </div>
+                <div className="swiper-pagination swiper-pagination-bottom mt-4"></div>
             }
 
         </div>

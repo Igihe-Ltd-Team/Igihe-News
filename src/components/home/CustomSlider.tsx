@@ -72,20 +72,20 @@ function CustomSlider({
                     <button
                         type="button"
                         aria-label="Previous slide"
-                        className="swiper-button-prev !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"
+                        className="swiper-button-prev"
                         onClick={() => swiperRef.current?.slidePrev()}
                     />
                     <button
                         type="button"
                         aria-label="Next slide"
-                        className="swiper-button-next !text-blue-500 !w-10 !h-10 bg-white !rounded-full !shadow-lg after:!text-lg"
+                        className="swiper-button-next"
                         onClick={() => swiperRef.current?.slideNext()}
                     />
                 </>
             )}
 
             {showPagination && (
-                <div className="swiper-pagination !bottom-0 mt-4">
+                <div className="swiper-pagination swiper-pagination-bottom mt-4">
                     {childrenArray.map((_, index) => (
                         <button
                             key={index}
