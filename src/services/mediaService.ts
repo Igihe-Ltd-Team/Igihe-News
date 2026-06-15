@@ -106,38 +106,17 @@ export async function fetchMedia(mediaId: number): Promise<any> {
 // ─── Advertisements ──────────────────────────────────────────────────────────
 
 const ADS_CACHE_TTL = 5 * 60 * 1000 // 1 hour
-let adsCache: Advertisement[] | null = null
-let adsCacheTimestamp = 0
 let adsFetchInProgress: Promise<Advertisement[]> | null = null
 
 
 export function clearAdsCache(): void {
-  adsCache = null
-  adsCacheTimestamp = 0
   adsFetchInProgress = null
   console.log('🗑️ Ads cache cleared')
 }
 
 
 export async function fetchAdvertisements(): Promise<Advertisement[]> {
-  const now = Date.now()
-
-  // const needsRevalidate = process.env.NEXT_PHASE === 'phase-production-build' 
-  //   ? false 
-  //   : now - (globalThis as any).__LAST_AD_REVALIDATION__ < 5000
-  
-  // if ((globalThis as any).__FORCE_AD_REFRESH__ || needsRevalidate) {
-  //   adsCache = null
-  //   adsCacheTimestamp = 0;
-  //   (globalThis as any).__FORCE_AD_REFRESH__ = false
-  // }
-
-  // if (adsCache && (now - adsCacheTimestamp) < ADS_CACHE_TTL) {
-  //   return adsCache
-  // }
-
-  // if (adsFetchInProgress) return adsFetchInProgress
-
+  if (adsFetchInProgress) return adsFetchInProgress
 
   adsFetchInProgress = (async () => {
     try {
@@ -148,18 +127,12 @@ export async function fetchAdvertisements(): Promise<Advertisement[]> {
             `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${Date.now()}`
           )
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-          const ads = (await response.json()) || []
-          adsCache = ads
-          adsCacheTimestamp = Date.now()
-          return ads
+          return (await response.json()) || []
         },
         ttl: ADS_CACHE_TTL,
         tags: ['advertisements', 'slots'],
         dedup: true,
       })
-    } catch (error) {
-      console.error('Error fetching advertisements:', error)
-      return []
     } finally {
       adsFetchInProgress = null
     }

@@ -1,13 +1,10 @@
 "use client"
 // app/components/HeaderClient.tsx (Client Component)
-import { useState, ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
+import { Fragment, ReactNode } from 'react'
 import Languages from '../ui/Languages'
 import ThemeSwitcher from '../ui/ThemeSwitcher'
 import { useResponsive } from '@/hooks/useResponsive'
 import IgiheCanvas from './IgiheCanvas'
-import { ThemedText } from '../ThemedText'
-import SearchModal from '../SearchModal'
 
 interface HeaderClientProps {
   categories: any[]
@@ -20,9 +17,7 @@ export default function HeaderClient({
   logoSection,
   desktopAdSection 
 }: HeaderClientProps) {
-  const pathname = usePathname()
   const { isMobile } = useResponsive()
-  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null)
 
   return (
     <>
@@ -39,7 +34,7 @@ export default function HeaderClient({
       {/* Logo and banner */}
       <div className="row flex align-items-center py-2 justify-content-between header-row-cotainer">
         <div className={`col-md-5 site-logo-wrapper ${isMobile && 'd-flex justify-content-between'}`}>
-          {logoSection}
+          <Fragment key="logo-section">{logoSection}</Fragment>
           
           {isMobile && (
             <IgiheCanvas 
@@ -50,7 +45,7 @@ export default function HeaderClient({
           )}
         </div>
         
-        {!isMobile && desktopAdSection}
+        {!isMobile && <Fragment key="desktop-ad-section">{desktopAdSection}</Fragment>}
       </div>
 
       {/* Menus section - Desktop only */}

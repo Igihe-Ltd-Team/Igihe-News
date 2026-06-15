@@ -128,6 +128,21 @@ export const handlers = [
     return HttpResponse.json(makeAuthor({ id: Number(params.id) }))
   }),
 
+  // Custom byline taxonomy used by the production API
+  http.get(`${BASE}/byline`, ({ request }) => {
+    const url = new URL(request.url)
+    const slug = url.searchParams.get('slug')
+    if (slug) {
+      if (slug === 'unknown') return HttpResponse.json([])
+      return HttpResponse.json([makeAuthor({ slug })])
+    }
+    return HttpResponse.json([makeAuthor(), makeAuthor({ id: 2, slug: 'john-doe', name: 'John' })])
+  }),
+
+  http.get(`${BASE}/bylines/:id`, ({ params }) => {
+    return HttpResponse.json(makeAuthor({ id: Number(params.id) }))
+  }),
+
   // Custom post types
   http.get(`${BASE}/opinion`, () => {
     return HttpResponse.json([makePost({ id: 100 }), makePost({ id: 101 })], {

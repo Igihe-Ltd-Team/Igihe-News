@@ -7,6 +7,24 @@ export const API_CONFIG = {
   retryAttempts: 3,
 } as const
 
+/**
+ * WordPress does not allow browser cross-origin requests. Keep server-side
+ * requests direct, but route browser reads through the same-origin BFF proxy.
+ */
+export function resolveApiUrl(url: string, method = 'GET'): string {
+  if (
+    method !== 'GET' ||
+    typeof window === 'undefined' ||
+    !API_CONFIG.baseURL ||
+    !url.startsWith(API_CONFIG.baseURL)
+  ) {
+    return url
+  }
+
+  const relative = url.slice(API_CONFIG.baseURL.length).replace(/^\/+/, '')
+  return `/api/proxy/${relative}`
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -28,15 +46,8 @@ export async function fetchWithTimeout(
 ): Promise<Response> {
   let lastError: Error | null = null
   const maxRetries = API_CONFIG.retryAttempts
-  const isServer = typeof window === 'undefined'
-
-  // Cache-bust on the client for GET requests
-  let finalUrl = url
-  if ((!options.method || options.method === 'GET') && !isServer) {
-    finalUrl = url.includes('?')
-      ? `${url}&_=${Date.now()}`
-      : `${url}?_=${Date.now()}`
-  }
+  const method = options.method?.toUpperCase() || 'GET'
+  const finalUrl = resolveApiUrl(url, method)
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController()
@@ -48,7 +59,7 @@ export async function fetchWithTimeout(
         signal: controller.signal,
         headers: {
           Accept: 'application/json',
-          ...(options.method !== 'GET' && { 'Content-Type': 'application/json' }),
+          ...(method !== 'GET' && { 'Content-Type': 'application/json' }),
           ...options.headers,
         },
       }

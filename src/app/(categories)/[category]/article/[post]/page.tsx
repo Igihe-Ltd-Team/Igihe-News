@@ -217,7 +217,6 @@ async function ArticleContent({
 
   return (
     <HydrateArticle article={postData} slug={slug}>
-      {/* <ViewTrackerComponent postId={postData.id} /> */}
 
       <div className='pb-md-4'>
         <Suspense fallback={null}>

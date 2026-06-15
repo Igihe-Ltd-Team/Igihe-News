@@ -1,4 +1,4 @@
-import { prefetchAllHomeData, prefetchHomeData } from '@/lib/prefetch-home-data'
+import { prefetchHomeData } from '@/lib/prefetch-home-data'
 import { Home } from './home/home'
 import { PrefetchHomeData } from './prefetch-home-data'
 
@@ -13,18 +13,9 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  //  
-  // Choose your strategy based on needs
-  // const initialData = STRATEGY === 'full' 
-  //   ? await prefetchAllHomeData()
-  //   : await prefetchHomeData() 
-
-  // const initialData = await prefetchHomeData()
-  const initialData = await prefetchAllHomeData()
-
-
-  
-  
+  // Only block on above-the-fold data. Below-the-fold server components stream
+  // through their Suspense boundaries and use the shared service cache.
+  const initialData = await prefetchHomeData()
 
   return (
     <PrefetchHomeData initialData={initialData}>

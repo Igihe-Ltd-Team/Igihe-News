@@ -1,30 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { LocalRateLimiter } from '@/lib/rateLimit';
 
 const BACKEND_URL = 'https://igihecomments.com';
+const commentRateLimiter = new LocalRateLimiter({ limit: 5, windowMs: 10 * 60_000 });
+
+function getClientIp(request: NextRequest): string {
+  return request.headers.get('x-real-ip') ||
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('cf-connecting-ip') ||
+    'anonymous';
+}
+
+function isValidText(value: unknown, maxLength: number): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && value.length <= maxLength;
+}
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    
-    // Build query string
-    const params = new URLSearchParams();
-    
-    // For fetch requests
-    if (searchParams.has('identifier')) {
-      params.append('identifier', searchParams.get('identifier') || '');
-    }
-    
-    // For submit requests
-    if (searchParams.has('name')) {
-      params.append('name', searchParams.get('name') || '');
-      params.append('email', searchParams.get('email') || '');
-      params.append('comment', searchParams.get('comment') || '');
-      params.append('identifier', searchParams.get('identifier') || '');
-      params.append('title', searchParams.get('title') || '');
-      params.append('url', searchParams.get('url') || '');
-      params.append('reply_to', searchParams.get('reply_to') || '');
+    const identifier = searchParams.get('identifier');
+    if (!identifier || identifier.length > 100) {
+      return NextResponse.json({ error: 'Valid identifier is required' }, { status: 400 });
     }
 
+    const params = new URLSearchParams({ identifier });
     const backendUrl = `${BACKEND_URL}/api/routes?${params.toString()}`;
     
     // console.log('📤 GET request to backend:', backendUrl);
@@ -38,8 +37,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error(`❌ Backend returned ${response.status}:`, text);
+      console.error(`Comments backend returned ${response.status}`);
       
       return NextResponse.json(
         {
@@ -62,8 +60,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('❌ Proxy GET error:', errorMessage);
+    console.error('Comments proxy GET error:', error);
     
     return NextResponse.json(
       {
@@ -71,7 +68,7 @@ export async function GET(request: NextRequest) {
           {
             node: {
               Status: 'Failed',
-              message: `Proxy error: ${errorMessage}`,
+              message: 'Unable to fetch comments',
             },
           },
         ],
@@ -83,7 +80,26 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json(); // JSON from frontend
+    const rateLimit = commentRateLimiter.check(getClientIp(request));
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many comments. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
+    const body = await request.json();
+    if (
+      !isValidText(body.name, 100) ||
+      !isValidText(body.email, 254) ||
+      !isValidText(body.comment, 5_000) ||
+      !isValidText(body.identifier, 100) ||
+      (body.reference !== undefined && typeof body.reference !== 'string') ||
+      (body.url !== undefined && typeof body.url !== 'string') ||
+      (body.reply_to !== undefined && typeof body.reply_to !== 'string')
+    ) {
+      return NextResponse.json({ error: 'Invalid comment submission' }, { status: 400 });
+    }
 
     // Build form data
     const formData = new URLSearchParams();
@@ -104,21 +120,18 @@ export async function POST(request: NextRequest) {
       body: formData.toString(),
     });
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    if (!response.ok) {
+      return NextResponse.json({ error: 'Comment service unavailable' }, { status: 502 });
+    }
 
+    const data = await response.json();
+    return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    console.error('Comments proxy POST error:', error);
+    return NextResponse.json({ error: 'Unable to submit comment' }, { status: 500 });
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 });
 }

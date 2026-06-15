@@ -69,6 +69,21 @@ describe('fetchCategoryBySlug', () => {
     expect(cat).toBeNull()
   })
 
+  it('caches repeated slug lookups', async () => {
+    let requests = 0
+    server.use(
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/categories', () => {
+        requests++
+        return HttpResponse.json([{ id: 1, name: 'Tech', slug: 'technology', count: 5 }])
+      })
+    )
+
+    await fetchCategoryBySlug('technology')
+    await fetchCategoryBySlug('technology')
+
+    expect(requests).toBe(1)
+  })
+
   it('throws on server error', async () => {
     server.use(
       http.get('https://new.igihe.com/english/wp-json/wp/v2/categories', () =>

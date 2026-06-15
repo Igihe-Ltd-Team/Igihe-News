@@ -1,23 +1,24 @@
 "use client"
-import { Author, AuthorWithPosts } from '@/types/fetchData'
+import Link from 'next/link'
+import { useQuery } from '@tanstack/react-query'
 import { OptimizedImage } from '../ui/OptimizedImage'
 import { ApiService } from '@/services/apiService'
-import { Col, Row } from 'react-bootstrap'
+import { Row } from 'react-bootstrap'
 import { ThemedText } from '../ThemedText'
-import { useAuthorData } from '@/hooks/useAuthorData'
+import { queryKeys } from '@/lib/queryKeys'
 import NewsSkeleton from '../NewsSkeleton'
 
+export default function AuthorsList() {
+  const { data: authors, isLoading } = useQuery({
+    queryKey: queryKeys.authors.lists(),
+    queryFn: () => ApiService.fetchAllAuthors(),
+    staleTime: 10 * 60 * 1000,
+  })
 
-export default async function AuthorsList() {
-  // const authors = await ApiService.fetchAllAuthors()
+  if (isLoading) {
+    return <NewsSkeleton />
+  }
 
-  const {useAllAuthors} = useAuthorData()
-
-  const { data: authors, isLoading, error } = useAllAuthors()
-
-// console.log('authors',authors)
-if(isLoading)
-  return <NewsSkeleton/>
   return (
 
     <div className="min-h-screen bg-light">
@@ -28,7 +29,7 @@ if(isLoading)
             <nav aria-label="breadcrumb">
               <ol className="breadcrumb">
                 <li className="breadcrumb-item">
-                  <a href="/">Home</a>
+                  <Link href="/">Home</Link>
                 </li>
                 <li className="breadcrumb-item active">Authors</li>
               </ol>
@@ -46,7 +47,7 @@ if(isLoading)
           {
             authors?.map((author) => {
               return (
-                <a href={`/author/${author.slug}`} className='feature col-md-3 text-decoration-none text-dark' key={author.id}>
+                <Link href={`/author/${author.slug}`} className='feature col-md-3 text-decoration-none text-dark' key={author.id}>
                   
                     {author.avatar_urls && (
                       <OptimizedImage
@@ -62,7 +63,7 @@ if(isLoading)
                     <ThemedText type='defaultSemiBold'>{author.name}</ThemedText>
                   </div>
                   {/* <p className='line-clamp-3'>{author.description}</p> */}
-                </a>
+                </Link>
               )
             }
             )

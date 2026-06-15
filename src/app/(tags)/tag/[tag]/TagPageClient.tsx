@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Col, Row, Button } from "react-bootstrap";
-import { Category, NewsItem } from "@/types/fetchData";
+import { NewsItem } from "@/types/fetchData";
 import DynamicArticleCard from "@/components/news/DynamicArticleCard";
 import SideBar from "@/components/ReUsable/SideBar";
 import { fetchArticlesByTag } from "./actions";
+import { mergeUniqueNewsItems, uniqueNewsItems } from "@/lib/newsItems";
 
 interface TagPageClientProps {
   initialPosts: NewsItem[];
@@ -25,7 +26,7 @@ export default function TagPageClient({
   initialPageInfo,
   tag
 }: TagPageClientProps) {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState(() => uniqueNewsItems(initialPosts));
   const [pageInfo, setPageInfo] = useState(initialPageInfo);
   const [isPending, startTransition] = useTransition();
 
@@ -38,8 +39,7 @@ export default function TagPageClient({
       const result = await fetchArticlesByTag(tag, nextPage);
 
       if (result?.data) {
-        // Append new posts to existing posts
-        setPosts(prevPosts => [...prevPosts, ...result.data]);
+        setPosts(prevPosts => mergeUniqueNewsItems(prevPosts, result.data));
         setPageInfo({
           currentPage: result.pagination.currentPage,
           lastPage: result.pagination.totalPages,

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { chatWithNewsAgent, AgentMessage } from "@/services/geminiService";
 import { NewsItem } from "@/types/fetchData";
 import Image from "next/image";
 import ReactMarkdown from 'react-markdown';
@@ -14,6 +13,22 @@ interface Message {
   text: string;
   timestamp: Date;
   isTyping?: boolean;
+}
+
+interface AgentMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+async function chatWithNewsAgent(messages: AgentMessage[]): Promise<string> {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages }),
+  });
+  if (!response.ok) throw new Error('News assistant request failed');
+  const data = await response.json();
+  return data.text;
 }
 
 const QUICK_PROMPTS = [

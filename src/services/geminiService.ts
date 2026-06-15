@@ -4,7 +4,7 @@
 // import { NewsItem } from "@/types/fetchData";
 // import { stripHtml } from "@/lib/utils";
 
-// const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GERMINI_API;
+// const GEMINI_API_KEY = process.env.GEMINI_API_KEY_1;
 // const WP_API = process.env.NEXT_PUBLIC_WORDPRESS_API_URL;
 // if (!GEMINI_API_KEY) console.warn("GEMINI_API_KEY is not set – Gemini will not work");
 
@@ -329,10 +329,10 @@ import { ApiService } from "./apiService";
 
 
 const GEMINI_KEYS = [
-  process.env.NEXT_PUBLIC_GERMINI_API,
-  process.env.NEXT_PUBLIC_GERMINI_API2,
-  process.env.NEXT_PUBLIC_GERMINI_API3,
-  process.env.NEXT_PUBLIC_GERMINI_API4,
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
 ].filter(Boolean) as string[];
 
 

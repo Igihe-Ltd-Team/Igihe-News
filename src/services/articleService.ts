@@ -19,16 +19,11 @@ export async function fetchPostBySlug(slug: string): Promise<NewsItem | null> {
   return cachedRequest({
     key: `post:${slug}`,
     fetchFn: async () => {
-      try {
-        const response = await fetchWithTimeout(
+      const response = await fetchWithTimeout(
         `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
       )
       const posts = await response.json()
       return Array.isArray(posts) && posts.length > 0 ? posts[0] : null
-      } catch (error) {
-        return null
-      }
-      
     },
     getContentDate: (data) => data?.date || null,
   })
@@ -38,14 +33,9 @@ export async function customPostFetch(apiUrl: string, slug: string): Promise<New
   return cachedRequest({
     key: `post:${slug}`,
     fetchFn: async () => {
-      try {
-        const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${apiUrl}`)
+      const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${apiUrl}`)
       const posts = await response.json()
       return Array.isArray(posts) && posts.length > 0 ? posts[0] : null
-      } catch (error) {
-        return null
-      }
-      
     },
     getContentDate: (data) => data?.date || null,
   })
@@ -120,9 +110,7 @@ export async function fetchArticles(params?: {
   return cachedRequest({
     key: cacheKey,
     fetchFn: async () => {
-
-      try {
-        const qs = buildQuery(queryParams)
+      const qs = buildQuery(queryParams)
       const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/posts?${qs}`)
       const data = await response.json()
 
@@ -134,19 +122,6 @@ export async function fetchArticles(params?: {
         page: params?.page,
         per_page: params?.per_page,
       })
-      } catch (error) {
-        return {
-          data: [],
-          pagination: {
-            currentPage: params?.page || 1,
-            perPage: params?.per_page || 20,
-            totalPages: 0,
-            totalItems: 0,
-            hasNextPage: false,
-          },
-        }
-      }
-      
     },
     getContentDate: (res) => res?.data?.[0]?.date ?? null,
     ttl: listTTL,
@@ -218,32 +193,18 @@ export async function fetchOtherPosts(params?: {
   return cachedRequest({
     key: cacheKey,
     fetchFn: async () => {
-      try {
-        const qs = buildQuery(queryParams)
-        const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${params?.postType}?${qs}`)
-        const data = await response.json()
+      const qs = buildQuery(queryParams)
+      const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${params?.postType}?${qs}`)
+      const data = await response.json()
 
-        if (Array.isArray(data) && data.length > 0) {
-          cacheArticlesFromList(data).catch(() => { })
-        }
-
-        return buildPaginationResponse(data, response, {
-          page: params?.page,
-          per_page: params?.per_page,
-        })
-      } catch (err) {
-        console.error('[fetchArticles] failed:', err)
-        return {
-          data: [],
-          pagination: {
-            currentPage: params?.page || 1,
-            perPage: params?.per_page || 20,
-            totalPages: 0,
-            totalItems: 0,
-            hasNextPage: false,
-          },
-        } // safe fallback
+      if (Array.isArray(data) && data.length > 0) {
+        cacheArticlesFromList(data).catch(() => { })
       }
+
+      return buildPaginationResponse(data, response, {
+        page: params?.page,
+        per_page: params?.per_page,
+      })
     },
     getContentDate: (res) => res?.data?.[0]?.date ?? null,
     ttl: listTTL,
@@ -262,6 +223,10 @@ export async function fetchRelatedPosts(
     exclude: [postId],
     _embed: '1',
   }
+
+console.log("postId",postId)
+console.log("categories",categories)
+
 
   if (categories.length > 0) {
     queryParams.categories = categories.join(',')
@@ -330,8 +295,7 @@ export async function fetchOpinions(params?: {
   return cachedRequest({
     key: `opinion:${JSON.stringify(queryParams)}`,
     fetchFn: async () => {
-      try {
-        const qs = buildQuery(queryParams)
+      const qs = buildQuery(queryParams)
       const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/opinion?${qs}`)
       const data = await response.json()
 
@@ -343,19 +307,6 @@ export async function fetchOpinions(params?: {
         page: params?.page,
         per_page: params?.per_page,
       })
-      } catch (error) {
-        return {
-          data: [],
-          pagination: {
-            currentPage: params?.page || 1,
-            perPage: params?.per_page || 20,
-            totalPages: 0,
-            totalItems: 0,
-            hasNextPage: false,
-          },
-        }
-      }
-      
     },
     ttl: 5 * 60 * 1000,
   })
@@ -378,10 +329,8 @@ export async function fetchAdvertorials(params?: {
   return cachedRequest({
     key: `advertorial:${JSON.stringify(queryParams)}`,
     fetchFn: async () => {
-      try {
-        const qs = buildQuery(queryParams)
+      const qs = buildQuery(queryParams)
       const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/advertorial?${qs}`)
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       const ads = await response.json()
 
       if (Array.isArray(ads) && ads.length > 0) {
@@ -389,10 +338,6 @@ export async function fetchAdvertorials(params?: {
       }
 
       return ads || []
-      } catch (error) {
-        return []
-      }
-      
     },
     ttl: 10 * 60 * 1000,
   })
@@ -402,18 +347,12 @@ export async function fetchFacts(): Promise<NewsItem[]> {
   return cachedRequest({
     key: 'fact-of-the-day:all',
     fetchFn: async () => {
-      try {
-        const response = await fetchWithTimeout(
+      const response = await fetchWithTimeout(
         `${API_CONFIG.baseURL}/fact-of-the-day?_embed&per_page=1`
       )
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       return (await response.json()) || []
-      } catch (error) {
-        return null
-      }
-      
     },
-    getContentDate: (data) => data?.date || null,
+    getContentDate: (data) => data?.[0]?.date || null,
   })
 }
 
@@ -421,11 +360,9 @@ export async function fetchAnnouncements(): Promise<NewsItem[]> {
   return cachedRequest({
     key: 'announcement:all',
     fetchFn: async () => {
-      try {
-        const response = await fetchWithTimeout(
+      const response = await fetchWithTimeout(
         `${API_CONFIG.baseURL}/announcement?_embed&per_page=50`
       )
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       const announcements = await response.json()
 
       if (Array.isArray(announcements) && announcements.length > 0) {
@@ -433,12 +370,8 @@ export async function fetchAnnouncements(): Promise<NewsItem[]> {
       }
 
       return announcements || []
-      } catch (error) {
-        return []
-      }
-      
     },
-    getContentDate: (data) => data?.date || null,
+    getContentDate: (data) => data?.[0]?.date || null,
   })
 }
 

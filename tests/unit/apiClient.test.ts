@@ -1,6 +1,6 @@
 import { server } from '../mocks/msw/server'
 import { errorHandlers } from '../mocks/msw/handlers'
-import { fetchWithTimeout, buildQuery, buildPaginationResponse, ApiError, API_CONFIG } from '../../src/services/apiClient'
+import { fetchWithTimeout, buildQuery, buildPaginationResponse, ApiError, API_CONFIG, resolveApiUrl } from '../../src/services/apiClient'
 import { http, HttpResponse } from 'msw'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
@@ -34,6 +34,25 @@ describe('ApiError', () => {
   it('supports isRetryable flag', () => {
     const err = new ApiError('timeout', 408, true)
     expect(err.isRetryable).toBe(true)
+  })
+})
+
+describe('resolveApiUrl', () => {
+  it('keeps WordPress URLs direct on the server', () => {
+    expect(resolveApiUrl(`${BASE}/posts?page=1`)).toBe(`${BASE}/posts?page=1`)
+  })
+
+  it('routes browser WordPress GET requests through the same-origin proxy', () => {
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: {} })
+
+    try {
+      expect(resolveApiUrl(`${BASE}/posts?page=1`)).toBe('/api/proxy/posts?page=1')
+      expect(resolveApiUrl(`${BASE}/comments`, 'POST')).toBe(`${BASE}/comments`)
+    } finally {
+      if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow)
+      else delete (globalThis as { window?: unknown }).window
+    }
   })
 })
 
@@ -74,6 +93,7 @@ describe('fetchWithTimeout', () => {
     )
     await fetchWithTimeout(`${BASE}/posts`)
     expect(capturedHeaders['accept']).toBe('application/json')
+    expect(capturedHeaders['content-type']).toBeUndefined()
   })
 
   it('sets Content-Type for POST requests', async () => {

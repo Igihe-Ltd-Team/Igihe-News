@@ -344,12 +344,15 @@
 import { fileCache } from '@/lib/cache/fileCache'
 import { calculateArticleCacheTTL, calculateListCacheTTL } from '@/lib/cache/dynamicCache'
 import { NewsItem } from '@/types/fetchData'
+import { LocalRateLimiter } from '@/lib/rateLimit'
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 
 export const CACHE_CONFIG = {
   defaultTTL: 5 * 60 * 1000,
   maxMemoryCacheSize: 100,
+  // Kept for explicit endpoint-level rate limiting only. Cache misses must not
+  // share a global request bucket because normal traffic bursts would fail.
   rateLimitMax: 100,
   rateLimitWindowMs: 60_000,
   // ★ How many times beyond TTL we'll serve stale data while revalidating.
@@ -399,19 +402,30 @@ export const pendingRequests = new Map<string, Promise<any>>()
 
 // ─── Rate Limiter ────────────────────────────────────────────────────────────
 
-const rateLimitBuckets = new Map<string, number[]>()
+const explicitRateLimiter = new LocalRateLimiter({
+  limit: CACHE_CONFIG.rateLimitMax,
+  windowMs: CACHE_CONFIG.rateLimitWindowMs,
+})
+const customRateLimiters = new Map<string, LocalRateLimiter>()
 
 export function checkRateLimit(
   key: string = 'api_requests',
   maxRequests: number = CACHE_CONFIG.rateLimitMax,
   windowMs: number = CACHE_CONFIG.rateLimitWindowMs
 ): void {
-  const now = Date.now()
-  const requests = rateLimitBuckets.get(key) || []
-  const recent = requests.filter(t => t > now - windowMs)
-  if (recent.length >= maxRequests) throw new Error('Rate limit exceeded')
-  recent.push(now)
-  rateLimitBuckets.set(key, recent)
+  const configKey = `${maxRequests}:${windowMs}`
+  let limiter = explicitRateLimiter
+
+  if (maxRequests !== CACHE_CONFIG.rateLimitMax || windowMs !== CACHE_CONFIG.rateLimitWindowMs) {
+    limiter = customRateLimiters.get(configKey) ?? new LocalRateLimiter({
+      limit: maxRequests,
+      windowMs,
+      maxBuckets: 1_000,
+    })
+    customRateLimiters.set(configKey, limiter)
+  }
+
+  if (!limiter.check(key).allowed) throw new Error('Rate limit exceeded')
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -496,7 +510,6 @@ async function fetchAndCache<T>(
   baseTTL: number = CACHE_CONFIG.defaultTTL
 ): Promise<T> {
   const now = Date.now()
-  checkRateLimit()
 
   try {
     const promise = fetchFn()
@@ -520,7 +533,7 @@ async function fetchAndCache<T>(
       return staleMemory.data
     }
     if (isServer()) {
-      const staleFile = await fileCache.get<T>(key)
+      const staleFile = await fileCache.get<T>(key, { allowExpired: true })
       if (staleFile !== null) {
         console.warn('⚠️ Using stale file cache due to error')
         return staleFile
@@ -557,24 +570,14 @@ export function cacheArticleInMemory(article: NewsItem): void {
 export async function cacheArticlesFromList(articles: NewsItem[]): Promise<void> {
   if (!articles?.length) return
   const now = Date.now()
-  const batchSize = 5
 
-  for (let i = 0; i < articles.length; i += batchSize) {
-    const batch = articles.slice(i, i + batchSize)
-    await Promise.all(
-      batch.map(async (article) => {
-        if (!article?.slug) return
-        const key = `post:${article.slug}`
-        if (pendingRequests.has(key)) return
-        const ttl = article.date ? calculateArticleCacheTTL(article.date) : CACHE_CONFIG.defaultTTL
-        memoryCache.set(key, { data: article, timestamp: now })
-        if (isServer()) {
-          try {
-            await fileCache.set(key, article, ttl, { contentDate: article.date })
-          } catch { /* silent */ }
-        }
-      })
-    )
+  // Lists are already persisted under their query key. Warming individual
+  // articles in memory avoids hundreds of redundant filesystem writes.
+  for (const article of articles) {
+    if (!article?.slug) continue
+    const key = `post:${article.slug}`
+    if (pendingRequests.has(key)) continue
+    memoryCache.set(key, { data: article, timestamp: now })
   }
 }
 

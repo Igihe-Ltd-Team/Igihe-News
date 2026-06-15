@@ -235,7 +235,7 @@ describe('fetchAuthorBySlug', () => {
 
   it('throws on server error', async () => {
     server.use(
-      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/byline', () =>
         HttpResponse.json({}, { status: 500 })
       )
     )
@@ -268,7 +268,7 @@ describe('fetchPostsByAuthorSlug', () => {
 
   it('returns empty data on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/byline', () =>
         HttpResponse.error()
       )
     )
@@ -304,7 +304,7 @@ describe('fetchAllAuthors', () => {
   it('accepts per_page param', async () => {
     let capturedUrl = ''
     server.use(
-      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', ({ request }) => {
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/byline', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json([])
       })
@@ -315,7 +315,7 @@ describe('fetchAllAuthors', () => {
 
   it('returns empty array on error', async () => {
     server.use(
-      http.get('https://new.igihe.com/english/wp-json/wp/v2/users', () =>
+      http.get('https://new.igihe.com/english/wp-json/wp/v2/byline', () =>
         HttpResponse.error()
       )
     )

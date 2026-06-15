@@ -82,13 +82,13 @@ const isSpecialDate =
         {/* Desktop Ads - Server Side */}
         <div className="d-none d-md-block">
           <Row>
-            <Col>
+            <Col md={6}>
               <ServerSlotManager
                 position="premium_leaderboard_1"
                 priority={true}
               />
             </Col>
-            <Col>
+            <Col md={6}>
               <ServerSlotManager
                 position="mot-premium_leaderboard_1_b"
                 priority={true}
@@ -114,7 +114,7 @@ const isSpecialDate =
             </a>
           }
           desktopAdSection={
-            <Col md={7} key={Math.random()}>
+            <Col md={7} key="desktop-ad-section">
               <ServerSlotManager
                 position="next-to-logo"
                 priority={true}

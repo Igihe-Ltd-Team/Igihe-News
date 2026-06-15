@@ -87,7 +87,7 @@
 'use client';
 import { useTheme } from 'next-themes';
 import { HTMLAttributes } from 'react';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeArticleHtml } from '@/lib/sanitizeHtml';
 
 export type ThemedTextProps = HTMLAttributes<HTMLSpanElement> & {
   lightColor?: string;
@@ -156,10 +156,7 @@ export function ThemedText({
   // If children is a string, parse and sanitize it
   // Otherwise render normally without dangerouslySetInnerHTML
   if (typeof children === 'string') {
-    const clean = DOMPurify.sanitize(parseCustomMarkup(children), {
-      ADD_TAGS: ['iframe'],
-      ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'allow', 'loading'],
-    });
+    const clean = sanitizeArticleHtml(parseCustomMarkup(children));
 
     return (
       <span

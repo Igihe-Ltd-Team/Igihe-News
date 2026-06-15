@@ -212,8 +212,9 @@ export function getAdPositionsFromClassList(classList: string[]): AdPositionKey[
 
 export function getAdsByPosition(ads: Advertisement[], position: AdPositionKey): Advertisement[] {
   return ads
-    .filter(ad => 
-      ad.class_list.some(className => className === `tag-${position}`)
-    )
-    .sort((a, b) => b.menu_order - a.menu_order)
+    .filter(ad => {
+      const classList = Array.isArray(ad.class_list) ? ad.class_list : []
+      return classList.includes(`tag-${position}`) || String(ad.acf?.ad_position) === position
+    })
+    .sort((a, b) => (b.menu_order || 0) - (a.menu_order || 0))
 }

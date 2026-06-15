@@ -170,15 +170,22 @@ describe('cachedRequest', () => {
   })
 
   it('deduplicates concurrent in-flight requests', async () => {
-    const fetchFn = jest.fn().mockImplementation(
-      () => new Promise(res => setTimeout(() => res(mockData), 50))
-    )
+    let resolveFetch: (value: typeof mockData) => void = () => {}
+    const deferredFetch = new Promise<typeof mockData>(res => { resolveFetch = res })
+    const fetchFn = jest.fn(() => deferredFetch)
 
-    const [r1, r2, r3] = await Promise.all([
+    const requests = [
       cachedRequest({ key: 'test:dedup', fetchFn }),
       cachedRequest({ key: 'test:dedup', fetchFn }),
       cachedRequest({ key: 'test:dedup', fetchFn }),
-    ])
+    ]
+
+    while (fetchFn.mock.calls.length === 0) {
+      await Promise.resolve()
+    }
+
+    resolveFetch(mockData)
+    const [r1, r2, r3] = await Promise.all(requests)
 
     expect(fetchFn).toHaveBeenCalledTimes(1)
     expect(r1).toEqual(r2)
@@ -224,6 +231,25 @@ describe('cachedRequest', () => {
     })
 
     expect(result).toEqual(staleData)
+  })
+
+  it('falls back to expired file cache on fetch error', async () => {
+    const staleData = { ...mockData, slug: 'stale-file' }
+    ;(fileCache.get as jest.Mock)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(staleData)
+    const fetchFn = jest.fn().mockRejectedValue(new Error('Network Error'))
+
+    const result = await cachedRequest({
+      key: 'test:stale-file-fallback',
+      fetchFn,
+    })
+
+    expect(result).toEqual(staleData)
+    expect(fileCache.get).toHaveBeenLastCalledWith(
+      'test:stale-file-fallback',
+      { allowExpired: true }
+    )
   })
 
   it('re-throws when no stale data is available', async () => {
@@ -320,6 +346,7 @@ describe('cacheArticlesFromList', () => {
 
     expect(memoryCache.get('post:article-1')).toBeDefined()
     expect(memoryCache.get('post:article-2')).toBeDefined()
+    expect(fileCache.set).not.toHaveBeenCalled()
   })
 
   it('skips articles without slug', async () => {

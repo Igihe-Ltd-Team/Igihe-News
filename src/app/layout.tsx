@@ -27,8 +27,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 
   return (
-    <html lang="en">
-      <body className={raleway.variable}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={raleway.variable} suppressHydrationWarning>
 
         <Suspense fallback={null}>
           {/* Suspense is required because useSearchParams() suspends */}

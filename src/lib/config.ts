@@ -4,8 +4,8 @@ export const config = {
     revalidate: parseInt(process.env.ISR_REVALIDATE || '60'),
   },
   cache: {
-    redis: process.env.REDIS_URL,
     ttl: parseInt(process.env.CACHE_TTL || '300'),
+    backend: 'memory-and-filesystem',
   },
   cdn: {
     enabled: process.env.ENABLE_CDN === 'true',

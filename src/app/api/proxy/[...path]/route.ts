@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { LocalRateLimiter } from '@/lib/rateLimit'
 
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://igihe.com/wp-json/wp/v2'
+const proxyRateLimiter = new LocalRateLimiter({ limit: 120, windowMs: 60_000 })
+const ALLOWED_ENDPOINTS = new Set([
+  'posts', 'categories', 'tags', 'pages', 'media', 'igh-yt-videos',
+  'advertisement', 'opinion', 'advertorial', 'announcement', 'fact-of-the-day',
+  'byline', 'bylines', 'comments', 'popular-posts',
+])
+
+function getClientIp(request: NextRequest): string {
+  return request.headers.get('x-real-ip') ||
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('cf-connecting-ip') ||
+    'anonymous'
+}
 
 // Enhanced cache with LRU eviction
 class LRUCache {
@@ -144,7 +158,28 @@ export async function GET(
   try {
     // AWAIT the params FIRST
     const { path } = await context.params
-    const searchParams = request.nextUrl.searchParams
+    if (
+      path.length === 0 ||
+      !ALLOWED_ENDPOINTS.has(path[0]) ||
+      path.some(segment => !/^[a-zA-Z0-9_-]+$/.test(segment))
+    ) {
+      return NextResponse.json({ error: 'Endpoint not allowed' }, { status: 403 })
+    }
+
+    const rateLimit = proxyRateLimiter.check(getClientIp(request))
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } }
+      )
+    }
+
+    const searchParams = new URLSearchParams(request.nextUrl.searchParams)
+    if (searchParams.get('context') === 'edit' || searchParams.has('_envelope')) {
+      return NextResponse.json({ error: 'Query not allowed' }, { status: 403 })
+    }
+    const perPage = Number(searchParams.get('per_page'))
+    if (Number.isFinite(perPage) && perPage > 100) searchParams.set('per_page', '100')
     
     // Normalize cache key for better hit rates
     const sortedParams = Array.from(searchParams.entries())

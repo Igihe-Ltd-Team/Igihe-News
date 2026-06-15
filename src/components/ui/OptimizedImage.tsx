@@ -1,11 +1,10 @@
 'use client'
 
-import Image from 'next/image'
-import { useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
+import Image, { StaticImageData } from 'next/image'
+import { useState } from 'react'
 
 interface OptimizedImageProps {
-  src: string
+  src: string | StaticImageData | { url?: string; src?: string }
   alt: string
   width?: number
   height?: number
@@ -22,7 +21,6 @@ interface OptimizedImageProps {
 export function OptimizedImage({
   src,
   alt,
-  width,
   height,
   priority = false,
   className,
@@ -30,23 +28,10 @@ export function OptimizedImage({
   onLoad,
   imgClass,
     placeholderType = 'solid',
-  fill = false,
   aspectRatio = 'unset'
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
-
-useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
-    // Small delay to prevent flash of loading state for fast-loading images
-    const timer = setTimeout(() => setIsVisible(true), 50)
-    return () => clearTimeout(timer)
-  }, [])
   
 
   const handleLoad = () => {
@@ -63,26 +48,20 @@ useEffect(() => {
   // console.log('Image Error',hasError)
   // console.log('Image src Error',src)
 
-  const imageSrc = hasError ? '/assets/igiheIcon.png' : src
-const containerHeight = Math.max(Number(height), 100) + 'px'
-
-
-
-if (!isMounted) {
-    return (
-      <div
-          className={`placeholder-glow ${placeholderType === 'skeleton' ? 'placeholder' : ''}`}
-          style={{
-            // position: 'absolute',
-            inset: 0,
-            height:height,
-            backgroundColor: placeholderType === 'solid' ? '#e9ecef' : 'transparent',
-            borderRadius: '8px',
-            zIndex: 1,
-          }}
-        />
-    )
-  }
+  const sourceValue = typeof src === 'string'
+    ? src
+    : src && 'url' in src && typeof src.url === 'string'
+      ? src.url
+      : src && 'src' in src && typeof src.src === 'string'
+        ? src.src
+        : ''
+  const safeSource = sourceValue.trim() || '/assets/igiheIcon.png'
+  const imageSrc = hasError ? '/assets/igiheIcon.png' : safeSource
+  const normalizedHeight = Number(height) > 0 ? Number(height) : undefined
+  const minimumHeight = `${Math.max(normalizedHeight ?? 0, 100)}px`
+  const isAnimatedGif = /\.gif(?:$|[?#])/i.test(imageSrc)
+  const isLegacyImageHost = imageSrc.startsWith('https://en-images.igihe.com/')
+  const hasAspectRatio = aspectRatio !== 'unset'
 
 
 
@@ -93,44 +72,68 @@ if (!isMounted) {
       // maxHeight:'100%',
       // height: containerHeight
 
-        minHeight: height ? `${height}px` : 'auto',
-        height: height ? `${height}px` : 'auto',
+        minHeight: minimumHeight,
+        height: normalizedHeight ? `${normalizedHeight}px` : hasAspectRatio ? 'auto' : minimumHeight,
         overflow: 'hidden',
         aspectRatio: aspectRatio,
     }}>
 
 
-      {isVisible && isLoading && (
-        <div
-          className={`placeholder-glow ${placeholderType === 'skeleton' ? 'placeholder' : ''}`}
+      {/* {isLoading && (
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      backgroundColor: placeholderType === 'solid' ? '#e9ecef' : 'transparent',
+      borderRadius: '8px',
+      zIndex: 1,
+      // Optional: fade the placeholder out too
+      transition: 'opacity 0.3s ease-in-out',
+    }}
+  />
+)} */}
+
+
+      {isAnimatedGif || isLegacyImageHost ? (
+        // Next's optimizer cannot optimize animated/legacy images and emits
+        // misleading fill/sizes warnings for them, so serve them directly.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageSrc}
+          alt={alt}
+          className={imgClass}
+          onLoad={handleLoad}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onError={handleError}
           style={{
-            // position: 'absolute',
+            position: 'absolute',
             inset: 0,
-            height:height,
-            backgroundColor: placeholderType === 'solid' ? '#e9ecef' : 'transparent',
-            borderRadius: '8px',
-            zIndex: 1,
+            width: '100%',
+            height: '100%',
+            opacity: isLoading ? 0 : 1,
+            transition: 'opacity 0.3s ease-in-out',
+          }}
+        />
+      ) : (
+        <Image
+          src={imageSrc}
+          alt={alt}
+          fill
+          sizes={sizes}
+          priority={priority}
+          className={`${imageSrc === '/assets/igiheIcon.png' ? 'blur object-fit-contain p-3' : imgClass}`}
+          onLoad={handleLoad}
+          loading={priority ? "eager" : "lazy"}
+          onError={handleError}
+          placeholder="blur"
+          blurDataURL="/assets/igiheIcon.png"
+          style={{
+            opacity: isLoading ? 0 : 1,
+            transition: 'opacity 0.3s ease-in-out',
           }}
         />
       )}
-
-
-      <Image
-        src={imageSrc}
-        alt={alt}
-        fill
-        priority={priority}
-        className={`${imageSrc === '/assets/igiheIcon.png' ? 'blur object-fit-contain p-3' : imgClass}`}
-        onLoad={handleLoad}
-        loading={priority ? "eager" : "lazy"}
-        onError={handleError}
-        placeholder="blur"
-        blurDataURL="/assets/igiheIcon.png"
-        style={{
-          opacity: isLoading ? 0 : 1,
-          transition: 'opacity 0.3s ease-in-out',
-        }}
-      />
 
     </div>
   )

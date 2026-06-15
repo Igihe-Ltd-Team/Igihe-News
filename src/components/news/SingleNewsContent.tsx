@@ -13,7 +13,7 @@ import { NewsItem } from '@/types/fetchData'
 import { useNewsData } from '@/hooks/useNewsData'
 import DynamicArticleCard from './DynamicArticleCard'
 import HeaderDivider from '../HeaderDivider'
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeArticleHtml } from '@/lib/sanitizeHtml'
 
 
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -90,6 +90,10 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
         }
     )
 
+    const article = post || initialArticle
+    const imgs = extractImagesFromHtml(article?.content?.rendered || "")
+    const { containerRef, lightboxProps } = usePostContentLightbox(imgs);
+
     if (articleLoading) {
         return (
             <div className="min-h-screen d-flex align-items-center justify-content-center">
@@ -97,8 +101,6 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
             </div>
         )
     }
-
-    const article = post || initialArticle
 
     if (!article) {
         return (
@@ -121,13 +123,11 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const author = article.bylines;
     const authorsName = article.bylines?.[0]?.name || '';
     const authorImage = article.bylines?.[0]?.image;
+    const authorImageUrl = typeof authorImage === 'string'
+        ? authorImage
+        : authorImage?.url || authorImage?.src;
     const postUrls = article ? `${process.env.NEXT_PUBLIC_APP_URL}/${articleCategory?.toLowerCase()}/article/${article.slug}` : '';
     const tags = getTags(article)
-
-    const imgs = extractImagesFromHtml(article?.content?.rendered || "")
-   
-
-    const { containerRef, lightboxProps } = usePostContentLightbox(imgs);
 
     return (
         <Container>
@@ -140,7 +140,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                 <SinglePostMetaData
                     author={author}
                     authorName={authorsName}
-                    authorImage={authorImage || '/assets/user-avatar.png'}
+                    authorImage={authorImageUrl || '/assets/user-avatar.png'}
                     publishDate={publishDate}
                     category={articleCategory}
                     categorySlug={articleCategorySlug}
@@ -179,12 +179,8 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     className="post-content font-visby"
                                     style={{ overflow: 'hidden', width: '100%' }}
                                     dangerouslySetInnerHTML={{
-                                        __html: DOMPurify.sanitize(
-                                            parseCustomMarkup(article?.content?.rendered || ''),
-                                            {
-                                                ADD_TAGS: ['iframe'],
-                                                ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'allow', 'loading']
-                                            }
+                                        __html: sanitizeArticleHtml(
+                                            parseCustomMarkup(article?.content?.rendered || '')
                                         )
                                     }}
                                 />

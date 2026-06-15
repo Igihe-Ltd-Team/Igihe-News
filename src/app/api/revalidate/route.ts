@@ -1,8 +1,8 @@
-// app/api/revalidate/route.ts
+export const runtime = 'nodejs'
 
-export const runtime = 'nodejs' // required — fileCache uses fs, not available on Edge
-
+import { prefetchHomeData } from '@/lib/prefetch-home-data'
 import { resetRegistry } from '@/lib/postRegistry'
+import { buildRevalidationPlan, WordPressChange } from '@/lib/wordpressRevalidation'
 import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
 import { revalidatePath, revalidateTag } from 'next/cache'
@@ -10,119 +10,111 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const SECRET = process.env.REVALIDATION_SECRET
 
-
-async function getAllCategories(): Promise<string[]> {
-  const categories = await ApiService.fetchCategories()
-  // Adjust `.slug` to match your category object shape
-  return categories.map((c: { slug: string }) => c.slug).filter(Boolean)
+function isAuthorized(request: NextRequest): boolean {
+  const incomingSecret = request.headers.get('x-revalidate-secret')
+  return Boolean(SECRET && incomingSecret === SECRET)
 }
 
-async function purgeAll(slug?: string, category?: string) {
-resetRegistry()
-  const patterns = [
-    slug ? `post:${slug}` : null,  // specific article first (fast path)
-    'articles:',      // all paginated article lists
-    'popular:',       // traffic-based popular lists
-    'opinion:',       // opinion lists
-    'advertorial:',   // advertorial lists
-    'announcement:',  // announcement lists
-    'categories:',    // category lists + counts (new article changes count)
-    'search:',        // search results now stale
-    'author-posts:',  // author article lists now stale
-    'slots:',
-  ].filter(Boolean) as string[]
+async function warmFreshData(change: WordPressChange, warmTargets: string[]) {
+  const tasks: Array<{ name: string; run: () => Promise<unknown> }> = []
 
-  await Promise.all(patterns.map(p => clearCache(p)))
-
-
-  try {
-    ApiService.fetchCategories()
-  } catch (e) {
-    console.warn('Could not clear ad module cache:', e)
+  if (warmTargets.includes('article') && change.slug) {
+    tasks.push({ name: 'article', run: () => ApiService.refreshArticle(change.slug!, true) })
   }
-  
-  revalidateTag('advertisements','max')
-  revalidateTag('slots', 'max')
-
-  
-  // ── 2. Revalidate Next.js page cache ──────────────────────────────────────
-  //
-  // Pattern revalidation — marks ALL instances of each dynamic route stale.
-  // Route groups (categories) and (tags) are transparent to the URL.
-  revalidatePath('/[category]/article/[post]', 'page')  // (categories)/[category]/article/[post]
-  revalidatePath('/[category]', 'page')                  // (categories)/[category]
-  revalidatePath('/tag/[tag]', 'page')                   // (tags)/tag/[tag]
-  revalidatePath('/opinion', 'page')
-  revalidatePath('/announcements', 'page')
-  revalidatePath('/advertorials', 'page')
-  revalidatePath('/', 'layout')                          // homepage + all shared layout
-
-  // Exact-path revalidation — queues an immediate background rebuild of the
-  // specific article page so the very first visitor after the webhook gets
-  // fresh content without needing a second request.
-  if (slug && category) {
-    revalidatePath(`/${category}/article/${slug}`)
-    revalidatePath(`/${category}`)
+  if (warmTargets.includes('categories')) {
+    tasks.push({ name: 'categories', run: () => ApiService.fetchCategories({ per_page: 100 }) })
   }
-  else{
-    const allSlugs = await getAllCategories()
-    allSlugs.forEach(cat => revalidatePath(`/${cat}`))
+  if (warmTargets.includes('ads')) {
+    tasks.push({ name: 'ads', run: () => ApiService.fetchAdvertisements() })
   }
+  if (warmTargets.includes('videos')) {
+    tasks.push({ name: 'videos', run: () => ApiService.fetchVideos({ per_page: 21 }) })
+  }
+  if (warmTargets.includes('home')) {
+    tasks.push({ name: 'home', run: () => prefetchHomeData() })
+  }
+
+  const results = await Promise.allSettled(tasks.map(task => task.run()))
+  return tasks.map((task, index) => ({
+    target: task.name,
+    status: results[index].status,
+  }))
+}
+
+async function applyWordPressChange(change: WordPressChange) {
+  const plan = buildRevalidationPlan(change)
+
+  resetRegistry()
+  if (plan.type === 'ads' || plan.type === 'unknown') ApiService.clearAdsCache()
+
+  await Promise.all(plan.cachePatterns.map(pattern => clearCache(pattern)))
+
+  const warmed = await warmFreshData(change, plan.warm)
+
+  if (plan.type === 'ads' || plan.type === 'unknown') {
+    revalidateTag('advertisements', 'max')
+    revalidateTag('slots', 'max')
+  }
+  plan.paths.forEach(item => revalidatePath(item.path, item.type))
+
+  return { plan, warmed }
 }
 
 export async function POST(request: NextRequest) {
-
-  
-
-  // ── Authenticate ──────────────────────────────────────────────────────────
-  const incomingSecret =
-    request.headers.get('x-revalidate-secret') ||
-    request.nextUrl.searchParams.get('secret')
-
-  if (!SECRET || incomingSecret !== SECRET) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-    if (typeof globalThis !== 'undefined') {
-    // Use Object.assign or direct property assignment
-    Object.assign(globalThis, { 
-      __FORCE_AD_REFRESH__: true,
-      __LAST_AD_REVALIDATION__: Date.now() 
-    })
-  }
-  // ── Parse body ────────────────────────────────────────────────────────────
-  // WordPress sends:
-  //   { slug: "article-slug", id: 123, type: "post", category: "sport" }
-  let body: { slug?: string; id?: number; type?: string; category?: string } = {}
+  let change: WordPressChange = {}
   try {
-    body = await request.json()
+    change = await request.json()
   } catch {
-    // Empty body → broad purge, that's fine
+    // An empty payload intentionally performs a broad refresh.
   }
 
-  const { slug, id, type = 'post', category } = body
-  console.log(`🔄 Revalidate — slug:${slug} id:${id} type:${type} category:${category}`)
-
   try {
-    await purgeAll(slug, category)
-    return NextResponse.json({ revalidated: true, slug, id, type, timestamp: new Date().toISOString() })
+    const result = await applyWordPressChange(change)
+    return NextResponse.json({
+      revalidated: true,
+      change: { ...change, type: result.plan.type },
+      cachePatterns: result.plan.cachePatterns,
+      paths: result.plan.paths.map(item => item.path),
+      warmed: result.warmed,
+      timestamp: new Date().toISOString(),
+    })
   } catch (error) {
     console.error('Revalidation error:', error)
-    return NextResponse.json({ error: 'Revalidation failed', detail: String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Revalidation failed' }, { status: 500 })
   }
 }
 
-// GET — manual testing:
-// curl "https://your-site.com/api/revalidate?secret=SECRET&slug=my-slug&category=sport"
 export async function GET(request: NextRequest) {
-  const secret = request.nextUrl.searchParams.get('secret')
-  if (!SECRET || secret !== SECRET) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const slug     = request.nextUrl.searchParams.get('slug')     ?? undefined
-  const category = request.nextUrl.searchParams.get('category') ?? undefined
+  const categories = request.nextUrl.searchParams.getAll('categories')
+  const id = request.nextUrl.searchParams.get('id')
+  const change: WordPressChange = {
+    slug: request.nextUrl.searchParams.get('slug') ?? undefined,
+    id: id ? Number(id) : undefined,
+    type: request.nextUrl.searchParams.get('type') ?? undefined,
+    category: request.nextUrl.searchParams.get('category') ?? undefined,
+    categories: categories.length ? categories : undefined,
+  }
 
-  await purgeAll(slug, category)
-  return NextResponse.json({ revalidated: true, slug, category, timestamp: new Date().toISOString() })
+  try {
+    const result = await applyWordPressChange(change)
+    return NextResponse.json({
+      revalidated: true,
+      change: { ...change, type: result.plan.type },
+      cachePatterns: result.plan.cachePatterns,
+      paths: result.plan.paths.map(item => item.path),
+      warmed: result.warmed,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error('Revalidation error:', error)
+    return NextResponse.json({ error: 'Revalidation failed' }, { status: 500 })
+  }
 }

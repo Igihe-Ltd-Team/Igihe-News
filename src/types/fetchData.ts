@@ -62,7 +62,11 @@ export interface Byline{
         name: string,
         slug: string,
         description: string,
-        image: string,
+        image: string | {
+          url?: string
+          src?: string
+          alt?: string
+        },
         user_id: number
       }
 
@@ -371,6 +375,9 @@ export interface Advertisement {
     title: string
     url: string
   }
+  featured_image?: {
+    url: string
+  } | null
 
   acf: {
     ads_image: number

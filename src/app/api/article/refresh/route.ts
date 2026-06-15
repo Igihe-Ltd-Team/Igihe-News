@@ -1,28 +1,20 @@
 // app/api/article/refresh/route.ts
 import { ApiService } from '@/services/apiService';
+import { LocalRateLimiter } from '@/lib/rateLimit';
 import { NewsItem } from '@/types/fetchData';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Rate limiting helper
-const rateLimit = new Map<string, number[]>();
-
-function checkRateLimit(ip: string, limit: number = 10, windowMs: number = 60000): boolean {
-  const now = Date.now();
-  const windowStart = now - windowMs;
-  const requests = rateLimit.get(ip) || [];
-  const recentRequests = requests.filter(time => time > windowStart);
-
-  if (recentRequests.length >= limit) {
-    return false;
-  }
-
-  recentRequests.push(now);
-  rateLimit.set(ip, recentRequests);
-  return true;
-}
+const refreshRateLimiter = new LocalRateLimiter({ limit: 10, windowMs: 60_000 });
 
 export async function POST(request: NextRequest) {
   try {
+    const expectedSecret = process.env.ARTICLE_REFRESH_SECRET;
+    const incomingSecret = request.headers.get('x-article-refresh-secret');
+    if (!expectedSecret || incomingSecret !== expectedSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Get client IP for rate limiting
     // const ip = request?.ip || request.headers.get('x-forwarded-for') || 'anonymous';
 
@@ -33,51 +25,24 @@ export async function POST(request: NextRequest) {
     'anonymous'
     
     // Check rate limit (10 requests per minute per IP)
-    if (!checkRateLimit(ip, 10, 60000)) {
+    const rateLimit = refreshRateLimiter.check(ip);
+    if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
-        { status: 429, headers: { 'Retry-After': '60' } }
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } }
       );
     }
     
     // Parse request
     const body = await request.json();
-    const { slug, id, batch, secret } = body;
-    
-    // Optional authentication
-    const expectedSecret = process.env.ARTICLE_REFRESH_SECRET;
-    if (expectedSecret && secret !== expectedSecret) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
-    }
-    
-    // Handle batch refresh
-    if (batch && Array.isArray(batch)) {
-      if (batch.length > 20) {
-        return NextResponse.json(
-          { error: 'Batch size too large. Maximum 20 articles per batch.' },
-          { status: 400 }
-        );
-      }
-      
-      // const results = await ApiService.batchRefresh(batch);
-      
-      return NextResponse.json({
-        success: true,
-        message: `Batch refresh completed for ${batch.length} articles`,
-        // results,
-        timestamp: new Date().toISOString()
-      });
-    }
+    const { slug, id } = body;
     
     // Single article refresh
     let refreshedArticle: NewsItem | null = null;
     
-    if (slug) {
+    if (typeof slug === 'string' && slug.length <= 200) {
       refreshedArticle = await ApiService.refreshArticle(slug, true);
-    } else if (id) {
+    } else if (Number.isInteger(id) && id > 0) {
       refreshedArticle = await ApiService.refreshArticleById(id, true);
     } else {
       return NextResponse.json(
@@ -105,14 +70,13 @@ export async function POST(request: NextRequest) {
       }
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Article refresh API error:', error);
     
     return NextResponse.json(
       { 
         success: false,
         error: 'Failed to refresh article',
-        message: error.message,
         timestamp: new Date().toISOString()
       },
       { status: 500 }

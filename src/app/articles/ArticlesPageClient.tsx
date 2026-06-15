@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Col, Row, Button } from "react-bootstrap";
-import { Category, NewsItem } from "@/types/fetchData";
+import { NewsItem } from "@/types/fetchData";
 import DynamicArticleCard from "@/components/news/DynamicArticleCard";
 import CategoryMainSection from "@/components/news/CategoryMainSection";
 import HeaderDivider from "@/components/HeaderDivider";
@@ -10,6 +10,10 @@ import AdManager from "@/components/ads/AdManager";
 import CustomSlider from "@/components/home/CustomSlider";
 import SideBar from "@/components/ReUsable/SideBar";
 import { fetchArticles } from "./actions";
+import { mergeUniqueNewsItems, uniqueNewsItems } from "@/lib/newsItems";
+
+const PAGE_SIZE = 20;
+const HIGHLIGHT_OFFSET = 7;
 
 interface ArticlesPageClientProps {
   initialPosts: NewsItem[];
@@ -26,7 +30,7 @@ export default function ArticlesPageClient({
   highlightArticles,
   initialPageInfo,
 }: ArticlesPageClientProps) {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState(() => uniqueNewsItems(initialPosts));
   const [pageInfo, setPageInfo] = useState(initialPageInfo);
     const [isPending, startTransition] = useTransition();
 
@@ -37,11 +41,10 @@ export default function ArticlesPageClient({
       const nextPage = pageInfo.currentPage + 1;
   
       startTransition(async () => {
-        const result = await fetchArticles(nextPage);
+        const result = await fetchArticles(nextPage, PAGE_SIZE, HIGHLIGHT_OFFSET);
   
         if (result?.data) {
-          // Append new posts to existing posts
-          setPosts(prevPosts => [...prevPosts, ...result.data]);
+          setPosts(prevPosts => mergeUniqueNewsItems(prevPosts, result.data));
           setPageInfo({
             currentPage: result.pagination.currentPage,
             lastPage: result.pagination.totalPages,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import { Category, NewsItem } from "@/types/fetchData";
 import DynamicArticleCard from "@/components/news/DynamicArticleCard";
@@ -8,9 +8,12 @@ import CategoryMainSection from "@/components/news/CategoryMainSection";
 import HeaderDivider from "@/components/HeaderDivider";
 import AdManager from "@/components/ads/AdManager";
 import CustomSlider from "@/components/home/CustomSlider";
-import { useNewsData } from "@/hooks/useNewsData";
 import SideBar from "@/components/ReUsable/SideBar";
 import { fetchArticlesByCategory } from "./action";
+import { mergeUniqueNewsItems, uniqueNewsItems } from "@/lib/newsItems";
+
+const PAGE_SIZE = 20;
+const HIGHLIGHT_OFFSET = 7;
 
 interface CategoryPageClientProps {
   initialPosts: NewsItem[];
@@ -31,7 +34,7 @@ export default function CategoryPageClient({
   initialPageInfo,
   slug
 }: CategoryPageClientProps) {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState(() => uniqueNewsItems(initialPosts));
   const [pageInfo, setPageInfo] = useState(initialPageInfo);
     const [isPending, startTransition] = useTransition();
 
@@ -42,11 +45,15 @@ export default function CategoryPageClient({
       const nextPage = pageInfo.currentPage + 1;
   
       startTransition(async () => {
-        const result = await fetchArticlesByCategory(categoryInfo.id, nextPage);
+        const result = await fetchArticlesByCategory(
+          categoryInfo.id,
+          nextPage,
+          PAGE_SIZE,
+          HIGHLIGHT_OFFSET
+        );
   
         if (result?.data) {
-          // Append new posts to existing posts
-          setPosts(prevPosts => [...prevPosts, ...result.data]);
+          setPosts(prevPosts => mergeUniqueNewsItems(prevPosts, result.data));
           setPageInfo({
             currentPage: result.pagination.currentPage,
             lastPage: result.pagination.totalPages,

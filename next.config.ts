@@ -1,5 +1,20 @@
 import type { NextConfig } from "next";
 
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://traffic.igihe.com`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https:",
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://www.instagram.com https://w.soundcloud.com",
+  "upgrade-insecure-requests",
+].join("; ");
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
@@ -41,9 +56,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "secure.gravatar.com", pathname: "/avatar/**" },
       { protocol: "https", hostname: "img.youtube.com", pathname: "/**" },
       { protocol: "https", hostname: "en.igihe.com", pathname: "/_next/image" },
-      { protocol: "https", hostname: "new.igihe.com", pathname: "english/wp-content/uploads/**" },
+      { protocol: "https", hostname: "new.igihe.com", pathname: "/**" },
+      { protocol: "https", hostname: "igihe.com", pathname: "/**" },
+      { protocol: "https", hostname: "cdn.igihe.com", pathname: "/**" },
     ],
-    unoptimized: true,
+    unoptimized: false,
   },
 
   headers: async () => [
@@ -89,26 +106,15 @@ const nextConfig: NextConfig = {
     },
 
     {
-      // ✅ Static chunks: cache forever (hash in filename = safe)
-      source: '/_next/static/(.*)',
-      headers: [
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-      ],
-    },
-    {
-      // ✅ Optimized images: cache with revalidation
-      source: '/_next/image(.*)',
-      headers: [
-        { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=3600' },
-      ],
-    },
-    {
       source: '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
       headers: [
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-        { key: 'X-XSS-Protection', value: '1; mode=block' },
-        // ✅ no-cache (must revalidate) but NOT no-store (allows conditional requests)
+        { key: 'Content-Security-Policy', value: contentSecurityPolicy },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'Permissions-Policy', value: 'camera=(), geolocation=(), microphone=(self)' },
+        { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        // Revalidate dynamic HTML while allowing conditional requests.
         { key: 'Cache-Control', value: 'no-cache' },
       ],
     },

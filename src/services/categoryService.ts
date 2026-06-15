@@ -36,22 +36,32 @@ export async function fetchCategories(params?: {
 }
 
 export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
-  const response = await fetchWithTimeout(
-    `${API_CONFIG.baseURL}/categories?slug=${slug}&_embed`
-  )
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-  const categories = await response.json()
-  return categories[0] || null
+  return cachedRequest({
+    key: `category:slug:${slug}`,
+    fetchFn: async () => {
+      const response = await fetchWithTimeout(
+        `${API_CONFIG.baseURL}/categories?slug=${encodeURIComponent(slug)}&_embed`
+      )
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+      const categories = await response.json()
+      return categories[0] || null
+    },
+    ttl: 30 * 60 * 1000,
+  })
 }
 
 export async function fetchCategoryById(category: number): Promise<Category | null> {
-  // console.log('category Data',`${API_CONFIG.baseURL}/categories/${category}&_embed`)
-  const response = await fetchWithTimeout(
-    `${API_CONFIG.baseURL}/categories/${category}?_embed`
-  )
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-  const categories = await response.json()
-  return categories[0] || null
+  return cachedRequest({
+    key: `category:id:${category}`,
+    fetchFn: async () => {
+      const response = await fetchWithTimeout(
+        `${API_CONFIG.baseURL}/categories/${category}?_embed`
+      )
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+      return (await response.json()) || null
+    },
+    ttl: 30 * 60 * 1000,
+  })
 }
 
 export async function fetchPostsByCategorySlug(

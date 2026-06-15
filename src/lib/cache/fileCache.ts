@@ -3,6 +3,15 @@ import type { promises as fsPromises } from 'fs'
 import type { join as pathJoin } from 'path'
 
 const CACHE_DIR = '.cache'
+const DEFAULT_MAX_CACHE_BYTES = 512 * 1024 * 1024
+const cacheDebug = (...args: unknown[]) => {
+  if (process.env.FILE_CACHE_DEBUG === 'true') console.log(...args)
+}
+
+function getMaxCacheBytes(): number {
+  const configured = Number(process.env.FILE_CACHE_MAX_BYTES)
+  return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_MAX_CACHE_BYTES
+}
 
 interface CacheEntry<T> {
   data: T
@@ -12,6 +21,10 @@ interface CacheEntry<T> {
     contentDate?: string
     isPermanent?: boolean
   }
+}
+
+interface CacheReadOptions {
+  allowExpired?: boolean
 }
 
 const getCwd = (): string => {
@@ -55,7 +68,7 @@ export class FileCache {
     return this.path.join(cwd, CACHE_DIR, `${sanitizedKey}.json`)
   }
 
-  async get<T>(key: string): Promise<T | null> {
+  async get<T>(key: string, options: CacheReadOptions = {}): Promise<T | null> {
     if (!this.fs || typeof window !== 'undefined') return null
     try {
       const filePath = this.getCacheFilePath(key)
@@ -65,18 +78,18 @@ export class FileCache {
       const now = Date.now()
 
       if (entry.metadata?.isPermanent) {
-        console.log(`✅ File cache HIT (PERMANENT): ${key}`)
+        cacheDebug(`File cache HIT (PERMANENT): ${key}`)
         return entry.data
       }
 
       if (now > entry.expiresAt) {
-        await this.delete(key)
-        console.log(`⏰ Cache expired: ${key}`)
+        if (options.allowExpired) return entry.data
+        cacheDebug(`File cache expired: ${key}`)
         return null
       }
 
       const remainingMin = Math.round((entry.expiresAt - now) / 1000 / 60)
-      console.log(`✅ File cache HIT: ${key} (${remainingMin} min remaining)`)
+      cacheDebug(`File cache HIT: ${key} (${remainingMin} min remaining)`)
       return entry.data
     } catch {
       return null
@@ -101,9 +114,11 @@ export class FileCache {
         metadata: { ...metadata, isPermanent },
       }
 
-      await this.fs.writeFile(filePath, JSON.stringify(entry), 'utf-8')
+      const temporaryPath = `${filePath}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`
+      await this.fs.writeFile(temporaryPath, JSON.stringify(entry), 'utf-8')
+      await this.fs.rename(temporaryPath, filePath)
       const ttlDisplay = isPermanent ? 'PERMANENT' : `${Math.round(ttl / 1000 / 60)} min`
-      console.log(`💾 File cache SET: ${key} (${ttlDisplay})`)
+      cacheDebug(`File cache SET: ${key} (${ttlDisplay})`)
     } catch (error) {
       console.error('Failed to write file cache:', error)
     }
@@ -115,7 +130,7 @@ export class FileCache {
       const filePath = this.getCacheFilePath(key)
       if (!filePath) return
       await this.fs.unlink(filePath)
-      console.log(`🗑️  File cache DELETE: ${key}`)
+      cacheDebug(`File cache DELETE: ${key}`)
     } catch {
       // File doesn't exist — that's fine
     }
@@ -137,7 +152,7 @@ export class FileCache {
         : files
 
       if (targets.length === 0) {
-        console.log(`🗑️  No files matched pattern: ${pattern}`)
+        cacheDebug(`No cache files matched pattern: ${pattern}`)
         return
       }
 
@@ -145,7 +160,7 @@ export class FileCache {
         targets.map(f => this.fs!.unlink(this.path!.join(cacheDir, f)))
       )
 
-      console.log(`🗑️  Cleared ${targets.length} file(s)${pattern ? ` matching: ${pattern}` : ' (all)'}`)
+      cacheDebug(`Cleared ${targets.length} cache file(s)${pattern ? ` matching: ${pattern}` : ' (all)'}`)
     } catch (error) {
       console.error('Failed to clear file cache:', error)
     }
@@ -182,11 +197,53 @@ export class FileCache {
         }
       }
 
+      await this.enforceSizeLimit(cacheDir)
+
       if (cleaned > 0 || skippedPermanent > 0) {
-        console.log(`🧹 Cleaned ${cleaned} expired files (kept ${skippedPermanent} permanent)`)
+        cacheDebug(`Cleaned ${cleaned} expired cache files (kept ${skippedPermanent} permanent)`)
       }
     } catch (error) {
       console.error('Failed to clean expired cache:', error)
+    }
+  }
+
+  private async enforceSizeLimit(cacheDir: string): Promise<void> {
+    if (!this.fs || !this.path) return
+
+    const maxBytes = getMaxCacheBytes()
+    const files = await this.fs.readdir(cacheDir)
+    const temporaryEntries: Array<{ path: string; size: number; modifiedAt: number }> = []
+    let totalSize = 0
+
+    for (const file of files) {
+      try {
+        const filePath = this.path.join(cacheDir, file)
+        const [stats, content] = await Promise.all([
+          this.fs.stat(filePath),
+          this.fs.readFile(filePath, 'utf-8'),
+        ])
+        const entry: CacheEntry<unknown> = JSON.parse(content)
+        totalSize += stats.size
+        if (!entry.metadata?.isPermanent) {
+          temporaryEntries.push({ path: filePath, size: stats.size, modifiedAt: stats.mtimeMs })
+        }
+      } catch {
+        // Ignore files that are concurrently removed or not valid cache entries.
+      }
+    }
+
+    temporaryEntries.sort((a, b) => a.modifiedAt - b.modifiedAt)
+    let evicted = 0
+
+    for (const entry of temporaryEntries) {
+      if (totalSize <= maxBytes) break
+      await this.fs.unlink(entry.path)
+      totalSize -= entry.size
+      evicted += 1
+    }
+
+    if (evicted > 0) {
+      console.warn(`File cache exceeded ${maxBytes} bytes; evicted ${evicted} oldest temporary entries`)
     }
   }
 
@@ -219,6 +276,21 @@ export class FileCache {
       return { count: files.length, size: totalSize, permanent: permanentCount, temporary: temporaryCount }
     } catch {
       return { count: 0, size: 0, permanent: 0, temporary: 0 }
+    }
+  }
+
+  async healthCheck(): Promise<boolean> {
+    if (!this.fs || !this.path || typeof window !== 'undefined') return false
+
+    try {
+      const cacheDir = await this.ensureCacheDir()
+      if (!cacheDir) return false
+      const probe = this.path.join(cacheDir, `.health-${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`)
+      await this.fs.writeFile(probe, 'ok', 'utf-8')
+      await this.fs.unlink(probe)
+      return true
+    } catch {
+      return false
     }
   }
 }
