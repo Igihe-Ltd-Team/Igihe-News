@@ -1,7 +1,7 @@
 'use client'
 
 import Image, { StaticImageData } from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface OptimizedImageProps {
   src: string | StaticImageData | { url?: string; src?: string }
@@ -32,7 +32,7 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
-  
+  const imgRef = useRef<HTMLImageElement>(null)
 
   const handleLoad = () => {
     setIsLoading(false)
@@ -44,10 +44,6 @@ export function OptimizedImage({
     setHasError(true)
   }
 
-  // Fallback image
-  // console.log('Image Error',hasError)
-  // console.log('Image src Error',src)
-
   const sourceValue = typeof src === 'string'
     ? src
     : src && 'url' in src && typeof src.url === 'string'
@@ -57,6 +53,12 @@ export function OptimizedImage({
         : ''
   const safeSource = sourceValue.trim() || '/assets/igiheIcon.png'
   const imageSrc = hasError ? '/assets/igiheIcon.png' : safeSource
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoading(false)
+    }
+  }, [imageSrc])
   const normalizedHeight = Number(height) > 0 ? Number(height) : undefined
   const minimumHeight = `${Math.max(normalizedHeight ?? 0, 100)}px`
   const isAnimatedGif = /\.gif(?:$|[?#])/i.test(imageSrc)
@@ -99,6 +101,7 @@ export function OptimizedImage({
         // misleading fill/sizes warnings for them, so serve them directly.
         // eslint-disable-next-line @next/next/no-img-element
         <img
+          ref={imgRef}
           src={imageSrc}
           alt={alt}
           className={imgClass}
