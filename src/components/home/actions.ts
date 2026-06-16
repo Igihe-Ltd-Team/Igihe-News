@@ -99,7 +99,7 @@ export const getPopularArticles = createCachedFetch(async (): Promise<TraficNews
       period: 'week',
       limit: 5
     })
-    console.log('Logedd popula data',data)
+    // console.log('Logedd popula data',data)
     return data || []
   } catch (error) {
     console.error('Error fetching popular articles:', error)

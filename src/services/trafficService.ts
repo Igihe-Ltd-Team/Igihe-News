@@ -29,11 +29,7 @@ export async function fetchMostPopularArticles(params?: {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       const data = await response.json()
 
-      if (Array.isArray(data) && data.length > 0) {
-        cacheArticlesFromList(data as unknown as NewsItem[]).catch(() => {})
-      }
-
-      return data || []
+      return Array.isArray(data.articles) ? data.articles : []
     },
     // 24-hour TTL for popular articles
     getContentDate: () => String(24 * 60 * 60 * 1000),
@@ -66,6 +62,7 @@ export async function fetchMostPopularArticlesFallback(params?: {
       )
       const posts = await response.json()
       return Array.isArray(posts.articles) ? posts.articles : []
+      
     },
     getContentDate: (posts) => (posts.length > 0 ? posts[0].date : null),
   })

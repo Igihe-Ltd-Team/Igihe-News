@@ -362,7 +362,7 @@ import { MetadataRoute } from 'next'
 import { ApiService } from '@/services/apiService'
 import { Category } from '@/types/fetchData'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://en.igihe.com'
+const BASE_URL = 'https://en.igihe.com'
 const FETCH_TIMEOUT_MS = 15_000
 
 // Wraps any promise with a timeout
