@@ -161,9 +161,9 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     src={featuredImage || '/assets/igiheIcon.png'}
                                     alt={stripHtml(article.title.rendered)}
                                     fill
-                                    height={isMobile ? 300 : isTablet ? 400 : 554}
+                                    height={isMobile ? 300 : isTablet ? 400 : 600}
                                     className="object-cover"
-                                    imgClass='object-fit-cover'
+                                    imgClass='object-fit-cover object-position-top'
                                     priority
                                 />
                                 {

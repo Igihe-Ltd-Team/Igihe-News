@@ -1666,3 +1666,8 @@ kbd {
 .emoji-toggle:hover {
   background: rgba(0, 0, 0, 0.06);
 }
+
+
+.object-position-top{
+  object-position: top!important;
+}
