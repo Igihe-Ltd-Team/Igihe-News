@@ -20,9 +20,9 @@ export async function fetchMostPopularArticles(params?: {
     )
   )
 
-  // return cachedRequest({
-  //   key: `popular:${query}`,
-  //   fetchFn: async () => {
+  return cachedRequest({
+    key: `popular:${query}`,
+    fetchFn: async () => {
       const response = await fetchWithTimeout(
         `${TRAFFIC_BASE}?property_id=igihe-en&${query}`
       )
@@ -34,10 +34,10 @@ export async function fetchMostPopularArticles(params?: {
       }
 
       return data || []
-  //   },
-  //   // 24-hour TTL for popular articles
-  //   getContentDate: () => String(24 * 60 * 60 * 1000),
-  // })
+    },
+    // 24-hour TTL for popular articles
+    getContentDate: () => String(24 * 60 * 60 * 1000),
+  })
 }
 
 export async function fetchMostPopularArticlesFallback(params?: {
