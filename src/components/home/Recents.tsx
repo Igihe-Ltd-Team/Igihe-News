@@ -22,6 +22,7 @@ import {
   getOtherFeatured
 } from './actions'
 import ServerSlotManager from '../ads/ServerSlotManager'
+import PopularNewsFetcher from './PopularNewsFetcher'
 
 const Videos = React.lazy(() => import('./Videos'))
 const Opinios = React.lazy(() => import('./Opinion'))
@@ -95,7 +96,7 @@ export default async function Recents() {
   // Fetch all data on the server
   const [
     latests,
-    popular,
+    // popular,
     // featured,
     greatLakesArticles,
     internationalArticles,
@@ -106,7 +107,7 @@ export default async function Recents() {
     otherFeatured
   ] = await Promise.all([
     getLatestArticles(),
-    getPopularArticles(),
+    // getPopularArticles(),
     // getHighlightArticles(),
     getGreatLakesArticles(),
     getInternationalArticles(),
@@ -126,10 +127,10 @@ export default async function Recents() {
 
   // const transformedArticles: NewsItem[] = popular?.map(transformToNewsItem);
 
-  const transformedArticles: NewsItem[] =
-  (popular ?? [])
-    .filter((item) => item?.url && item?.title)
-    .map(transformToNewsItem);
+  // const transformedArticles: NewsItem[] =
+  // (popular ?? [])
+  //   .filter((item) => item?.url && item?.title)
+  //   .map(transformToNewsItem);
 
 
   return (
@@ -220,9 +221,11 @@ export default async function Recents() {
         </div>
 
         <div className="col-xl-4 col-lg-4 mt-0">
-          <Suspense fallback={<NewsSkeleton count={1}/>}>
+          {/* <Suspense fallback={<NewsSkeleton count={1}/>}>
             <PopularNews articles={transformedArticles || []} name='Popular News' />
-          </Suspense>
+          </Suspense> */}
+
+           <PopularNewsFetcher />
           
           <div className='pt-2'>
             <SectionWithToggle
