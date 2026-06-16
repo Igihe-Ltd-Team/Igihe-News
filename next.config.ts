@@ -60,7 +60,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "igihe.com", pathname: "/**" },
       { protocol: "https", hostname: "cdn.igihe.com", pathname: "/**" },
     ],
-    unoptimized: false,
+    unoptimized: true,
   },
 
   headers: async () => [
