@@ -104,13 +104,13 @@ function DynamicArticleCard({
         }
 
         <div
-          className={`${isTimeLine && 'ps-4'} ${(!bottomBorder && !bordered) && 'py-2'}`}
+          className={`${(isTimeLine && !isMobile) && 'ps-4'} ${(!bottomBorder && !bordered) && 'py-2'}`}
           style={{
             padding: bordered ? 20 : 0,
           }}
         >
           {
-            isTimeLine &&
+            (isTimeLine && !isMobile) &&
             <div
               className="position-absolute rounded-circle bg-white timeLine-pointer"></div>
           }

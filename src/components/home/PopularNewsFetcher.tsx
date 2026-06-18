@@ -20,5 +20,5 @@ export default function PopularNewsFetcher() {
     .filter(item => item?.url && item?.title)
     .map(transformToNewsItem)
 
-  return <PopularNews articles={articles} name="Actualités populaires" />
+  return <PopularNews articles={articles} name="Popular News" />
 }

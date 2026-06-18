@@ -97,7 +97,7 @@ export default function CategoryPageClient({
           <Col md={8}>
             <HeaderDivider title={`Other ${categoryInfo.name} News`} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {posts.map((article) => (
                 <DynamicArticleCard
                   key={article.id}
