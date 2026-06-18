@@ -41,7 +41,7 @@ export default function ArticlesPageClient({
       const nextPage = pageInfo.currentPage + 1;
   
       startTransition(async () => {
-        const result = await fetchArticles(nextPage, PAGE_SIZE, HIGHLIGHT_OFFSET);
+        const result = await fetchArticles(nextPage, PAGE_SIZE);
   
         if (result?.data) {
           setPosts(prevPosts => mergeUniqueNewsItems(prevPosts, result.data));

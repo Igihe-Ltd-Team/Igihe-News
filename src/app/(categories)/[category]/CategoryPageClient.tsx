@@ -48,8 +48,7 @@ export default function CategoryPageClient({
         const result = await fetchArticlesByCategory(
           categoryInfo.id,
           nextPage,
-          PAGE_SIZE,
-          HIGHLIGHT_OFFSET
+          PAGE_SIZE
         );
   
         if (result?.data) {
