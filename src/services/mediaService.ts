@@ -105,53 +105,55 @@ export async function fetchMedia(mediaId: number): Promise<any> {
 
 // ─── Advertisements ──────────────────────────────────────────────────────────
 
-const ADS_CACHE_TTL = 5 * 60 * 1000 // 1 hour
+const ADS_CACHE_TTL = 5 * 60 * 1000
 let adsFetchInProgress: Promise<Advertisement[]> | null = null
-
 
 export function clearAdsCache(): void {
   adsFetchInProgress = null
-  console.log('🗑️ Ads cache cleared')
 }
 
+async function fetchAdsFromWordPress(): Promise<Advertisement[]> {
+  const url = `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed`
+
+  if (typeof window === 'undefined') {
+    // Server: use Next.js data cache with tag so revalidateTag('advertisements') works
+    // across all workers in production — no custom memory/file cache involved here.
+    const response = await fetch(url, {
+      next: { tags: ['advertisements'], revalidate: 300 },
+    })
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    return (await response.json()) || []
+  }
+
+  // Client: route through the BFF proxy (CORS) with no-cache to always get fresh data
+  const response = await fetchWithTimeout(url, { cache: 'no-store' } as RequestInit)
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+  return (await response.json()) || []
+}
 
 export async function fetchAdvertisements(): Promise<Advertisement[]> {
   if (adsFetchInProgress) return adsFetchInProgress
 
-  adsFetchInProgress = (async () => {
-    try {
-      return cachedRequest({
-        key: 'slots:all',
-        fetchFn: async () => {
-          const response = await fetchWithTimeout(
-            `${API_CONFIG.baseURL}/advertisement?status=publish&per_page=100&_embed&_nocache=${Date.now()}`
-          )
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-          return (await response.json()) || []
-        },
-        ttl: ADS_CACHE_TTL,
-        tags: ['advertisements', 'slots'],
-        dedup: true,
-      })
-    } finally {
-      adsFetchInProgress = null
-    }
-  })()
+  adsFetchInProgress = fetchAdsFromWordPress().finally(() => {
+    adsFetchInProgress = null
+  })
 
   return adsFetchInProgress
 }
 
-// export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
-//   try {
-//     const allAds = await fetchAdvertisements()
-//     return getAdsByPosition(allAds, position)
-//   } catch {
-//     return []
-//   }
-// }
-
 export async function fetchAdsByPosition(position: AdPositionKey): Promise<Advertisement[]> {
   try {
+    if (typeof window === 'undefined') {
+      // Server: go directly through fetchAdvertisements which uses Next.js's tagged data cache.
+      // Skipping the per-worker memory cache here is intentional — it is what was causing stale
+      // ads to persist in production even after revalidateTag('advertisements') was called.
+      const allAds = await fetchAdvertisements()
+      return getAdsByPosition(allAds, position)
+    }
+
+    // Client: use per-browser memory cache for dedup within the page lifetime.
+    // The underlying fetchAdvertisements routes through the BFF proxy whose cache
+    // is cleared by the revalidate endpoint.
     return cachedRequest({
       key: `slots:${position}`,
       fetchFn: async () => {
