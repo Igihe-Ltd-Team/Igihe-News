@@ -24,6 +24,8 @@ import {
   refreshArticle,
   refreshArticleById,
   getCachedArticle,
+  fetchPostByIdLookUp, 
+  fetchPostBySlugLookUp
 } from './articleService'
 
 import {
@@ -77,6 +79,8 @@ export { ApiError }
 export class ApiService {
   // ── Cache ────────────────────────────────────────
   static getCachedArticle = getCachedArticle
+  static fetchPostByIdLookUp =fetchPostByIdLookUp 
+  static fetchPostBySlugLookUp= fetchPostBySlugLookUp
   static cacheArticles = cacheArticleInMemory
   static clearCache = clearCache
   static cleanExpiredCache = cleanExpiredCache

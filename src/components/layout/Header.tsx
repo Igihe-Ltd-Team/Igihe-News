@@ -80,7 +80,7 @@ const isSpecialDate =
 
       <div className="container z-1 position-relative hero-bg">
         {/* Desktop Ads - Server Side */}
-        <div className="d-none d-md-block">
+        <div className="d-none d-md-block" style={{paddingTop:5,paddingBottom:5}}>
           <Row>
             <Col>
               <ServerSlotManager

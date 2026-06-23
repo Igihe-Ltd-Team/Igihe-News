@@ -56,6 +56,72 @@ export async function fetchSinglePost(id: string): Promise<NewsItem> {
 
 // ─── Article Lists ───────────────────────────────────────────────────────────
 
+
+
+export async function fetchPostBySlugLookUp(slug: string): Promise<NewsItem | null> {
+  // Define the order of priority for checking endpoints
+  const endpoints = ['posts', 'opinion', 'advertorial', 'announcement'];
+
+  return cachedRequest({
+    key: `slug-lookup:${slug}`, // Changed key to be generic since it could be any type
+    fetchFn: async () => {
+      try {
+        // Loop through each endpoint until an article is found
+        for (const endpoint of endpoints) {
+          const response = await fetchWithTimeout(
+            `${API_CONFIG.baseURL}/${endpoint}?slug=${slug}&_embed=1`
+          );
+          
+          if (!response.ok) continue; // Skip to next endpoint if request fails
+
+          const data = await response.json();
+          
+          if (Array.isArray(data) && data.length > 0) {
+            return data[0]; // Return the first match found and exit the loop
+          }
+        }
+        
+        return null; // Return null if no match was found in any endpoint
+      } catch (error) {
+        console.error(`Error fetching slug ${slug}:`, error);
+        return null;
+      }
+    },
+    getContentDate: (data) => data?.date || null,
+  })
+}
+
+
+
+export async function fetchPostByIdLookUp(id: string): Promise<NewsItem | null> {
+  const endpoints = ['posts', 'opinion', 'advertorial', 'announcement'];
+
+  return cachedRequest({
+    key: `id-lookup:${id}`,
+    fetchFn: async () => {
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetchWithTimeout(
+            `${API_CONFIG.baseURL}/${endpoint}/${id}`
+          );
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          return Array.isArray(data) && data.length > 0 ? data[0] : data
+
+        } catch (error) {
+          continue;
+        }
+      }
+
+      return null; // No match found across all endpoints
+    },
+    getContentDate: (data) => data?.date || null,
+  });
+}
+
+
+
 export async function fetchArticles(params?: {
   page?: number
   per_page?: number
@@ -224,8 +290,6 @@ export async function fetchRelatedPosts(
     _embed: '1',
   }
 
-console.log("postId",postId)
-console.log("categories",categories)
 
 
   if (categories.length > 0) {

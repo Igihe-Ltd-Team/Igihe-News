@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { LocalRateLimiter } from '@/lib/rateLimit'
+import { proxyCache } from '@/lib/proxyCache'
 
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://igihe.com/wp-json/wp/v2'
 const proxyRateLimiter = new LocalRateLimiter({ limit: 120, windowMs: 60_000 })
@@ -16,58 +17,18 @@ function getClientIp(request: NextRequest): string {
     'anonymous'
 }
 
-// Enhanced cache with LRU eviction
-class LRUCache {
-  private cache: Map<string, CacheEntry>
-  private maxSize: number
-
-  constructor(maxSize = 100) {
-    this.cache = new Map()
-    this.maxSize = maxSize
-  }
-
-  get(key: string): CacheEntry | undefined {
-    const entry = this.cache.get(key)
-    if (!entry) return undefined
-    
-    // Move to end (most recently used)
-    this.cache.delete(key)
-    this.cache.set(key, entry)
-    return entry
-  }
-
-  set(key: string, value: CacheEntry): void {
-    // Remove if exists (to re-add at end)
-    if (this.cache.has(key)) {
-      this.cache.delete(key)
-    }
-    
-    // Evict oldest if at capacity
-    if (this.cache.size >= this.maxSize) {
-      const firstKey = this.cache.keys().next().value
-      this.cache.delete(firstKey || '')
-    }
-    
-    this.cache.set(key, value)
-  }
-
-  clear(): void {
-    this.cache.clear()
-  }
-}
-
 interface CacheEntry {
   data: any
   expiry: number
-  etag?: string,
-  _headers?:{
-    wpTotal?:number | string | null
-    wpTotalPages?:number | string | null
-    link?:string | null
+  etag?: string
+  _headers?: {
+    wpTotal?: number | string | null
+    wpTotalPages?: number | string | null
+    link?: string | null
   }
 }
 
-const cache = new LRUCache(200) // Store up to 200 cached responses
+const cache = proxyCache
 
 // Cache TTL configuration by endpoint type
 const CACHE_TTL = {

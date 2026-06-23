@@ -5,6 +5,7 @@ import { resetRegistry } from '@/lib/postRegistry'
 import { buildRevalidationPlan, WordPressChange } from '@/lib/wordpressRevalidation'
 import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
+import { proxyCache } from '@/lib/proxyCache'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -46,7 +47,10 @@ async function applyWordPressChange(change: WordPressChange) {
   const plan = buildRevalidationPlan(change)
 
   resetRegistry()
-  if (plan.type === 'ads' || plan.type === 'unknown') ApiService.clearAdsCache()
+  if (plan.type === 'ads' || plan.type === 'unknown') {
+    ApiService.clearAdsCache()
+    proxyCache.clearByPattern('advertisement')
+  }
 
   await Promise.all(plan.cachePatterns.map(pattern => clearCache(pattern)))
 
