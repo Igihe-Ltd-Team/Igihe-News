@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { NewsItem } from "@/types/fetchData";
 import Image from "next/image";
-import ReactMarkdown from 'react-markdown';
 
 import DOMPurify from 'isomorphic-dompurify';
 import { ThemedText } from "./ThemedText";
@@ -20,14 +19,38 @@ interface AgentMessage {
   content: string;
 }
 
+function toAgentArticle(article: NewsItem | undefined, language: "en" | "fr" | "rw") {
+  if (!article) return undefined;
+  return {
+    source_id: String(article.id),
+    title: plainText(article.title?.rendered),
+    excerpt: plainText(article.excerpt?.rendered),
+    content: plainText(article.content?.rendered),
+    link: article.link,
+    url: article.link,
+    language,
+    slug: article.slug,
+  };
+}
+
 async function chatWithNewsAgent(
   messages: AgentMessage[],
+  options: {
+    article?: NewsItem;
+    sourceSite: string;
+    language: "en" | "fr" | "rw";
+  },
   onChunk: (chunk: string) => void
 ): Promise<void> {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({
+      messages,
+      article: toAgentArticle(options.article, options.language),
+      source_site: options.sourceSite,
+      language: options.language,
+    }),
   });
   if (!response.ok) throw new Error("News assistant request failed");
 
@@ -66,12 +89,54 @@ const QUICK_PROMPTS = [
   { icon: "🌐", label: "International", cmd: "What's happening internationally?" },
 ];
 
+const ARTICLE_QUICK_PROMPTS = [
+  { icon: "🧾", label: "Summarize", cmd: "Summarize this article in a few clear points." },
+  { icon: "✅", label: "Key takeaways", cmd: "What are the key takeaways from this article?" },
+  { icon: "❓", label: "Explain simply", cmd: "Explain this article in simple terms." },
+  { icon: "🧭", label: "Why it matters", cmd: "Why does this article matter?" },
+  { icon: "🔎", label: "Facts only", cmd: "List the main facts stated in this article." },
+];
+
 const TYPING_PHRASES = [
   "Searching IGIHE database…",
   "Reading latest articles…",
   "Analyzing results…",
   "Preparing response…",
 ];
+
+const ARTICLE_TYPING_PHRASES = [
+  "Reading this article…",
+  "Checking the stored text…",
+  "Grounding the answer…",
+  "Preparing response…",
+];
+
+function resolveSourceSite() {
+  if (typeof window === "undefined") {
+    return process.env.NEXT_PUBLIC_APP_URL || "https://en.igihe.com";
+  }
+  return window.location.origin || process.env.NEXT_PUBLIC_APP_URL || "https://en.igihe.com";
+}
+
+function resolveLanguage(sourceSite: string): "en" | "fr" | "rw" {
+  const site = sourceSite.toLowerCase();
+  if (site.includes("fr.igihe.com")) return "fr";
+  if (site.includes("igihe.com") && !site.includes("en.igihe.com") && !site.includes("fr.igihe.com")) return "rw";
+  return "en";
+}
+
+function plainText(value?: string) {
+  return (value || "")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function articleTitle(article?: NewsItem) {
+  return plainText(article?.title?.rendered) || "this article";
+}
 
 
 
@@ -96,13 +161,13 @@ const parseCustomMarkup = (content: string) => {
 
 
 
-function TypingIndicator({ phase }: { phase: number }) {
+function TypingIndicator({ phase, phrases }: { phase: number; phrases: string[] }) {
   return (
     <div className="igihe-typing">
       <div className="igihe-typing__dots">
         <span /><span /><span />
       </div>
-      <span className="igihe-typing__label">{TYPING_PHRASES[phase]}</span>
+      <span className="igihe-typing__label">{phrases[phase]}</span>
     </div>
   );
 }
@@ -112,6 +177,11 @@ function formatTime(date: Date) {
 }
 
 export default function NewsAgent({ article }: { article?: NewsItem }) {
+  const isArticleMode = Boolean(article);
+  const sourceSite = resolveSourceSite();
+  const language = resolveLanguage(sourceSite);
+  const quickPrompts = isArticleMode ? ARTICLE_QUICK_PROMPTS : QUICK_PROMPTS;
+  const typingPhrases = isArticleMode ? ARTICLE_TYPING_PHRASES : TYPING_PHRASES;
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -133,11 +203,11 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         role: "assistant",
         timestamp: new Date(),
         text: article
-          ? `${greeting}! I've loaded this article into my context and I'm ready to help you explore it.\n\nYou can ask me to summarize it, extract key takeaways, explain any term, or simply ask anything about the content.`
-          : `${greeting}! I'm your IGIHE news assistant.\n\nAsk me about any story, topic, or time period and I'll search for the most relevant information.\n\nWhat would you like to know?`,
+          ? `${greeting}! I'm focused on **${articleTitle(article)}**.\n\nAsk me to summarize it, extract key takeaways, explain details, or answer questions using this article only.`
+          : `${greeting}! I'm your IGIHE news assistant for this site.\n\nAsk about headlines, Rwanda, sports, business, international news, or any current IGIHE topic and I'll search the right source for you.\n\nWhat would you like to know?`,
       }]);
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length, article]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -161,12 +231,12 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     if (loading) {
       setTypingPhase(0);
       phaseTimer.current = setInterval(() =>
-        setTypingPhase(p => Math.min(p + 1, TYPING_PHRASES.length - 1)), 1800);
+        setTypingPhase(p => Math.min(p + 1, typingPhrases.length - 1)), 1800);
     } else {
       if (phaseTimer.current) clearInterval(phaseTimer.current);
     }
     return () => { if (phaseTimer.current) clearInterval(phaseTimer.current); };
-  }, [loading]);
+  }, [loading, typingPhrases.length]);
 
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -192,7 +262,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     setLoading(true);
 
     try {
-      await chatWithNewsAgent(history, (chunk) => {
+      await chatWithNewsAgent(history, { article, sourceSite, language }, (chunk) => {
         setMessages(prev =>
           prev.map(m => m.id === assistantId ? { ...m, text: m.text + chunk } : m)
         );
@@ -208,7 +278,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     } finally {
       setLoading(false);
     }
-  }, [messages, loading]);
+  }, [messages, loading, article, sourceSite, language]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
@@ -756,7 +826,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                     <Image src={"/assets/igiheIcon.png"} alt={""} height={18} width={18} />
                   </div>
                   <div className="igihe-msg__body">
-                    <TypingIndicator phase={typingPhase} />
+                    <TypingIndicator phase={typingPhase} phrases={typingPhrases} />
                   </div>
                 </div>
               )}
@@ -769,7 +839,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
               <div className="igihe-quick">
                 <ThemedText className="igihe-quick__label">Suggested</ThemedText>
                 <div className="igihe-quick__chips">
-                  {QUICK_PROMPTS.map(p => (
+                  {quickPrompts.map(p => (
                     <button
                       key={p.cmd}
                       className="igihe-chip"
@@ -802,7 +872,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                   value={input}
                   onChange={handleInput}
                   onKeyDown={handleKey}
-                  placeholder="Ask about any news story, topic or event…"
+                  placeholder={isArticleMode ? "Ask about this article…" : "Ask about any news story, topic or event…"}
                   disabled={loading}
                 />
                 <button

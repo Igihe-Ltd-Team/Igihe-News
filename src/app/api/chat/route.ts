@@ -5,8 +5,83 @@ const chatRateLimiter = new LocalRateLimiter({ limit: 10, windowMs: 60_000 });
 const MAX_MESSAGES = 20;
 const MAX_USER_MESSAGE_LENGTH = 2_000;
 const MAX_ASSISTANT_MESSAGE_LENGTH = 20_000;
+const MAX_ARTICLE_TEXT_LENGTH = 80_000;
 
 const AI_API_URL = process.env.NEWS_AI_API_URL || "https://ai.inoventyk.rw";
+
+type AgentMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+type ArticlePayload = {
+  source_id?: string;
+  title?: string;
+  content?: string;
+  excerpt?: string;
+  link?: string;
+  url?: string;
+  language?: string;
+};
+
+function stripHtml(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8216;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function inferSourceSite(req: NextRequest, explicit?: unknown): string {
+  if (typeof explicit === "string" && explicit.trim()) return explicit.trim();
+  return (
+    req.headers.get("origin") ||
+    req.headers.get("referer") ||
+    req.headers.get("host") ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "en.igihe.com"
+  );
+}
+
+function inferLanguage(sourceSite: string, explicit?: unknown): "en" | "fr" | "rw" {
+  const site = sourceSite.toLowerCase();
+  if (site.includes("fr.igihe.com")) return "fr";
+  if (site.includes("igihe.com") && !site.includes("en.igihe.com") && !site.includes("fr.igihe.com")) return "rw";
+  if (explicit === "fr" || explicit === "rw" || explicit === "en") return explicit;
+  return "en";
+}
+
+function normalizeArticle(raw: any, language: string): ArticlePayload | null {
+  if (!raw || typeof raw !== "object") return null;
+  const title = stripHtml(raw.title?.rendered ?? raw.title);
+  const content = stripHtml(raw.content?.rendered ?? raw.content).slice(0, MAX_ARTICLE_TEXT_LENGTH);
+  const excerpt = stripHtml(raw.excerpt?.rendered ?? raw.excerpt).slice(0, 2_000);
+  const link = typeof raw.link === "string" ? raw.link : typeof raw.url === "string" ? raw.url : undefined;
+
+  if (!title && !content && !excerpt && !link) return null;
+
+  return {
+    source_id: raw.id ? String(raw.id) : raw.source_id,
+    title,
+    content,
+    excerpt,
+    link,
+    url: link,
+    language,
+  };
+}
+
+function lastUserQuestion(messages: AgentMessage[]): string {
+  return [...messages].reverse().find((message) => message.role === "user")?.content || "";
+}
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -29,10 +104,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let messages: Array<{ role: string; content: string }>;
+  let messages: AgentMessage[];
+  let article: ArticlePayload | null = null;
+  let sourceSite = "";
+  let language: "en" | "fr" | "rw" = "en";
   try {
     const body = await req.json();
+    sourceSite = inferSourceSite(req, body.source_site ?? body.sourceSite);
+    language = inferLanguage(sourceSite, body.language);
     messages = body.messages;
+    article = normalizeArticle(body.article, language);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -42,7 +123,7 @@ export async function POST(req: NextRequest) {
     messages.length === 0 ||
     messages.length > MAX_MESSAGES ||
     messages.some(
-      (m) =>
+      (m: AgentMessage) =>
         !m ||
         !["user", "assistant"].includes(m.role) ||
         typeof m.content !== "string" ||
@@ -59,10 +140,16 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const aiRes = await fetch(`${AI_API_URL}/api/v1/news-ai/chat`, {
+        const question = lastUserQuestion(messages);
+        const endpoint = article ? "/api/v1/news-ai/article/ask" : "/api/v1/news-ai/chat";
+        const payload = article
+          ? { article, question, source_site: sourceSite }
+          : { messages, language, limit: 9, source_site: sourceSite };
+
+        const aiRes = await fetch(`${AI_API_URL}${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages }),
+          body: JSON.stringify(payload),
           cache: "no-store",
         });
 
