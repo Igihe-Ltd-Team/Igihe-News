@@ -10,6 +10,31 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 const SECRET = process.env.REVALIDATION_SECRET
+const ASK_IGIHE_WEBHOOK_URL = process.env.ASK_IGIHE_WEBHOOK_URL   // e.g. http://localhost:8000/api/v1/sources/wp-webhook
+const ASK_IGIHE_WEBHOOK_SECRET = process.env.ASK_IGIHE_WEBHOOK_SECRET || ''
+
+async function notifyAskIgihe(change: WordPressChange): Promise<void> {
+  if (!ASK_IGIHE_WEBHOOK_URL || !change.slug) return
+  const plan = buildRevalidationPlan(change)
+  if (plan.type !== 'post' && plan.type !== 'opinion' && plan.type !== 'advertorial' && plan.type !== 'announcement') return
+  try {
+    await fetch(ASK_IGIHE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(ASK_IGIHE_WEBHOOK_SECRET ? { 'X-WP-Secret': ASK_IGIHE_WEBHOOK_SECRET } : {}),
+      },
+      body: JSON.stringify({
+        slug: change.slug,
+        language: change.language || 'rw',
+        link: change.slug,
+      }),
+      signal: AbortSignal.timeout(8000),
+    })
+  } catch {
+    // Non-fatal — revalidation still succeeds even if ask-igihe ingestion fails
+  }
+}
 
 function isAuthorized(request: NextRequest): boolean {
   const headerSecret = request.headers.get('x-revalidate-secret')
@@ -78,7 +103,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await applyWordPressChange(change)
+    const [result] = await Promise.all([
+      applyWordPressChange(change),
+      notifyAskIgihe(change),
+    ])
     return NextResponse.json({
       revalidated: true,
       change: { ...change, type: result.plan.type },
@@ -109,7 +137,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await applyWordPressChange(change)
+    const [result] = await Promise.all([
+      applyWordPressChange(change),
+      notifyAskIgihe(change),
+    ])
     return NextResponse.json({
       revalidated: true,
       change: { ...change, type: result.plan.type },

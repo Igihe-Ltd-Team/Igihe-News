@@ -6,6 +6,7 @@ export interface WordPressChange {
   categories?: string[]
   action?: string
   status?: string
+  language?: string  // "rw" | "en" | "fr" — passed from WordPress publish hook
 }
 
 export interface RevalidationPlan {

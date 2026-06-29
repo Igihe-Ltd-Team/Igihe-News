@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useGemini } from '@/hooks/useGemini'
 import { NewsItem } from '@/types/fetchData'
-import DOMPurify from 'isomorphic-dompurify';
 
 interface Message {
   id: string
@@ -206,15 +206,30 @@ export default function AIChatButton({ article }: { article?: NewsItem }) {
                         <small>Thinking...</small>
                       </div>
                     ) : (
-                        <div
-                            className="post-content d-block whitespace-pre-wrap"
-                            style={{
-                                overflow: 'hidden',
-                                width: '100%'
-                            }}
-                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.text || '') }}
-                        />
-                    //   <small className="d-block whitespace-pre-wrap">{msg.text}</small>
+                      <div style={{ overflow: 'hidden', width: '100%', fontSize: '0.875rem' }}>
+                        <ReactMarkdown
+                          components={{
+                            h1: ({ children }) => <strong className="d-block mb-1">{children}</strong>,
+                            h2: ({ children }) => <strong className="d-block mb-1">{children}</strong>,
+                            h3: ({ children }) => <strong className="d-block mb-1">{children}</strong>,
+                            h4: ({ children }) => <strong className="d-block mb-1">{children}</strong>,
+                            h5: ({ children }) => <strong className="d-block mb-1">{children}</strong>,
+                            h6: ({ children }) => <strong className="d-block mb-1">{children}</strong>,
+                            a: ({ href, children }) => (
+                              <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary">
+                                {children}
+                              </a>
+                            ),
+                            p: ({ children }) => <p className="mb-1" style={{ margin: 0 }}>{children}</p>,
+                            ul: ({ children }) => <ul className="ps-3 mb-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="ps-3 mb-1">{children}</ol>,
+                            li: ({ children }) => <li className="mb-0">{children}</li>,
+                            hr: () => <hr className="my-2" />,
+                          }}
+                        >
+                          {msg.text || ''}
+                        </ReactMarkdown>
+                      </div>
                     )}
                   </div>
                 </div>

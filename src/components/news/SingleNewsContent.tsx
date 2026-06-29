@@ -36,6 +36,7 @@ import { useEffect, useState } from 'react'
 import Lightbox from '../lightbox/LightBox'
 import { usePostContentLightbox } from '../lightbox/Uselightbox'
 import Slides from '../home/Slides'
+import NewsAgent from '../NewsAgent'
 
 
 interface SingleNewsContentProps {
@@ -199,7 +200,9 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                         )
                                     }
                                 </div> */}
-                                <AIChatButton article={article} />
+                                {/* <AIChatButton article={article} /> */}
+
+                                <NewsAgent article={article} />
 
                                 {
                                     relatedPosts.length > 0 &&

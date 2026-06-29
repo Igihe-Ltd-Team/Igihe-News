@@ -14,21 +14,48 @@ interface Message {
   timestamp: Date;
   isTyping?: boolean;
 }
-
+ 
 interface AgentMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-async function chatWithNewsAgent(messages: AgentMessage[]): Promise<string> {
-  const response = await fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+async function chatWithNewsAgent(
+  messages: AgentMessage[],
+  onChunk: (chunk: string) => void
+): Promise<void> {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages }),
   });
-  if (!response.ok) throw new Error('News assistant request failed');
-  const data = await response.json();
-  return data.text;
+  if (!response.ok) throw new Error("News assistant request failed");
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No stream");
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const payload = line.slice(6).trim();
+      if (payload === "[DONE]") return;
+      if (!payload) continue;
+      try {
+        const chunk = JSON.parse(payload);
+        if (typeof chunk === "string") onChunk(chunk);
+      } catch { /* ignore parse errors */ }
+    }
+  }
 }
 
 const QUICK_PROMPTS = [
@@ -146,29 +173,38 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     if (!trimmed || loading) return;
 
     setShowQuickPrompts(false);
-    const userMsg: Message = { id: Date.now().toString(), role: "user", text: trimmed, timestamp: new Date() };
-    const history: AgentMessage[] = [...messages.filter(m => !m.isTyping).map(m => ({ role: m.role, content: m.text })), { role: "user", content: trimmed }];
+    const now = Date.now();
+    const userMsg: Message = { id: String(now), role: "user", text: trimmed, timestamp: new Date() };
+    const assistantId = String(now + 1);
+    const history: AgentMessage[] = [
+      ...messages.filter(m => !m.isTyping).map(m => ({ role: m.role, content: m.text })),
+      { role: "user", content: trimmed },
+    ];
 
-    setMessages(prev => [...prev, userMsg]);
+    // Add user message + empty assistant bubble immediately
+    setMessages(prev => [
+      ...prev,
+      userMsg,
+      { id: assistantId, role: "assistant", text: "", timestamp: new Date() },
+    ]);
     setInput("");
     if (inputRef.current) inputRef.current.style.height = "auto";
     setLoading(true);
 
     try {
-      const reply = await chatWithNewsAgent(history);
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        text: reply,
-        timestamp: new Date(),
-      }]);
+      await chatWithNewsAgent(history, (chunk) => {
+        setMessages(prev =>
+          prev.map(m => m.id === assistantId ? { ...m, text: m.text + chunk } : m)
+        );
+      });
     } catch {
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        text: "I'm sorry — I ran into a problem reaching the database. Please try again in a moment.",
-        timestamp: new Date(),
-      }]);
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === assistantId
+            ? { ...m, text: "I'm sorry — I ran into a problem. Please try again in a moment." }
+            : m
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -421,10 +457,11 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         .igihe-msg__bubble {
           padding: 13px 17px;
           border-radius: 18px;
+          font-size: 14.5px;
+          line-height: 1.65;
           color: var(--igihe-text);
           white-space: pre-wrap;
           word-break: break-word;
-          line-height:23px!important
         }
         .igihe-msg__bubble--ai {
         //   background: var(--igihe-surface);
@@ -644,11 +681,11 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                 <span className="igihe-avatar__dot" />
               </div>
               <div>
-                <ThemedText className="igihe-header__name">Ask IGIHE</ThemedText>
-                <ThemedText className="igihe-header__sub">
-                  <ThemedText className="igihe-header__sub-dot" />
+                <div className="igihe-header__name">Ask IGIHE</div>
+                <div className="igihe-header__sub">
+                  <span className="igihe-header__sub-dot" />
                   Online
-                </ThemedText>
+                </div>
               </div>
               <div className="igihe-header-actions">
                 <button
@@ -697,22 +734,27 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                       {/* <div className={`igihe-msg__bubble ${m.role === "user" ? "igihe-msg__bubble--user" : "igihe-msg__bubble--ai"}`}>
                         {parseCustomMarkup(m.text)}
                       </div> */}
-                      <ThemedText
+                      <div
                         className={`igihe-msg__bubble ${m.role === "user" ? "igihe-msg__bubble--user" : "igihe-msg__bubble--ai"}`}
-                        // dangerouslySetInnerHTML={{ __html: parseCustomMarkup(m.text) }}
-                        // dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseCustomMarkup(m.text) || '') }}
-                         ><ReactMarkdown>{m.text}</ReactMarkdown></ThemedText>
-                         
+                      >
+                        <ThemedText dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseCustomMarkup(m.text) || '') }} />
+                        {loading && m.role === "assistant" && m.text.length > 0 && messages[messages.length - 1]?.id === m.id && (
+                          <span className="igihe-cursor" />
+                        )}
+                      </div>
 
-                      <ThemedText className="igihe-msg__time">{formatTime(m.timestamp)}</ThemedText>
+                      <div className="igihe-msg__time">{formatTime(m.timestamp)}</div>
                     </div>
                   </div>
                 </div>
               ))}
 
-              {loading && (
+              {/* typing indicator only shown while assistant bubble is still empty */}
+              {loading && messages[messages.length - 1]?.text === "" && (
                 <div className="igihe-msg">
-                  <div className="igihe-msg__avatar igihe-msg__avatar--ai">🤖</div>
+                  <div className="igihe-msg__avatar igihe-msg__avatar--ai">
+                    <Image src={"/assets/igiheIcon.png"} alt={""} height={18} width={18} />
+                  </div>
                   <div className="igihe-msg__body">
                     <TypingIndicator phase={typingPhase} />
                   </div>
@@ -774,7 +816,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
                     : "↑"}
                 </button>
               </div>
-              <ThemedText className="igihe-input-hint">Enter to send · Shift+Enter for new line · Esc to close</ThemedText>
+              <div className="igihe-input-hint">Enter to send · Shift+Enter for new line · Esc to close</div>
             </div>
 
           </div>
@@ -783,6 +825,16 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+        .igihe-cursor {
+          display: inline-block;
+          width: 2px;
+          height: 1em;
+          background: currentColor;
+          margin-left: 2px;
+          vertical-align: text-bottom;
+          animation: blink 0.8s step-start infinite;
+        }
       `}</style>
     </>
   );
