@@ -1,13 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LocalRateLimiter } from "@/lib/rateLimit";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 const chatRateLimiter = new LocalRateLimiter({ limit: 10, windowMs: 60_000 });
 const MAX_MESSAGES = 20;
 const MAX_USER_MESSAGE_LENGTH = 2_000;
 const MAX_ASSISTANT_MESSAGE_LENGTH = 20_000;
 const MAX_ARTICLE_TEXT_LENGTH = 80_000;
+const DEFAULT_AI_API_URL = "https://ai.inoventyk.rw";
 
-const AI_API_URL = process.env.NEWS_AI_API_URL || "https://ai.inoventyk.rw";
+function normalizeAiApiUrl(raw?: string): string {
+  const value = (raw || DEFAULT_AI_API_URL).trim();
+  try {
+    const url = new URL(value);
+    const isLocal =
+      ["localhost", "127.0.0.1", "0.0.0.0", "igihe.local"].includes(url.hostname) ||
+      url.hostname.endsWith(".local");
+
+    if (isLocal && process.env.NODE_ENV === "production") {
+      return DEFAULT_AI_API_URL;
+    }
+
+    if (url.pathname.startsWith("/api/v1")) {
+      url.pathname = "";
+    }
+    url.search = "";
+    url.hash = "";
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return DEFAULT_AI_API_URL;
+  }
+}
+
+const AI_API_URL = normalizeAiApiUrl(process.env.NEWS_AI_API_URL);
 
 type AgentMessage = {
   role: "user" | "assistant";
@@ -83,6 +110,14 @@ function lastUserQuestion(messages: AgentMessage[]): string {
   return [...messages].reverse().find((message) => message.role === "user")?.content || "";
 }
 
+function sseText(encoder: TextEncoder, text: string): Uint8Array {
+  return encoder.encode(`data: ${JSON.stringify(text)}\n\n`);
+}
+
+function sseDone(encoder: TextEncoder): Uint8Array {
+  return encoder.encode("data: [DONE]\n\n");
+}
+
 export async function POST(req: NextRequest) {
   const ip =
     req.headers.get("x-real-ip") ||
@@ -151,10 +186,22 @@ export async function POST(req: NextRequest) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
           cache: "no-store",
+          signal: AbortSignal.timeout(45_000),
         });
 
         if (!aiRes.ok) {
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          console.error("[/api/chat] upstream failed", {
+            status: aiRes.status,
+            endpoint,
+            aiBase: AI_API_URL,
+          });
+          controller.enqueue(
+            sseText(
+              encoder,
+              "I'm sorry — the IGIHE AI service is reachable but returned an error. Please try again in a moment."
+            )
+          );
+          controller.enqueue(sseDone(encoder));
           controller.close();
           return;
         }
@@ -183,13 +230,19 @@ export async function POST(req: NextRequest) {
             );
             await new Promise((r) => setTimeout(r, 18));
           }
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.enqueue(sseDone(encoder));
         }
 
         controller.close();
       } catch (err) {
         console.error("[/api/chat]", err instanceof Error ? err.message : err);
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.enqueue(
+          sseText(
+            encoder,
+            "I'm sorry — I couldn't connect to the IGIHE AI service from this deployment. Please try again in a moment."
+          )
+        );
+        controller.enqueue(sseDone(encoder));
         controller.close();
       }
     },
