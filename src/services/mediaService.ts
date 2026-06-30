@@ -107,9 +107,11 @@ export async function fetchMedia(mediaId: number): Promise<any> {
 
 const ADS_CACHE_TTL = 5 * 60 * 1000
 let adsFetchInProgress: Promise<Advertisement[]> | null = null
+let lastGoodAds: Advertisement[] = []
 
 export function clearAdsCache(): void {
   adsFetchInProgress = null
+  lastGoodAds = []
 }
 
 async function fetchAdsFromWordPress(): Promise<Advertisement[]> {
@@ -134,9 +136,18 @@ async function fetchAdsFromWordPress(): Promise<Advertisement[]> {
 export async function fetchAdvertisements(): Promise<Advertisement[]> {
   if (adsFetchInProgress) return adsFetchInProgress
 
-  adsFetchInProgress = fetchAdsFromWordPress().finally(() => {
-    adsFetchInProgress = null
-  })
+  adsFetchInProgress = fetchAdsFromWordPress()
+    .then((ads) => {
+      lastGoodAds = ads
+      return ads
+    })
+    .catch((error) => {
+      console.error('Error fetching advertisements:', error)
+      return lastGoodAds
+    })
+    .finally(() => {
+      adsFetchInProgress = null
+    })
 
   return adsFetchInProgress
 }

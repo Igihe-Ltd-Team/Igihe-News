@@ -204,9 +204,11 @@ export const handlers = [
 
   // Traffic API
   http.get(TRAFFIC, () => {
-    return HttpResponse.json([
-      { id: 1, slug: 'popular-post', title: 'Popular', date: new Date().toISOString(), views: 1000 },
-    ])
+    return HttpResponse.json({
+      articles: [
+        { id: 1, slug: 'popular-post', title: 'Popular', date: new Date().toISOString(), views: 1000 },
+      ],
+    })
   }),
 
   // Health check
