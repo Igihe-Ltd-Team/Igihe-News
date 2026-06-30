@@ -34,7 +34,10 @@ function normalizeAiApiUrl(raw?: string): string {
   }
 }
 
-const AI_API_URL = normalizeAiApiUrl(process.env.NEWS_AI_API_URL);
+const AI_API_URL =
+  process.env.NODE_ENV === "production"
+    ? DEFAULT_AI_API_URL
+    : normalizeAiApiUrl(process.env.NEWS_AI_API_URL);
 
 type AgentMessage = {
   role: "user" | "assistant";
