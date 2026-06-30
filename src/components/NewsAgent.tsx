@@ -19,6 +19,16 @@ interface AgentMessage {
   content: string;
 }
 
+const DIRECT_AI_API_URL = "https://ai.inoventyk.rw";
+
+const PROXY_ERROR_PATTERNS = [
+  /IGIHE AI service .*returned/i,
+  /IGIHE AI service .*reachable/i,
+  /couldn'?t connect to the IGIHE AI service/i,
+  /upstream error/i,
+  /Please try again in a moment/i,
+];
+
 function toAgentArticle(article: NewsItem | undefined, language: "en" | "fr" | "rw") {
   if (!article) return undefined;
   return {
@@ -33,14 +43,132 @@ function toAgentArticle(article: NewsItem | undefined, language: "en" | "fr" | "
   };
 }
 
+type NewsAgentOptions = {
+  article?: NewsItem;
+  sourceSite: string;
+  language: "en" | "fr" | "rw";
+};
+
+type StreamCallbacks = {
+  onChunk: (chunk: string) => void;
+  onReset: () => void;
+};
+
+function isProxyErrorText(text: string) {
+  return PROXY_ERROR_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function parseSsePayload(payload: string): string {
+  try {
+    const parsed = JSON.parse(payload);
+    if (typeof parsed === "string") return parsed;
+    if (parsed && typeof parsed === "object") {
+      const token = (parsed as { token?: unknown; text?: unknown; response?: unknown }).token;
+      if (typeof token === "string") return token;
+      const text = (parsed as { text?: unknown; response?: unknown }).text;
+      if (typeof text === "string") return text;
+      const response = (parsed as { response?: unknown }).response;
+      if (typeof response === "string") return response;
+    }
+  } catch {
+    // Some deployments/proxies may send plain text after "data:".
+  }
+  return payload;
+}
+
+async function readProxyStream(response: Response, callbacks: StreamCallbacks): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const text = await response.text();
+    callbacks.onChunk(text);
+    return text;
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let fullText = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (payload === "[DONE]") return fullText;
+      if (!payload) continue;
+      const chunk = parseSsePayload(payload);
+      if (!chunk || chunk === "[DONE]") continue;
+      fullText += chunk;
+      callbacks.onChunk(chunk);
+    }
+  }
+
+  if (buffer.trim().startsWith("data:")) {
+    const payload = buffer.trim().slice(5).trim();
+    if (payload && payload !== "[DONE]") {
+      const chunk = parseSsePayload(payload);
+      fullText += chunk;
+      callbacks.onChunk(chunk);
+    }
+  }
+
+  return fullText;
+}
+
+async function callDirectNewsAi(
+  messages: AgentMessage[],
+  options: NewsAgentOptions,
+  callbacks: StreamCallbacks
+): Promise<void> {
+  const article = toAgentArticle(options.article, options.language);
+  const endpoint = article ? "/api/v1/news-ai/article/ask" : "/api/v1/news-ai/chat";
+  const question = [...messages].reverse().find((message) => message.role === "user")?.content || "";
+  const body = article
+    ? { article, question, source_site: options.sourceSite }
+    : {
+        messages,
+        language: options.language,
+        source_site: options.sourceSite,
+        limit: 9,
+      };
+
+  const response = await fetch(`${DIRECT_AI_API_URL}${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Direct IGIHE AI request failed (${response.status})`);
+  }
+
+  const data = await response.json().catch(() => null);
+  const text =
+    (typeof data?.response === "string" && data.response) ||
+    (typeof data?.answer === "string" && data.answer) ||
+    (typeof data?.text === "string" && data.text) ||
+    "";
+
+  if (!text.trim()) {
+    throw new Error("Direct IGIHE AI returned an empty response");
+  }
+
+  const tokens = text.split(/(\s+)/).filter(Boolean);
+  for (const token of tokens) {
+    callbacks.onChunk(token);
+    await new Promise((resolve) => setTimeout(resolve, 8));
+  }
+}
+
 async function chatWithNewsAgent(
   messages: AgentMessage[],
-  options: {
-    article?: NewsItem;
-    sourceSite: string;
-    language: "en" | "fr" | "rw";
-  },
-  onChunk: (chunk: string) => void
+  options: NewsAgentOptions,
+  callbacks: StreamCallbacks
 ): Promise<void> {
   const response = await fetch("/api/chat", {
     method: "POST",
@@ -52,32 +180,17 @@ async function chatWithNewsAgent(
       language: options.language,
     }),
   });
-  if (!response.ok) throw new Error("News assistant request failed");
 
-  const reader = response.body?.getReader();
-  if (!reader) throw new Error("No stream");
+  if (!response.ok) {
+    callbacks.onReset();
+    await callDirectNewsAi(messages, options, callbacks);
+    return;
+  }
 
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      const payload = line.slice(6).trim();
-      if (payload === "[DONE]") return;
-      if (!payload) continue;
-      try {
-        const chunk = JSON.parse(payload);
-        if (typeof chunk === "string") onChunk(chunk);
-      } catch { /* ignore parse errors */ }
-    }
+  const fullText = await readProxyStream(response, callbacks);
+  if (!fullText.trim() || isProxyErrorText(fullText)) {
+    callbacks.onReset();
+    await callDirectNewsAi(messages, options, callbacks);
   }
 }
 
@@ -262,10 +375,17 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     setLoading(true);
 
     try {
-      await chatWithNewsAgent(history, { article, sourceSite, language }, (chunk) => {
-        setMessages(prev =>
-          prev.map(m => m.id === assistantId ? { ...m, text: m.text + chunk } : m)
-        );
+      await chatWithNewsAgent(history, { article, sourceSite, language }, {
+        onChunk: (chunk) => {
+          setMessages(prev =>
+            prev.map(m => m.id === assistantId ? { ...m, text: m.text + chunk } : m)
+          );
+        },
+        onReset: () => {
+          setMessages(prev =>
+            prev.map(m => m.id === assistantId ? { ...m, text: "" } : m)
+          );
+        },
       });
     } catch {
       setMessages(prev =>
@@ -293,13 +413,21 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
   const handleVoice = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return;
-    const rec = new SR();
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.onstart = () => setIsListening(true);
-    rec.onend = () => setIsListening(false);
-    rec.onresult = (e: any) => setInput(e.results[0][0].transcript);
-    rec.start();
+    try {
+      const rec = new SR();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.onstart = () => setIsListening(true);
+      rec.onerror = () => setIsListening(false);
+      rec.onend = () => setIsListening(false);
+      rec.onresult = (e: any) => {
+        const transcript = e?.results?.[0]?.[0]?.transcript;
+        if (typeof transcript === "string") setInput(transcript);
+      };
+      rec.start();
+    } catch {
+      setIsListening(false);
+    }
   };
 
   return (
@@ -388,7 +516,9 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           width: 100%;
           max-width: 860px;
           height: 100%;
+          height: 92dvh;
           max-height: 92vh;
+          max-height: 92dvh;
         //   background: var(--igihe-bg);
         background: rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(12px);
@@ -719,7 +849,14 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
 
         @media (max-width: 640px) {
           .igihe-overlay { padding: 0; }
-          .igihe-panel { border-radius: 0; max-height: 100vh; border: none; }
+          .igihe-panel {
+            border-radius: 0;
+            height: 100vh;
+            height: 100dvh;
+            max-height: 100vh;
+            max-height: 100dvh;
+            border: none;
+          }
           .igihe-messages { padding: 16px 16px 12px; }
           .igihe-msg__body { max-width: 85%; }
         }
