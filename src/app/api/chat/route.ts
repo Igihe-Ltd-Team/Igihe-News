@@ -121,6 +121,16 @@ function sseDone(encoder: TextEncoder): Uint8Array {
   return encoder.encode("data: [DONE]\n\n");
 }
 
+async function fetchAi(endpoint: string, payload: unknown, baseUrl = AI_API_URL): Promise<Response> {
+  return fetch(`${baseUrl}${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    signal: AbortSignal.timeout(45_000),
+  });
+}
+
 export async function POST(req: NextRequest) {
   const ip =
     req.headers.get("x-real-ip") ||
@@ -184,13 +194,15 @@ export async function POST(req: NextRequest) {
           ? { article, question, source_site: sourceSite }
           : { messages, language, limit: 9, source_site: sourceSite };
 
-        const aiRes = await fetch(`${AI_API_URL}${endpoint}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          cache: "no-store",
-          signal: AbortSignal.timeout(45_000),
-        });
+        let aiRes = await fetchAi(endpoint, payload);
+        if (!aiRes.ok && AI_API_URL !== DEFAULT_AI_API_URL) {
+          console.error("[/api/chat] upstream failed; retrying default", {
+            status: aiRes.status,
+            endpoint,
+            aiBase: AI_API_URL,
+          });
+          aiRes = await fetchAi(endpoint, payload, DEFAULT_AI_API_URL);
+        }
 
         if (!aiRes.ok) {
           console.error("[/api/chat] upstream failed", {
@@ -201,7 +213,7 @@ export async function POST(req: NextRequest) {
           controller.enqueue(
             sseText(
               encoder,
-              "I'm sorry — the IGIHE AI service is reachable but returned an error. Please try again in a moment."
+              `I'm sorry — the IGIHE AI service returned an upstream error (${aiRes.status}). Please try again in a moment.`
             )
           );
           controller.enqueue(sseDone(encoder));
