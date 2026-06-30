@@ -65,7 +65,7 @@ function stripHtml(value: unknown): string {
     .replace(/&#8221;/g, '"')
     .replace(/\s+/g, " ")
     .trim();
-}
+} 
 
 function inferSourceSite(req: NextRequest, explicit?: unknown): string {
   if (typeof explicit === "string" && explicit.trim()) return explicit.trim();
