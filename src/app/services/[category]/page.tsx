@@ -121,7 +121,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           <Col md={8}>
             <HeaderDivider title={`Latest ${thisCategory?.name} News`} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1">
               {isLoading ? (
                 <NewsSkeleton />
               ) : (

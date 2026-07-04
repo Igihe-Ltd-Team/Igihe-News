@@ -29,6 +29,9 @@ const PROXY_ERROR_PATTERNS = [
   /Please try again in a moment/i,
 ];
 
+const DIRECT_CHUNK_SIZE = 420;
+const STREAM_FLUSH_MS = 100;
+
 function toAgentArticle(article: NewsItem | undefined, language: "en" | "fr" | "rw") {
   if (!article) return undefined;
   return {
@@ -158,10 +161,9 @@ async function callDirectNewsAi(
     throw new Error("Direct IGIHE AI returned an empty response");
   }
 
-  const tokens = text.split(/(\s+)/).filter(Boolean);
-  for (const token of tokens) {
-    callbacks.onChunk(token);
-    await new Promise((resolve) => setTimeout(resolve, 8));
+  for (let i = 0; i < text.length; i += DIRECT_CHUNK_SIZE) {
+    callbacks.onChunk(text.slice(i, i + DIRECT_CHUNK_SIZE));
+    await new Promise((resolve) => setTimeout(resolve, 25));
   }
 }
 
@@ -374,20 +376,47 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     if (inputRef.current) inputRef.current.style.height = "auto";
     setLoading(true);
 
+    let pendingText = "";
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const flushPendingText = () => {
+      if (flushTimer) {
+        clearTimeout(flushTimer);
+        flushTimer = null;
+      }
+      if (!pendingText) return;
+      const nextText = pendingText;
+      pendingText = "";
+      setMessages(prev =>
+        prev.map(m => m.id === assistantId ? { ...m, text: m.text + nextText } : m)
+      );
+    };
+
+    const queueAssistantText = (chunk: string) => {
+      if (!chunk) return;
+      pendingText += chunk;
+      if (flushTimer) return;
+      flushTimer = setTimeout(flushPendingText, STREAM_FLUSH_MS);
+    };
+
+    const resetAssistantText = () => {
+      pendingText = "";
+      if (flushTimer) {
+        clearTimeout(flushTimer);
+        flushTimer = null;
+      }
+      setMessages(prev =>
+        prev.map(m => m.id === assistantId ? { ...m, text: "" } : m)
+      );
+    };
+
     try {
       await chatWithNewsAgent(history, { article, sourceSite, language }, {
-        onChunk: (chunk) => {
-          setMessages(prev =>
-            prev.map(m => m.id === assistantId ? { ...m, text: m.text + chunk } : m)
-          );
-        },
-        onReset: () => {
-          setMessages(prev =>
-            prev.map(m => m.id === assistantId ? { ...m, text: "" } : m)
-          );
-        },
+        onChunk: queueAssistantText,
+        onReset: resetAssistantText,
       });
     } catch {
+      resetAssistantText();
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
@@ -396,6 +425,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         )
       );
     } finally {
+      flushPendingText();
       setLoading(false);
     }
   }, [messages, loading, article, sourceSite, language]);

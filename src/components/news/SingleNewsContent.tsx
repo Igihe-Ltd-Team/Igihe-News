@@ -68,6 +68,35 @@ const parseCustomMarkup = (content: string) => {
 };
 
 
+function useIsPortraitImage(src?: string) {
+    const [isPortrait, setIsPortrait] = useState(false)
+
+    useEffect(() => {
+        if (!src) {
+            setIsPortrait(false)
+            return
+        }
+        let cancelled = false
+        const img = new window.Image()
+        img.src = src
+        const check = () => {
+            if (cancelled || !img.naturalWidth || !img.naturalHeight) return
+            setIsPortrait(img.naturalHeight / img.naturalWidth > 1.05)
+        }
+        if (img.complete) {
+            check()
+        } else {
+            img.onload = check
+        }
+        return () => {
+            cancelled = true
+        }
+    }, [src])
+
+    return isPortrait
+}
+
+
 export default function SingleNewsContent({ slug, initialArticle }: SingleNewsContentProps) {
     const { isMobile, isTablet, deviceType, width } = useResponsive()
     const [isClient, setIsClient] = useState(false)
@@ -95,6 +124,9 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
     const imgs = extractImagesFromHtml(article?.content?.rendered || "")
     const { containerRef, lightboxProps } = usePostContentLightbox(imgs);
 
+
+
+
     if (articleLoading) {
         return (
             <div className="min-h-screen d-flex align-items-center justify-content-center">
@@ -116,7 +148,12 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
             </div>
         )
     }
+    
+
     const featuredImage = getFeaturedImage(article, true);
+    const isPortraitHero = useIsPortraitImage(featuredImage || undefined)
+    const heroHeight = isMobile ? 300 : isTablet ? 400 : 600
+
 
     const articleCategory = article ? getCategoryName(article) : undefined;
     const articleCategorySlug = article ? getCategorySlug(article) : undefined;
@@ -158,7 +195,38 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                 </div>
                             </Col>
                             <Col md="11">
-                                <OptimizedImage
+                            <div
+                                    className="position-relative w-100"
+                                    style={{ height: heroHeight, overflow: 'hidden', borderRadius: 8, backgroundColor: '#000' }}
+                                >
+                                    {isPortraitHero && featuredImage && (
+                                        <div
+                                            aria-hidden
+                                            style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                backgroundImage: `url(${featuredImage})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                filter: 'blur(24px) brightness(0.55)',
+                                                transform: 'scale(1.15)',
+                                                zIndex: 0,
+                                            }}
+                                        />
+                                    )}
+                                    <div className="position-relative h-100 w-100" style={{ zIndex: 1 }}>
+                                        <OptimizedImage
+                                            src={featuredImage || '/assets/igiheIcon.png'}
+                                            alt={stripHtml(article.title.rendered)}
+                                            fill
+                                            height={heroHeight}
+                                            className="object-cover"
+                                            imgClass={isPortraitHero ? 'object-fit-contain' : 'object-fit-cover object-position-top'}
+                                            priority
+                                        />
+                                    </div>
+                                </div>
+                                {/* <OptimizedImage
                                     src={featuredImage || '/assets/igiheIcon.png'}
                                     alt={stripHtml(article.title.rendered)}
                                     fill
@@ -166,7 +234,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                     className="object-cover"
                                     imgClass='object-fit-cover object-position-top'
                                     priority
-                                />
+                                /> */}
                                 {
                                     article?.excerpt?.rendered &&
                                     <div className='excerpt-section'>

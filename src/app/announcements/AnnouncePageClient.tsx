@@ -58,7 +58,7 @@ export default function AnnouncePageClient({
       <div className="pb-md-4">
         <Row>
           <Col md={8}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 mt-4">
+            <div className="grid grid-cols-1  mt-4">
               {posts.map((article,index) => (
                 <a 
                                         // href={chechedfile.isImage? `/advertorial/article/${item.slug}` : chechedfile.filePath} 
