@@ -1,6 +1,4 @@
-import { prefetchHomeData } from '@/lib/prefetch-home-data'
 import { Home } from './home/home'
-import { PrefetchHomeData } from './prefetch-home-data'
 
 
 export const revalidate = 300
@@ -13,16 +11,8 @@ export async function generateMetadata() {
   }
 }
 
-export default async function HomePage() {
-  // Only block on above-the-fold data. Below-the-fold server components stream
-  // through their Suspense boundaries and use the shared service cache.
-  const initialData = await prefetchHomeData()
-
-  return (
-    <PrefetchHomeData initialData={initialData}>
-      <Home />
-    </PrefetchHomeData>
-  )
+export default function HomePage() {
+  return <Home />
 }
 
 // Error boundary

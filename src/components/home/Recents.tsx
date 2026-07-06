@@ -1,18 +1,15 @@
 import React, { Suspense } from 'react'
 import HeaderDivider from '../HeaderDivider'
-import { NewsItem, transformToNewsItem } from '@/types/fetchData'
+import { NewsItem } from '@/types/fetchData'
 import DynamicArticleCard from '../news/DynamicArticleCard'
 import TimeLine from '../ReUsable/TimeLine'
 import NewsSkeleton from '../NewsSkeleton'
 import SectionWithToggle from '../ReUsable/SectionWithToggle'
 import { ThemedText } from '../ThemedText'
 import { Col, Row } from 'react-bootstrap'
-import PopularNews from '../news/PopularNews'
 
 import {
   getLatestArticles,
-  getPopularArticles,
-  getHighlightArticles,
   getGreatLakesArticles,
   getEntertainmentArticles,
   getFeaturedAdvertorial,
@@ -92,93 +89,108 @@ async function NewsSection({ title, articles, isMobile,slug }: NewsSectionProps)
   )
 }
 
-export default async function Recents() {
-  // Fetch all data on the server
+async function LatestFeaturedSection() {
   const [
     latests,
-    // popular,
-    // featured,
-    greatLakesArticles,
-    internationalArticles,
-    entertainment,
-    advertorial,
-    announcement,
     mainFeatured,
     otherFeatured
   ] = await Promise.all([
     getLatestArticles(),
-    // getPopularArticles(),
-    // getHighlightArticles(),
-    getGreatLakesArticles(),
-    getInternationalArticles(),
-    getEntertainmentArticles(),
-    getFeaturedAdvertorial(),
-    getFeaturedAnnouncement(),
     getMainFeatured(),
     getOtherFeatured()
   ])
 
-  // Get device info from headers (you'll need to implement this)
-  // For now, we'll pass it as a prop or use a client wrapper
-  const isMobile = false // This should be determined from user agent
+  return (
+    <>
+      <HeaderDivider title="Latest news" slug={'articles'} />
+      <div className="row g-3">
+        <div className="col-xl-4 col-lg-6 col-md-6">
+          <div className="row">
+            {latests.map(article => (
+              <div className="col-xl-12 col-lg-6 col-md-12 col-sd-6 col-12" key={article.id || article.slug}>
+                <DynamicArticleCard
+                  article={article}
+                  showImage
+                  priority={false}
+                  imgHeight={143}
+                  bgColor="#1176BB08"
+                  bordered
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="col-xl-8 col-lg-6 col-md-6">
+          <div className="">
+            {mainFeatured?.[0] && (
+              <DynamicArticleCard
+                key={mainFeatured[0].id || mainFeatured[0].slug}
+                article={mainFeatured[0]}
+                showImage
+                showHeader
+                priority={true}
+                imgHeight={321}
+                bordered
+                showExpt
+                titleStyle={'size20'}
+              />
+            )}
+          </div>
+          <div className="py-2">
+            <HeaderDivider title="Featured News" slug={'tag/72'} />
+            <div>
+              <TimeLine articles={otherFeatured || []} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
 
+async function GreatLakesSection() {
+  const articles = await getGreatLakesArticles()
+  return <NewsSection title="Great Lakes Region" articles={articles} isMobile={false} slug={'tag/99'} />
+}
 
-  // console.log('popular popular popular',popular)
+async function EntertainmentSection() {
+  const articles = await getEntertainmentArticles()
+  return <NewsSection title="Entertainment" articles={articles} isMobile={false} slug={'entertainment'} />
+}
 
-  // const transformedArticles: NewsItem[] = popular?.map(transformToNewsItem);
+async function InternationalSection() {
+  const articles = await getInternationalArticles()
+  return <NewsSection title="International" articles={articles} isMobile={false} slug={'tag/101'} />
+}
 
-  // const transformedArticles: NewsItem[] =
-  // (popular ?? [])
-  //   .filter((item) => item?.url && item?.title)
-  //   .map(transformToNewsItem);
+async function AdvertorialsSection() {
+  const advertorial = await getFeaturedAdvertorial()
 
+  return (
+    <SectionWithToggle
+      title='Advertorials'
+      articles={advertorial}
+      showImgs
+      showDate
+      titleBG='#1176BB'
+      slug={'advertorials'}
+    />
+  )
+}
 
+async function AnnouncementsSection() {
+  const announcement = await getFeaturedAnnouncement()
+  return <SectionWithToggle isFile={true} slug={'announcements'} title='Announcements' articles={announcement} titleBG='#282F2F' />
+}
+
+export default function Recents() {
   return (
     <div className="container p-2">
       <div className="row g-4">
         <div className="col-xl-8 col-lg-12 mt-0">
-          <HeaderDivider title="Latest news" slug={'articles'}/>
-          <div className="row g-3">
-            <div className="col-xl-4 col-lg-6 col-md-6">
-              <div className="row">
-                {latests.map(article => (
-                  <div className="col-xl-12 col-lg-6 col-md-12 col-sd-6 col-12" key={article.id || article.slug}>
-                    <DynamicArticleCard
-                      article={article}
-                      showImage
-                      priority={false}
-                      imgHeight={143}
-                      bgColor="#1176BB08"
-                      bordered
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="col-xl-8 col-lg-6 col-md-6">
-              <div className="">
-                {mainFeatured && (
-                  <DynamicArticleCard
-                    key={mainFeatured[0].id || mainFeatured[0].slug}
-                    article={mainFeatured[0]}
-                    showImage
-                    showHeader
-                    priority={true}
-                    imgHeight={321}
-                    bordered
-                    showExpt
-                    titleStyle={'size20'}
-                  />
-                )}
-              </div>
-              <div className="py-2">
-                <HeaderDivider title="Featured News" slug={'tag/72'} />
-                <div>
-                  <TimeLine articles={otherFeatured || []} />
-                </div>
-              </div>
-            </div>
-          </div>
+          <Suspense fallback={<NewsSkeleton count={3} />}>
+            <LatestFeaturedSection />
+          </Suspense>
 
           <Row className='pt-4'>
             <Col>
@@ -189,13 +201,15 @@ export default async function Recents() {
               />
             </Col>
           </Row>
-          
-          <NewsSection title="Great Lakes Region" articles={greatLakesArticles} isMobile={isMobile} slug={'tag/99'} />
+
+          <Suspense fallback={<NewsSkeleton count={3} />}>
+            <GreatLakesSection />
+          </Suspense>
 
           <Suspense fallback={<NewsSkeleton count={3} />}>
             <Videos />
           </Suspense>
-          
+
           <Row>
             <Col>
               <ServerSlotManager
@@ -205,9 +219,11 @@ export default async function Recents() {
               />
             </Col>
           </Row>
-          
-          <NewsSection title="Entertainment" articles={entertainment} isMobile={isMobile} slug={'entertainment'}/>
-          
+
+          <Suspense fallback={<NewsSkeleton count={3} />}>
+            <EntertainmentSection />
+          </Suspense>
+
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
             <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
             <ServerSlotManager
@@ -216,32 +232,27 @@ export default async function Recents() {
               className="mb-2"
             />
           </div>
-          
-          <NewsSection title="International" articles={internationalArticles} isMobile={isMobile} slug={'tag/101'}/>
+
+          <Suspense fallback={<NewsSkeleton count={3} />}>
+            <InternationalSection />
+          </Suspense>
         </div>
 
         <div className="col-xl-4 col-lg-4 mt-0">
-          {/* <Suspense fallback={<NewsSkeleton count={1}/>}>
-            <PopularNews articles={transformedArticles || []} name='Popular News' />
-          </Suspense> */}
+          <PopularNewsFetcher />
 
-           <PopularNewsFetcher />
-          
           <div className='pt-2'>
-            <SectionWithToggle
-              title='Advertorials'
-              articles={advertorial}
-              showImgs
-              showDate
-              titleBG='#1176BB'
-              slug={'advertorials'}
-            />
+            <Suspense fallback={<NewsSkeleton count={1} />}>
+              <AdvertorialsSection />
+            </Suspense>
           </div>
-          
+
           <div className='pt-3'>
-            <SectionWithToggle isFile={true} slug={'announcements'} title='Announcements' articles={announcement} titleBG='#282F2F' />
+            <Suspense fallback={<NewsSkeleton count={1} />}>
+              <AnnouncementsSection />
+            </Suspense>
           </div>
-          
+
           <div className='mt-3 p-2' style={{ backgroundColor: '#f5f5f5' }}>
             <ThemedText className='d-flex justify-content-center' type='small'>Advertisement</ThemedText>
             <ServerSlotManager
@@ -250,25 +261,25 @@ export default async function Recents() {
               className="mb-2"
             />
           </div>
-          
+
           <div className='pt-3'>
             <Suspense fallback={<NewsSkeleton count={1} />}>
               <Opinios />
             </Suspense>
           </div>
-          
+
           <ServerSlotManager
             position="after-opinions"
             priority={true}
             className="mb-2"
           />
-          
+
           <div className='py-4'>
             <Suspense fallback={null}>
               <RandomCard />
             </Suspense>
           </div>
-          
+
           <ServerSlotManager
             position="after-facts"
             priority={true}

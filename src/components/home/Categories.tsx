@@ -1,7 +1,6 @@
-import React from 'react'
-import HeaderDivider from '../HeaderDivider'
-import { Category } from '@/types/fetchData'
+import React, { Suspense } from 'react'
 import NewsByCategory from './NewsByCategory'
+import NewsSkeleton from '../NewsSkeleton'
 
 interface CategorySectionProps {
     categories: {
@@ -32,7 +31,9 @@ export default function Categories({ categories }: CategorySectionProps) {
                 {
                     categories.slice(0, 4).map((category, i) => (
                         <div className="col-xl-3 col-lg-6 col-md-6" key={i}>
-                            <NewsByCategory categoryId={category.id} categoryName={category.name} categorySlug={category.slug} />
+                            <Suspense fallback={<NewsSkeleton count={1} />}>
+                                <NewsByCategory categoryId={category.id} categoryName={category.name} categorySlug={category.slug} />
+                            </Suspense>
                         </div>
                     ))
                 }
