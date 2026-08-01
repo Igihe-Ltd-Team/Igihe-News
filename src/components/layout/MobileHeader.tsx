@@ -156,8 +156,8 @@ export default function MobileHeader({
           </button>
 
           <ul className="dropdown-menu">
-            <li><a className="dropdown-item" href="igihe.com">Kinyarwanda</a></li>
-            <li><a className="dropdown-item" href="fr.igihe.com">French</a></li>
+            <li><a className="dropdown-item" target='_blank' href="http://igihe.com">Kinyarwanda</a></li>
+            <li><a className="dropdown-item" target='_blank' href="http://fr.igihe.com">French</a></li>
           </ul>
         </div>
 
