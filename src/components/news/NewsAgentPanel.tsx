@@ -465,6 +465,10 @@ export default function NewsAgentPanel({ article, active, isMobile, onClose }: N
           .igihe-msg__body { max-width: 85%; }
           /* Panel is full-bleed on mobile — clear the notch/status bar. */
           .igihe-header { padding-top: max(18px, env(safe-area-inset-top)); }
+          /* iOS Safari auto-zooms the whole page in when focusing any input
+             with font-size under 16px — feels like the page glitching/not
+             responding right as you tap in to type. 16px is the threshold. */
+          .igihe-textarea { font-size: 16px; }
         }
       `}</style>
 

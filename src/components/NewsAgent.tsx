@@ -31,35 +31,6 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
     return () => { document.body.style.overflow = original; };
   }, [isOpen]);
 
-  // Track the real visible viewport height while open, exposed as --vvh.
-  // `dvh` alone doesn't reliably shrink for the on-screen keyboard on iOS
-  // Safari, so the mobile panel's fixed height can visibly jump each time
-  // the keyboard opens/closes (e.g. tapping back into the input to send a
-  // second message) — without this it reads as the whole panel reloading.
-  // Only listens to "resize" (the keyboard signal), not "scroll" (fires
-  // continuously while panning). Applied directly rather than rAF-batched:
-  // "resize" only fires once per keyboard open/close, not at high frequency,
-  // so there's nothing worth coalescing.
-  useEffect(() => {
-    if (!isOpen) return;
-    const root = document.documentElement;
-
-    const applyVvh = () => {
-      const height = window.visualViewport?.height ?? window.innerHeight;
-      root.style.setProperty("--vvh", `${height}px`);
-    };
-
-    applyVvh();
-    window.visualViewport?.addEventListener("resize", applyVvh);
-    window.addEventListener("resize", applyVvh);
-
-    return () => {
-      window.visualViewport?.removeEventListener("resize", applyVvh);
-      window.removeEventListener("resize", applyVvh);
-      root.style.removeProperty("--vvh");
-    };
-  }, [isOpen]);
-
   return (
     <>
       <style>{`
@@ -164,10 +135,8 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
             border-radius: 0;
             height: 100vh;
             height: 100dvh;
-            height: var(--vvh, 100dvh);
             max-height: 100vh;
             max-height: 100dvh;
-            max-height: var(--vvh, 100dvh);
             border: none;
             background: var(--igihe-bg, #0d0f14);
             backdrop-filter: none;
