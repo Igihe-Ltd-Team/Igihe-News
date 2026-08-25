@@ -547,11 +547,16 @@ export default function NewsAgentPanel({ article, active, isMobile, onClose }: N
       )}
 
       {/* Input */}
+      {/* Voice/send buttons preventDefault on mousedown so tapping them
+          doesn't blur the textarea first — on mobile that blur starts the
+          keyboard closing (and the layout resizing) mid-tap, which can eat
+          the click and require a second tap to actually register. */}
       <div className="igihe-input-area">
         <div className="igihe-input-row">
           <button
             className={`igihe-voice-btn ${isListening ? "igihe-voice-btn--listening" : ""}`}
             onClick={handleVoice}
+            onMouseDown={(e) => e.preventDefault()}
             title="Voice input"
             disabled={loading}
           >
@@ -570,6 +575,7 @@ export default function NewsAgentPanel({ article, active, isMobile, onClose }: N
           <button
             className="igihe-send-btn"
             onClick={() => send(input)}
+            onMouseDown={(e) => e.preventDefault()}
             disabled={!input.trim() || loading}
             title="Send message"
           >
