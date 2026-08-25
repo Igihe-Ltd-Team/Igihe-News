@@ -31,7 +31,15 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  reactCompiler: process.env.NODE_ENV === 'production',
+  // Disabled: causes a production-only hydration-mismatch crash (React error
+  // #418, minified) sitewide — reproduced on a local production build with
+  // it on, gone with it off. It never ran in `next dev` (this flag was
+  // previously gated to production only), so the compiler was silently
+  // shipping this to every mobile visitor while local testing looked fine.
+  // Re-enable only after finding and fixing the specific Rules-of-React
+  // violation it's exposing — this is a broad, sitewide mitigation, not a
+  // fix of the underlying cause.
+  reactCompiler: false,
 
   // Use git commit as build ID so chunks are consistent across instances
   generateBuildId: async () => {

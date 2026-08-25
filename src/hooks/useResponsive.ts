@@ -37,26 +37,28 @@ export interface ResponsiveState {
  * }
  */
 export function useResponsive(debounceMs: number = 150): ResponsiveState {
-  const [state, setState] = useState<ResponsiveState>(() => {
-    // Initialize with SSR-safe defaults
-    if (typeof window === 'undefined') {
-      return {
-        isMobile: false,
-        isTablet: false,
-        isDesktop: true,
-        isLargeDesktop: false,
-        deviceType: 'desktop',
-        width: 1024,
-        height: 768
-      }
-    }
-
-    // Client-side initialization
-    const width = window.innerWidth
-    return getResponsiveState(width, window.innerHeight)
+  // Always start from the SSR-safe default, on the server AND the client.
+  // The client's *first* render is what React reconciles against the
+  // server-rendered HTML — reading window.innerWidth here (as this used to)
+  // makes that first render diverge from the server on any non-desktop
+  // device, which is a hydration-mismatch error. React silently recovers
+  // from that in development, but the same mismatch throws in production.
+  // The real viewport size is applied via the effect below, immediately
+  // after mount — i.e. after hydration has already succeeded.
+  const [state, setState] = useState<ResponsiveState>({
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true,
+    isLargeDesktop: false,
+    deviceType: 'desktop',
+    width: 1024,
+    height: 768
   })
 
   useEffect(() => {
+    // Sync the real viewport size right after mount (post-hydration).
+    setState(getResponsiveState(window.innerWidth, window.innerHeight))
+
     let timeoutId: NodeJS.Timeout | null = null
 
     const handleResize = () => {
