@@ -1,42 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { NewsItem } from "@/types/fetchData";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useChatStore } from "@/stores/chatStore";
 import NewsAgentPanel from "./news/NewsAgentPanel";
 
 export default function NewsAgent({ article }: { article?: NewsItem }) {
-  const router = useRouter();
+  // Mounted for the whole page lifetime (unlike the panel, which only
+  // mounts once opened), so isMobile has already settled to the real
+  // viewport by the time a user can click the trigger — no fresh-mount
+  // race with the panel's own effects that depend on it.
   const { isMobile } = useResponsive();
   const [isOpen, setIsOpen] = useState(false);
-  const setArticleContext = useChatStore((s) => s.setArticleContext);
 
-  const openChat = () => {
-    if (isMobile) {
-      // Mobile: never mount the modal — hand off context and navigate to the
-      // dedicated full-screen page instead (avoids the modal crash/instability).
-      setArticleContext(article);
-      router.push("/chat");
-      return;
-    }
-    setIsOpen(true);
-  };
-
-  // Defensive: if the viewport becomes mobile-sized while the modal is open
-  // (e.g. rotating a device or resizing a window), close it rather than let
-  // it keep rendering on a mobile viewport.
-  useEffect(() => {
-    if (isOpen && isMobile) setIsOpen(false);
-  }, [isMobile, isOpen]);
-
-  // Esc to close (modal only)
+  // Esc to close
   useEffect(() => {
     if (!isOpen) return;
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
+  }, [isOpen]);
+
+  // Lock background scroll while open — on mobile especially, the page
+  // behind a `position: fixed` overlay can still rubber-band/scroll without
+  // this, fighting the overlay for the compositor.
+  useEffect(() => {
+    if (!isOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = original; };
   }, [isOpen]);
 
   return (
@@ -97,6 +89,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
           align-items: center;
           justify-content: center;
           padding: 16px;
+          overscroll-behavior: contain;
           animation: overlay-in 0.25s ease-out;
         }
         @keyframes overlay-in {
@@ -128,7 +121,16 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         }
 
         @media (max-width: 640px) {
-          .igihe-overlay { padding: 0; }
+          /* Full-bleed panel covers the overlay edge-to-edge on mobile, so
+             the overlay's own blur is never actually visible — just costly.
+             The panel drops its translucency + blur too (was double-blurring
+             with the overlay) in favor of a plain solid background, which is
+             the single biggest compositing cost cut for weaker mobile GPUs. */
+          .igihe-overlay {
+            padding: 0;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+          }
           .igihe-panel {
             border-radius: 0;
             height: 100vh;
@@ -136,6 +138,9 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
             max-height: 100vh;
             max-height: 100dvh;
             border: none;
+            background: var(--igihe-bg, #0d0f14);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
           }
         }
       `}</style>
@@ -143,7 +148,7 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
       {/* ── Floating trigger ── */}
       <button
         className="igihe-trigger"
-        onClick={openChat}
+        onClick={() => setIsOpen(true)}
         aria-label="Open AI news assistant"
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -154,14 +159,14 @@ export default function NewsAgent({ article }: { article?: NewsItem }) {
         <span className="igihe-trigger__pulse" />
       </button>
 
-      {/* ── Desktop modal (never mounted on mobile) ── */}
-      {isOpen && !isMobile && (
+      {/* ── Modal (desktop and mobile) ── */}
+      {isOpen && (
         <div className="igihe-overlay" onClick={e => { if (e.target === e.currentTarget) setIsOpen(false); }}>
           <div className="igihe-panel">
             <NewsAgentPanel
               article={article}
               active={isOpen}
-              variant="modal"
+              isMobile={isMobile}
               onClose={() => setIsOpen(false)}
             />
           </div>

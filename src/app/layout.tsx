@@ -4,7 +4,6 @@ import { Providers } from './providers';
 import { raleway } from '@/lib/fonts';
 import Header from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import ChromeVisibility from '@/components/layout/ChromeVisibility';
 import { initCacheCleanup } from '@/lib/cache/cleanup'
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics'
@@ -37,9 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
         
         <Providers>
-          <ChromeVisibility header={<Header />} footer={<Footer />}>
-            <main className="py-2">{children}</main>
-          </ChromeVisibility>
+          <Header />
+          <main className="py-2">{children}</main>
+          <Footer/>
         </Providers>
         <Script
           src="https://traffic.igihe.com/t.js"

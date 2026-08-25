@@ -8,12 +8,10 @@ import { ThemedText } from "../ThemedText";
 import { useNewsAgentChat } from "@/hooks/useNewsAgentChat";
 import type { ChatMessage } from "@/stores/chatStore";
 
-type Variant = "modal" | "page";
-
 interface NewsAgentPanelProps {
   article?: NewsItem;
   active: boolean;
-  variant: Variant;
+  isMobile: boolean;
   onClose: () => void;
 }
 
@@ -98,7 +96,7 @@ const ChatMessageBubble = memo(function ChatMessageBubble({
   );
 });
 
-export default function NewsAgentPanel({ article, active, variant, onClose }: NewsAgentPanelProps) {
+export default function NewsAgentPanel({ article, active, isMobile, onClose }: NewsAgentPanelProps) {
   const {
     isArticleMode,
     quickPrompts,
@@ -116,13 +114,7 @@ export default function NewsAgentPanel({ article, active, variant, onClose }: Ne
     handleInput,
     handleVoice,
     clear,
-  } = useNewsAgentChat(article, active);
-
-  const closeTitle = variant === "modal" ? "Close (Esc)" : "Back";
-  const closeIcon = variant === "modal" ? "✕" : "←";
-  const inputHint = variant === "modal"
-    ? "Enter to send · Shift+Enter for new line · Esc to close"
-    : "Enter to send · Shift+Enter for new line";
+  } = useNewsAgentChat(article, active, isMobile);
 
   return (
     <>
@@ -154,20 +146,6 @@ export default function NewsAgentPanel({ article, active, variant, onClose }: Ne
           background:#1076ba3d;
           flex-shrink: 0;
         }
-        .igihe-back-btn {
-          width: 34px; height: 34px;
-          border-radius: 8px;
-          border: none;
-          background: transparent;
-          color: var(--igihe-text);
-          cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 20px;
-          flex-shrink: 0;
-          margin: -4px 0;
-          transition: background 0.15s;
-        }
-        .igihe-back-btn:hover { background: var(--igihe-surface2); }
         .igihe-avatar {
           width: 42px; height: 42px;
           border-radius: 50%;
@@ -485,16 +463,13 @@ export default function NewsAgentPanel({ article, active, variant, onClose }: Ne
         @media (max-width: 640px) {
           .igihe-messages { padding: 16px 16px 12px; }
           .igihe-msg__body { max-width: 85%; }
+          /* Panel is full-bleed on mobile — clear the notch/status bar. */
+          .igihe-header { padding-top: max(18px, env(safe-area-inset-top)); }
         }
       `}</style>
 
       {/* Header */}
       <div className="igihe-header">
-        {variant === "page" && (
-          <button className="igihe-back-btn" onClick={onClose} aria-label="Back">
-            {closeIcon}
-          </button>
-        )}
         <div className="igihe-avatar">
           <Image src={"/assets/igiheIcon.png"} alt={""} height={30} width={30} />
           <span className="igihe-avatar__dot" />
@@ -514,15 +489,13 @@ export default function NewsAgentPanel({ article, active, variant, onClose }: Ne
           >
             ↺
           </button>
-          {variant === "modal" && (
-            <button
-              className="igihe-icon-btn"
-              title={closeTitle}
-              onClick={onClose}
-            >
-              {closeIcon}
-            </button>
-          )}
+          <button
+            className="igihe-icon-btn"
+            title="Close (Esc)"
+            onClick={onClose}
+          >
+            ✕
+          </button>
         </div>
       </div>
 
@@ -605,7 +578,7 @@ export default function NewsAgentPanel({ article, active, variant, onClose }: Ne
               : "↑"}
           </button>
         </div>
-        <div className="igihe-input-hint">{inputHint}</div>
+        <div className="igihe-input-hint">Enter to send · Shift+Enter for new line · Esc to close</div>
       </div>
     </>
   );

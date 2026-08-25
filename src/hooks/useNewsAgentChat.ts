@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NewsItem } from "@/types/fetchData";
-import { useResponsive } from "@/hooks/useResponsive";
 import { useChatStore, ChatMessage } from "@/stores/chatStore";
 import {
   AgentMessage,
@@ -19,13 +18,12 @@ import {
 const STREAM_FLUSH_MS = 100;
 
 /**
- * Shared chat logic for both the desktop modal and the mobile full-page view.
- * `active` gates the greeting/focus effects (modal: isOpen, page: always true).
- * Conversation + article context live in the Zustand store so they survive the
- * mobile hand-off from trigger tap -> /chat navigation, and viewport resizes.
+ * Chat logic for the NewsAgent modal (used on both desktop and mobile).
+ * `active` gates the greeting/focus effects and mirrors the modal's isOpen.
+ * Conversation + article context live in the Zustand store rather than local
+ * state so they survive a resize/remount without losing the conversation.
  */
-export function useNewsAgentChat(article: NewsItem | undefined, active: boolean) {
-  const { isMobile } = useResponsive();
+export function useNewsAgentChat(article: NewsItem | undefined, active: boolean, isMobile: boolean) {
   const isArticleMode = Boolean(article);
   const sourceSite = resolveSourceSite();
   const language = resolveLanguage(sourceSite);
@@ -78,10 +76,15 @@ export function useNewsAgentChat(article: NewsItem | undefined, active: boolean)
     bottomRef.current?.scrollIntoView({ behavior: loading ? "auto" : "smooth" });
   }, [messages, loading]);
 
-  // Focus input
+  // Focus input. Skipped on mobile — auto-focusing pops the keyboard open
+  // at the exact moment the panel is also mid-open-animation and the
+  // backdrop blur is compositing, piling up work right when the modal
+  // mounts. Desktop keeps the nice auto-focus convenience.
   useEffect(() => {
-    if (active) setTimeout(() => inputRef.current?.focus(), 350);
-  }, [active]);
+    if (!active || isMobile) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 350);
+    return () => clearTimeout(timer);
+  }, [active, isMobile]);
 
   // Typing phase cycle
   useEffect(() => {
@@ -174,7 +177,7 @@ export function useNewsAgentChat(article: NewsItem | undefined, active: boolean)
       flushPendingText();
       setLoading(false);
     }
-  }, [messages, loading, article, sourceSite, language, setMessages]);
+  }, [messages, loading, article, sourceSite, language, setMessages, isMobile]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
