@@ -1,10 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { NewsItem } from "@/types/fetchData";
 import Image from "next/image";
 import DOMPurify from "isomorphic-dompurify";
 import { ThemedText } from "../ThemedText";
 import { useNewsAgentChat } from "@/hooks/useNewsAgentChat";
+import type { ChatMessage } from "@/stores/chatStore";
 
 type Variant = "modal" | "page";
 
@@ -48,6 +50,53 @@ function TypingIndicator({ phase, phrases }: { phase: number; phrases: string[] 
 function formatTime(date: Date) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
+// Memoized so a streaming update (which touches only the last message) only
+// re-runs DOMPurify/markup parsing for that message, not the whole history.
+// Without this, every ~100ms flush during a response re-sanitized every
+// message in the conversation — cheap for a fresh chat, but it scales with
+// conversation length and was a real source of mobile slowdown/crashes on
+// longer sessions.
+const ChatMessageBubble = memo(function ChatMessageBubble({
+  message,
+  isFirst,
+  isLastStreaming,
+}: {
+  message: ChatMessage;
+  isFirst: boolean;
+  isLastStreaming: boolean;
+}) {
+  return (
+    <div>
+      {isFirst && (
+        <div className="igihe-divider" style={{ marginBottom: 20 }}>
+          {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+        </div>
+      )}
+      <div className={`igihe-msg ${message.role === "user" ? "igihe-msg--user" : ""}`}>
+        {message.role === "user" ?
+          <div className={`igihe-msg__avatar igihe-msg__avatar--user`}>
+            👤
+          </div> :
+          <div className={`igihe-msg__avatar igihe-msg__avatar--ai`}>
+            <Image src={"/assets/igiheIcon.png"} alt={""} height={18} width={18} />
+          </div>
+        }
+
+        <div className="igihe-msg__body">
+          <div
+            className={`igihe-msg__bubble ${message.role === "user" ? "igihe-msg__bubble--user" : "igihe-msg__bubble--ai"}`}
+          >
+            <ThemedText dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseCustomMarkup(message.text) || '') }} />
+            {isLastStreaming && <span className="igihe-cursor" />}
+          </div>
+
+          <div className="igihe-msg__time">{formatTime(message.timestamp)}</div>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 export default function NewsAgentPanel({ article, active, variant, onClose }: NewsAgentPanelProps) {
   const {
@@ -481,37 +530,12 @@ export default function NewsAgentPanel({ article, active, variant, onClose }: Ne
       <div className="igihe-messages">
 
         {messages.map((m, i) => (
-          <div key={m.id}>
-            {/* Date divider for first message */}
-            {i === 0 && (
-              <div className="igihe-divider" style={{ marginBottom: 20 }}>
-                {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
-              </div>
-            )}
-            <div className={`igihe-msg ${m.role === "user" ? "igihe-msg--user" : ""}`}>
-              {m.role === "user" ?
-                <div className={`igihe-msg__avatar igihe-msg__avatar--user`}>
-                  👤
-                </div> :
-                <div className={`igihe-msg__avatar igihe-msg__avatar--ai`}>
-                  <Image src={"/assets/igiheIcon.png"} alt={""} height={18} width={18} />
-                </div>
-              }
-
-              <div className="igihe-msg__body">
-                <div
-                  className={`igihe-msg__bubble ${m.role === "user" ? "igihe-msg__bubble--user" : "igihe-msg__bubble--ai"}`}
-                >
-                  <ThemedText dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseCustomMarkup(m.text) || '') }} />
-                  {loading && m.role === "assistant" && m.text.length > 0 && messages[messages.length - 1]?.id === m.id && (
-                    <span className="igihe-cursor" />
-                  )}
-                </div>
-
-                <div className="igihe-msg__time">{formatTime(m.timestamp)}</div>
-              </div>
-            </div>
-          </div>
+          <ChatMessageBubble
+            key={m.id}
+            message={m}
+            isFirst={i === 0}
+            isLastStreaming={loading && m.role === "assistant" && m.text.length > 0 && i === messages.length - 1}
+          />
         ))}
 
         {/* typing indicator only shown while assistant bubble is still empty */}

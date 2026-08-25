@@ -8,24 +8,37 @@ import { useChatStore } from "@/stores/chatStore";
 // Keeps a live viewport-height custom property so the page stays exactly the
 // visible height on iOS/Android when the on-screen keyboard opens/closes —
 // dvh alone doesn't track the keyboard reliably on iOS Safari.
+//
+// Only listens to visualViewport's "resize" (fires on keyboard open/close),
+// not "scroll" (fires continuously during panning/momentum scroll) — the
+// latter combined with a rapidly-mutating message list during streaming was
+// forcing a style recalc + reflow of the whole fixed-position page on every
+// tick, which is a plausible source of the renderer crashing on real devices.
+// rAF-coalesced so at most one write happens per frame.
 function useVisualViewportHeight() {
   useEffect(() => {
     const root = document.documentElement;
+    let raf = 0;
 
-    const setVvh = () => {
+    const applyVvh = () => {
+      raf = 0;
       const height = window.visualViewport?.height ?? window.innerHeight;
       root.style.setProperty("--vvh", `${height}px`);
     };
 
-    setVvh();
-    window.visualViewport?.addEventListener("resize", setVvh);
-    window.visualViewport?.addEventListener("scroll", setVvh);
-    window.addEventListener("resize", setVvh);
+    const scheduleVvh = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(applyVvh);
+    };
+
+    applyVvh();
+    window.visualViewport?.addEventListener("resize", scheduleVvh);
+    window.addEventListener("resize", scheduleVvh);
 
     return () => {
-      window.visualViewport?.removeEventListener("resize", setVvh);
-      window.visualViewport?.removeEventListener("scroll", setVvh);
-      window.removeEventListener("resize", setVvh);
+      if (raf) cancelAnimationFrame(raf);
+      window.visualViewport?.removeEventListener("resize", scheduleVvh);
+      window.removeEventListener("resize", scheduleVvh);
       root.style.removeProperty("--vvh");
     };
   }, []);

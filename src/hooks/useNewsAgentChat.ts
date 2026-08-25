@@ -67,9 +67,13 @@ export function useNewsAgentChat(article: NewsItem | undefined, active: boolean)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, messages.length, article]);
 
-  // Scroll to bottom
+  // Scroll to bottom. Instant (not smooth) while a response is actively
+  // streaming in: smooth-scroll animations were being re-queued on every
+  // ~100ms flush tick for the duration of the whole response, which is a
+  // tight loop WebKit handles poorly when the DOM is also mutating —
+  // a plausible cause of renderer instability on real mobile devices.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: loading ? "auto" : "smooth" });
   }, [messages, loading]);
 
   // Focus input
