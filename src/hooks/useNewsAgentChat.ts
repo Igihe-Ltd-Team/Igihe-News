@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NewsItem } from "@/types/fetchData";
+import { useResponsive } from "@/hooks/useResponsive";
 import { useChatStore, ChatMessage } from "@/stores/chatStore";
 import {
   AgentMessage,
@@ -24,6 +25,7 @@ const STREAM_FLUSH_MS = 100;
  * mobile hand-off from trigger tap -> /chat navigation, and viewport resizes.
  */
 export function useNewsAgentChat(article: NewsItem | undefined, active: boolean) {
+  const { isMobile } = useResponsive();
   const isArticleMode = Boolean(article);
   const sourceSite = resolveSourceSite();
   const language = resolveLanguage(sourceSite);
@@ -133,6 +135,12 @@ export function useNewsAgentChat(article: NewsItem | undefined, active: boolean)
     const queueAssistantText = (chunk: string) => {
       if (!chunk) return;
       pendingText += chunk;
+      // On mobile, skip the incremental re-renders entirely — accumulate
+      // silently and let the `finally` block's flushPendingText() below do
+      // one single flush once the full response has arrived. The typing
+      // indicator covers the wait, then the answer appears all at once.
+      // Desktop keeps the live character-by-character streaming.
+      if (isMobile) return;
       if (flushTimer) return;
       flushTimer = setTimeout(flushPendingText, STREAM_FLUSH_MS);
     };
