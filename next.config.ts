@@ -100,6 +100,20 @@ const nextConfig: NextConfig = {
     },
 
     {
+      source: '/news-sitemap.xml',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=300, s-maxage=300, stale-while-revalidate=600',
+        },
+        {
+          key: 'Content-Type',
+          value: 'application/xml',
+        },
+      ],
+    },
+
+    {
       source: '/robots.txt',
       headers: [
         {
@@ -114,7 +128,7 @@ const nextConfig: NextConfig = {
     },
 
     {
-      source: '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
+      source: '/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|news-sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
       headers: [
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'X-Frame-Options', value: 'SAMEORIGIN' },

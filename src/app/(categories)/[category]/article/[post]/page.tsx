@@ -9,6 +9,9 @@ import HydrateArticle from './HydrateArticle'
 import { Container } from 'react-bootstrap'
 import CustomSlider from '@/components/home/CustomSlider'
 import ServerSlotManager from '@/components/ads/ServerSlotManager'
+import NewsArticleJsonLd from '@/components/seo/NewsArticleJsonLd'
+
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://en.igihe.com').replace(/\/$/, '')
 
 interface PageProps {
   params: Promise<{ post: string, category: string }>
@@ -215,8 +218,11 @@ async function ArticleContent({
     notFound()
   }
 
+  const articleUrl = `${BASE_URL}/${category}/article/${slug}`
+
   return (
     <HydrateArticle article={postData} slug={slug}>
+      <NewsArticleJsonLd post={postData} url={articleUrl} />
 
       <div className='pb-md-4'>
         <Suspense fallback={null}>

@@ -360,18 +360,10 @@
 
 import { MetadataRoute } from 'next'
 import { ApiService } from '@/services/apiService'
-import { Category } from '@/types/fetchData'
+import { withTimeout, buildCategoryMap } from '@/lib/sitemapHelpers'
 
 const BASE_URL = 'https://en.igihe.com'
 const FETCH_TIMEOUT_MS = 15_000
-
-// Wraps any promise with a timeout
-function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>(resolve => setTimeout(() => resolve(fallback), ms)),
-  ])
-}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = []
@@ -396,19 +388,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 //   addTagPages(entries, tags)
 
   return entries
-}
-
-// ─── Category map ────────────────────────────────────────────────────────────
-
-async function buildCategoryMap(): Promise<Map<number, string>> {
-  try {
-    const { prefetchAllHomeData } = await import('@/lib/prefetch-home-data')
-    const data = await prefetchAllHomeData()
-    const categories: Category[] = data.categories || []
-    return new Map(categories.map(c => [c.id, c.slug]))
-  } catch {
-    return new Map()
-  }
 }
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────────

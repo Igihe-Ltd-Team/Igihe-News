@@ -17,7 +17,7 @@ export default function robots(): MetadataRoute.Robots {
         '/cdn-cgi/',
       ],
     },
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
     host: BASE_URL,
   }
 }
