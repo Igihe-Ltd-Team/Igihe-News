@@ -12,27 +12,109 @@ export async function generateMetadata() {
       template: '%s | IGIHE',
     },
     applicationName: 'IGIHE English',
-    keywords: [
-      'IGIHE',
-      'IGIHE English',
-      'English IGIHE',
-      'IGIHE News',
-      'Rwanda news',
-      'Africa news',
-      'East Africa news',
-      'Rwanda latest news',
-      'breaking news Rwanda',
-      'Rwanda politics',
-      'Rwanda business',
-      'Rwanda sports',
-      'Rwanda entertainment',
-      'Rwanda',
-      'Kigali',
-      'Africa',
-      'East Africa',
-    ],
-    description: 'IGIHE news brings you the latest and breaking news, trending topics, and discussions from all over the world.',
+    // keywords: [
+    //   'IGIHE',
+    //   'IGIHE English',
+    //   'English IGIHE',
+    //   'IGIHE News',
+    //   'Rwanda news',
+    //   'Africa news',
+    //   'East Africa news',
+    //   'Rwanda latest news',
+    //   'breaking news Rwanda',
+    //   'Rwanda politics',
+    //   'Rwanda business',
+    //   'Rwanda sports',
+    //   'Rwanda entertainment',
+    //   'Rwanda',
+    //   'Kigali',
+    //   'Africa',
+    //   'East Africa',
+    //   "paul kagame", 
+    //   "news",
+    //   "auto express", 
+    //   "Sport",
+    // ],
+    // description: 'IGIHE news brings you the latest and breaking news, trending topics, and discussions from all over the world.',
 
+
+
+    keywords: [
+  // Brand
+  'IGIHE',
+  'IGIHE English',
+  'IGIHE News',
+  'English News Rwanda',
+
+  // Rwanda News
+  'Rwanda news',
+  'Rwanda latest news',
+  'Rwanda breaking news',
+  'news in Rwanda',
+  'Rwanda current affairs',
+  'Rwanda today',
+  'Kigali news',
+
+  // Politics & Government
+  'Rwanda politics',
+  'Rwanda government',
+  'Rwanda president',
+  'Rwanda parliament',
+  'Rwanda public affairs',
+  'Rwanda political news',
+
+  // Business & Economy
+  'Rwanda business',
+  'Rwanda business news',
+  'Rwanda economy',
+  'Rwanda economic news',
+  'Rwanda investment',
+  'Rwanda finance',
+  'Kigali business',
+
+  // Africa & East Africa
+  'Africa news',
+  'African news',
+  'East Africa news',
+  'East African news',
+  'Africa breaking news',
+  'African politics',
+  'African business',
+
+  // Sports
+  'Rwanda sports',
+  'Rwanda sports news',
+  'Rwanda football',
+  'Rwanda football news',
+  'African football',
+  'East Africa sports',
+
+  // Technology
+  'Rwanda technology',
+  'Rwanda tech news',
+  'Africa technology',
+  'African technology news',
+  'digital Rwanda',
+  'technology news',
+
+  // Entertainment & Culture
+  'Rwanda entertainment',
+  'Rwanda entertainment news',
+  'Rwanda culture',
+  'Rwandan culture',
+  'Kigali entertainment',
+  'African entertainment',
+
+  // International
+  'international news',
+  'world news',
+  'global news',
+  'latest international news',
+  'breaking world news'
+],
+
+description:
+  'IGIHE English brings you the latest news from Rwanda, Africa and around the world, covering politics, business, sports, technology, entertainment, culture and current affairs.',  
     authors: [
       {
         name: 'IGIHE',
