@@ -8,7 +8,6 @@ import { initCacheCleanup } from '@/lib/cache/cleanup'
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import { Suspense } from 'react';
-import { resetRegistry } from '@/lib/postRegistry';
 
 export const metadata = {
   title: 'IGIHE',
@@ -16,8 +15,10 @@ export const metadata = {
 };
 
 if (typeof window === 'undefined') {
-  initCacheCleanup()
-  // resetRegistry()
+  // Never leave this floating unhandled — Node treats an unhandled promise
+  // rejection as a fatal error and kills the whole process (all in-flight
+  // requests for every visitor), not just this one background task.
+  initCacheCleanup().catch((error) => console.error('[layout] Cache cleanup init failed:', error))
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
