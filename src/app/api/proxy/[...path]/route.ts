@@ -115,7 +115,8 @@ export async function GET(
   context: { params: Promise<{ path: string[] }> }
 ) {
   const startTime = Date.now()
-  
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
   try {
     // AWAIT the params FIRST
     const { path } = await context.params
@@ -238,7 +239,7 @@ export async function GET(
     
     // Fetch with timeout and optimized headers
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+    timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
     
     const response = await fetch(wordpressUrl, {
       headers: {
@@ -253,6 +254,11 @@ export async function GET(
     clearTimeout(timeoutId)
 
     if (!response.ok) {
+      const status = response.status
+      // Drain the body so undici releases the connection back to the pool
+      // immediately instead of waiting on GC.
+      await response.body?.cancel().catch(() => {})
+
       // Fallback to mock data in development
       if (process.env.NODE_ENV === 'development') {
         const pathKey = path.join('/')
@@ -261,17 +267,17 @@ export async function GET(
           const headers = new Headers()
           headers.set('X-Cache', 'MOCK-FALLBACK')
           headers.set('X-Response-Time', `${Date.now() - startTime}ms`)
-          
+
           return new NextResponse(JSON.stringify(mockResponse), {
             status: 200,
             headers: headers
           })
         }
       }
-      
+
       return NextResponse.json(
-        { error: 'WordPress API error', status: response.status },
-        { status: response.status }
+        { error: 'WordPress API error', status: status },
+        { status: status }
       )
     }
 
@@ -318,8 +324,9 @@ export async function GET(
     })
 
   } catch (error: any) {
+    if (timeoutId) clearTimeout(timeoutId)
     const isTimeout = error instanceof Error && error.name === 'AbortError'
-    
+
     // Fallback to mock data on error - WITHOUT accessing context.params again
     if (process.env.NODE_ENV === 'development') {
       // Try to get the path from the request URL instead

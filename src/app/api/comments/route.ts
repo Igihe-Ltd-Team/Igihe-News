@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       console.error(`Comments backend returned ${response.status}`);
-      
+      await response.body?.cancel().catch(() => {});
+
       return NextResponse.json(
         {
           nodes: [
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
+      await response.body?.cancel().catch(() => {});
       return NextResponse.json({ error: 'Comment service unavailable' }, { status: 502 });
     }
 

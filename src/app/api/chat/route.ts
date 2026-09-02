@@ -201,6 +201,7 @@ export async function POST(req: NextRequest) {
             endpoint,
             aiBase: AI_API_URL,
           });
+          await aiRes.body?.cancel().catch(() => {});
           aiRes = await fetchAi(endpoint, payload, DEFAULT_AI_API_URL);
         }
 
@@ -210,6 +211,7 @@ export async function POST(req: NextRequest) {
             endpoint,
             aiBase: AI_API_URL,
           });
+          await aiRes.body?.cancel().catch(() => {});
           controller.enqueue(
             sseText(
               encoder,

@@ -2,7 +2,6 @@ import { Home } from './home/home'
 
 
 export const revalidate = 300
-export const dynamic = 'force-dynamic'
 
 export async function generateMetadata() {
   return {

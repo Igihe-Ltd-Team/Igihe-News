@@ -126,6 +126,10 @@ export async function fetchWithTimeout(
 
       if (!response.ok) {
         const status = response.status
+        // Drain the body so undici releases the connection back to the pool
+        // immediately instead of waiting on GC — left unread, a discarded
+        // Response can hold its socket (and the pool slot) for a while.
+        await response.body?.cancel().catch(() => {})
         const shouldRetry =
           attempt < maxRetries &&
           (status === 429 || status >= 500 || status === 408 || status === 0)
