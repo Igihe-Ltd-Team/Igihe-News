@@ -8,7 +8,7 @@ const TYPE_MAPPING: Record<string, string> = {
   announcement: 'announcement',
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname
 
   if (pathname === '/spip.php') {
@@ -54,7 +54,7 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next()
 }
 
-// Only run on legacy .html URLs — keeps all normal page requests free of middleware overhead
+// Only run on legacy .html URLs — keeps all normal page requests free of proxy overhead
 export const config = {
   matcher: ['/(.*\\.html)','/spip.php'],
   

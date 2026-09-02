@@ -1,10 +1,15 @@
 // ─── API Client ──────────────────────────────────────────────────────────────
-// Low-level HTTP helpers: fetch with timeout, retry, and exponential backoff.
+// Low-level HTTP helpers: fetch with timeout, retry+backoff, and a circuit
+// breaker that stops retrying once the upstream is confirmed down.
 
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_WORDPRESS_API_URL!,
   timeout: 20_000,
   retryAttempts: 3,
+  // After this many fully-exhausted-retry failures in a row, stop attempting
+  // requests entirely for circuitCooldownMs instead of retrying each one.
+  circuitFailureThreshold: 5,
+  circuitCooldownMs: 30_000,
 } as const
 
 /**
@@ -36,14 +41,66 @@ export class ApiError extends Error {
   }
 }
 
+// ─── Circuit breaker ─────────────────────────────────────────────────────────
+// One process-wide breaker for the WordPress origin (this client only ever
+// talks to one). Closed: requests flow normally. Open: every request fails
+// immediately with no fetch attempted, until the cooldown elapses. Half-open:
+// exactly one trial request is let through to check recovery — everything
+// else keeps failing fast until that trial settles.
+
+type CircuitState = 'closed' | 'open' | 'half-open'
+
+let circuitState: CircuitState = 'closed'
+let circuitFailureCount = 0
+let circuitOpenedAt = 0
+
+function assertCircuitClosed(): void {
+  if (circuitState === 'closed') return
+
+  if (circuitState === 'open') {
+    if (Date.now() - circuitOpenedAt < API_CONFIG.circuitCooldownMs) {
+      throw new ApiError('WordPress API unavailable — failing fast (circuit open)', 503, true)
+    }
+    circuitState = 'half-open' // cooldown elapsed — this call becomes the trial
+    return
+  }
+
+  // half-open: a trial request is already in flight, keep failing fast
+  throw new ApiError('WordPress API unavailable — failing fast (circuit open)', 503, true)
+}
+
+function recordCircuitSuccess(): void {
+  if (circuitState !== 'closed') {
+    console.warn('[apiClient] Circuit breaker CLOSED — WordPress API recovered')
+  }
+  circuitFailureCount = 0
+  circuitState = 'closed'
+}
+
+function recordCircuitFailure(): void {
+  circuitFailureCount++
+  if (circuitState === 'half-open' || circuitFailureCount >= API_CONFIG.circuitFailureThreshold) {
+    if (circuitState !== 'open') {
+      console.warn(
+        `[apiClient] Circuit breaker OPEN — WordPress API unresponsive after ${circuitFailureCount} failures, failing fast for ${API_CONFIG.circuitCooldownMs / 1000}s`
+      )
+    }
+    circuitState = 'open'
+    circuitOpenedAt = Date.now()
+  }
+}
+
 /**
- * Fetch with automatic timeout, retry, and exponential backoff.
+ * Fetch with automatic timeout, retry, exponential backoff, and a circuit
+ * breaker that fails fast once the upstream is confirmed down.
  */
 export async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
   timeout: number = API_CONFIG.timeout
 ): Promise<Response> {
+  assertCircuitClosed()
+
   let lastError: Error | null = null
   const maxRetries = API_CONFIG.retryAttempts
   const method = options.method?.toUpperCase() || 'GET'
@@ -82,6 +139,7 @@ export async function fetchWithTimeout(
         throw new ApiError(`HTTP error! status: ${status}`, status, false)
       }
 
+      recordCircuitSuccess()
       return response
     } catch (error: any) {
       clearTimeout(timer)
@@ -91,6 +149,8 @@ export async function fetchWithTimeout(
         await backoff(attempt)
         continue
       }
+
+      recordCircuitFailure()
 
       const isTimeout =
         controller.signal.aborted ||
