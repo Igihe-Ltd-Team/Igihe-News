@@ -62,7 +62,6 @@ export function OptimizedImage({
   const normalizedHeight = Number(height) > 0 ? Number(height) : undefined
   const minimumHeight = `${Math.max(normalizedHeight ?? 0, 100)}px`
   const isAnimatedGif = /\.gif(?:$|[?#])/i.test(imageSrc)
-  const isLegacyImageHost = imageSrc.startsWith('https://en-images.igihe.com/') || imageSrc.startsWith('https://cdn.igihe.com/')
   const hasAspectRatio = aspectRatio !== 'unset'
 
 const effectiveHeight = height && height > 0 ? height : undefined
@@ -102,9 +101,9 @@ const effectiveHeight = height && height > 0 ? height : undefined
 )}
 
 
-      {isAnimatedGif || isLegacyImageHost ? (
-        // Next's optimizer cannot optimize animated/legacy images and emits
-        // misleading fill/sizes warnings for them, so serve them directly.
+      {isAnimatedGif ? (
+        // Next's optimizer serves animated images as-is anyway (it can't
+        // resize/recompress without breaking the animation), so skip it.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           ref={imgRef}
