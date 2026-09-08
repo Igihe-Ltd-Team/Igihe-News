@@ -100,11 +100,13 @@ const nextConfig: NextConfig = {
     },
 
     {
+      // Google News needs new articles to appear within minutes — keep this
+      // in sync with the `revalidate` export in app/news-sitemap.xml/route.ts.
       source: '/news-sitemap.xml',
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, max-age=300, s-maxage=300, stale-while-revalidate=600',
+          value: 'public, max-age=60, s-maxage=60, stale-while-revalidate=120',
         },
         {
           key: 'Content-Type',

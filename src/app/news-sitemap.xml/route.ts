@@ -3,7 +3,8 @@ import { NewsItem } from '@/types/fetchData'
 import { buildCategoryMap, withTimeout } from '@/lib/sitemapHelpers'
 import { stripHtml } from '@/lib/utils'
 
-export const revalidate = 300
+// Keep in sync with the /news-sitemap.xml Cache-Control rule in next.config.ts.
+export const revalidate = 60
 
 const BASE_URL = 'https://en.igihe.com'
 const FETCH_TIMEOUT_MS = 15_000
@@ -52,9 +53,13 @@ function buildUrlEntry(post: NewsItem, categorySlug: string): string {
   const loc = `${BASE_URL}/${categorySlug}/article/${post.slug}`
   const title = escapeXml(stripHtml(post.title?.rendered || ''))
   const publicationDate = post.date_gmt ? `${post.date_gmt}Z` : post.date
+  // Doesn't affect Google News (it reads news:publication_date), but helps
+  // regular Search notice when a published article gets revised.
+  const lastmod = post.modified_gmt ? `${post.modified_gmt}Z` : publicationDate
 
   return `  <url>
     <loc>${escapeXml(loc)}</loc>
+    <lastmod>${lastmod}</lastmod>
     <news:news>
       <news:publication>
         <news:name>IGIHE</news:name>
