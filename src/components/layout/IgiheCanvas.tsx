@@ -25,7 +25,7 @@ export default function IgiheCanvas({ categories, showHome, btnVariant }: menuIt
 
     return (
         <div className="justify-content-center">
-            <Button className='custom-menu-button' variant={btnVariant} onClick={handleShow}>
+            <Button className='custom-menu-button' variant={btnVariant} onClick={handleShow} aria-label="Open menu">
                 <span className="navbar-toggler-icon">
                     <svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M21.6031 9.625H8.55076C7.99168 9.625 7.53845 9.99325 7.53845 10.4475V10.5525C7.53845 11.0068 7.99168 11.375 8.55076 11.375H21.6031C22.1621 11.375 22.6154 11.0068 22.6154 10.5525V10.4475C22.6154 9.99325 22.1621 9.625 21.6031 9.625Z" fill="#fff" />

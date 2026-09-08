@@ -20,6 +20,8 @@ describe('WordPress revalidation planning', () => {
       { path: '/' },
       { path: '/business' },
       { path: '/business/article/breaking-news' },
+      { path: '/sitemap.xml' },
+      { path: '/news-sitemap.xml' },
     ]))
     expect(plan.warm).toEqual(expect.arrayContaining(['article', 'categories', 'home']))
   })
@@ -40,7 +42,10 @@ describe('WordPress revalidation planning', () => {
     expect(plan.paths).toEqual(expect.arrayContaining([
       { path: '/videos' },
       { path: '/videos/interview' },
+      { path: '/sitemap.xml' },
     ]))
+    // Only /sitemap.xml lists videos — /news-sitemap.xml is posts-only (Google News).
+    expect(plan.paths).not.toContainEqual({ path: '/news-sitemap.xml' })
   })
 
   it('uses a broad refresh when the content type is absent', () => {

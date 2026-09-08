@@ -43,7 +43,11 @@ export function buildRevalidationPlan(change: WordPressChange): RevalidationPlan
   const type = normalizeWordPressType(change.type)
   const categories = unique([change.category, ...(change.categories || [])].filter(Boolean) as string[])
   const cachePatterns = ['search:', 'popular:']
-  const paths: RevalidationPlan['paths'] = [{ path: '/' }]
+  // Sitemaps are keyed off /sitemap.ts and news-sitemap.xml's own data-fetch
+  // cache, not off any of the paths below — nothing was ever telling them to
+  // refresh when content changed, so they only ever caught up once their own
+  // background revalidation window happened to pass.
+  const paths: RevalidationPlan['paths'] = [{ path: '/' }, { path: '/sitemap.xml' }]
   const warm: RevalidationPlan['warm'] = ['home']
 
   const addContentPaths = () => {
@@ -64,6 +68,7 @@ export function buildRevalidationPlan(change: WordPressChange): RevalidationPlan
       }
       warm.push('categories')
       addContentPaths()
+      paths.push({ path: '/news-sitemap.xml' })
       break
     case 'ads':
       cachePatterns.push('slots:')

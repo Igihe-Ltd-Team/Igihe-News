@@ -33,6 +33,7 @@ export default function NewsSkeleton({count = 6}:SkeletonProps) {
                 <button
                   className="btn btn-primary disabled placeholder col-6"
                   aria-disabled="true"
+                  aria-hidden="true"
                 ></button>
               </div>
             </div>
