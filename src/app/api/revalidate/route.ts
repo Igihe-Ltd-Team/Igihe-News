@@ -2,7 +2,11 @@ export const runtime = 'nodejs'
 
 import { prefetchHomeData } from '@/lib/prefetch-home-data'
 import { resetRegistry } from '@/lib/postRegistry'
-import { buildRevalidationPlan, WordPressChange } from '@/lib/wordpressRevalidation'
+import {
+  buildRevalidationPlan,
+  normalizeRevalidateSearchParams,
+  WordPressChange,
+} from '@/lib/wordpressRevalidation'
 import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
 import { proxyCache } from '@/lib/proxyCache'
@@ -36,9 +40,13 @@ async function notifyAskIgihe(change: WordPressChange): Promise<void> {
   }
 }
 
+function getSearchParams(request: NextRequest): URLSearchParams {
+  return normalizeRevalidateSearchParams(request.nextUrl.searchParams)
+}
+
 function isAuthorized(request: NextRequest): boolean {
   const headerSecret = request.headers.get('x-revalidate-secret')
-  const querySecret = request.nextUrl.searchParams.get('secret')
+  const querySecret = getSearchParams(request).get('secret')
   return Boolean(SECRET && (headerSecret === SECRET || querySecret === SECRET))
 }
 
@@ -74,7 +82,11 @@ async function applyWordPressChange(change: WordPressChange) {
   resetRegistry()
   if (plan.type === 'ads' || plan.type === 'unknown') {
     ApiService.clearAdsCache()
-    proxyCache.clearByPattern('advertisement')
+  }
+  if (plan.proxyPatterns === 'all') {
+    proxyCache.clear()
+  } else {
+    plan.proxyPatterns.forEach(pattern => proxyCache.clearByPattern(pattern))
   }
 
   await Promise.all(plan.cachePatterns.map(pattern => clearCache(pattern)))
@@ -111,6 +123,7 @@ export async function POST(request: NextRequest) {
       revalidated: true,
       change: { ...change, type: result.plan.type },
       cachePatterns: result.plan.cachePatterns,
+      proxyPatterns: result.plan.proxyPatterns,
       paths: result.plan.paths.map(item => item.path),
       warmed: result.warmed,
       timestamp: new Date().toISOString(),
@@ -126,13 +139,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const categories = request.nextUrl.searchParams.getAll('categories')
-  const id = request.nextUrl.searchParams.get('id')
+  const params = getSearchParams(request)
+  const categories = params.getAll('categories')
+  const id = params.get('id')
   const change: WordPressChange = {
-    slug: request.nextUrl.searchParams.get('slug') ?? undefined,
+    slug: params.get('slug') ?? undefined,
     id: id ? Number(id) : undefined,
-    type: request.nextUrl.searchParams.get('type') ?? undefined,
-    category: request.nextUrl.searchParams.get('category') ?? undefined,
+    type: params.get('type') ?? undefined,
+    category: params.get('category') ?? undefined,
     categories: categories.length ? categories : undefined,
   }
 
@@ -145,6 +159,7 @@ export async function GET(request: NextRequest) {
       revalidated: true,
       change: { ...change, type: result.plan.type },
       cachePatterns: result.plan.cachePatterns,
+      proxyPatterns: result.plan.proxyPatterns,
       paths: result.plan.paths.map(item => item.path),
       warmed: result.warmed,
       timestamp: new Date().toISOString(),
