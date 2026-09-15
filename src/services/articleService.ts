@@ -134,7 +134,8 @@ export async function fetchArticles(params?: {
   after?: string
   before?: string
   author?: number
-  bylines?:number
+  /** One byline term id, or several (merged author aliases) — OR-ed by WordPress. */
+  bylines?: number | number[]
   user?: number
   tags?: number[]
   offset?:number
@@ -162,7 +163,10 @@ export async function fetchArticles(params?: {
   if (params?.before) queryParams.before = params.before
   if (params?.author) queryParams.author = params.author
   if (params?.user) queryParams.user = params.user
-  if (params?.bylines) queryParams.byline = params.bylines
+  if (params?.bylines) {
+    const ids = Array.isArray(params.bylines) ? params.bylines : [params.bylines]
+    if (ids.length) queryParams.byline = ids.join(',')
+  }
   if (params?.offset) queryParams.offset = params.offset
   
 

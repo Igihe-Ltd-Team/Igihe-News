@@ -86,15 +86,22 @@ const nextConfig: NextConfig = {
       headers: [{ key: "Content-Type", value: "application/json" }],
     },
     {
+      // Sitemap files are regenerated on publish (src/lib/sitemap); keep the
+      // CDN TTL short so a new article reaches crawlers within minutes.
+      source: '/sitemap-:name(index|pages|categories|videos|authors|articles-\\d+).xml',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=300, s-maxage=600, stale-while-revalidate=3600',
+        },
+      ],
+    },
+    {
       source: '/sitemap.xml',
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
-        },
-        {
-          key: 'Content-Type',
-          value: 'application/xml',
+          value: 'public, max-age=300, s-maxage=600, stale-while-revalidate=3600',
         },
       ],
     },
@@ -130,7 +137,7 @@ const nextConfig: NextConfig = {
     },
 
     {
-      source: '/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|news-sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
+      source: '/((?!_next/static|_next/image|favicon.ico|sitemap[^/]*\\.xml|sitemaps/|news-sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
       headers: [
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -146,6 +153,15 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
   return [
+    // Public sitemap URLs -> the single route handler in app/sitemaps/[name].
+    // Keep /sitemap.xml working: it is the URL already submitted to Search
+    // Console and now serves the index.
+    { source: "/sitemap-index.xml", destination: "/sitemaps/index" },
+    { source: "/sitemap.xml", destination: "/sitemaps/index" },
+    {
+      source: "/sitemap-:name(pages|categories|videos|authors|articles-\\d+).xml",
+      destination: "/sitemaps/:name",
+    },
     {
       source: "/.well-known/assetlinks.json",
       destination: "/api/assetlinks",

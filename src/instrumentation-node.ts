@@ -19,3 +19,12 @@ process.on('uncaughtException', (error) => {
   console.error('[uncaughtException]', error)
   process.exit(1)
 })
+
+// Keeps the XML sitemaps regenerating on their own (publish webhooks are
+// debounced into runs, plus an hourly catch-up and a daily full re-sync).
+// Enabled in production by default; SITEMAP_SCHEDULER=on|off overrides.
+import('./lib/sitemap/scheduler')
+  .then(({ startSitemapScheduler }) => {
+    if (startSitemapScheduler()) console.log('[sitemap] scheduler started')
+  })
+  .catch((error) => console.error('[sitemap] scheduler failed to start:', error))

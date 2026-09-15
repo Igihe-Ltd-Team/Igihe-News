@@ -1,5 +1,6 @@
 // src/app/robots.ts
 import { MetadataRoute } from 'next'
+import { ROBOTS_DISALLOW, ROBOTS_SITEMAP_PATHS } from '@/lib/sitemap/robotsRules'
 
 const BASE_URL = 'https://en.igihe.com'
 
@@ -8,16 +9,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: [
-        '/api/',
-        '/admin/',
-        '/private/',
-        '/*?*', // Block URLs with query parameters
-        '/_next/',
-        '/cdn-cgi/',
-      ],
+      disallow: ROBOTS_DISALLOW,
     },
-    sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
+    // The index references every child sitemap (pages, categories, articles,
+    // videos, authors) plus the news sitemap; the news sitemap is listed on
+    // its own as well so Google News picks it up directly.
+    sitemap: ROBOTS_SITEMAP_PATHS.map(path => `${BASE_URL}${path}`),
     host: BASE_URL,
   }
 }

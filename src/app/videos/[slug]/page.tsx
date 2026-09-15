@@ -2,6 +2,8 @@ import { stripHtml } from "@/lib/utils";
 import { Metadata } from "next";
 import VideoContents from "@/components/videos/VideoContents";
 
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://en.igihe.com').replace(/\/$/, '')
+
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -112,14 +114,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }),
       
       alternates: {
-        canonical: postData.link
+        // Our own URL — never postData.link, which is the WordPress origin
+        // and would tell crawlers the canonical page lives off-site.
+        canonical: `${BASE_URL}/videos/${slug}`
       },
       
       openGraph: {
         type: 'article',
         title,
         description,
-        url: postData.link,
+        url: `${BASE_URL}/videos/${slug}`,
         siteName: 'IGIHE',
         locale: 'en_US',
         images: [{

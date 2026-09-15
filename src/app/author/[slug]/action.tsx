@@ -1,33 +1,34 @@
 'use server';
 
 import { ApiService } from "@/services/apiService";
+import { getAuthorBylineIds } from "@/lib/sitemap/authors";
 
-export async function fetchArticlesAuthor(author: number, page: number) {
-    console.log('author', author)
+export async function fetchArticlesAuthor(author: number | number[], page: number) {
     return await ApiService.fetchArticles({
-        // author: author,
-        bylines:author,
+        bylines: author,
         page
     }).catch(() => null);
 }
 
-export async function getAuthor(slug: string, page: number = 1) { 
+export async function getAuthor(slug: string, page: number = 1) {
     try {
         const author = await ApiService.fetchAuthorBySlug(slug)
 
-        if (!author) return null 
+        if (!author) return null
+
+        // Merged spellings of the same byline (src/data/authorAliases.ts)
+        // contribute their articles to the canonical author page.
+        const bylineIds = getAuthorBylineIds(slug, author.id)
 
         const posts = await ApiService.fetchArticles({
-            // user: author.id,
-            bylines:author.id,
+            bylines: bylineIds,
             page,
-            per_page:10
+            per_page: 10
         })
 
-        return { author, postsData: posts }
+        return { author, bylineIds, postsData: posts }
     } catch (error) {
         console.log('❌ Fetch error:', error)
         return null
     }
 }
-

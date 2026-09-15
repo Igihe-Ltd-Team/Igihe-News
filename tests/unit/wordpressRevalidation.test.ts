@@ -24,11 +24,24 @@ describe('WordPress revalidation planning', () => {
       { path: '/' },
       { path: '/business' },
       { path: '/business/article/breaking-news' },
-      { path: '/sitemap.xml' },
       { path: '/news-sitemap.xml' },
     ]))
+    // The XML sitemaps are regenerated files, not cached pages.
+    expect(plan.paths).not.toContainEqual({ path: '/sitemap.xml' })
+    expect(plan.sitemaps).toEqual({ regenerate: true, removals: [] })
     expect(plan.proxyPatterns).toEqual(expect.arrayContaining(['posts:', 'popular-posts:']))
     expect(plan.warm).toEqual(expect.arrayContaining(['article', 'categories', 'home']))
+  })
+
+  it('tells the sitemap job which article left the site', () => {
+    expect(buildRevalidationPlan({ type: 'post', slug: 'gone', id: 7, action: 'trash' }).sitemaps)
+      .toEqual({ regenerate: true, removals: [{ type: 'post', slug: 'gone', id: 7 }] })
+    expect(buildRevalidationPlan({ type: 'opinion', slug: 'draft-again', status: 'draft' }).sitemaps)
+      .toEqual({ regenerate: true, removals: [{ type: 'opinion', slug: 'draft-again', id: undefined }] })
+    expect(buildRevalidationPlan({ type: 'igh-yt-videos', id: 42, action: 'delete' }).sitemaps)
+      .toEqual({ regenerate: true, removals: [{ type: 'video', slug: undefined, id: 42 }] })
+    expect(buildRevalidationPlan({ type: 'advertisement' }).sitemaps).toEqual({ regenerate: false, removals: [] })
+    expect(buildRevalidationPlan({ type: 'tag', slug: 'rwanda' }).sitemaps).toEqual({ regenerate: false, removals: [] })
   })
 
   it('revalidates dynamic pages through their route-group-qualified app paths', () => {
@@ -69,10 +82,10 @@ describe('WordPress revalidation planning', () => {
     expect(plan.paths).toEqual(expect.arrayContaining([
       { path: '/videos' },
       { path: '/videos/interview' },
-      { path: '/sitemap.xml' },
     ]))
-    // Only /sitemap.xml lists videos — /news-sitemap.xml is posts-only (Google News).
+    // Videos live in sitemap-videos.xml (regenerated) — /news-sitemap.xml is articles-only (Google News).
     expect(plan.paths).not.toContainEqual({ path: '/news-sitemap.xml' })
+    expect(plan.sitemaps.regenerate).toBe(true)
   })
 
   it('uses a broad refresh when the content type is absent', () => {
@@ -86,9 +99,9 @@ describe('WordPress revalidation planning', () => {
       { path: CATEGORY_PAGE_ROUTE, type: 'page' },
       { path: ARTICLE_PAGE_ROUTE, type: 'page' },
       { path: TAG_PAGE_ROUTE, type: 'page' },
-      { path: '/sitemap.xml' },
       { path: '/news-sitemap.xml' },
     ]))
+    expect(plan.sitemaps.regenerate).toBe(true)
     expect(plan.warm).toEqual(expect.arrayContaining(['categories', 'ads', 'videos', 'home']))
   })
 

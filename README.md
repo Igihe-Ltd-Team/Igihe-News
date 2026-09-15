@@ -63,6 +63,11 @@ not accepted.
 - WordPress content updates must call `/api/revalidate` with
   `x-revalidate-secret`. The endpoint clears only affected caches, refreshes
   data from WordPress, and warms the homepage before returning.
+- XML sitemaps are generated files under `.cache/sitemaps/` and regenerate on
+  publish (debounced), hourly, and with a daily full re-sync. Submit
+  `https://en.igihe.com/sitemap-index.xml` in Search Console. `yarn sitemap
+  status` shows the last run and any excluded URLs; see
+  [docs/sitemaps.md](docs/sitemaps.md).
 - Alert on elevated 5xx rates, WordPress latency, build failures, and health
   endpoint failures.
 - Keep at least one previous build artifact available for rollback.

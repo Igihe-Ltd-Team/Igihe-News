@@ -10,6 +10,7 @@ import {
 import { ApiService } from '@/services/apiService'
 import { clearCache } from '@/services/cacheManager'
 import { proxyCache } from '@/lib/proxyCache'
+import { requestSitemapRegeneration } from '@/lib/sitemap/scheduler'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -99,6 +100,14 @@ async function applyWordPressChange(change: WordPressChange) {
   }
   plan.paths.forEach(item => revalidatePath(item.path, item.type))
 
+  // Sitemap files are rebuilt in the background (debounced) so lastmod keeps
+  // tracking real publish/update times; this never delays the webhook.
+  if (plan.sitemaps.regenerate) {
+    requestSitemapRegeneration(`webhook:${plan.type}${change.slug ? `:${change.slug}` : ''}`, {
+      removals: plan.sitemaps.removals,
+    })
+  }
+
   return { plan, warmed }
 }
 
@@ -125,6 +134,7 @@ export async function POST(request: NextRequest) {
       cachePatterns: result.plan.cachePatterns,
       proxyPatterns: result.plan.proxyPatterns,
       paths: result.plan.paths.map(item => item.path),
+      sitemaps: result.plan.sitemaps,
       warmed: result.warmed,
       timestamp: new Date().toISOString(),
     })
@@ -148,6 +158,8 @@ export async function GET(request: NextRequest) {
     type: params.get('type') ?? undefined,
     category: params.get('category') ?? undefined,
     categories: categories.length ? categories : undefined,
+    action: params.get('action') ?? undefined,
+    status: params.get('status') ?? undefined,
   }
 
   try {
@@ -161,6 +173,7 @@ export async function GET(request: NextRequest) {
       cachePatterns: result.plan.cachePatterns,
       proxyPatterns: result.plan.proxyPatterns,
       paths: result.plan.paths.map(item => item.path),
+      sitemaps: result.plan.sitemaps,
       warmed: result.warmed,
       timestamp: new Date().toISOString(),
     })

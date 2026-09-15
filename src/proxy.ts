@@ -1,4 +1,5 @@
 import { fetchPostByIdLookUp, fetchPostBySlugLookUp } from '@/services/apiService'
+import { resolveAuthorSlug } from '@/lib/sitemap/authors'
 import { NextRequest, NextResponse } from 'next/server'
 
 const TYPE_MAPPING: Record<string, string> = {
@@ -10,6 +11,18 @@ const TYPE_MAPPING: Record<string, string> = {
 
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname
+
+  // Duplicate byline spellings (src/data/authorAliases.ts) get a real 301
+  // here, before the page starts streaming — a redirect thrown inside the
+  // page would arrive as a 200 with a client-side redirect.
+  if (pathname.startsWith('/author/')) {
+    const slug = decodeURIComponent(pathname.slice('/author/'.length).replace(/\/+$/, ''))
+    const canonical = resolveAuthorSlug(slug)
+    if (slug && canonical !== slug) {
+      return NextResponse.redirect(new URL(`/author/${canonical}`, req.url), 301)
+    }
+    return NextResponse.next()
+  }
 
   if (pathname === '/spip.php') {
     const rawUrl = req.url
@@ -54,8 +67,8 @@ export async function proxy(req: NextRequest) {
   return NextResponse.next()
 }
 
-// Only run on legacy .html URLs — keeps all normal page requests free of proxy overhead
+// Only run on legacy .html URLs and author archives — keeps all other page
+// requests free of proxy overhead
 export const config = {
-  matcher: ['/(.*\\.html)','/spip.php'],
-  
+  matcher: ['/(.*\\.html)', '/spip.php', '/author/:slug+'],
 }

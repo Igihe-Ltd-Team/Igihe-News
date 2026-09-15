@@ -17,7 +17,8 @@ import { fetchArticlesAuthor } from './action'
 interface AuthorPageProps {
     author: Byline
     initialPosts: NewsItem[]
-    authorID: number
+    /** Byline term id(s) whose articles this page lists (aliases merged in). */
+    authorID: number | number[]
     initialPageInfo: {
         currentPage: number;
         lastPage: number;
