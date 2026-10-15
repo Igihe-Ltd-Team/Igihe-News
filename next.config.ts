@@ -1,19 +1,40 @@
 import type { NextConfig } from "next";
+const NARRATOR = 'https://ai.inoventyk.rw'
+
 
 const contentSecurityPolicy = [
+
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'self'",
   "object-src 'none'",
   `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://traffic.igihe.com https://static.cloudflareinsights.com`,
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
+  "font-src 'self' data: https://cdn.jsdelivr.net",
   "connect-src 'self' https:",
+  `media-src 'self' blob: ${NARRATOR}`,          // <-- add this line
   "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://www.instagram.com https://w.soundcloud.com",
   "upgrade-insecure-requests",
 ].join("; ");
+
+
+
+// const contentSecurityPolicy = [
+//   "default-src 'self'",
+//   "base-uri 'self'",
+//   "form-action 'self'",
+//   "frame-ancestors 'self'",
+//   "object-src 'none'",
+//   `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://traffic.igihe.com https://static.cloudflareinsights.com`,
+//   "style-src 'self' 'unsafe-inline'",
+//   "img-src 'self' data: blob: https:",
+//   "font-src 'self' data:",
+//   "connect-src 'self' https:",
+//   "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://www.instagram.com https://w.soundcloud.com",
+//   "upgrade-insecure-requests",
+// ].join("; ");
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -85,9 +106,22 @@ const nextConfig: NextConfig = {
       source: "/.well-known/assetlinks.json",
       headers: [{ key: "Content-Type", value: "application/json" }],
     },
+
     {
-      // Sitemap files are regenerated on publish (src/lib/sitemap); keep the
-      // CDN TTL short so a new article reaches crawlers within minutes.
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              `connect-src 'self' ${NARRATOR}`,
+              `media-src 'self' blob: data: ${NARRATOR}`,
+            ].join('; '),
+          },
+        ],
+      },
+
+    {
       source: '/sitemap-:name(index|pages|categories|videos|authors|articles-\\d+).xml',
       headers: [
         {

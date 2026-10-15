@@ -122,6 +122,127 @@ describe('fetchWithTimeout', () => {
   })
 })
 
+type ApiClientModule = typeof import('../../src/services/apiClient')
+
+/** A private copy of the client, so each test gets its own circuit-breaker state. */
+function freshClient(): ApiClientModule {
+  let mod: ApiClientModule | undefined
+  jest.isolateModules(() => {
+    mod = require('../../src/services/apiClient')
+  })
+  return mod!
+}
+
+const realSetTimeout = setTimeout
+
+/**
+ * Runs `start` under fake timers and steps the clock until it settles.
+ * Retries schedule their backoff timer only after the previous response
+ * arrives, and the mock server answers in real time, so each step also yields
+ * a few real milliseconds.
+ */
+async function settleWithFakeClock<T>(start: () => Promise<T>) {
+  let outcome: { status: 'pending' } | { status: 'resolved'; value: T } | { status: 'rejected'; error: any } = { status: 'pending' }
+  start().then(
+    value => { outcome = { status: 'resolved', value } },
+    error => { outcome = { status: 'rejected', error } }
+  )
+  for (let step = 0; step < 600 && outcome.status === 'pending'; step++) {
+    await jest.advanceTimersByTimeAsync(500)
+    await new Promise(resolve => realSetTimeout(resolve, 2))
+  }
+  return outcome
+}
+
+describe('fetchWithTimeout: definitive client errors', () => {
+  it.each([400, 401, 403, 404, 410, 422])('does not retry a %i: the origin has given its final answer', async status => {
+    let requests = 0
+    server.use(
+      http.get(`${BASE}/posts`, () => {
+        requests++
+        return HttpResponse.json({ message: 'no' }, { status })
+      })
+    )
+    await expect(fetchWithTimeout(`${BASE}/posts`)).rejects.toMatchObject({ name: 'ApiError', statusCode: status, isRetryable: false })
+    expect(requests).toBe(1)
+  })
+
+  it('does not wait on body.cancel(), which can stay pending forever', async () => {
+    const neverSettles = new Promise<void>(() => {})
+    const response = { ok: false, status: 404, body: { cancel: () => neverSettles } } as unknown as Response
+    const fetchSpy = jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(response)
+    try {
+      const outcome = await Promise.race([
+        fetchWithTimeout(`${BASE}/posts`).then(() => 'resolved', error => error),
+        new Promise<string>(resolve => realSetTimeout(() => resolve('hung'), 1000)),
+      ])
+      expect(outcome).not.toBe('hung')
+      expect(outcome).toMatchObject({ statusCode: 404 })
+    } finally {
+      fetchSpy.mockRestore()
+    }
+  })
+
+  it('never opens the circuit breaker, however many 404s come in a row', async () => {
+    const client = freshClient()
+    server.use(
+      http.get(`${BASE}/missing`, () => HttpResponse.json({ message: 'Not Found' }, { status: 404 })),
+      http.get(`${BASE}/posts`, () => HttpResponse.json([]))
+    )
+    // The threshold is 5 consecutive failures; send twice that many 404s.
+    for (let i = 0; i < 10; i++) {
+      await expect(client.fetchWithTimeout(`${BASE}/missing`)).rejects.toMatchObject({ statusCode: 404 })
+    }
+    // A real request straight afterwards must not be refused as "circuit open".
+    const res = await client.fetchWithTimeout(`${BASE}/posts`)
+    expect(res.ok).toBe(true)
+  })
+
+  it('still retries 429 and 408, which are about timing and not final answers', async () => {
+    const client = freshClient()
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+    try {
+      for (const status of [429, 408]) {
+        let requests = 0
+        server.use(
+          http.get(`${BASE}/posts`, () => (++requests === 1 ? HttpResponse.json({}, { status }) : HttpResponse.json([])))
+        )
+        const outcome = await settleWithFakeClock(() => client.fetchWithTimeout(`${BASE}/posts`))
+        expect(outcome.status).toBe('resolved')
+        expect(requests).toBe(2)
+      }
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  it('closes a half-open breaker when its trial request gets a 404, instead of leaving it stuck', async () => {
+    const client = freshClient()
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+    try {
+      // Five calls that exhaust their retries open the breaker.
+      server.use(http.get(`${BASE}/posts`, () => HttpResponse.error()))
+      for (let i = 0; i < 5; i++) {
+        const outcome = await settleWithFakeClock(() => client.fetchWithTimeout(`${BASE}/posts`))
+        expect(outcome.status).toBe('rejected')
+      }
+      await expect(client.fetchWithTimeout(`${BASE}/posts`)).rejects.toThrow(/circuit open/)
+
+      // After the cooldown the next call is the trial. It gets a 404: WordPress is up.
+      await jest.advanceTimersByTimeAsync(client.API_CONFIG.circuitCooldownMs + 1000)
+      server.use(http.get(`${BASE}/posts`, () => HttpResponse.json({ message: 'Not Found' }, { status: 404 })))
+      await expect(client.fetchWithTimeout(`${BASE}/posts`)).rejects.toMatchObject({ statusCode: 404 })
+
+      // Closed again: the next call goes through rather than failing fast forever.
+      server.use(http.get(`${BASE}/posts`, () => HttpResponse.json([])))
+      const res = await client.fetchWithTimeout(`${BASE}/posts`)
+      expect(res.ok).toBe(true)
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+})
+
 describe('buildQuery', () => {
   it('builds a query string from params', () => {
     const qs = buildQuery({ page: 1, per_page: 20, search: 'hello' })

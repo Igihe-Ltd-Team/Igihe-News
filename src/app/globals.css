@@ -588,6 +588,7 @@ font-size: 0.813rem;
 .video-slider .swiper-button-next,
 .video-slider .swiper-button-prev {
   width: 29px !important;
+  border: 0;
 }
 
 .video-slider .swiper-button-prev {

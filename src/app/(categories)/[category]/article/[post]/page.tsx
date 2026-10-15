@@ -2,6 +2,7 @@ import { cache } from 'react'
 import { Suspense } from 'react'
 import SingleNewsContent from '@/components/news/SingleNewsContent'
 import { stripHtml } from '@/lib/utils'
+import { decodeSlugParam, encodeSegment } from '@/lib/slugLookup'
 import { ApiService } from '@/services/apiService'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -31,7 +32,7 @@ const endpoints: Record<string, string> = {
 // Cache deduplicates requests during the same render cycle
 const getPostData = cache(async (slug: string, section: string) => {
   const endpoint = endpoints[section] ?? "posts"
-  const api = `${endpoint}?slug=${slug}&_embed`
+  const api = `${endpoint}?slug=${encodeURIComponent(slug)}&_embed`
 
   try {
     if (section === 'posts') {
@@ -47,10 +48,11 @@ const getPostData = cache(async (slug: string, section: string) => {
 
 /* ------------------------ METADATA ------------------------ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { post: slug, category } = await params
+  const { post, category } = await params
+  const slug = decodeSlugParam(post)
 
 const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://en.igihe.com').replace(/\/$/, '')
- const nextJsUrl = `${baseUrl}/${category}/article/${slug}`;
+ const nextJsUrl = `${baseUrl}/${category}/article/${encodeSegment(slug)}`;
 
 
   // Capitalize slug for fallback title
@@ -193,7 +195,8 @@ const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://en.igihe.com').repl
 
 /* ------------------------ PAGE ------------------------ */
 export default async function SingleNewsPage({ params }: PageProps) {
-  const { post: slug, category } = await params
+  const { post, category } = await params
+  const slug = decodeSlugParam(post)
 
   return (
     <Suspense key={slug} fallback={<ArticleSkeleton />}>
@@ -218,7 +221,7 @@ async function ArticleContent({
     notFound()
   }
 
-  const articleUrl = `${BASE_URL}/${category}/article/${slug}`
+  const articleUrl = `${BASE_URL}/${category}/article/${encodeSegment(slug)}`
 
   return (
     <HydrateArticle article={postData} slug={slug}>

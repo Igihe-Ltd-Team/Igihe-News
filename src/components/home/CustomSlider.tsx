@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useRef, useState } from 'react'
+import React, { useId, useRef, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper/modules'
+import { Navigation, Pagination,Autoplay } from 'swiper/modules'
 import type { Swiper as SwiperInstance } from 'swiper'
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -32,6 +32,11 @@ function CustomSlider({
     const childrenArray = React.Children.toArray(children)
     const swiperRef = useRef<SwiperInstance | null>(null)
     const [activeIndex, setActiveIndex] = useState(0)
+
+    const uid = useId().replace(/:/g, '')
+        const prevClass = `swiper-button-prev-${uid}`
+        const nextClass = `swiper-button-next-${uid}`
+        const paginationClass = `swiper-pagination-${uid}`
     
     return (
         <div className="position-relative video-slider">
@@ -40,11 +45,19 @@ function CustomSlider({
                 onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
                 spaceBetween={spaceBetween}
                 slidesPerView={3}
+                 navigation={{
+                    nextEl: `.${nextClass}`,
+                    prevEl: `.${prevClass}`,
+                }}
+                pagination={{
+                    clickable: true,
+                    el: `.${paginationClass}`,
+                }}
                 autoplay={{
                     delay: autoplayDelay,
                     disableOnInteraction: false,
                 }}
-                modules={[Autoplay]}
+                modules={[Navigation, Pagination, Autoplay]}
                 breakpoints={{
                     320: {
                         slidesPerView: smDisplay,
@@ -72,13 +85,13 @@ function CustomSlider({
                     <button
                         type="button"
                         aria-label="Previous slide"
-                        className="swiper-button-prev"
+                        className={`swiper-button-prev ${prevClass}`}
                         onClick={() => swiperRef.current?.slidePrev()}
                     />
                     <button
                         type="button"
                         aria-label="Next slide"
-                        className="swiper-button-next"
+                        className={`swiper-button-next ${nextClass}`}
                         onClick={() => swiperRef.current?.slideNext()}
                     />
                 </>

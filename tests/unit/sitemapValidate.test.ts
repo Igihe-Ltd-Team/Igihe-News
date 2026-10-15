@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/sitemap/config'
 import { checkUrl, classify, planValidation, runValidation } from '@/lib/sitemap/validate'
 import type { ValidationCache, ValidationTarget } from '@/lib/sitemap/types'
 
@@ -121,22 +122,81 @@ describe('planning and classification', () => {
     expect(result.outcomes).toHaveLength(30)
   })
 
+  const SITE = SITE_URL
+  const homeOk = () => respond(200, html('<title>IGIHE</title>'))
+  const noindex = () => respond(200, html('<meta name="robots" content="noindex">'))
+  const selfCanonical = (url: string) => respond(200, html(`<link rel="canonical" href="${url}">`))
+  const articles = (n: number): ValidationTarget[] =>
+    Array.from({ length: n }, (_, i) => ({ url: `https://en.igihe.com/news/article/p${i}`, kind: 'article', key: 'k' }))
+
   it('keeps content verdicts even when most of a batch legitimately fails', async () => {
     // 20 of 30 pages carry noindex: a real finding, not an outage.
-    const many: ValidationTarget[] = Array.from({ length: 30 }, (_, i) => ({ url: `https://en.igihe.com/news/article/p${i}`, kind: 'article', key: 'k' }))
+    const many = articles(30)
     const fetchImpl = async (url: string) =>
-      Number(url.slice(-2).replace(/\D/g, '')) < 20
-        ? respond(200, html('<meta name="robots" content="noindex">'))
-        : respond(200, html(`<link rel="canonical" href="${url}">`))
+      url === SITE ? homeOk() : Number(url.split('/p').pop()) < 20 ? noindex() : selfCanonical(url)
     const result = await runValidation(many, {}, { budget: 30, concurrency: 5, now, fetchImpl })
     expect(result.aborted).toBeUndefined()
     expect(Object.values(result.cache).filter(v => !v.ok)).toHaveLength(20)
   })
 
-  it('still aborts when practically everything fails, whatever the reason', async () => {
-    const many: ValidationTarget[] = Array.from({ length: 30 }, (_, i) => ({ url: `https://en.igihe.com/news/article/p${i}`, kind: 'article', key: 'k' }))
-    const fetchImpl = async () => respond(200, html('<meta name="robots" content="noindex">'))
-    const result = await runValidation(many, {}, { budget: 30, concurrency: 5, now, fetchImpl })
-    expect(result.aborted).toBeDefined()
+  it('records a retry batch of URLs that are already known to be bad (the production case)', async () => {
+    // Failed verdicts expire after the retry window and come due again. That
+    // batch fails ~100% by construction and must not be mistaken for an outage.
+    const bad = articles(20)
+    const stale = new Date(now - 7 * 60 * 60 * 1000).toISOString()
+    const cache: ValidationCache = Object.fromEntries(
+      bad.map(t => [t.url, { url: t.url, kind: t.kind, ok: false, reason: 'noindex (meta robots)', checkedAt: stale, key: t.key }])
+    )
+    const fetchImpl = async (url: string) => (url === SITE ? homeOk() : noindex())
+
+    const result = await runValidation(bad, cache, { budget: 50, concurrency: 4, now, fetchImpl })
+
+    expect(result.checked).toBe(20)
+    expect(result.failed).toBe(20)
+    expect(result.aborted).toBeUndefined()
+    // The verdicts were refreshed, so the URLs are not due again on the next run.
+    expect(Object.values(result.cache).every(v => v.checkedAt === new Date(now).toISOString())).toBe(true)
+    expect(planValidation(bad, result.cache, now + 60_000, 50).toCheck).toHaveLength(0)
+  })
+
+  it('aborts when the home page fails too, whatever the reason', async () => {
+    const many = articles(30)
+    const result = await runValidation(many, {}, { budget: 30, concurrency: 5, now, fetchImpl: async () => noindex() })
+    expect(result.aborted).toMatch(/control check failed/)
+    expect(result.aborted).toMatch(/home page/)
+    expect(Object.keys(result.cache)).toHaveLength(0)
+  })
+
+  it('aborts when articles that passed before stop passing (site-wide article breakage)', async () => {
+    const known: ValidationCache = {
+      'https://en.igihe.com/news/article/was-fine': {
+        url: 'https://en.igihe.com/news/article/was-fine', kind: 'article', ok: true, checkedAt: new Date(now - 3600_000).toISOString(), key: 'k',
+      },
+    }
+    const batch = articles(10)
+    const fetchImpl = async (url: string) => (url === SITE ? homeOk() : noindex())
+    const result = await runValidation(batch, known, { budget: 10, concurrency: 2, now, fetchImpl })
+    expect(result.aborted).toMatch(/previously passing articles/)
+    expect(result.cache).toBe(known)
+  })
+
+  it('trusts the batch when at least one previously good article still passes', async () => {
+    const good = (n: number) => `https://en.igihe.com/news/article/ok${n}`
+    const known: ValidationCache = Object.fromEntries([1, 2, 3].map(n => [good(n), {
+      url: good(n), kind: 'article', ok: true, checkedAt: new Date(now - n * 3600_000).toISOString(), key: 'k',
+    }]))
+    const batch = articles(10)
+    const fetchImpl = async (url: string) => (url === SITE || url === good(1) ? (url === SITE ? homeOk() : selfCanonical(url)) : noindex())
+    const result = await runValidation(batch, known, { budget: 10, concurrency: 2, now, fetchImpl })
+    expect(result.aborted).toBeUndefined()
+    expect(Object.values(result.cache).filter(v => !v.ok)).toHaveLength(10)
+  })
+
+  it('does not bother with controls for a couple of ordinary failures', async () => {
+    const batch = articles(2)
+    const fetchImpl = jest.fn(async (url: string) => (url === SITE ? homeOk() : noindex()))
+    const result = await runValidation(batch, {}, { budget: 2, concurrency: 1, now, fetchImpl })
+    expect(result.aborted).toBeUndefined()
+    expect(fetchImpl).toHaveBeenCalledTimes(2) // just the two URLs, no home-page control
   })
 })

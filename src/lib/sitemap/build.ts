@@ -1,7 +1,9 @@
+import { encodeSegment } from '../slugLookup.ts'
 import {
   ARTICLES_PER_FILE,
   DEFAULT_POST_SECTION,
   MIN_AUTHOR_POSTS,
+  RESERVED_ARTICLE_SECTIONS,
   SECTION_BY_TYPE,
   SITE_URL,
   STATIC_PAGES,
@@ -34,20 +36,22 @@ function entry(url: string, kind: UrlKind, tier: Tier, lastmod: string | undefin
   return { loc: url, url, kind, key, lastmod, ...withTier(tier) }
 }
 
+export { encodeSegment }
+
 export function pageUrl(path: string): string {
   return path === '/' ? SITE_URL : `${SITE_URL}${path}`
 }
 
 export function categoryUrl(slug: string): string {
-  return `${SITE_URL}/${slug}`
+  return `${SITE_URL}/${encodeSegment(slug)}`
 }
 
 export function videoUrl(slug: string): string {
-  return `${SITE_URL}/videos/${slug}`
+  return `${SITE_URL}/videos/${encodeSegment(slug)}`
 }
 
 export function authorUrl(slug: string): string {
-  return `${SITE_URL}/author/${slug}`
+  return `${SITE_URL}/author/${encodeSegment(slug)}`
 }
 
 /**
@@ -63,13 +67,13 @@ export function resolveArticleSection(
   if (record.type !== 'post') return SECTION_BY_TYPE[record.type]
   for (const id of record.categories) {
     const slug = categorySlugById.get(id)
-    if (slug) return slug
+    if (slug && !RESERVED_ARTICLE_SECTIONS.has(slug)) return slug
   }
   return DEFAULT_POST_SECTION
 }
 
 export function articleUrl(record: ArticleRecord, categorySlugById: Map<number, string>): string {
-  return `${SITE_URL}/${resolveArticleSection(record, categorySlugById)}/article/${record.slug}`
+  return `${SITE_URL}/${encodeSegment(resolveArticleSection(record, categorySlugById))}/article/${encodeSegment(record.slug)}`
 }
 
 export interface LatestDates {

@@ -80,6 +80,13 @@ export const SECTION_BY_TYPE: Record<'opinion' | 'advertorial' | 'announcement',
 }
 export const DEFAULT_POST_SECTION = 'news'
 
+// First path segments the app serves with a dedicated route, so
+// `/<segment>/article/<slug>` never reaches the article route. `/services/…`
+// belongs to the legacy services/[category]/[post] page, whose canonical points
+// at WordPress, so posts filed under the "Services" category are listed under
+// their next category (or the default section) instead.
+export const RESERVED_ARTICLE_SECTIONS = new Set(['services'])
+
 export const VALIDATION = {
   // Max URLs fetched per regeneration run. Everything else is cached from
   // earlier runs or left pending; see docs/sitemaps.md.
@@ -98,13 +105,20 @@ export const VALIDATION = {
   // published in WordPress and their route is deterministic). Set to "false"
   // to hold every URL back until it has passed an HTTP check.
   includeUnvalidated: (process.env.SITEMAP_INCLUDE_UNVALIDATED ?? 'true') !== 'false',
-  // Outage guard. If more than this share of a run's checks fail for
-  // transport reasons (network errors, 5xx, 429, 403), or nearly every check
-  // fails for any reason, assume the validator or the site is broken and do
-  // not record the failures as exclusions.
+  // Outage guard, in two parts:
+  //  1. Transport: if more than this share of a run's checks fail for
+  //     transport reasons (network errors, 5xx, 429, 403), assume the checker
+  //     or the site is unreachable and record nothing.
+  //  2. Controls: when most of a batch fails for content reasons, re-fetch
+  //     things that must pass (the home page, recently verified articles). If
+  //     they fail too, the checker or the site is broken; if they pass, the
+  //     failures are real. A failure *ratio* cannot tell the two apart: a retry
+  //     batch of URLs already known to be bad fails ~100% by construction.
   maxTransientFailureRatio: 0.5,
-  maxTotalFailureRatio: 0.9,
   minChecksForRatio: 20,
+  controlTriggerRatio: 0.5,
+  controlMinFailures: 3,
+  controlArticleCandidates: 3,
   userAgent: process.env.SITEMAP_VALIDATOR_UA || 'IGIHE-SitemapValidator/1.0 (+https://en.igihe.com/sitemap-index.xml)',
   alertWebhookUrl: process.env.SITEMAP_ALERT_WEBHOOK_URL || '',
 }

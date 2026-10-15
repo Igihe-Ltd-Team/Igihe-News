@@ -189,12 +189,33 @@ export function applyValidation(
 // guarding — the guard exists for "an entire real collection vanished".
 export const MASS_EXCLUSION_GUARD_MIN_PREVIOUS = 10
 
-async function alert(summary: ValidationSummary, log: Logger): Promise<void> {
-  if (summary.excludedUrls.length === 0 && !summary.aborted) return
-  const lines = summary.excludedUrls.slice(0, 50).map(item => `- ${item.url} — ${item.reason}`)
-  const text = summary.aborted
+/** URLs excluded now that were not excluded in the previous run — the only thing worth alerting on. */
+export function newExclusions(previous: ValidationSummary | null, current: ValidationSummary): ExcludedUrl[] {
+  const known = new Set((previous?.excludedUrls ?? []).map(item => item.url))
+  return current.excludedUrls.filter(item => !known.has(item.url))
+}
+
+/**
+ * Logs (and posts to the webhook) when something new went wrong: a URL that
+ * was not excluded before, or the first aborted run in a row. A steady state
+ * of the same known-bad URLs is reported once at info level, not on every
+ * hourly and webhook-triggered run.
+ */
+async function alert(summary: ValidationSummary, previous: ValidationSummary | null, log: Logger): Promise<void> {
+  const fresh = newExclusions(previous, summary)
+  const newAbort = Boolean(summary.aborted) && !previous?.aborted
+
+  if (!newAbort && fresh.length === 0) {
+    if (summary.excludedUrls.length > 0) {
+      log.info(`[sitemap] ${summary.excludedUrls.length} URL(s) still excluded or guarded, unchanged since the last run (see validation-report.json)`)
+    }
+    return
+  }
+
+  const lines = fresh.slice(0, 50).map(item => `- ${item.url} — ${item.reason}${item.guarded ? ' [kept in sitemap: looked systemic]' : ''}`)
+  const text = newAbort
     ? `Sitemap validation aborted: ${summary.aborted}`
-    : `Sitemap regeneration excluded ${summary.excludedUrls.length} URL(s):\n${lines.join('\n')}${summary.excludedUrls.length > 50 ? '\n…' : ''}`
+    : `Sitemap regeneration found ${fresh.length} newly failing URL(s):\n${lines.join('\n')}${fresh.length > 50 ? '\n…' : ''}`
   log.error(`[sitemap] ${text}`)
   if (!VALIDATION.alertWebhookUrl) return
   try {
@@ -265,7 +286,7 @@ export async function regenerateSitemaps(options: RegenerateOptions): Promise<Re
         excludedUrls,
         aborted: result.aborted,
       }
-      log.info(`[sitemap] validation: ${result.checked} fetched, ${excludedUrls.length} excluded, ${pending.count} pending, ${result.due} due`)
+      log.info(`[sitemap] validation: ${result.checked} fetched, ${droppedCount} excluded, ${excludedUrls.length - droppedCount} guarded, ${pending.count} pending, ${result.due} due`)
     }
 
     const rendered = renderFiles(entries)
@@ -338,7 +359,7 @@ export async function regenerateSitemaps(options: RegenerateOptions): Promise<Re
     await saveManifest(manifest)
     if (validation) {
       await writeFileAtomic(REPORT_FILE, JSON.stringify({ generatedAt: now, ...validation }, null, 2))
-      await alert(validation, log)
+      await alert(validation, previousManifest.validation, log)
     }
 
     const report: RegenerationReport = {

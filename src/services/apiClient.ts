@@ -126,10 +126,21 @@ export async function fetchWithTimeout(
 
       if (!response.ok) {
         const status = response.status
-        // Drain the body so undici releases the connection back to the pool
-        // immediately instead of waiting on GC — left unread, a discarded
-        // Response can hold its socket (and the pool slot) for a while.
-        await response.body?.cancel().catch(() => {})
+        // Release the body so undici returns the connection to the pool
+        // immediately instead of waiting on GC. Deliberately not awaited:
+        // cancel() can stay pending indefinitely on some Response
+        // implementations, and the request timer is already cleared, so
+        // awaiting it could hang this request with nothing left to rescue it.
+        response.body?.cancel().catch(() => {})
+
+        if (isDefinitiveClientError(status)) {
+          // The origin answered, so it is up. Record that (it also closes a
+          // half-open breaker, which would otherwise wait forever for its
+          // trial request to settle) and hand the 4xx to the caller.
+          recordCircuitSuccess()
+          throw new ApiError(`HTTP error! status: ${status}`, status, false)
+        }
+
         const shouldRetry =
           attempt < maxRetries &&
           (status === 429 || status >= 500 || status === 408 || status === 0)
@@ -147,6 +158,11 @@ export async function fetchWithTimeout(
       return response
     } catch (error: any) {
       clearTimeout(timer)
+
+      // A final 4xx answer: no retries, no breaker failure.
+      if (error instanceof ApiError && error.statusCode !== undefined && isDefinitiveClientError(error.statusCode)) {
+        throw error
+      }
 
       if (attempt < maxRetries) {
         lastError = error
@@ -177,6 +193,16 @@ export async function fetchWithTimeout(
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * A 4xx other than request-timeout (408) and rate-limit (429) is the origin's
+ * final answer about this one request. Retrying cannot change it, and it says
+ * nothing about the origin being down: a 404 means WordPress is up and the
+ * thing does not exist.
+ */
+function isDefinitiveClientError(status: number): boolean {
+  return status >= 400 && status < 500 && status !== 408 && status !== 429
+}
 
 function backoff(attempt: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))

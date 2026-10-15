@@ -1,11 +1,15 @@
 import {
+  articleUrl,
+  authorUrl,
   buildArticleEntries,
   buildAuthorEntries,
   buildCategoryEntries,
   buildEntries,
   buildPageEntries,
   chunkArticles,
+  encodeSegment,
   resolveArticleSection,
+  videoUrl,
 } from '@/lib/sitemap/build'
 import { TIERS } from '@/lib/sitemap/config'
 import type { Inventory } from '@/lib/sitemap/types'
@@ -126,6 +130,29 @@ describe('listing pages', () => {
     // Sections with different latest articles get different timestamps.
     const byLoc = Object.fromEntries(categories.map(c => [c.loc, c.lastmod]))
     expect(byLoc['https://en.igihe.com/news']).not.toBe(byLoc['https://en.igihe.com/business'])
+  })
+})
+
+describe('URL construction', () => {
+  it('percent-encodes path segments so <loc> is always a valid URL', () => {
+    expect(encodeSegment('plain-slug_1')).toBe('plain-slug_1')
+    expect(encodeSegment('ngug\u0129-wa-thiong-o')).toBe('ngug%C4%A9-wa-thiong-o')
+    expect(encodeSegment('to-\u200ekeep')).toBe('to-%E2%80%8Ekeep')
+    expect(encodeSegment('crisis-in\u2008mali')).toBe('crisis-in%E2%80%88mali')
+    expect(encodeSegment("it's (here)!")).toBe('it%27s%20%28here%29%21')
+
+    const record = { id: 1, type: 'post' as const, slug: 'sh\u014dta-iizuka', date: '', modified: '', categories: [], bylines: [] }
+    expect(articleUrl(record, new Map())).toBe('https://en.igihe.com/news/article/sh%C5%8Dta-iizuka')
+    expect(videoUrl('a b')).toBe('https://en.igihe.com/videos/a%20b')
+    expect(authorUrl('jos\u00e9')).toBe('https://en.igihe.com/author/jos%C3%A9')
+  })
+
+  it('never files a post under a section the app serves with its own route', () => {
+    const slugs = new Map([[3, 'services'], [1, 'news'], [2, 'business']])
+    // `/services/article/<slug>` is the legacy services page (canonical points at WordPress).
+    expect(resolveArticleSection({ type: 'post', categories: [3, 2] }, slugs)).toBe('business')
+    expect(resolveArticleSection({ type: 'post', categories: [3] }, slugs)).toBe('news')
+    expect(resolveArticleSection({ type: 'post', categories: [2, 3] }, slugs)).toBe('business')
   })
 })
 

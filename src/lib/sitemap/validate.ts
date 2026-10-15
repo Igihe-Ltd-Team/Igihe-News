@@ -1,4 +1,4 @@
-import { VALIDATION } from './config.ts'
+import { SITE_URL, VALIDATION } from './config.ts'
 import { isBlockedByRobots } from './robotsRules.ts'
 import type { Logger, UrlKind, ValidationCache, ValidationResult, ValidationTarget } from './types.ts'
 
@@ -167,6 +167,33 @@ export function planValidation(
   return { toCheck: due.slice(0, Math.max(0, budget)), due: due.length }
 }
 
+export interface ControlResult {
+  ok: boolean
+  reason?: string
+}
+
+/**
+ * Re-fetches pages that must pass: the home page and, when the cache has any,
+ * recently verified articles. If the home page fails, or none of the
+ * previously good articles pass any more, the checker or the site is broken
+ * and a batch's failures cannot be trusted. If they pass, the batch simply
+ * contains bad URLs (for example a retry of URLs already known to be bad).
+ */
+export async function runControls(cache: ValidationCache, fetchImpl?: FetchLike): Promise<ControlResult> {
+  const home = await checkUrl(SITE_URL, 'page', fetchImpl)
+  if (!home.ok) return { ok: false, reason: `home page: ${home.reason ?? 'failed'}` }
+
+  const recentGood = Object.values(cache)
+    .filter(result => result.ok && result.kind === 'article')
+    .sort((a, b) => Date.parse(b.checkedAt) - Date.parse(a.checkedAt))
+    .slice(0, VALIDATION.controlArticleCandidates)
+  if (recentGood.length === 0) return { ok: true }
+
+  const results = await Promise.all(recentGood.map(result => checkUrl(result.url, result.kind, fetchImpl)))
+  if (results.some(result => result.ok)) return { ok: true }
+  return { ok: false, reason: `none of ${recentGood.length} previously passing articles pass any more: ${results[0].reason ?? 'failed'}` }
+}
+
 export type UrlState = 'ok' | 'excluded' | 'pending'
 
 export function classify(target: ValidationTarget, cache: ValidationCache): UrlState {
@@ -241,16 +268,23 @@ export async function runValidation(
   const failed = checkedUrls.filter(entry => !entry.outcome.ok).length
   const transient = checkedUrls.filter(entry => !entry.outcome.ok && entry.outcome.transient).length
   const checked = outcomes.size
-  const outage =
-    checked >= VALIDATION.minChecksForRatio &&
-    (transient / checked > VALIDATION.maxTransientFailureRatio || failed / checked > VALIDATION.maxTotalFailureRatio)
-  if (outage) {
-    const message = `${failed}/${checked} checks failed (${transient} transport failures) — treating the run as a validator/site outage and keeping previous verdicts`
-    options.log?.error(`[sitemap] validation aborted: ${message}`)
+  let abortReason: string | undefined
+  if (checked >= VALIDATION.minChecksForRatio && transient / checked > VALIDATION.maxTransientFailureRatio) {
+    abortReason = `${failed}/${checked} checks failed (${transient} transport failures) — treating the run as a validator/site outage and keeping previous verdicts`
+  } else if (failed >= VALIDATION.controlMinFailures && failed / checked > VALIDATION.controlTriggerRatio) {
+    const controls = await runControls(cache, options.fetchImpl)
+    if (controls.ok) {
+      options.log?.info(`[sitemap] ${failed}/${checked} checks failed but the control pages pass — recording the failures as real`)
+    } else {
+      abortReason = `${failed}/${checked} checks failed and the control check failed too (${controls.reason}) — treating the run as a validator/site outage and keeping previous verdicts`
+    }
+  }
+  if (abortReason) {
+    options.log?.error(`[sitemap] validation aborted: ${abortReason}`)
     for (const group of summarizeFailures(checkedUrls).slice(0, 8)) {
       options.log?.error(`[sitemap]   ${group.count} × ${group.reason} (e.g. ${group.sample})`)
     }
-    return { cache, checked, failed, due, outcomes: checkedUrls, aborted: message }
+    return { cache, checked, failed, due, outcomes: checkedUrls, aborted: abortReason }
   }
 
   const next: ValidationCache = { ...cache }

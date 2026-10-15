@@ -1,6 +1,6 @@
-import { applyValidation, consoleLogger, MASS_EXCLUSION_GUARD_MIN_PREVIOUS } from '@/lib/sitemap/generate'
+import { applyValidation, consoleLogger, MASS_EXCLUSION_GUARD_MIN_PREVIOUS, newExclusions } from '@/lib/sitemap/generate'
 import type { Entry } from '@/lib/sitemap/build'
-import type { ExcludedUrl, ValidationCache } from '@/lib/sitemap/types'
+import type { ExcludedUrl, ValidationCache, ValidationSummary } from '@/lib/sitemap/types'
 
 const silent = { info: () => {}, warn: () => {}, error: () => {} }
 
@@ -86,5 +86,24 @@ describe('applyValidation mass-exclusion guard', () => {
 
   it('exposes a working default logger', () => {
     expect(() => consoleLogger.info('noop')).not.toThrow()
+  })
+})
+
+describe('newExclusions', () => {
+  const summary = (...urls: string[]): ValidationSummary => ({
+    checked: 0, excluded: urls.length, pending: 0, cached: 0,
+    excludedUrls: urls.map(url => ({ url, kind: 'article' as const, reason: 'noindex (meta robots)' })),
+  })
+
+  it('reports only URLs that were not already excluded last run', () => {
+    expect(newExclusions(summary('a', 'b'), summary('a', 'b', 'c')).map(i => i.url)).toEqual(['c'])
+  })
+
+  it('reports nothing when the same URLs stay excluded (no repeat alerts every run)', () => {
+    expect(newExclusions(summary('a', 'b'), summary('b', 'a'))).toEqual([])
+  })
+
+  it('reports everything on the first run', () => {
+    expect(newExclusions(null, summary('a', 'b'))).toHaveLength(2)
   })
 })

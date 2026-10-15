@@ -14,7 +14,7 @@ import { useNewsData } from '@/hooks/useNewsData'
 import DynamicArticleCard from './DynamicArticleCard'
 import HeaderDivider from '../HeaderDivider'
 import { sanitizeArticleHtml } from '@/lib/sanitizeHtml'
-
+import ArticleAudio from './ArticleAudio'
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
@@ -184,6 +184,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                     categorySlug={articleCategorySlug}
                     bylines={article.bylines}
                 />
+                <ArticleAudio url={article.link} />
                 <Row className='pt-4'>
                     <Col md="9">
                         <div className='d-flex flex-column-reverse flex-md-row'>

@@ -1,6 +1,7 @@
 import { fileCache } from '@/lib/cache/fileCache'
 import { NewsItem, articleResponse } from '@/types/fetchData'
 import { API_CONFIG, fetchWithTimeout, buildQuery, buildPaginationResponse } from './apiClient'
+import { isPlainSlug, sameSlug, slugSearchTerms } from '@/lib/slugLookup'
 import {
   cachedRequest,
   cacheArticlesFromList,
@@ -15,15 +16,50 @@ import {
 
 // ─── Single Article ──────────────────────────────────────────────────────────
 
+const SLUG_SEARCH_PAGE_SIZE = 100
+
+/**
+ * WordPress's `?slug=` filter never matches a post whose stored slug contains
+ * non-ASCII characters (accents, zero-width or directional marks, unusual
+ * spaces): the REST API reports the raw slug, but the filter normalises the
+ * query to percent-encoded form, which is not what is stored. Such posts are
+ * found by searching on the slug's plain words and keeping only the candidate
+ * whose slug is exactly the requested one, then loading it by ID.
+ */
+async function fetchPostBySearchedSlug(endpoint: string, slug: string): Promise<NewsItem | null> {
+  const terms = slugSearchTerms(slug)
+  if (terms.length === 0) return null
+
+  // A selective search first; if a term turns out to be a truncated or altered
+  // word, retry with only the two longest words.
+  const attempts = terms.length > 2 ? [terms, terms.slice(0, 2)] : [terms]
+
+  for (const attempt of attempts) {
+    const qs = buildQuery({ search: attempt.join(' '), per_page: SLUG_SEARCH_PAGE_SIZE, _fields: 'id,slug' })
+    const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${endpoint}?${qs}`)
+    const candidates = await response.json()
+    const match = Array.isArray(candidates)
+      ? candidates.find((candidate: { id?: number; slug?: string }) => candidate?.id && candidate.slug && sameSlug(candidate.slug, slug))
+      : undefined
+    if (!match) continue
+
+    const full = await fetchWithTimeout(`${API_CONFIG.baseURL}/${endpoint}/${match.id}?_embed=1`)
+    return (await full.json()) as NewsItem
+  }
+
+  return null
+}
+
 export async function fetchPostBySlug(slug: string): Promise<NewsItem | null> {
   return cachedRequest({
     key: `post:${slug}`,
     fetchFn: async () => {
       const response = await fetchWithTimeout(
-        `${API_CONFIG.baseURL}/posts?slug=${slug}&_embed=1`
+        `${API_CONFIG.baseURL}/posts?slug=${encodeURIComponent(slug)}&_embed=1`
       )
       const posts = await response.json()
-      return Array.isArray(posts) && posts.length > 0 ? posts[0] : null
+      if (Array.isArray(posts) && posts.length > 0) return posts[0]
+      return isPlainSlug(slug) ? null : fetchPostBySearchedSlug('posts', slug)
     },
     getContentDate: (data) => data?.date || null,
   })
@@ -35,7 +71,9 @@ export async function customPostFetch(apiUrl: string, slug: string): Promise<New
     fetchFn: async () => {
       const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${apiUrl}`)
       const posts = await response.json()
-      return Array.isArray(posts) && posts.length > 0 ? posts[0] : null
+      if (Array.isArray(posts) && posts.length > 0) return posts[0]
+      // `apiUrl` is `<endpoint>?slug=…`; the endpoint is everything before the query.
+      return isPlainSlug(slug) ? null : fetchPostBySearchedSlug(apiUrl.split('?')[0], slug)
     },
     getContentDate: (data) => data?.date || null,
   })
