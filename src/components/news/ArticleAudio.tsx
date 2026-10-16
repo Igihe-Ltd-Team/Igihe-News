@@ -1,29 +1,28 @@
 'use client'
 
-/**
- * "Listen to this article" player for the IGIHE Next.js site.
- *
- * Backed by the Article Narrator service (NEXT_PUBLIC_NARRATOR_URL). Audio is generated paragraph by
- * paragraph: playback starts within a few seconds while the rest is still being produced, and every
- * finished article is cached on the server. Nothing is requested until the visitor presses play
- * (a page view alone never triggers generation).
- *
- * Usage (see the single-article component):
- *     <ArticleAudio url={article.link} />
- * `url` must be the article's WordPress address (the `link` field of the WP REST post), because that is
- * how the narrator finds it. If you know it, you can pass `source` ("en" | "fr" | "rwn" | "rw") and
- * `postId` (WordPress ID) instead.
- */
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const BASE = (process.env.NEXT_PUBLIC_NARRATOR_URL!).replace(/\/$/, '')
 const API = `${BASE}/api/public`
 const RATES = [1, 1.25, 1.5, 2, 0.75]
-// Tiny silent clip, served by the narrator (not a data: URI, so strict Content-Security-Policies still allow it).
-// Playing it inside the click handler "unlocks" the audio element, so parts that arrive seconds later
-// (after the click's autoplay permission expired) can still start playing.
+
 const SILENT = `${BASE}/embed/silence.wav`
+
+const VOICE_STORAGE_KEY = 'igihe-audio-voice'
+const VOICE_LABELS: Record<string, Record<string, string>> = {
+    en: { female: 'Woman', male: 'Man' },
+    fr: { female: 'Femme', male: 'Homme' },
+    rw: { female: 'Umugore', male: 'Umugabo' },   // best effort: have a native speaker review
+}
+
+// Sites the narrator can read, with their voice choices (loaded once).
+interface PlayerLook { color?: string | null; label?: string | null }
+interface NarratorSource { key: string; base_url: string; voices?: string[]; player?: PlayerLook }
+let sourcesPromise: Promise<NarratorSource[]> | null = null
+function narratorSources(): Promise<NarratorSource[]> {
+    sourcesPromise ??= fetch(`${API}/sources`).then(r => (r.ok ? r.json() : [])).catch(() => [])
+    return sourcesPromise
+}
 
 interface Segment { index: number; ready: boolean; failed: boolean; url: string | null }
 interface Manifest {
@@ -74,13 +73,20 @@ const NEXT = 'M6 6l9 6-9 6zM16 6h2v12h-2z'
 const PREV = 'M18 6l-9 6 9 6zM6 6h2v12H6z'
 const PHONES = 'M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2v-8H5v-1a7 7 0 0 1 14 0v1h-2v8h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z'
 
-export default function ArticleAudio({ url, source, postId, label, color = '#0f766e' }: Props) {
+export default function ArticleAudio({ url, source, postId, label: labelProp, color: colorProp = '#0f766e' }: Props) {
+    // What the administrator set in the Ask IGIHE dashboard (colour, button text) wins over the props of this component.
+    const [look, setLook] = useState<PlayerLook>({})
+    const color = look.color || colorProp
+    const label = look.label || labelProp
     const t = LABELS[pickLang(url, source)] ?? LABELS.en!
     const [phase, setPhase] = useState<Phase>('idle')
     const [manifest, setManifest] = useState<Manifest | null>(null)
     const [current, setCurrent] = useState(0)
     const [rateIdx, setRateIdx] = useState(0)
     const [message, setMessage] = useState('')
+    const [voices, setVoices] = useState<string[]>([])
+    const [voiceKey, setVoiceKey] = useState('')
+    const voiceRef = useRef('')
 
     const audio = useRef<HTMLAudioElement | null>(null)
     const manifestRef = useRef<Manifest | null>(null)
@@ -92,7 +98,8 @@ export default function ArticleAudio({ url, source, postId, label, color = '#0f7
     const unlocked = useRef(false)
 
     const query = useCallback((create: boolean) => {
-        const p = new URLSearchParams({ create: create ? '1' : '0' })
+        const p = new URLSearchParams({ create: create ? '1' : '0', at: String(currentRef.current) })
+        if (voiceRef.current && voiceRef.current !== 'default') p.set('voice', voiceRef.current)
         if (postId && source) { p.set('source', source); p.set('post', String(postId)) }
         else if (url) { p.set('url', url); if (source) p.set('source', source) }
         return `${API}/audio?${p.toString()}`
@@ -208,6 +215,28 @@ export default function ArticleAudio({ url, source, postId, label, color = '#0f7
         audio.current?.removeAttribute('data-src')
     }, [url, source, postId, stop])
 
+    // Which voices does this article's site offer? (e.g. woman / man)
+    useEffect(() => {
+        let cancelled = false
+        narratorSources().then(list => {
+            if (cancelled) return
+            const target = (url || '').toLowerCase().replace(/\/$/, '')
+            const base = (s: NarratorSource) => s.base_url.toLowerCase().replace(/\/$/, '')
+            const match = list.find(s => source && s.key === source)
+                ?? list.filter(s => target === base(s) || target.startsWith(base(s) + '/')).sort((a, b) => b.base_url.length - a.base_url.length)[0]
+            setLook(match?.player ?? {})
+            if (list.length && !match) { setPhase('hidden'); return }   // the dashboard turned the player off for this site
+            const choices = match?.voices ?? []
+            let saved = ''
+            try { saved = localStorage.getItem(VOICE_STORAGE_KEY) ?? '' } catch { /* storage unavailable: choice just is not remembered */ }
+            const initial = choices.includes(saved) ? saved : (choices[0] ?? '')
+            voiceRef.current = initial
+            setVoices(choices)
+            setVoiceKey(initial)
+        })
+        return () => { cancelled = true }
+    }, [url, source])
+
     const unlock = () => {
         const el = audio.current
         if (!el || unlocked.current) return
@@ -254,6 +283,24 @@ export default function ArticleAudio({ url, source, postId, label, color = '#0f7
         tryStart()
     }
 
+    // Switch between the woman's and the man's voice: restart cleanly with the other version of the audio.
+    const chooseVoice = (key: string) => {
+        if (key === voiceRef.current) return
+        const wasActive = wantPlay.current || phase === 'playing'
+        stop()
+        window.clearTimeout(poll.current)
+        manifestRef.current = null
+        setManifest(null)
+        currentRef.current = 0
+        setCurrent(0)
+        audio.current?.removeAttribute('data-src')
+        voiceRef.current = key
+        setVoiceKey(key)
+        setPhase('idle'); setMessage('')
+        try { localStorage.setItem(VOICE_STORAGE_KEY, key) } catch { /* ignore */ }
+        if (wasActive) void begin()
+    }
+
     const cycleRate = () => {
         const next = (rateIdx + 1) % RATES.length
         setRateIdx(next)
@@ -281,6 +328,17 @@ export default function ArticleAudio({ url, source, postId, label, color = '#0f7
                 <span style={{ fontSize: 14, fontWeight: 600, flex: '1 1 140px', minWidth: 0 }}>
                     {label || t.listen}
                 </span>
+
+            {voices.length > 1 && (
+                <div role="group" aria-label="Voice" style={{ display: 'inline-flex', marginTop: 8, borderRadius: 999, border: '1px solid #d7dde3', overflow: 'hidden' }}>
+                    {voices.map(key => (
+                        <button key={key} type="button" aria-pressed={voiceKey === key} onClick={() => chooseVoice(key)}
+                            style={{ ...btn, borderRadius: 0, minWidth: 0, height: 28, fontSize: 12, background: voiceKey === key ? color : '#fff', color: voiceKey === key ? '#fff' : '#1f2933' }}>
+                            {(VOICE_LABELS[pickLang(url, source)] ?? VOICE_LABELS.en!)[key] ?? key}
+                        </button>
+                    ))}
+                </div>
+            )}
                 {active && total > 0 && (
                     <>
                         <button type="button" onClick={() => jump(-1)} disabled={current <= 0} aria-label="Previous part" style={{ ...btn, opacity: current <= 0 ? 0.4 : 1 }}>{icon(PREV)}</button>
