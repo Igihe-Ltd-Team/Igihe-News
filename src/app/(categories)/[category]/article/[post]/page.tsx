@@ -23,8 +23,13 @@ const endpoints: Record<string, string> = {
   opinion: "opinion",
   'rubrique-19': "opinion",
   advertorials: "advertorial",
+  // Singular segments are what the site's own links and proxy.ts redirects
+  // produce (/advertorial/article/..., /announcement/article/...). Without
+  // these keys they fell through to the ordinary "posts" endpoint and 404'd.
+  advertorial: "advertorial",
   facts: "facts",
   announcements: 'announcement',
+  announcement: 'announcement',
   opinions: "opinion",
 }
 

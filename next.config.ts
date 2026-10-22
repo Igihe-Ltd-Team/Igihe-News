@@ -15,7 +15,8 @@ const contentSecurityPolicy = [
   "font-src 'self' data: https://cdn.jsdelivr.net",
   "connect-src 'self' https:",
   `media-src 'self' blob: ${NARRATOR}`,          // <-- add this line
-  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://www.instagram.com https://w.soundcloud.com",
+  // *.igihe.com: the PDF an announcement carries is shown in an iframe straight from cdn.igihe.com / en-images.igihe.com (see lib/articleFile).
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://www.instagram.com https://w.soundcloud.com https://*.igihe.com",
   "upgrade-insecure-requests",
 ].join("; ");
 

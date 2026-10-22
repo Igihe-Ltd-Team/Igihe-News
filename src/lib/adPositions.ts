@@ -186,35 +186,28 @@ export type AdPositionKey = keyof typeof AD_POSITIONS
 
 export function getAdPositionFromClassList(classList: string[]): AdPositionKey | null {
   for (const className of classList) {
-    if (className.startsWith('tag-')) {
-      const position = className.replace('tag-', '') as AdPositionKey
+    
+      const position = className as AdPositionKey
       if (position in AD_POSITIONS) {
         return position
       }
-    }
   }
   return null
 }
 
 export function getAdPositionsFromClassList(classList: string[]): AdPositionKey[] {
   return classList
-    .filter(className => className.startsWith('tag-'))
-    .map(className => className.replace('tag-', '') as AdPositionKey)
+    .map(className => className as AdPositionKey)
     .filter(position => position in AD_POSITIONS)
 }
 
-// export function getAdsByPosition(ads: Advertisement[], position: AdPositionKey): Advertisement[] {
-//   // console.log(ads)
-//   return ads
-//     .filter(ad => getAdPositionFromClassList(ad.class_list) === position)
-//     .sort((a, b) => b.menu_order - a.menu_order) // Higher menu_order first
-// }
+
 
 export function getAdsByPosition(ads: Advertisement[], position: AdPositionKey): Advertisement[] {
   return ads
     .filter(ad => {
-      const classList = Array.isArray(ad.class_list) ? ad.class_list : []
-      return classList.includes(`tag-${position}`) || String(ad.acf?.ad_position) === position
+      const classList = Array.isArray(ad.banner_placement_slugs) ? ad.banner_placement_slugs : []
+      return classList.includes(position) || String(ad.acf?.ad_position) === position
     })
     .sort((a, b) => (b.menu_order || 0) - (a.menu_order || 0))
 }

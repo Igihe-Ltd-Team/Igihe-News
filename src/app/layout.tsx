@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { Providers } from './providers';
-import { raleway } from '@/lib/fonts';
+import { dmSans, raleway } from '@/lib/fonts';
 import Header from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { initCacheCleanup } from '@/lib/cache/cleanup'
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={raleway.variable} suppressHydrationWarning>
+      <body className={`${raleway.variable} ${dmSans.variable}`} suppressHydrationWarning>
 
         <Suspense fallback={null}>
           {/* Suspense is required because useSearchParams() suspends */}

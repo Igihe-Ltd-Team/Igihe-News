@@ -55,7 +55,7 @@ const adDestination = ad?.meta?.igh_ad_url
 
 
   return (
-    <div className={`slot-unit tag-${position} ${className}`}>
+    <div className={`slot-unit pm-${position} ${className}`}>
       <a 
       href={destinationHref}
         target="_blank" 

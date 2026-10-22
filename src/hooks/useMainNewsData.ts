@@ -160,7 +160,7 @@ export function useAdsFromCache(position: AdPositionKey) {
   const allAds = queryClient.getQueryData<Advertisement[]>(['advertisements'])
 
   if (allAds) {
-    return allAds.filter(ad => ad.class_list.includes(`tag-${position}`))
+    return allAds.filter(ad => ad.banner_placement_slugs.includes(position))
   }
   return null
 }

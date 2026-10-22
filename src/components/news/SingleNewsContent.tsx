@@ -37,6 +37,7 @@ import Lightbox from '../lightbox/LightBox'
 import { usePostContentLightbox } from '../lightbox/Uselightbox'
 import Slides from '../home/Slides'
 import NewsAgent from '../NewsAgent'
+import ArticleFileEmbed from './ArticleFileEmbed'
 
 
 interface SingleNewsContentProps {
@@ -196,6 +197,8 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                 </div>
                             </Col>
                             <Col md="11">
+                            {
+                                    featuredImage &&
                             <div
                                     className="position-relative w-100"
                                     style={{ height: heroHeight, overflow: 'hidden', borderRadius: 8, backgroundColor: '#000' }}
@@ -227,6 +230,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                         />
                                     </div>
                                 </div>
+}
                                 {/* <OptimizedImage
                                     src={featuredImage || '/assets/igiheIcon.png'}
                                     alt={stripHtml(article.title.rendered)}
@@ -254,6 +258,7 @@ export default function SingleNewsContent({ slug, initialArticle }: SingleNewsCo
                                         )
                                     }}
                                 />
+                                <ArticleFileEmbed file={article.file} title={stripHtml(article.title.rendered)} />
                                 <Lightbox {...lightboxProps} />
 
                                 {/* <div className='d-flex gap-2'>

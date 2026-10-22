@@ -61,9 +61,8 @@ export default function AnnouncePageClient({
             <div className="grid grid-cols-1  mt-4">
               {posts.map((article,index) => (
                 <a 
-                                        // href={chechedfile.isImage? `/advertorial/article/${item.slug}` : chechedfile.filePath} 
-                                        href={article?.file?.url ? article?.file?.url : `/announcement/article/${article.slug}`} 
-                                        target={article?.file?.url ? '_blank' : '_parent'}
+                                        // The article page shows the attached PDF or picture inside the page (ArticleFileEmbed), so the list always goes there.
+                                        href={`/announcement/article/${article.slug}`}
                                         key={article.id}
                                         className={`list-group-item px-0 list-group-item-action}`}
                                         style={{ cursor: 'pointer', backgroundColor: 'transparent' }}

@@ -1,4 +1,4 @@
-import { Raleway } from 'next/font/google';
+import { DM_Sans, Raleway } from 'next/font/google';
 import localFont from 'next/font/local';
 
 export const raleway = Raleway({
@@ -6,6 +6,14 @@ export const raleway = Raleway({
   display: 'swap',
   variable: '--font-raleway',
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+});
+
+// Only the footer's app-store badges use it (see the footer design).
+export const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-dm-sans',
+  weight: ['400', '500'],
 });
 
 // /Users/ishimweamir/Downloads/projects/igihe/igihe-news/public/assets/fonts/visby/VisbyRoundCF-Heavy.woff2

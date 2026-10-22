@@ -180,7 +180,7 @@ async function AdvertorialsSection() {
 
 async function AnnouncementsSection() {
   const announcement = await getFeaturedAnnouncement()
-  return <SectionWithToggle isFile={true} slug={'announcements'} title='Announcements' articles={announcement} titleBG='#282F2F' />
+  return <SectionWithToggle isFile={false} slug={'announcements'} title='Announcements' articles={announcement} titleBG='#282F2F' />
 }
 
 export default function Recents() {

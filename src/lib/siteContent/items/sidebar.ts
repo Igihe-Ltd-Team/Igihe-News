@@ -1,0 +1,68 @@
+import type { ContentItems } from '../types'
+
+export const SIDEBAR = {
+  "sidebar.popular.title": {
+    group: "Article and list pages",
+    label: "\"Most read\" title (page sidebars)",
+    kind: "text",
+    default: "Izasomwe cyane",
+    where: "Heading of the most-read list in the sidebar of article, category, tag and list pages.",
+    maxLength: 60,
+  },
+  "sidebar.social.title": {
+    group: "Social media and sharing",
+    label: "\"Follow us\" title (sidebar)",
+    kind: "text",
+    default: "Komeza udukurikire",
+    where: "Heading of the social media block in page sidebars.",
+    maxLength: 60,
+  },
+  "sidebar.social.facebook": {
+    group: "Social media and sharing",
+    label: "Sidebar: Facebook link",
+    kind: "link",
+    optional: true,
+    default: "https://www.facebook.com/igihe",
+    where: "Facebook button in page sidebars.",
+  },
+  "sidebar.social.youtube": {
+    group: "Social media and sharing",
+    label: "Sidebar: YouTube link",
+    kind: "link",
+    optional: true,
+    default: "https://www.youtube.com/@IGIHE_Official",
+    where: "YouTube button in page sidebars.",
+  },
+  "sidebar.social.tiktok": {
+    group: "Social media and sharing",
+    label: "Sidebar: TikTok link",
+    kind: "link",
+    optional: true,
+    default: "https://www.tiktok.com/@igihe?lang=en",
+    where: "TikTok button in page sidebars.",
+  },
+  "sidebar.social.whatsapp": {
+    group: "Social media and sharing",
+    label: "Sidebar: WhatsApp link",
+    kind: "link",
+    optional: true,
+    default: "https://whatsapp.com/channel/0029VaESIcN5a249FL5Clf12",
+    where: "WhatsApp button in page sidebars.",
+  },
+  "sidebar.social.x": {
+    group: "Social media and sharing",
+    label: "Sidebar: X (Twitter) link",
+    kind: "link",
+    optional: true,
+    default: "https://x.com/igihe",
+    where: "X button in page sidebars.",
+  },
+  "sidebar.social.instagram": {
+    group: "Social media and sharing",
+    label: "Sidebar: Instagram link",
+    kind: "link",
+    optional: true,
+    default: "https://www.instagram.com/igiheofficial/",
+    where: "Instagram button in page sidebars.",
+  },
+} as const satisfies ContentItems

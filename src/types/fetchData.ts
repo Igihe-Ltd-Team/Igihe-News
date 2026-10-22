@@ -114,9 +114,13 @@ export interface NewsItem {
     }
   }
 
+  /** The PDF or picture an announcement carries, shown under the article text (see lib/articleFile). */
   file?: {
     url: string
-  }
+    id?: number
+    title?: string
+    mime_type?: string
+  } | null
   guid: {
     rendered: string
   }
@@ -150,7 +154,8 @@ export interface NewsItem {
   }
   categories: Category[]
   tags: Tag[]
-  class_list: string[]
+    class_list: string[]
+  banner_placement_slugs:[]
   video_url?: string,
   acf: {
     igh_yt_video_url?: string;
@@ -368,7 +373,8 @@ export interface Advertisement {
     igh_ad_url: string
   }
   menu_order: number
-  class_list: string[]
+    class_list: string[]
+    banner_placement_slugs:string[]
   ads_image: {
     id: number
     mime_type: string
@@ -478,6 +484,7 @@ export function transformToNewsItem(apiItem: TraficNews): NewsItem {
     categories: [], // You'd need to map category string to Category type
     tags: [],
     class_list: [],
+    banner_placement_slugs:[],
     video_url: undefined,
     acf: {},
     _links: {
