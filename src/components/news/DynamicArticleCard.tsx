@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { articlePath } from '@/lib/articleSection'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { formatDate, getCategoryName, getCategorySlug, getFeaturedImage, stripHtml } from '@/lib/utils'
 import { NewsItem } from '@/types/fetchData'
@@ -77,7 +78,7 @@ function DynamicArticleCard({
       {
         (showImage || isMobile) &&
         <a
-          href={article?.slug? `/${getCategorySlug(article)}/article/${article?.slug}`:'#'}
+          href={article?.slug ? articlePath(article) : '#'}
           className="text-decoration-none text-reset"
           style={
             isSlider ? { width: '20%' } : { flex: 1 }
@@ -166,7 +167,7 @@ function DynamicArticleCard({
 
             <a
               // prefetch={false}
-              href={article?.slug? `/${getCategorySlug(article)}/article/${article?.slug}`:'#'}
+              href={article?.slug ? articlePath(article) : '#'}
               className="text-decoration-none text-reset"
               aria-label={`Read full article: ${stripHtml(article?.title?.rendered)}`}
             // onMouseEnter={() => mouseEnter(article)}

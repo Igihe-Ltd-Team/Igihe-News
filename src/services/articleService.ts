@@ -66,14 +66,16 @@ export async function fetchPostBySlug(slug: string): Promise<NewsItem | null> {
 }
 
 export async function customPostFetch(apiUrl: string, slug: string): Promise<NewsItem | null> {
+  // `apiUrl` is `<endpoint>?slug=…`. The key carries the endpoint: a "not found" for this slug under
+  // /advertorial/... must not be served to /announcement/... for the next five minutes (both used `post:<slug>`).
+  const endpoint = apiUrl.split('?')[0]
   return cachedRequest({
-    key: `post:${slug}`,
+    key: `post:${slug}:${endpoint}`,
     fetchFn: async () => {
       const response = await fetchWithTimeout(`${API_CONFIG.baseURL}/${apiUrl}`)
       const posts = await response.json()
       if (Array.isArray(posts) && posts.length > 0) return posts[0]
-      // `apiUrl` is `<endpoint>?slug=…`; the endpoint is everything before the query.
-      return isPlainSlug(slug) ? null : fetchPostBySearchedSlug(apiUrl.split('?')[0], slug)
+      return isPlainSlug(slug) ? null : fetchPostBySearchedSlug(endpoint, slug)
     },
     getContentDate: (data) => data?.date || null,
   })

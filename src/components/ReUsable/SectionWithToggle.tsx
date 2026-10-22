@@ -4,6 +4,7 @@ import React from 'react';
 import { useState } from "react";
 import { ThemedText } from '../ThemedText';
 import { formatDate, getCategoryName, getCategorySlug, getFeaturedImage, isImageMedia, stripHtml } from '@/lib/utils';
+import { articlePath } from '@/lib/articleSection';
 import { OptimizedImage } from '../ui/OptimizedImage';
 import { NewsItem } from '@/types/fetchData';
 import { useTheme } from 'next-themes';
@@ -60,8 +61,8 @@ const SectionWithToggle = ({ slug, title, titleBG = '#1176BB', showImgs, showDat
                     const chechedfile = isImageMedia(item, true)
                     return (
                         <a
-                            // href={chechedfile.isImage? `/advertorial/article/${item.slug}` : chechedfile.filePath} 
-                            href={isFile ? item?.file?.url : `/advertorial/article/${item.slug}`}
+                            // The section comes from the item's post type: this list shows announcements as well as advertorials.
+                            href={isFile ? item?.file?.url : articlePath(item)}
                             target={isFile ? '_blank' : '_parent'}
                             key={item.id}
                             className={`list-group-item px-0 list-group-item-action ${index !== visiblePosts.length - 1 ? 'border-bottom' : ''}`}

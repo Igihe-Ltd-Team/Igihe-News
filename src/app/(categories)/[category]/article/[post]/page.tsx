@@ -5,7 +5,8 @@ import { stripHtml } from '@/lib/utils'
 import { decodeSlugParam, encodeSegment } from '@/lib/slugLookup'
 import { ApiService } from '@/services/apiService'
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { articlePath } from '@/lib/articleSection'
 import HydrateArticle from './HydrateArticle'
 import { Container } from 'react-bootstrap'
 import CustomSlider from '@/components/home/CustomSlider'
@@ -19,6 +20,9 @@ interface PageProps {
 }
 
 /* ------------------------ ENDPOINTS ------------------------ */
+/** The post type each custom-type endpoint serves; a post of another type under that section is at the wrong address. */
+const ENDPOINT_TYPES: Record<string, string> = { opinion: 'opinion', advertorial: 'advertorial', announcement: 'announcement' }
+
 const endpoints: Record<string, string> = {
   opinion: "opinion",
   'rubrique-19': "opinion",
@@ -220,13 +224,24 @@ async function ArticleContent({
 }) {
   // This will use cached data from generateMetadata
   const postData = await getPostData(slug, category)
+  const currentPath = `/${category}/article/${encodeSegment(slug)}`
 
-  // Handle 404 if no post found
   if (!postData) {
+    // Links have pointed announcements at /advertorial/article/… and old addresses are shared and indexed:
+    // find the post wherever it lives and send the reader to its real address rather than a dead end.
+    const elsewhere = await ApiService.fetchPostBySlugLookUp(slug).catch(() => null)
+    if (elsewhere?.slug && articlePath(elsewhere) !== currentPath) permanentRedirect(articlePath(elsewhere))
     notFound()
   }
 
-  const articleUrl = `${BASE_URL}/${category}/article/${encodeSegment(slug)}`
+  // A type section (announcement, advertorial, opinion) answering with a post of another kind: redirect to
+  // its canonical address instead of rendering it under the wrong one.
+  const expectedType = ENDPOINT_TYPES[endpoints[category] ?? '']
+  if (expectedType && postData.type !== expectedType && articlePath(postData) !== currentPath) {
+    permanentRedirect(articlePath(postData))
+  }
+
+  const articleUrl = `${BASE_URL}${currentPath}`
 
   return (
     <HydrateArticle article={postData} slug={slug}>
