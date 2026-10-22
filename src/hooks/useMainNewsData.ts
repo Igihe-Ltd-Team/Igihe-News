@@ -1,5 +1,6 @@
 'use client'
 
+import { gcTimeFor } from '@/lib/react-query'
 import { AdPositionKey } from '@/lib/adPositions'
 import { queryKeys } from '@/lib/queryKeys'
 import { ApiService } from '@/services/apiService'
@@ -134,7 +135,7 @@ export function useAdsByPosition(position: AdPositionKey, enabled = true) {
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),
     staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: gcTimeFor(30 * 60 * 1000), // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     enabled,

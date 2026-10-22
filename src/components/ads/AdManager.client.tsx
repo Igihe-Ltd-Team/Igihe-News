@@ -1,5 +1,6 @@
 'use client'
 
+import { gcTimeFor } from '@/lib/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { ApiService } from '@/services/apiService'
 import AdUnit from './AdUnit'
@@ -42,7 +43,7 @@ export default function AdManagerClient({
     queryKey: queryKeys.ads.byPosition(position),
     queryFn: () => ApiService.fetchAdsByPosition(position),
     staleTime: 30 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes cache time
+    gcTime: gcTimeFor(10 * 60 * 1000), // 10 minutes cache time
     initialData: initialAds, // Use server-fetched data as initial data
     enabled: shouldFetch // Only fetch on client if enabled
   })

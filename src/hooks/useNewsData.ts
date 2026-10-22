@@ -1,6 +1,7 @@
 // hooks/useNewsData.ts
 'use client'
 
+import { gcTimeFor } from '@/lib/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import { ApiService } from '@/services/apiService'
 import { articleResponse, Category, NewsItem } from '@/types/fetchData'
@@ -312,7 +313,7 @@ const useArticleDetails = (
     
     // 🎯 CRITICAL: These prevent immediate refetch
     staleTime: hasInitialData ? 30 * 1000 : 5 * 60 * 1000, // 30 seconds for server data, 5 min for client
-    gcTime: 10 * 60 * 1000,
+    gcTime: gcTimeFor(10 * 60 * 1000),
     retry: hasInitialData ? 0 : 2, // Don't retry if we have server data
     
     // Prevent refetching when component mounts
@@ -335,7 +336,7 @@ const useArticleDetails = (
     },
     enabled: !!articleQuery.data?.id,
     staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    gcTime: gcTimeFor(10 * 60 * 1000),
     retry: 2,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

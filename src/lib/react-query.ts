@@ -1,17 +1,30 @@
 import { QueryClient, DefaultOptions } from '@tanstack/react-query'
 
+// On the server a QueryClient lives for one render and is then discarded, so its cache needs no garbage collection. TanStack's
+// own default there is Infinity (no timers); a finite value starts a timer for EVERY query of EVERY server-rendered page,
+// and each timer keeps its query, its client and the data inside alive until it fires. At production traffic that was
+// ~10,000 pending timers and a process that grew past 3 GB (found with a timer probe: all of them came from scheduleGc).
+const isServer = typeof window === 'undefined'
+
+/** A `gcTime` for one query: the given time in the browser, never (no timer) on the server. Use this instead of a bare number. */
+export const gcTimeFor = (browserMs: number): number => (isServer ? Infinity : browserMs)
+
 const queryConfig: DefaultOptions = {
   queries: {
     // Stale time: how long data is considered fresh
     staleTime: 5 * 60 * 1000, // 5 minutes
     
     // Cache time: how long unused data stays in memory
-    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    gcTime: isServer ? Infinity : 10 * 60 * 1000, // browser: 10 minutes (formerly cacheTime); server: never schedule a timer
     
     // Retry configuration for failed requests
     retry: (failureCount, error) => {
-      // Don't retry on 404s
-      if (error instanceof Error && error.message.includes('404')) {
+      if (isServer) return false // nothing is fetched while rendering on the server, and a retry would only add a timer
+      // Don't retry on 404s, and don't retry on 429s — a rate-limit response
+      // means the server just asked us to slow down, so immediately firing
+      // again (even with backoff) just adds to the same limit window instead
+      // of letting it clear.
+      if (error instanceof Error && (error.message.includes('404') || error.message.includes('429'))) {
         return false
       }
       // Retry up to 2 times for other errors
